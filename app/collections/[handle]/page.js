@@ -1,12 +1,26 @@
+"use client";
+import { useState, useEffect } from 'react';
 import { getCollectionByHandle } from '../../../lib/shopify';
 import ProductCard from '../../../components/ProductCard';
 import { t } from '../../../lib/i18n';
 import Link from 'next/link';
 
-export default async function CollectionPage({ params }) {
+export default function CollectionPage({ params }) {
   const locale = "ar";
-  const decodedHandle = decodeURIComponent(params.handle);
-  const collection = await getCollectionByHandle(decodedHandle);
+  const [collection, setCollection] = useState(null);
+  
+  useEffect(() => {
+    async function fetchCollection() {
+      try {
+        const decodedHandle = decodeURIComponent(params.handle);
+        const fetchedCollection = await getCollectionByHandle(decodedHandle);
+        setCollection(fetchedCollection);
+      } catch (error) {
+        console.error('Error fetching collection:', error);
+      }
+    }
+    fetchCollection();
+  }, [params.handle]);
 
   if (!collection) {
     return (
