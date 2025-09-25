@@ -1,3 +1,4 @@
+"use client";
 import Link from 'next/link';
 import CartIcon from './icons/CartIcon';
 import SearchIcon from './icons/SearchIcon';
