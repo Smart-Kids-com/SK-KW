@@ -1,10 +1,24 @@
+"use client";
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { getCollections } from '../lib/shopify';
 import { t } from '../lib/i18n';
 
-export default async function Home({ params }) {
+export default function Home({ params }) {
   const locale = "ar";
-  const collections = await getCollections();
+  const [collections, setCollections] = useState([]);
+
+  useEffect(() => {
+    async function fetchCollections() {
+      try {
+        const fetchedCollections = await getCollections();
+        setCollections(fetchedCollections);
+      } catch (error) {
+        console.error('Error fetching collections:', error);
+      }
+    }
+    fetchCollections();
+  }, []);
 
   return (
     <>
