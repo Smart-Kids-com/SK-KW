@@ -1,0 +1,39 @@
+{
+  "home": {
+    "welcome": "مرحباً بكم في SK-KW"
+  },
+  "cart": {
+    "title": "عربة التسوق",
+    "empty": "عربة التسوق فارغة حالياً.",
+    "continue_shopping": "تصفّح المنتجات",
+    "product": "المنتج",
+    "price": "السعر",
+    "quantity": "العدد",
+    "total": "الإجمالي",
+    "remove": "إزالة",
+    "checkout": "إكمال الطلب",
+    "clear": "إفراغ السلة"
+  },
+  "collections": {
+    "not_found": "هذه المجموعة غير موجودة."
+  },
+  "products": {
+    "product": {
+      "sold_out": "نفذت الكمية",
+      "not_found": "هذا المنتج غير موجود."
+    }
+  },
+  "search": {
+    "title": "بحث المنتجات",
+    "placeholder": "ابحث عن منتج...",
+    "button": "بحث",
+    "no_results": "لم يتم العثور على نتائج."
+  },
+  "customer": {
+    "account": {
+      "title": "الحساب"
+    },
+    "log_in": "تسجيل الدخول",
+    "register": "إنشاء حساب جديد"
+  }
+}

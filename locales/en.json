@@ -1,0 +1,39 @@
+{
+  "home": {
+    "welcome": "Welcome to \"Smart Kids Kuwait\""
+  },
+  "cart": {
+    "title": "Cart",
+    "empty": "Your cart is currently empty.",
+    "continue_shopping": "Continue Shopping",
+    "product": "Product",
+    "price": "Price",
+    "quantity": "Qty",
+    "total": "Total",
+    "remove": "Remove",
+    "checkout": "Checkout",
+    "clear": "Clear Cart"
+  },
+  "collections": {
+    "not_found": "This collection does not exist."
+  },
+  "products": {
+    "product": {
+      "sold_out": "Sold Out",
+      "not_found": "This product does not exist."
+    }
+  },
+  "search": {
+    "title": "Product Search",
+    "placeholder": "Search for a product...",
+    "button": "Search",
+    "no_results": "No results found."
+  },
+  "customer": {
+    "account": {
+      "title": "Account"
+    },
+    "log_in": "Log In",
+    "register": "Create New Account"
+  }
+}
