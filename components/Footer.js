@@ -4,324 +4,259 @@ import Link from 'next/link';
 export default function Footer() {
   return (
     <footer style={{
-      background: 'linear-gradient(135deg, var(--color-dark) 0%, #1a1a1a 100%)',
-      color: 'var(--color-white)',
+      background: 'linear-gradient(135deg, var(--color-primary) 0%, #1e3a8a 100%)',
+      color: '#fff',
       marginTop: 'auto'
     }}>
-      {/* Main footer content */}
+      {/* Main Footer */}
       <div style={{
-        padding: '3rem 2rem 2rem',
-        maxWidth: '1200px',
-        margin: '0 auto'
+        maxWidth: 1200,
+        margin: '0 auto',
+        padding: '3rem 2rem'
       }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '2rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '3rem',
           marginBottom: '2rem'
         }}>
-          {/* Company Info */}
-          <div>
+          
+          {/* Right Side - Social Media */}
+          <div style={{
+            textAlign: 'center'
+          }}>
             <div style={{
               display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              marginBottom: '1rem'
+              flexDirection: 'column',
+              gap: '1rem',
+              alignItems: 'center'
             }}>
-              <div style={{
-                background: 'var(--gradient-accent)',
-                borderRadius: '50%',
-                width: '40px',
-                height: '40px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.2rem'
-              }}>
-                🧸
-              </div>
-              <h3 style={{
-                fontSize: '1.3rem',
-                fontWeight: 700,
-                color: 'var(--color-white)',
-                margin: 0
-              }}>
-                Smart Kids Kuwait
-              </h3>
-            </div>
-            
-            <p style={{
-              color: 'rgba(255,255,255,0.8)',
-              lineHeight: '1.6',
-              marginBottom: '1rem'
-            }}>
-              متجركم المفضل لأفضل الألعاب التعليمية والترفيهية للأطفال في الكويت. نسعى لتوفير منتجات عالية الجودة تساهم في تنمية مهارات أطفالكم.
-            </p>
-
-            {/* Social Links */}
-            <div style={{ display: 'flex', gap: '1rem' }}>
-              {[
-                { icon: '📘', label: 'Facebook', href: '#' },
-                { icon: '📷', label: 'Instagram', href: '#' },
-                { icon: '🐦', label: 'Twitter', href: '#' },
-                { icon: '📺', label: 'YouTube', href: '#' }
-              ].map((social, index) => (
-                <a
-                  key={index}
-                  href={social.href}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '40px',
-                    height: '40px',
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                    borderRadius: '50%',
-                    textDecoration: 'none',
-                    fontSize: '1.2rem',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'var(--color-primary)';
-                    e.target.style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'rgba(255,255,255,0.1)';
-                    e.target.style.transform = 'translateY(0)';
-                  }}
-                >
-                  {social.icon}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 style={{
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              marginBottom: '1rem',
-              color: 'var(--color-accent)'
-            }}>
-              روابط سريعة
-            </h4>
-            <ul style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: 0
-            }}>
-              {[
-                { text: 'الرئيسية', href: '/' },
-                { text: 'المجموعات', href: '/collections' },
-                { text: 'البحث', href: '/search' },
-                { text: 'عربة التسوق', href: '/cart' },
-                { text: 'حسابي', href: '/account' }
-              ].map((link, index) => (
-                <li key={index} style={{ marginBottom: '0.5rem' }}>
-                  <Link
-                    href={link.href}
-                    style={{
-                      color: 'rgba(255,255,255,0.8)',
-                      textDecoration: 'none',
-                      transition: 'color 0.3s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.color = 'var(--color-accent)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.color = 'rgba(255,255,255,0.8)';
-                    }}
-                  >
-                    {link.text}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Customer Service */}
-          <div>
-            <h4 style={{
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              marginBottom: '1rem',
-              color: 'var(--color-accent)'
-            }}>
-              خدمة العملاء
-            </h4>
-            <ul style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: 0
-            }}>
-              {[
-                { text: 'اتصل بنا', href: '/contact' },
-                { text: 'الأسئلة الشائعة', href: '/faq' },
-                { text: 'سياسة الإرجاع', href: '/returns' },
-                { text: 'الشحن والتوصيل', href: '/shipping' },
-                { text: 'طرق الدفع', href: '/payment' }
-              ].map((link, index) => (
-                <li key={index} style={{ marginBottom: '0.5rem' }}>
-                  <Link
-                    href={link.href}
-                    style={{
-                      color: 'rgba(255,255,255,0.8)',
-                      textDecoration: 'none',
-                      transition: 'color 0.3s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.color = 'var(--color-accent)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.color = 'rgba(255,255,255,0.8)';
-                    }}
-                  >
-                    {link.text}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h4 style={{
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              marginBottom: '1rem',
-              color: 'var(--color-accent)'
-            }}>
-              معلومات التواصل
-            </h4>
-            
-            <div style={{ marginBottom: '0.8rem' }}>
-              <div style={{
+              <a href="https://facebook.com/smartkidskw" style={{ 
+                color: 'rgba(255,255,255,0.8)', 
+                textDecoration: 'none',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                marginBottom: '0.5rem'
+                fontSize: '1.1rem'
               }}>
-                <span>📍</span>
-                <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>
-                  الكويت، حولي
-                </span>
-              </div>
-              
-              <div style={{
+                📘 Facebook
+              </a>
+              <a href="https://instagram.com/smartkidskw" style={{ 
+                color: 'rgba(255,255,255,0.8)', 
+                textDecoration: 'none',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                marginBottom: '0.5rem'
+                fontSize: '1.1rem'
               }}>
-                <span>📞</span>
-                <a 
-                  href="tel:+96512345678" 
-                  style={{ 
-                    color: 'rgba(255,255,255,0.8)', 
-                    textDecoration: 'none',
-                    fontSize: '0.9rem'
-                  }}
-                >
-                  +965 1234 5678
-                </a>
-              </div>
-              
-              <div style={{
+                📷 Instagram
+              </a>
+              <a href="https://youtube.com/smartkidskw" style={{ 
+                color: 'rgba(255,255,255,0.8)', 
+                textDecoration: 'none',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                marginBottom: '0.5rem'
+                fontSize: '1.1rem'
               }}>
-                <span>✉️</span>
-                <a 
-                  href="mailto:info@smartkidskw.com" 
-                  style={{ 
-                    color: 'rgba(255,255,255,0.8)', 
-                    textDecoration: 'none',
-                    fontSize: '0.9rem'
-                  }}
-                >
-                  info@smartkidskw.com
-                </a>
-              </div>
-
-              <div style={{
+                📺 YouTube
+              </a>
+              <a href="https://tiktok.com/@smartkidskw" style={{ 
+                color: 'rgba(255,255,255,0.8)', 
+                textDecoration: 'none',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem'
+                gap: '0.5rem',
+                fontSize: '1.1rem'
               }}>
-                <span>🕐</span>
-                <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>
-                  السبت - الخميس: 9 صباحاً - 9 مساءً
-                </span>
-              </div>
+                🎵 TikTok
+              </a>
+              <a href="https://pinterest.com/smartkidskw" style={{ 
+                color: 'rgba(255,255,255,0.8)', 
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '1.1rem'
+              }}>
+                📌 Pinterest
+              </a>
+              <a href="https://snapchat.com/add/smartkidskw" style={{ 
+                color: 'rgba(255,255,255,0.8)', 
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '1.1rem'
+              }}>
+                👻 Snapchat
+              </a>
             </div>
           </div>
+
+          {/* Middle - Company Info */}
+          <div style={{
+            textAlign: 'center'
+          }}>
+            <div style={{
+              marginBottom: '1.5rem'
+            }}>
+              <img 
+                src="/logo-sk-smart-kids.png" 
+                alt="Logo of SK Smart Kids with a colorful character and text."
+                style={{
+                  width: '180px',
+                  height: 'auto',
+                  filter: 'brightness(1.2)',
+                  marginBottom: '1rem'
+                }}
+              />
+            </div>
+            <div style={{
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              marginBottom: '0.5rem'
+            }}>
+              smartkidskw.com
+            </div>
+            <div style={{
+              fontSize: '1rem',
+              fontWeight: '500',
+              marginBottom: '0.5rem'
+            }}>
+              INNOVATORS GULF TRADING W.L.L
+            </div>
+            <div style={{
+              fontSize: '0.9rem',
+              color: 'rgba(255,255,255,0.8)'
+            }}>
+              All Rights Reserved - جميع الحقوق محفوظة
+            </div>
+          </div>
+
+          {/* Left Side - Email Subscription */}
+          <div style={{
+            textAlign: 'center'
+          }}>
+            <div style={{
+              fontSize: '1rem',
+              marginBottom: '1rem',
+              color: 'rgba(255,255,255,0.9)'
+            }}>
+              أدخل بريدك الإلكتروني - سجل الآن!
+            </div>
+            <div style={{
+              border: '2px solid rgba(255,255,255,0.3)',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              background: 'rgba(255,255,255,0.1)',
+              fontSize: '1rem',
+              color: 'rgba(255,255,255,0.7)',
+              textAlign: 'center'
+            }}>
+              Email
+            </div>
+          </div>
+          
         </div>
       </div>
 
-      {/* Bottom bar */}
+      {/* Footer Links */}
       <div style={{
         borderTop: '1px solid rgba(255,255,255,0.1)',
-        padding: '1.5rem 2rem',
-        background: 'rgba(0,0,0,0.3)'
+        padding: '1.5rem 2rem'
       }}>
         <div style={{
-          maxWidth: '1200px',
+          maxWidth: 1200,
           margin: '0 auto',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '1rem'
+          textAlign: 'center',
+          marginBottom: '1.5rem'
         }}>
           <div style={{
+            fontSize: '0.9rem',
             color: 'rgba(255,255,255,0.7)',
-            fontSize: '0.9rem'
+            marginBottom: '1rem'
           }}>
-            جميع الحقوق محفوظة &copy; {new Date().getFullYear()} Smart Kids Kuwait. 
-            تم التطوير بواسطة <span style={{ color: 'var(--color-accent)' }}>SK-KW Team</span>
+            © 2025 INNOVATORS GULF TRADING W.L.L All Rights reserved. Smart Kids Kuwait - الأطفال المبتكرون الكويت
           </div>
-
-          <div style={{ 
-            display: 'flex', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
             gap: '2rem',
-            fontSize: '0.9rem'
+            flexWrap: 'wrap',
+            fontSize: '0.85rem'
           }}>
-            <Link 
-              href="/privacy" 
-              style={{ 
-                color: 'rgba(255,255,255,0.7)', 
-                textDecoration: 'none' 
-              }}
-            >
-              سياسة الخصوصية
-            </Link>
-            <Link 
-              href="/terms" 
-              style={{ 
-                color: 'rgba(255,255,255,0.7)', 
-                textDecoration: 'none' 
-              }}
-            >
-              الشروط والأحكام
-            </Link>
-            <a 
-              href="https://smartkidskw.com/" 
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ 
-                color: 'var(--color-accent)', 
-                textDecoration: 'none',
-                fontWeight: 600
-              }}
-            >
-              المتجر الأصلي ←
+            <a href="/refund" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
+              Refund policy
+            </a>
+            <a href="/privacy" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
+              Privacy policy
+            </a>
+            <a href="/terms" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
+              Terms of service
+            </a>
+            <a href="/shipping" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
+              Shipping policy
+            </a>
+            <a href="/contact" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
+              Contact information
             </a>
           </div>
         </div>
+
+        {/* Payment Methods */}
+        <div style={{
+          borderTop: '1px solid rgba(255,255,255,0.1)',
+          paddingTop: '1.5rem',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '1rem',
+            flexWrap: 'wrap',
+            fontSize: '0.9rem',
+            color: 'rgba(255,255,255,0.8)'
+          }}>
+            <span>💳 KNET</span>
+            <span>💳 MasterCard</span>
+            <span>💳 VISA</span>
+            <span>💳 AMEX</span>
+            <span>🍎 Apple Pay</span>
+          </div>
+        </div>
       </div>
+
+      {/* Mobile Responsive Styles */}
+      <style jsx>{`
+        @media (max-width: 768px) {
+          footer > div:first-child > div {
+            grid-template-columns: 1fr !important;
+            text-align: center !important;
+            gap: 2rem !important;
+          }
+          
+          footer a[href*="facebook"],
+          footer a[href*="instagram"],
+          footer a[href*="youtube"],
+          footer a[href*="tiktok"],
+          footer a[href*="pinterest"],
+          footer a[href*="snapchat"] {
+            justify-content: center !important;
+          }
+
+          footer div[style*="gap: 2rem"] {
+            gap: 1rem !important;
+            flex-direction: column;
+          }
+        }
+
+        @media (min-width: 769px) {
+          footer > div:first-child > div {
+            grid-template-columns: 1fr 1fr 1fr !important;
+          }
+        }
+      `}</style>
     </footer>
   );
 }

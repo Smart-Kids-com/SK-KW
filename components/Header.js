@@ -20,7 +20,7 @@ export default function Header() {
         textAlign: 'center',
         fontSize: '0.9rem'
       }}>
-        ⭐ مرحباً بكم في Smart Kids Kuwait - متجركم المفضل لألعاب الأطفال ⭐
+        ⭐ مرحباً بكم في SK Smart Kids - متجركم المفضل لألعاب الأطفال ⭐
       </div>
       
       <nav style={{
@@ -35,28 +35,17 @@ export default function Header() {
         <Link href="/" style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '0.5rem',
-          fontFamily: 'var(--font-heading)',
-          fontWeight: 800,
-          fontSize: '1.8rem',
-          color: '#fff',
-          textDecoration: 'none',
-          textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+          textDecoration: 'none'
         }}>
-          <div style={{
-            background: 'var(--gradient-accent)',
-            borderRadius: '50%',
-            width: '45px',
-            height: '45px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.2rem',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
-          }}>
-            🧸
-          </div>
-          Smart Kids Kuwait
+          <img 
+            src="/logo-sk-smart-kids.png" 
+            alt="Logo of SK Smart Kids with a colorful character and text."
+            style={{
+              width: '200px',
+              height: 'auto',
+              filter: 'brightness(1.1)'
+            }}
+          />
         </Link>
 
         {/* Search bar */}
