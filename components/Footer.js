@@ -31,7 +31,7 @@ export default function Footer() {
               gap: '1rem',
               alignItems: 'center'
             }}>
-              <a href="https://facebook.com/smartkidskw" style={{ 
+              <a href="https://www.facebook.com/KuwaitSmartKids" style={{ 
                 color: 'rgba(255,255,255,0.8)', 
                 textDecoration: 'none',
                 display: 'flex',
@@ -39,7 +39,9 @@ export default function Footer() {
                 gap: '0.5rem',
                 fontSize: '1.1rem'
               }}>
-                📘 Facebook
+                <svg aria-hidden="true" focusable="false" class="icon icon-facebook" viewBox="0 0 20 20">
+  <path fill="currentColor" d="M18 10.049C18 5.603 14.419 2 10 2c-4.419 0-8 3.603-8 8.049C2 14.067 4.925 17.396 8.75 18v-5.624H6.719v-2.328h2.03V8.275c0-2.017 1.195-3.132 3.023-3.132.874 0 1.79.158 1.79.158v1.98h-1.009c-.994 0-1.303.621-1.303 1.258v1.51h2.219l-.355 2.326H11.25V18c3.825-.604 6.75-3.933 6.75-7.951Z"></path>
+</svg> Facebook
               </a>
               <a href="https://instagram.com/smartkidskw" style={{ 
                 color: 'rgba(255,255,255,0.8)', 

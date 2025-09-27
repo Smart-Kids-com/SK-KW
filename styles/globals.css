@@ -1,207 +1,127 @@
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700&display=swap');
+/* === Smart Kids — globals.css (مطابق لـ Shopify settings_data.json) === */
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Amiri:wght@400;700&display=swap');
 
-:root {
-  --color-primary: #132e90;
-  --color-secondary: #df5299;
-  --color-accent: #ffcf41;
-  --color-light: #f9fafc;
-  --color-gray-light: #f8f9fa;
-  --color-gray: #6c757d;
-  --color-dark: #212529;
-  --color-white: #ffffff;
-  --color-error: #dc3545;
-  --color-success: #198754;
-  --color-info: #0dcaf0;
-  --color-warning: #ffc107;
+/* Tokens من Shopify */
+:root{
+  /* scheme-1 */
+  --bg:#370e3e;
+  --text:#ffffff;
+  --btn:#9422af;
+  --btn-label:#ffffff;
 
-  --font-heading: 'Cairo', 'Tajawal', Arial, sans-serif;
-  --font-body: 'Tajawal', Arial, sans-serif;
+  /* Typography */
+  --font-head:'Assistant',system-ui,Arial;
+  --font-body:'Amiri',system-ui,Arial;
+  --body-scale:120%;
+  --head-scale:110%;
 
-  --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-  --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
-  --border-radius: 0.5rem;
-  --border-radius-sm: 0.25rem;
-  --border-radius-lg: 1rem;
-  
-  --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, #1e3a8a 100%);
-  --gradient-secondary: linear-gradient(135deg, var(--color-secondary) 0%, #e11d48 100%);
-  --gradient-accent: linear-gradient(135deg, var(--color-accent) 0%, #fbbf24 100%);
+  /* Layout & spacing */
+  --page-w:1600px;
+  --grid-x:28px;
+  --grid-y:28px;
+  --section-space:4rem; /* spacing_sections=4 */
+
+  /* Buttons */
+  --btn-radius:4px;
+  --btn-border:3px;
+  --btn-border-color:rgba(255,255,255,.75);
+  --btn-shadow:8px 8px 15px rgba(0,0,0,.45);
+
+  /* Inputs */
+  --input-radius:4px;
+  --input-border:2px;
+  --input-border-color:rgba(255,255,255,1);
+  --input-shadow:8px 8px 20px rgba(0,0,0,.30);
+
+  /* Cards */
+  --card-radius:4px;
+  --card-shadow:8px 8px 40px rgba(0,0,0,.25);
+
+  /* Media */
+  --media-radius:10px;
+  --media-shadow:4px 4px 20px rgba(0,0,0,.05);
+
+  /* Drawer / Popup */
+  --drawer-border:1px solid rgba(255,255,255,.45);
+  --drawer-shadow:4px 4px 5px rgba(0,0,0,.80);
+  --popup-radius:4px;
+  --popup-border:2px solid rgba(255,255,255,.25);
+  --popup-shadow:16px 16px 5px rgba(0,0,0,.50);
+
+  /* Badges */
+  --badge-radius:2px;
 }
 
-* {
-  box-sizing: border-box;
+/* Base */
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:var(--font-body); font-size:var(--body-scale);
+  line-height:1.6; direction:rtl; text-align:right;
 }
+h1,h2,h3,h4,h5,h6{font-family:var(--font-head)}
+h1{font-size:calc(2rem * var(--head-scale))}
+h2{font-size:calc(1.6rem * var(--head-scale))}
+h3{font-size:calc(1.3rem * var(--head-scale))}
 
-body {
-  font-family: var(--font-body);
-  background: var(--color-gray-light);
-  color: var(--color-dark);
-  margin: 0;
-  padding: 0;
-  line-height: 1.6;
-  font-size: 16px;
-  direction: rtl;
-  text-align: right;
-}
+a{color:var(--btn);text-decoration:none;transition:transform .2s ease,color .2s ease}
+a:hover{color:#b83bc9;transform:translateY(-1px)}
 
-a {
-  color: var(--color-primary);
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
+.container{max-width:var(--page-w);margin-inline:auto;padding-inline:clamp(12px,2vw,28px)}
+.section{padding-block:var(--section-space)}
 
-a:hover {
-  color: var(--color-secondary);
-  transform: translateY(-1px);
-}
-
-main {
-  min-height: calc(100vh - 200px);
-  padding: 2rem 1rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* Typography */
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 1rem;
-  color: var(--color-dark);
-}
-
-h1 {
-  font-size: 2.5rem;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-h2 {
-  font-size: 2rem;
-  color: var(--color-primary);
-}
-
-h3 {
-  font-size: 1.5rem;
-}
-
-p {
-  margin-bottom: 1rem;
-  color: var(--color-gray);
-}
+/* Grid (Collections/Products) */
+.grid{display:grid;gap:var(--grid-y) var(--grid-x)}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
 
 /* Buttons */
-.btn {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  text-align: center;
-  border: none;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  font-size: 1rem;
+.btn{
+  display:inline-block;padding:.75rem 1.25rem;font-weight:600;
+  background:var(--btn); color:var(--btn-label);
+  border:var(--btn-border) solid var(--btn-border-color);
+  border-radius:var(--btn-radius); box-shadow:var(--btn-shadow);
+  transition:transform .2s ease,box-shadow .2s ease
 }
+.btn:hover{transform:translateY(-2px);box-shadow:0 14px 28px rgba(0,0,0,.25),0 10px 10px rgba(0,0,0,.22)}
+.btn--outline{background:transparent;color:var(--btn);border-color:var(--btn);box-shadow:none}
+.btn--outline:hover{background:var(--btn);color:var(--btn-label)}
 
-.btn-primary {
-  background: var(--gradient-primary);
-  color: var(--color-white);
-  box-shadow: var(--shadow);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  color: var(--color-white);
-}
-
-.btn-secondary {
-  background: var(--gradient-secondary);
-  color: var(--color-white);
-}
-
-.btn-outline {
-  background: transparent;
-  color: var(--color-primary);
-  border: 2px solid var(--color-primary);
-}
-
-.btn-outline:hover {
-  background: var(--color-primary);
-  color: var(--color-white);
+/* Inputs */
+input,select,textarea{
+  background:#fff;color:#121212;width:100%;
+  border:var(--input-border) solid var(--input-border-color);
+  border-radius:var(--input-radius); box-shadow:var(--input-shadow);
+  padding:.6rem .8rem
 }
 
 /* Cards */
-.card {
-  background: var(--color-white);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  transition: all 0.3s ease;
+.card{
+  background:#fff;color:#121212;border-radius:var(--card-radius);
+  box-shadow:var(--card-shadow);padding:1rem
 }
 
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-}
+/* Product card alignment per Shopify (right) */
+.product-card{text-align:right}
 
-/* Container */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
+/* Media */
+img,video{max-width:100%;height:auto;border-radius:var(--media-radius);box-shadow:var(--media-shadow)}
 
-/* Grid */
-.grid {
-  display: grid;
-  gap: 2rem;
-}
+/* Drawer / Cart */
+.drawer{border-top:var(--drawer-border);box-shadow:var(--drawer-shadow);background:var(--bg);color:var(--text)}
 
-.grid-2 {
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-}
+/* Popup / Modal */
+.popup{border:var(--popup-border);border-radius:var(--popup-radius);box-shadow:var(--popup-shadow);background:var(--bg);color:var(--text)}
 
-.grid-3 {
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-}
-
-.grid-4 {
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-}
-
-/* Loading animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.fade-in {
-  animation: fadeIn 0.6s ease-out;
-}
+/* Badges */
+.badge{display:inline-block;border-radius:var(--badge-radius);padding:.2rem .5rem}
 
 /* Responsive */
-@media (max-width: 768px) {
-  main {
-    padding: 1rem 0.5rem;
-  }
-  
-  h1 {
-    font-size: 2rem;
-  }
-  
-  .grid {
-    gap: 1rem;
-  }
-  
-  .btn {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.9rem;
-  }
+@media (max-width:1200px){.grid-4{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:768px){
+  .container{padding-inline:16px}
+  .grid-3,.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .btn{padding:.6rem 1rem}
 }
