@@ -1,0 +1,5 @@
+Branding applied from Shopify settings.
+Colors: {'background': '#370e3e', 'text': '#ffffff', 'button': '#9422af', 'button_label': '#ffffff'}
+Fonts: heading=Assistant, body=Amiri
+Imported in app/layout.js: Yes
+No assets copied by exact name.
