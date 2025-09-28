@@ -1,0 +1,25 @@
+/* branding-overrides.css - auto-applied from Shopify settings */
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Amiri:wght@400;700&display=swap');
+
+:root {
+  --color-bg: #370e3e;
+  --color-text: #ffffff;
+  --color-button: #9422af;
+  --color-button-label: #ffffff;
+  --font-heading: 'Assistant', system-ui, Arial, sans-serif;
+  --font-body: 'Amiri', system-ui, Arial, sans-serif;
+  --page-width: 1600px;
+  --heading-scale: 110%;
+  --body-scale: 120%;
+}
+
+html, body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: calc(16px * (var(--body-scale) / 100));
+}
+h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
+.container, main { max-width: var(--page-width); margin-inline: auto; }
+a, .btn, button { color: var(--color-button); }
+.btn, .button, button.primary { background: var(--color-button); color: var(--color-button-label) !important; }
