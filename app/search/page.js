@@ -6,7 +6,7 @@ export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [searched, setSearched] = useState(false);
-  const locale = "at";
+  const locale = "ar";
 
   const handleSearch = async (e) => {
     e.preventDefault();
