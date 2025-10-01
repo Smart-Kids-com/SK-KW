@@ -19,15 +19,9 @@ export default function Home() {
   }, []);
 
   const handleAddToCart = (collectionId, collectionTitle) => {
-    // Prevent default link behavior when clicking button
     event.preventDefault();
     event.stopPropagation();
-    
-    // Add to cart logic here
     console.log(`Adding ${collectionTitle} to cart`);
-    
-    // You can implement actual cart functionality here
-    // For now, just show an alert
     alert(`تمت إضافة ${collectionTitle} إلى عربة التسوق!`);
   };
 
@@ -79,7 +73,7 @@ export default function Home() {
             <Link key={collection.handle} href={`/collections/${collection.handle}`} className="product-card">
               <div className="product-image">
                 {collection.image && (
-                  <img src={collection.image.src} alt={collection.title} />
+                  <img src={collection.image.url} alt={collection.image.altText || collection.title} />
                 )}
                 <span className="sale-badge">عرض خاص</span>
               </div>
@@ -114,7 +108,7 @@ export default function Home() {
             <Link key={`latest-${collection.handle}`} href={`/collections/${collection.handle}`} className="product-card">
               <div className="product-image">
                 {collection.image && (
-                  <img src={collection.image.src} alt={collection.title} />
+                  <img src={collection.image.url} alt={collection.image.altText || collection.title} />
                 )}
                 {index < 8 && <span className="sale-badge">عرض خاص</span>}
               </div>
@@ -175,7 +169,7 @@ export default function Home() {
             <Link key={`featured-${collection.handle}`} href={`/collections/${collection.handle}`} className="product-card">
               <div className="product-image">
                 {collection.image && (
-                  <img src={collection.image.src} alt={collection.title} />
+                  <img src={collection.image.url} alt={collection.image.altText || collection.title} />
                 )}
                 <span className="sale-badge">عرض خاص</span>
               </div>
@@ -215,7 +209,7 @@ export default function Home() {
             <Link key={`islamic-${collection.handle}`} href={`/collections/${collection.handle}`} className="product-card">
               <div className="product-image">
                 {collection.image && (
-                  <img src={collection.image.src} alt={collection.title} />
+                  <img src={collection.image.url} alt={collection.image.altText || collection.title} />
                 )}
                 <span className="sale-badge">عرض خاص</span>
               </div>

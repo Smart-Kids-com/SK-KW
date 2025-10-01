@@ -1,186 +1,119 @@
 "use client";
 import Link from 'next/link';
-import CartIcon from './icons/CartIcon';
-import SearchIcon from './icons/SearchIcon';
+
+// يمكنك استبدال هذه الـ SVGs بمكونات منفصلة إذا أردت
+function MenuIcon(props) {
+  return (
+    <svg {...props} width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <rect y="8" width="32" height="2" rx="1" fill="#2563eb"/>
+      <rect y="15" width="32" height="2" rx="1" fill="#2563eb"/>
+      <rect y="22" width="32" height="2" rx="1" fill="#2563eb"/>
+    </svg>
+  );
+}
+function SearchIcon(props) {
+  return (
+    <svg {...props} width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="7"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+  );
+}
+function CartIcon(props) {
+  return (
+    <svg {...props} width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 6h15l-1.5 9h-13z"/>
+      <circle cx="9" cy="20" r="1.5"/>
+      <circle cx="18" cy="20" r="1.5"/>
+      <path d="M6 6L5 2H2"/>
+    </svg>
+  );
+}
 
 export default function Header() {
   return (
-    <header style={{
-      background: 'linear-gradient(135deg, var(--color-primary) 0%, #1e3a8a 100%)',
-      color: '#fff',
-      boxShadow: '0 4px 20px rgba(19, 46, 144, 0.3)',
-      position: 'sticky',
-      top: 0,
-      zIndex: 1000
-    }}>
-      {/* Top bar */}
+    <header style={{ width: '100%', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+      {/* Top purple bar */}
       <div style={{
-        background: 'rgba(255, 255, 255, 0.1)',
-        padding: '0.5rem 1rem',
+        background: '#3d0856',
+        color: '#fff',
         textAlign: 'center',
-        fontSize: '0.9rem'
-      }}>
-        ⭐ مرحباً بكم في SK Smart Kids - متجركم المفضل لألعاب الأطفال ⭐
-      </div>
-      
-      <nav style={{
+        fontSize: '1.5rem',
+        fontWeight: 400,
+        padding: '1.2rem 0 1.1rem 0',
+        letterSpacing: '0.01em',
         display: 'flex',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        maxWidth: 1200,
-        margin: '0 auto',
-        padding: '1rem 1rem'
+        justifyContent: 'center',
+        direction: 'rtl',
+        position: 'relative'
       }}>
-        {/* Logo */}
+        {/* سهم جهة اليمين */}
+        <span style={{ position: 'absolute', right: 28, fontSize: '2rem', top: '50%', transform: 'translateY(-50%)' }}>
+          <svg width="30" height="30" viewBox="0 0 30 30" fill="none"><path d="M13 8l5 7-5 7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </span>
+        التوصيل مجاناً للطلبات بقيمة 20 د.ك أو أكثر
+      </div>
+      {/* Main white header */}
+      <div style={{
+        background: '#fff',
+        padding: '1.1rem 0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 0,
+        position: 'relative'
+      }}>
+        {/* Menu icon - left */}
+        <button
+          aria-label="open menu"
+          style={{
+            background: 'none',
+            border: 'none',
+            marginLeft: 16,
+            marginRight: 28,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <MenuIcon />
+        </button>
+        {/* Logo - center */}
         <Link href="/" style={{
+          flex: 1,
+          textAlign: 'center',
           display: 'flex',
           alignItems: 'center',
-          textDecoration: 'none'
+          justifyContent: 'center',
+          minWidth: 0
         }}>
-          <img 
-            src="/logo-sk-smart-kids.png" 
-            alt="Logo of SK Smart Kids with a colorful character and text."
+          <img
+            src="/logo-sk-smart-kids.png"
+            alt="شعار الأطفال المبتكرون SK Smart Kids"
             style={{
-              width: '200px',
-              height: 'auto',
-              filter: 'brightness(1.1)'
+              height: 60,
+              width: 'auto',
+              maxWidth: 280,
+              objectFit: 'contain'
             }}
           />
         </Link>
-
-        {/* Search bar */}
+        {/* Icons - right */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          background: 'rgba(255, 255, 255, 0.15)',
-          borderRadius: '25px',
-          padding: '0.5rem 1rem',
-          minWidth: '300px',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)'
+          gap: '18px',
+          marginRight: 20
         }}>
-          <SearchIcon style={{ marginLeft: '0.5rem', color: 'rgba(255, 255, 255, 0.8)' }} />
-          <input
-            type="text"
-            placeholder="ابحث عن الألعاب..."
-            style={{
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              color: '#fff',
-              flex: 1,
-              fontSize: '1rem',
-              direction: 'rtl',
-              textAlign: 'right'
-            }}
-          />
-        </div>
-
-        {/* Navigation links */}
-        <div style={{
-          display: 'flex',
-          gap: '2rem',
-          alignItems: 'center',
-          fontWeight: 600,
-          fontSize: '1rem'
-        }}>
-          <Link href="/" style={{
-            color: '#fff',
-            textDecoration: 'none',
-            padding: '0.5rem 1rem',
-            borderRadius: '20px',
-            transition: 'all 0.3s ease',
-            position: 'relative'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.background = 'rgba(255, 255, 255, 0.2)';
-            e.target.style.transform = 'translateY(-2px)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = 'transparent';
-            e.target.style.transform = 'translateY(0)';
-          }}>
-            الرئيسية
+          <Link href="/search" aria-label="بحث">
+            <SearchIcon />
           </Link>
-
-          <Link href="/search" style={{
-            color: '#fff',
-            textDecoration: 'none',
-            padding: '0.5rem 1rem',
-            borderRadius: '20px',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.background = 'rgba(255, 255, 255, 0.2)';
-            e.target.style.transform = 'translateY(-2px)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = 'transparent';
-            e.target.style.transform = 'translateY(0)';
-          }}>
-            البحث
-          </Link>
-
-          <Link href="/cart" style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            color: '#fff',
-            textDecoration: 'none',
-            padding: '0.5rem 1rem',
-            borderRadius: '20px',
-            transition: 'all 0.3s ease',
-            position: 'relative'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.background = 'rgba(255, 255, 255, 0.2)';
-            e.target.style.transform = 'translateY(-2px)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = 'transparent';
-            e.target.style.transform = 'translateY(0)';
-          }}>
-            <CartIcon style={{ width: '20px', height: '20px' }} />
-            عربة التسوق
-            <span style={{
-              background: 'var(--color-accent)',
-              color: 'var(--color-dark)',
-              borderRadius: '50%',
-              width: '20px',
-              height: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.75rem',
-              fontWeight: 'bold',
-              position: 'absolute',
-              top: '-5px',
-              left: '-5px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-            }}>
-              0
-            </span>
-          </Link>
-
-          <Link href="/account" style={{
-            color: '#fff',
-            textDecoration: 'none',
-            padding: '0.5rem 1rem',
-            borderRadius: '20px',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.background = 'rgba(255, 255, 255, 0.2)';
-            e.target.style.transform = 'translateY(-2px)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = 'transparent';
-            e.target.style.transform = 'translateY(0)';
-          }}>
-            حسابي
+          <Link href="/cart" aria-label="عربة التسوق">
+            <CartIcon />
           </Link>
         </div>
-      </nav>
+      </div>
     </header>
   );
 }

@@ -18,8 +18,8 @@ export default async function ProductPage({ params }) {
       <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <div>
           <img
-            src={product.featuredImage?.src}
-            alt={product.featuredImage?.alt || product.title}
+            src={product.featuredImage?.url}
+            alt={product.featuredImage?.altText || product.title}
             style={{ width: 340, height: 340, objectFit: 'cover', borderRadius: 12, background: '#eee' }}
           />
         </div>

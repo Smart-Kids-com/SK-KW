@@ -40,8 +40,8 @@ export default function ProductCard({ product, locale = "ar" }) {
           borderRadius: 'var(--border-radius-lg) var(--border-radius-lg) 0 0'
         }}>
           <img
-            src={product.featuredImage?.src || '/placeholder-product.jpg'}
-            alt={product.featuredImage?.alt || product.title}
+            src={product.featuredImage?.url || '/placeholder-product.jpg'}
+            alt={product.featuredImage?.altText || product.title}
             style={{
               width: '100%',
               height: '220px',
@@ -204,7 +204,7 @@ export default function ProductCard({ product, locale = "ar" }) {
                 console.log('Added to cart:', product.title);
               }}
             >
-              🛒 أضف للسلة
+               أضف إلى عربة التسوق
             </button>
           )}
         </div>
