@@ -39,11 +39,10 @@ export default function Footer() {
                 gap: '0.5rem',
                 fontSize: '1.1rem'
               }}>
-                <svg aria-hidden="true" focusable="false" class="icon icon-facebook" viewBox="0 0 20 20">
-  <path fill="currentColor" d="M18 10.049C18 5.603 14.419 2 10 2c-4.419 0-8 3.603-8 8.049C2 14.067 4.925 17.396 8.75 18v-5.624H6.719v-2.328h2.03V8.275c0-2.017 1.195-3.132 3.023-3.132.874 0 1.79.158 1.79.158v1.98h-1.009c-.994 0-1.303.621-1.303 1.258v1.51h2.219l-.355 2.326H11.25V18c3.825-.604 6.75-3.933 6.75-7.951Z"></path>
-</svg> Facebook
+                <img src="/social/facebook.svg" alt="Facebook" style={{ width: 24, height: 24 }} />
+                Facebook
               </a>
-              <a href="https://instagram.com/smartkidskw" style={{ 
+              <a href="https://www.instagram.com/kuwaitsmartkids/" style={{ 
                 color: 'rgba(255,255,255,0.8)', 
                 textDecoration: 'none',
                 display: 'flex',
@@ -51,9 +50,10 @@ export default function Footer() {
                 gap: '0.5rem',
                 fontSize: '1.1rem'
               }}>
-                📷 Instagram
+                <img src="/social/instagram.svg" alt="Instagram" style={{ width: 24, height: 24 }} />
+                Instagram
               </a>
-              <a href="https://youtube.com/smartkidskw" style={{ 
+              <a href="https://www.youtube.com/@SmartKids-Gulf" style={{ 
                 color: 'rgba(255,255,255,0.8)', 
                 textDecoration: 'none',
                 display: 'flex',
@@ -61,9 +61,10 @@ export default function Footer() {
                 gap: '0.5rem',
                 fontSize: '1.1rem'
               }}>
-                📺 YouTube
+                <img src="/social/youtube.svg" alt="YouTube" style={{ width: 24, height: 24 }} />
+                YouTube
               </a>
-              <a href="https://tiktok.com/@smartkidskw" style={{ 
+              <a href="https://www.tiktok.com/@smartkids.gulf" style={{ 
                 color: 'rgba(255,255,255,0.8)', 
                 textDecoration: 'none',
                 display: 'flex',
@@ -71,9 +72,10 @@ export default function Footer() {
                 gap: '0.5rem',
                 fontSize: '1.1rem'
               }}>
-                🎵 TikTok
+                <img src="/social/tiktok.svg" alt="TikTok" style={{ width: 24, height: 24 }} />
+                TikTok
               </a>
-              <a href="https://pinterest.com/smartkidskw" style={{ 
+              <a href="https://www.pinterest.com/smartkidsgulf" style={{ 
                 color: 'rgba(255,255,255,0.8)', 
                 textDecoration: 'none',
                 display: 'flex',
@@ -81,9 +83,10 @@ export default function Footer() {
                 gap: '0.5rem',
                 fontSize: '1.1rem'
               }}>
-                📌 Pinterest
+                <img src="/social/pinterest.svg" alt="Pinterest" style={{ width: 24, height: 24 }} />
+                Pinterest
               </a>
-              <a href="https://snapchat.com/add/smartkidskw" style={{ 
+              <a href="https://www.snapchat.com/add/smart.kidskw" style={{ 
                 color: 'rgba(255,255,255,0.8)', 
                 textDecoration: 'none',
                 display: 'flex',
@@ -91,7 +94,8 @@ export default function Footer() {
                 gap: '0.5rem',
                 fontSize: '1.1rem'
               }}>
-                👻 Snapchat
+                <img src="/social/snapchat.svg" alt="Snapchat" style={{ width: 24, height: 24 }} />
+                Snapchat
               </a>
             </div>
           </div>
@@ -220,11 +224,11 @@ export default function Footer() {
             fontSize: '0.9rem',
             color: 'rgba(255,255,255,0.8)'
           }}>
-            <span>💳 KNET</span>
-            <span>💳 MasterCard</span>
-            <span>💳 VISA</span>
-            <span>💳 AMEX</span>
-            <span>🍎 Apple Pay</span>
+            <img src="/payments/knet.svg" alt="KNET" style={{ width: 40, height: 24 }} />
+            <img src="/payments/mastercard.svg" alt="MasterCard" style={{ width: 40, height: 24 }} />
+            <img src="/payments/visa.svg" alt="VISA" style={{ width: 40, height: 24 }} />
+            <img src="/payments/amex.svg" alt="American Express" style={{ width: 40, height: 24 }} />
+            <img src="/payments/applepay.svg" alt="Apple Pay" style={{ width: 40, height: 24 }} />
           </div>
         </div>
       </div>

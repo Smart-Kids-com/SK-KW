@@ -19,8 +19,8 @@ export default function CollectionGrid({ collections }) {
           }}
         >
           <img
-            src={col.image?.src}
-            alt={col.image?.alt || col.title}
+            src={col.image?.url}
+            alt={col.image?.altText || col.title}
             style={{ width: 220, height: 170, objectFit: "cover", borderRadius: 8 }}
           />
           <h2 style={{ fontWeight: 600, margin: "1rem 0 0.5rem", fontSize: "1.15rem", color: "var(--color-primary)" }}>
