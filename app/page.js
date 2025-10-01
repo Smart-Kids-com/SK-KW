@@ -1,5 +1,4 @@
 "use client";
-import Header from '../components/Header';
 import HomepageSlideshow from '../components/HomepageSlideshow';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
@@ -21,7 +20,6 @@ export default function Home() {
 
   return (
     <>
-      <Header />
       <HomepageSlideshow />
 
       {/* Hero Section */}
@@ -265,7 +263,7 @@ export default function Home() {
         .audio-section h2{font-size:2.2rem;color:#1f2937;margin-bottom:2rem}
         .audio-device-image{width:300px;height:200px;background:#e5e7eb;margin:2rem auto;border-radius:8px}
         .collections-section{padding:4rem 2rem;background:#fff}
-        .collections-section h2{font-size:2.2rem;color:#1f2937;text-align:center;margin-bottom:3rem}
+        .collections-section h2{font-size:2.2rem;color:#1f2937;text-align:center;margin-bottom:3رم}
         .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:2rem;max-width:1400px;margin:0 auto}
         .product-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,.1);transition:all .3s ease;text-decoration:none;color:inherit}
         .product-card:hover{transform:translateY(-5px);box-shadow:0 10px 25px rgba(0,0,0,.15)}
