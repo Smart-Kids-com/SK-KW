@@ -1,4 +1,6 @@
 "use client";
+import Header from '../components/Header';
+import HomepageSlideshow from '../components/HomepageSlideshow';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { getCollections } from '../lib/shopify';
@@ -7,27 +9,22 @@ export default function Home() {
   const [collections, setCollections] = useState([]);
 
   useEffect(() => {
-    async function fetchCollections() {
+    (async () => {
       try {
         const fetchedCollections = await getCollections();
-        setCollections(fetchedCollections);
+        setCollections(Array.isArray(fetchedCollections) ? fetchedCollections : []);
       } catch (error) {
-        console.error('Error fetching collections:', error);
+        console.error('Error fetching collections:', error?.message || error);
       }
-    }
-    fetchCollections();
+    })();
   }, []);
-
-  const handleAddToCart = (collectionId, collectionTitle) => {
-    event.preventDefault();
-    event.stopPropagation();
-    console.log(`Adding ${collectionTitle} to cart`);
-    alert(`تمت إضافة ${collectionTitle} إلى عربة التسوق!`);
-  };
 
   return (
     <>
-      {/* Hero Section - Interactive Audio Educational Display */}
+      <Header />
+      <HomepageSlideshow />
+
+      {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
           <h1>العرض التعليمي التفاعلي الصوتي</h1>
@@ -54,14 +51,12 @@ export default function Home() {
       <section className="audio-section">
         <div className="audio-content">
           <h2>المسلم الصغير 4 كتب صوتية للأطفال 🔊</h2>
-          <div className="audio-features">
-            <div className="audio-device-image">
-              {/* Placeholder for audio device image */}
-            </div>
-            <Link href="/collections/قصصي-الصوتية-المسموعة" className="section-btn">
-              تصفح المكتبة الصوتية
-            </Link>
-          </div>
+        </div>
+        <div className="audio-features">
+          <div className="audio-device-image" />
+          <Link href="/collections/قصصي-الصوتية-المسموعة" className="section-btn">
+            تصفح المكتبة الصوتية
+          </Link>
         </div>
       </section>
 
@@ -69,33 +64,40 @@ export default function Home() {
       <section className="collections-section">
         <h2>عروض القصص التفاعلية</h2>
         <div className="products-grid">
-          {collections.slice(0, 24).map((collection, index) => (
-            <Link key={collection.handle} href={`/collections/${collection.handle}`} className="product-card">
-              <div className="product-image">
-                {collection.image && (
-                  <img src={collection.image.url} alt={collection.image.altText || collection.title} />
+          {collections.slice(0, 24).map((collection) => (
+            <article key={collection.handle} className="product-card">
+              <Link href={`/collections/${collection.handle}`} className="product-image">
+                {collection?.image?.url && (
+                  <img
+                    src={collection.image.url}
+                    alt={collection?.image?.altText || collection.title || 'Collection'}
+                  />
                 )}
                 <span className="sale-badge">عرض خاص</span>
-              </div>
+              </Link>
               <div className="product-info">
-                <h3>{collection.title}</h3>
+                <h3>
+                  <Link href={`/collections/${collection.handle}`}>
+                    {collection.title}
+                  </Link>
+                </h3>
                 <div className="price-info">
                   <span className="regular-price">40.000 KWD</span>
                   <span className="sale-price">عرض خاص 33.000 KWD</span>
                 </div>
-                <button 
+                <Link
+                  href={`/collections/${collection.handle}`}
                   className="add-to-cart-btn"
-                  onClick={(e) => handleAddToCart(collection.handle, collection.title)}
                 >
-                  أضف إلى عربة التسوق
-                </button>
+                  تسوّق المجموعة
+                </Link>
               </div>
-            </Link>
+            </article>
           ))}
         </div>
         <div className="view-all-link">
           <Link href="/collections/عروض-القصص-التفاعلية">
-            1of24 مشاهدة الكل
+            عرض الكل ({collections.length})
           </Link>
         </div>
       </section>
@@ -105,15 +107,20 @@ export default function Home() {
         <h2>اكتشف أحدث إصداراتنا للأطفال</h2>
         <div className="products-grid">
           {collections.slice(0, 24).map((collection, index) => (
-            <Link key={`latest-${collection.handle}`} href={`/collections/${collection.handle}`} className="product-card">
-              <div className="product-image">
-                {collection.image && (
-                  <img src={collection.image.url} alt={collection.image.altText || collection.title} />
+            <article key={`latest-${collection.handle}`} className="product-card">
+              <Link href={`/collections/${collection.handle}`} className="product-image">
+                {collection?.image?.url && (
+                  <img
+                    src={collection.image.url}
+                    alt={collection?.image?.altText || collection.title || 'Collection'}
+                  />
                 )}
                 {index < 8 && <span className="sale-badge">عرض خاص</span>}
-              </div>
+              </Link>
               <div className="product-info">
-                <h3>{collection.title}</h3>
+                <h3>
+                  <Link href={`/collections/${collection.handle}`}>{collection.title}</Link>
+                </h3>
                 <div className="price-info">
                   {index < 8 ? (
                     <>
@@ -124,19 +131,19 @@ export default function Home() {
                     <span className="regular-price">12.500 KWD</span>
                   )}
                 </div>
-                <button 
+                <Link
+                  href={`/collections/${collection.handle}`}
                   className="add-to-cart-btn"
-                  onClick={(e) => handleAddToCart(collection.handle, collection.title)}
                 >
-                  أضف إلى عربة التسوق
-                </button>
+                  تسوّق المجموعة
+                </Link>
               </div>
-            </Link>
+            </article>
           ))}
         </div>
         <div className="view-all-link">
           <Link href="/collections/اكتشف-أحدث-إصداراتنا-للأطفال">
-            1of24 مشاهدة الكل
+            عرض الكل ({collections.length})
           </Link>
         </div>
       </section>
@@ -145,9 +152,7 @@ export default function Home() {
       <section className="progressive-stories">
         <h2>القصص التدريجية</h2>
         <div className="video-section">
-          <div className="video-placeholder">
-            {/* Video placeholder for progressive reading levels */}
-          </div>
+          <div className="video-placeholder" />
         </div>
       </section>
 
@@ -165,33 +170,38 @@ export default function Home() {
       <section className="collections-section">
         <h2>👇🏻المجموعات المتميزة</h2>
         <div className="products-grid">
-          {collections.slice(0, 24).map((collection, index) => (
-            <Link key={`featured-${collection.handle}`} href={`/collections/${collection.handle}`} className="product-card">
-              <div className="product-image">
-                {collection.image && (
-                  <img src={collection.image.url} alt={collection.image.altText || collection.title} />
+          {collections.slice(0, 24).map((collection) => (
+            <article key={`featured-${collection.handle}`} className="product-card">
+              <Link href={`/collections/${collection.handle}`} className="product-image">
+                {collection?.image?.url && (
+                  <img
+                    src={collection.image.url}
+                    alt={collection?.image?.altText || collection.title || 'Collection'}
+                  />
                 )}
                 <span className="sale-badge">عرض خاص</span>
-              </div>
+              </Link>
               <div className="product-info">
-                <h3>{collection.title}</h3>
+                <h3>
+                  <Link href={`/collections/${collection.handle}`}>{collection.title}</Link>
+                </h3>
                 <div className="price-info">
                   <span className="regular-price">26.000 KWD</span>
                   <span className="sale-price">عرض خاص 17.500 KWD</span>
                 </div>
-                <button 
+                <Link
+                  href={`/collections/${collection.handle}`}
                   className="add-to-cart-btn"
-                  onClick={(e) => handleAddToCart(collection.handle, collection.title)}
                 >
-                  أضف إلى عربة التسوق
-                </button>
+                  تسوّق المجموعة
+                </Link>
               </div>
-            </Link>
+            </article>
           ))}
         </div>
         <div className="view-all-link">
           <Link href="/collections/الكُتب-المُحببة-للأطفال">
-            1of24 مشاهدة الكل
+            عرض الكل ({collections.length})
           </Link>
         </div>
       </section>
@@ -205,362 +215,94 @@ export default function Home() {
           <p>اجعل تعلمهم ممتعًا ومفيدًا مع أفضل العروض في عالم الكتب الإسلامية</p>
         </div>
         <div className="products-grid">
-          {collections.slice(0, 17).map((collection, index) => (
-            <Link key={`islamic-${collection.handle}`} href={`/collections/${collection.handle}`} className="product-card">
-              <div className="product-image">
-                {collection.image && (
-                  <img src={collection.image.url} alt={collection.image.altText || collection.title} />
+          {collections.slice(0, 17).map((collection) => (
+            <article key={`islamic-${collection.handle}`} className="product-card">
+              <Link href={`/collections/${collection.handle}`} className="product-image">
+                {collection?.image?.url && (
+                  <img
+                    src={collection.image.url}
+                    alt={collection?.image?.altText || collection.title || 'Collection'}
+                  />
                 )}
                 <span className="sale-badge">عرض خاص</span>
-              </div>
+              </Link>
               <div className="product-info">
-                <h3>{collection.title}</h3>
+                <h3>
+                  <Link href={`/collections/${collection.handle}`}>{collection.title}</Link>
+                </h3>
                 <div className="price-info">
                   <span className="regular-price">26.000 KWD</span>
                   <span className="sale-price">عرض خاص 17.500 KWD</span>
                 </div>
-                <button 
+                <Link
+                  href={`/collections/${collection.handle}`}
                   className="add-to-cart-btn"
-                  onClick={(e) => handleAddToCart(collection.handle, collection.title)}
                 >
-                  أضف إلى عربة التسوق
-                </button>
+                  تسوّق المجموعة
+                </Link>
               </div>
-            </Link>
+            </article>
           ))}
         </div>
         <div className="view-all-link">
           <Link href="/collections/عروض-مكتبتي-الإسلامية">
-            1of17 مشاهدة الكل
+            عرض الكل ({collections.length})
           </Link>
         </div>
       </section>
 
       <style jsx>{`
-        /* Hero Section */
-        .hero-section {
-          background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-          color: white;
-          padding: 4rem 2rem;
-          text-align: center;
-          position: relative;
-        }
-
-        .hero-content h1 {
-          font-size: 3rem;
-          font-weight: 800;
-          margin-bottom: 1rem;
-        }
-
-        .hero-content p {
-          font-size: 1.5rem;
-          margin-bottom: 2rem;
-        }
-
-        .hero-btn {
-          display: inline-block;
-          background: #fbbf24;
-          color: #1f2937;
-          padding: 1rem 2rem;
-          border-radius: 8px;
-          text-decoration: none;
-          font-weight: 700;
-          font-size: 1.1rem;
-          transition: all 0.3s ease;
-        }
-
-        .hero-btn:hover {
-          background: #f59e0b;
-          transform: translateY(-2px);
-        }
-
-        .hero-number {
-          position: absolute;
-          top: 2rem;
-          right: 2rem;
-          font-size: 1.2rem;
-          font-weight: 600;
-        }
-
-        /* Education Boxes */
-        .education-boxes {
-          background: #f3f4f6;
-          padding: 4rem 2rem;
-          text-align: center;
-        }
-
-        .education-boxes h2 {
-          font-size: 2.5rem;
-          color: #1f2937;
-          margin-bottom: 1rem;
-        }
-
-        .education-boxes p {
-          font-size: 1.2rem;
-          color: #6b7280;
-          margin-bottom: 2rem;
-        }
-
-        /* Audio Section */
-        .audio-section {
-          padding: 4rem 2rem;
-          background: white;
-          text-align: center;
-        }
-
-        .audio-section h2 {
-          font-size: 2.2rem;
-          color: #1f2937;
-          margin-bottom: 2rem;
-        }
-
-        .audio-device-image {
-          width: 300px;
-          height: 200px;
-          background: #e5e7eb;
-          margin: 2rem auto;
-          border-radius: 8px;
-        }
-
-        /* Collections Sections */
-        .collections-section {
-          padding: 4rem 2rem;
-          background: #ffffff;
-        }
-
-        .collections-section h2 {
-          font-size: 2.2rem;
-          color: #1f2937;
-          text-align: center;
-          margin-bottom: 3rem;
-        }
-
-        .products-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 2rem;
-          max-width: 1400px;
-          margin: 0 auto;
-        }
-
-        .product-card {
-          background: white;
-          border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          transition: all 0.3s ease;
-          text-decoration: none;
-          color: inherit;
-        }
-
-        .product-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .product-image {
-          position: relative;
-          width: 100%;
-          height: 200px;
-          background: #f3f4f6;
-        }
-
-        .product-image img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .sale-badge {
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          background: #ef4444;
-          color: white;
-          padding: 0.5rem 1rem;
-          border-radius: 20px;
-          font-size: 0.8rem;
-          font-weight: 600;
-        }
-
-        .product-info {
-          padding: 1.5rem;
-        }
-
-        .product-info h3 {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: #1f2937;
-          margin-bottom: 1rem;
-          line-height: 1.4;
-        }
-
-        .price-info {
-          margin-bottom: 1rem;
-        }
-
-        .regular-price {
-          color: #6b7280;
-          text-decoration: line-through;
-          margin-right: 0.5rem;
-        }
-
-        .sale-price {
-          color: #ef4444;
-          font-weight: 600;
-        }
-
-        .add-to-cart-btn {
-          width: 100%;
-          background: #4f46e5;
-          color: white;
-          padding: 0.75rem;
-          border: none;
-          border-radius: 8px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: background 0.3s ease;
-        }
-
-        .add-to-cart-btn:hover {
-          background: #3730a3;
-        }
-
-        .view-all-link {
-          text-align: center;
-          margin-top: 3rem;
-        }
-
-        .view-all-link a {
-          color: #4f46e5;
-          font-weight: 600;
-          text-decoration: none;
-          font-size: 1.1rem;
-        }
-
-        .view-all-link a:hover {
-          text-decoration: underline;
-        }
-
-        /* Progressive Stories */
-        .progressive-stories {
-          background: #f9fafb;
-          padding: 4rem 2rem;
-          text-align: center;
-        }
-
-        .progressive-stories h2 {
-          font-size: 2.2rem;
-          color: #1f2937;
-          margin-bottom: 2rem;
-        }
-
-        .video-placeholder {
-          width: 100%;
-          max-width: 600px;
-          height: 300px;
-          background: #e5e7eb;
-          margin: 0 auto;
-          border-radius: 8px;
-        }
-
-        /* Islamic Stories */
-        .islamic-stories {
-          background: white;
-          padding: 4rem 2rem;
-          text-align: center;
-        }
-
-        .islamic-stories h2 {
-          font-size: 2.2rem;
-          color: #1f2937;
-          margin-bottom: 1rem;
-        }
-
-        .islamic-stories p {
-          color: #6b7280;
-          font-size: 1.1rem;
-          margin-bottom: 2rem;
-        }
-
-        .islamic-links {
-          display: flex;
-          gap: 2rem;
-          justify-content: center;
-          flex-wrap: wrap;
-        }
-
-        .islamic-links a {
-          color: #4f46e5;
-          text-decoration: none;
-          font-weight: 600;
-        }
-
-        .islamic-links a:hover {
-          text-decoration: underline;
-        }
-
-        /* Islamic Collections */
-        .islamic-collections {
-          background: #f9fafb;
-          padding: 4rem 2rem;
-        }
-
-        .islamic-collections h2 {
-          font-size: 2.2rem;
-          color: #1f2937;
-          text-align: center;
-          margin-bottom: 2rem;
-        }
-
-        .section-description {
-          text-align: center;
-          max-width: 800px;
-          margin: 0 auto 3rem;
-        }
-
-        .section-description p {
-          color: #6b7280;
-          font-size: 1.1rem;
-          line-height: 1.6;
-          margin-bottom: 1rem;
-        }
-
-        .section-btn {
-          display: inline-block;
-          background: #4f46e5;
-          color: white;
-          padding: 1rem 2rem;
-          border-radius: 8px;
-          text-decoration: none;
-          font-weight: 600;
-          transition: all 0.3s ease;
-        }
-
-        .section-btn:hover {
-          background: #3730a3;
-          transform: translateY(-2px);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-          .hero-content h1 {
-            font-size: 2rem;
-          }
-
-          .hero-content p {
-            font-size: 1.2rem;
-          }
-
-          .products-grid {
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1rem;
-          }
-
-          .islamic-links {
-            flex-direction: column;
-            gap: 1rem;
-          }
+        .hero-section{background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:#fff;padding:4rem 2rem;text-align:center;position:relative}
+        .hero-content h1{font-size:3rem;font-weight:800;margin-bottom:1rem}
+        .hero-content p{font-size:1.5rem;margin-bottom:2rem}
+        .hero-btn{display:inline-block;background:#fbbf24;color:#1f2937;padding:1rem 2rem;border-radius:8px;text-decoration:none;font-weight:700;font-size:1.1rem;transition:all .3s ease}
+        .hero-btn:hover{background:#f59e0b;transform:translateY(-2px)}
+        .hero-number{position:absolute;top:2rem;right:2rem;font-size:1.2rem;font-weight:600}
+        .education-boxes{background:#f3f4f6;padding:4rem 2rem;text-align:center}
+        .education-boxes h2{font-size:2.5rem;color:#1f2937;margin-bottom:1rem}
+        .education-boxes p{font-size:1.2rem;color:#6b7280;margin-bottom:2rem}
+        .audio-section{padding:4rem 2rem;background:#fff;text-align:center}
+        .audio-section h2{font-size:2.2rem;color:#1f2937;margin-bottom:2rem}
+        .audio-device-image{width:300px;height:200px;background:#e5e7eb;margin:2rem auto;border-radius:8px}
+        .collections-section{padding:4rem 2rem;background:#fff}
+        .collections-section h2{font-size:2.2rem;color:#1f2937;text-align:center;margin-bottom:3rem}
+        .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:2rem;max-width:1400px;margin:0 auto}
+        .product-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,.1);transition:all .3s ease;text-decoration:none;color:inherit}
+        .product-card:hover{transform:translateY(-5px);box-shadow:0 10px 25px rgba(0,0,0,.15)}
+        .product-image{position:relative;display:block;width:100%;height:200px;background:#f3f4f6}
+        .product-image img{width:100%;height:100%;object-fit:cover}
+        .sale-badge{position:absolute;top:10px;right:10px;background:#ef4444;color:#fff;padding:.5rem 1rem;border-radius:20px;font-size:.8rem;font-weight:600}
+        .product-info{padding:1.5rem}
+        .product-info h3{font-size:1.1rem;font-weight:600;color:#1f2937;margin-bottom:1rem;line-height:1.4}
+        .product-info h3 a{text-decoration:none;color:inherit}
+        .price-info{margin-bottom:1rem}
+        .regular-price{color:#6b7280;text-decoration:line-through;margin-right:.5rem}
+        .sale-price{color:#ef4444;font-weight:600}
+        .add-to-cart-btn{display:block;text-align:center;background:#4f46e5;color:#fff;padding:.75rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;transition:background .3s ease;text-decoration:none}
+        .add-to-cart-btn:hover{background:#3730a3}
+        .view-all-link{text-align:center;margin-top:3rem}
+        .view-all-link a{color:#4f46e5;font-weight:600;text-decoration:none;font-size:1.1rem}
+        .view-all-link a:hover{text-decoration:underline}
+        .progressive-stories{background:#f9fafb;padding:4rem 2rem;text-align:center}
+        .progressive-stories h2{font-size:2.2rem;color:#1f2937;margin-bottom:2rem}
+        .video-placeholder{width:100%;max-width:600px;height:300px;background:#e5e7eb;margin:0 auto;border-radius:8px}
+        .islamic-stories{background:#fff;padding:4rem 2rem;text-align:center}
+        .islamic-stories h2{font-size:2.2rem;color:#1f2937;margin-bottom:1rem}
+        .islamic-stories p{color:#6b7280;font-size:1.1rem;margin-bottom:2rem}
+        .islamic-links{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap}
+        .islamic-links a{color:#4f46e5;text-decoration:none;font-weight:600}
+        .islamic-links a:hover{text-decoration:underline}
+        .islamic-collections{background:#f9fafb;padding:4rem 2rem}
+        .islamic-collections h2{font-size:2.2rem;color:#1f2937;text-align:center;margin-bottom:2rem}
+        .section-description{text-align:center;max-width:800px;margin:0 auto 3rem}
+        .section-description p{color:#6b7280;font-size:1.1rem;line-height:1.6;margin-bottom:1rem}
+        .section-btn{display:inline-block;background:#4f46e5;color:#fff;padding:1rem 2rem;border-radius:8px;text-decoration:none;font-weight:600;transition:all .3s ease}
+        .section-btn:hover{background:#3730a3;transform:translateY(-2px)}
+        @media (max-width:768px){
+          .hero-content h1{font-size:2rem}
+          .hero-content p{font-size:1.2rem}
+          .products-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem}
+          .islamic-links{flex-direction:column;gap:1rem}
         }
       `}</style>
     </>
