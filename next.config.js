@@ -3,8 +3,8 @@ const nextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'cdn.shopify.com', pathname: '/' },
-      { protocol: 'https', hostname: 'smartkidskw.com', pathname: '/' },
+      { protocol: 'https', hostname: 'cdn.shopify.com', pathname: '/s/files/**' }, // Shopify
+      { protocol: 'https', hostname: 'smartkidskw.com', pathname: '/**' },         // موقعك
     ],
   },
   env: {
@@ -12,5 +12,4 @@ const nextConfig = {
     SHOPIFY_STOREFRONT_API_TOKEN: process.env.SHOPIFY_STOREFRONT_API_TOKEN,
   },
 };
-
 module.exports = nextConfig;
