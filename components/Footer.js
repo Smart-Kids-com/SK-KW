@@ -108,7 +108,7 @@ export default function Footer() {
               marginBottom: '1.5rem'
             }}>
               <img 
-                src="/logo-sk-smart-kids.png" 
+                src="//smart-kids.me/cdn/shop/files/Logo_smart_kids-of-header-tag.png?v=1756574543&amp;width=1340"
                 alt="Logo of SK Smart Kids with a colorful character and text."
                 style={{
                   width: '180px',
@@ -224,11 +224,11 @@ export default function Footer() {
             fontSize: '0.9rem',
             color: 'rgba(255,255,255,0.8)'
           }}>
-            <img src="/payments/knet.svg" alt="KNET" style={{ width: 40, height: 24 }} />
-            <img src="/payments/mastercard.svg" alt="MasterCard" style={{ width: 40, height: 24 }} />
-            <img src="/payments/visa.svg" alt="VISA" style={{ width: 40, height: 24 }} />
-            <img src="/payments/amex.svg" alt="American Express" style={{ width: 40, height: 24 }} />
-            <img src="/payments/applepay.svg" alt="Apple Pay" style={{ width: 40, height: 24 }} />
+            <img src="https://cdn.shopify.com/shopifycloud/checkout-web/assets/1636e49a98c1bfc06ec1.svg" alt="KNET" style={{ width: 51, height: 28 }} />
+            <img src="https://cdn.shopify.com/shopifycloud/checkout-web/assets/c1.en/assets/mastercard.1c4_lyMp.svg" alt="MasterCard" style={{ width: 51, height: 28 }} />
+            <img src="https://cdn.shopify.com/shopifycloud/checkout-web/assets/c1.en/assets/visa.sxIq5Dot.svg" alt="VISA" style={{ width: 51, height: 28 }} />
+            <img src="https://cdn.shopify.com/shopifycloud/checkout-web/assets/c1.en/assets/amex.Csr7hRoy.svg" alt="American Express" style={{ width: 51, height: 28 }} />
+            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/apple-pay.icon.svg?v=1757219416" alt="Apple Pay" style={{ width: 46, height: 28 }} />
           </div>
         </div>
       </div>
