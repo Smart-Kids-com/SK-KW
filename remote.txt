@@ -36,7 +36,7 @@ package.json
 pages/_app.js
 public/locales/ar/ar.json
 public/locales/en/en.json
-public/logo-sk-smart-kids.png
+public/"Logo of SK Smart Kids with a colorful character and text."
 styles/branding-overrides.css
 styles/globals.css
 swatch.liquid

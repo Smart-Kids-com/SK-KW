@@ -122,8 +122,8 @@ export default function Header() {
             minWidth: 0
           }}>
             <img
-              src="/logo-sk-smart-kids.png"
-              alt="شعار الأطفال المبتكرون SK Smart Kids"
+              src="//smart-kids.me/cdn/shop/files/Logo_smart_kids-of-header-tag.png?v=1756574543&amp;width=1340"
+              alt="Logo of SK Smart Kids with a colorful character and text."
               style={{ height: 84, width: 'auto', maxWidth: 320, objectFit: 'contain' }}
             />
           </Link>
