@@ -112,7 +112,7 @@ export default function Header() {
             <MenuIcon />
           </button>
 
-          {/* Logo - center */}
+          {/* Logo - center (تم تكبيره) */}
           <Link href="/" style={{
             flex: 1,
             textAlign: 'center',
@@ -124,7 +124,7 @@ export default function Header() {
             <img
               src="/logo-sk-smart-kids.png"
               alt="شعار الأطفال المبتكرون SK Smart Kids"
-              style={{ height: 60, width: 'auto', maxWidth: 280, objectFit: 'contain' }}
+              style={{ height: 84, width: 'auto', maxWidth: 320, objectFit: 'contain' }}
             />
           </Link>
 
@@ -202,7 +202,7 @@ export default function Header() {
           </button>
         </div>
 
-        {/* محتوى القائمة الجانبية (يعتمد على SideMenuCollections كما هو) */}
+        {/* محتوى القائمة الجانبية */}
         <div style={{ overflowY: 'auto', padding: '8px 12px' }}>
           <SideMenuCollections />
         </div>
