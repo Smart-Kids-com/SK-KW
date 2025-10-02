@@ -1,6 +1,7 @@
 // app/page.js — Server Component
 import Link from "next/link";
 import HomepageSlideshow from "../components/HomepageSlideshow";
+import ProductsCarousel from "../components/ProductsCarousel";
 
 import {
   slidesPrimary,
@@ -63,26 +64,6 @@ async function fetchCollectionProducts(handle, first = 8) {
     };
   });
   return { products, error: null };
-}
-
-function ProductsGrid({ products = [] }) {
-  if (!products.length) return null;
-  return (
-    <div className="grid">
-      {products.map((p) => (
-        <Link key={p.id} href={`/products/${p.handle}`} className="card">
-          <div className="thumb">
-            <img src={p.imageUrl} alt={p.imageAlt} />
-          </div>
-          <div className="info">
-            <h3 className="title">{p.title}</h3>
-            {p.price && <div className="price">{p.price}</div>}
-            <span className="btn btn-primary">تفاصيل المنتج</span>
-          </div>
-        </Link>
-      ))}
-    </div>
-  );
 }
 
 export default async function HomePage() {
@@ -171,7 +152,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 7) أقسام المجموعات (شبكة منتجات فعلية) */}
+      {/* 7) أقسام المجموعات (سلايدر منتجات) */}
       {collectionsData.map((fc) => (
         <section key={fc.id} className="collection-block">
           <div className="collection-head">
@@ -186,14 +167,20 @@ export default async function HomePage() {
           </div>
 
           {fc.products?.length ? (
-            <ProductsGrid products={fc.products} />
+            <ProductsCarousel
+              products={fc.products}
+              title={fc.title}
+              viewAllHref={`/collections/${fc.handle}`}
+            />
           ) : (
             <div className="collection-cta">
               <Link href={`/collections/${fc.handle}`} className="btn btn-primary">
                 تسوّق المجموعة
               </Link>
               {fc.error && (
-                <small style={{ color: "#888", marginTop: 8 }}>(تعذّر تحميل المنتجات الآن)</small>
+                <small style={{ color: "#888", marginTop: 8 }}>
+                  (تعذّر تحميل المنتجات الآن)
+                </small>
               )}
             </div>
           )}
