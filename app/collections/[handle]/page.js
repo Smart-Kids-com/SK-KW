@@ -1,76 +1,111 @@
-"use client";
-import { useState, useEffect } from 'react';
-import { getCollectionByHandle } from '../../../lib/shopify';
-import ProductCard from '../../../components/ProductCard';
-import { t } from '../../../lib/i18n';
-import Link from 'next/link';
+// app/collections/[handle]/page.js
+import Link from "next/link";
+import ProductCard from "../../../components/ProductCard";
 
-export default function CollectionPage({ params }) {
-  const locale = "ar";
-  const [collection, setCollection] = useState(null);
-  
-  useEffect(() => {
-    async function fetchCollection() {
-      try {
-        const decodedHandle = decodeURIComponent(params.handle);
-        const fetchedCollection = await getCollectionByHandle(decodedHandle);
-        setCollection(fetchedCollection);
-      } catch (error) {
-        console.error('Error fetching collection:', error);
+async function fetchCollectionByHandle(handle) {
+  const domain = process.env.SHOPIFY_STORE_DOMAIN;
+  const token = process.env.SHOPIFY_STOREFRONT_API_TOKEN;
+  if (!domain || !token || !handle) return null;
+
+  const endpoint = `https://${domain}/api/2024-07/graphql.json`;
+  const query = `
+    query CollectionByHandle($handle: String!, $first: Int!) {
+      collectionByHandle(handle: $handle) {
+        title
+        handle
+        description
+        descriptionHtml
+        products(first: $first) {
+          edges {
+            node {
+              id
+              title
+              handle
+              images(first: 6) { edges { node { url altText } } }
+              priceRange { minVariantPrice { amount currencyCode } }
+            }
+          }
+        }
       }
     }
-    fetchCollection();
-  }, [params.handle]);
+  `;
+
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "X-Shopify-Storefront-Access-Token": token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query, variables: { handle, first: 24 } }),
+    cache: "no-store",
+  });
+
+  if (!res.ok) return null;
+  const json = await res.json();
+  const c = json?.data?.collectionByHandle;
+  if (!c) return null;
+
+  const products =
+    c.products?.edges?.map((e) => {
+      const n = e.node;
+      const img = n.images?.edges?.[0]?.node || {};
+      const price = n.priceRange?.minVariantPrice;
+      return {
+        ...n,
+        imageUrl: img.url || "",
+        imageAlt: img.altText || n.title,
+        priceText: price ? `${Number(price.amount).toFixed(3)} ${price.currencyCode}` : "",
+      };
+    }) || [];
+
+  return {
+    title: c.title,
+    handle: c.handle,
+    description: c.description,
+    descriptionHtml: c.descriptionHtml,
+    products,
+  };
+}
+
+export default async function CollectionPage({ params }) {
+  const decodedHandle = decodeURIComponent(params?.handle || "");
+  const collection = await fetchCollectionByHandle(decodedHandle);
 
   if (!collection) {
     return (
-      <div className="container" style={{ 
-        padding: '4rem 2rem', 
-        textAlign: 'center',
-        minHeight: '60vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        <div style={{
-          fontSize: '4rem',
-          marginBottom: '1rem'
-        }}>
-          😕
-        </div>
-        
-        <h1 style={{
-          fontSize: '2rem',
-          color: 'var(--color-primary)',
-          marginBottom: '1rem'
-        }}>
-          {t("collections.not_found", locale) || "هذه المجموعة غير موجودة"}
+      <div
+        className="container"
+        dir="rtl"
+        style={{
+          padding: "4rem 2rem",
+          textAlign: "center",
+          minHeight: "60vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>😕</div>
+        <h1 style={{ fontSize: "2rem", color: "var(--color-primary)", marginBottom: "1rem" }}>
+          هذه المجموعة غير موجودة
         </h1>
-        
-        <p style={{
-          color: 'var(--color-gray)',
-          fontSize: '1.1rem',
-          marginBottom: '2rem',
-          maxWidth: '500px',
-          lineHeight: '1.6'
-        }}>
+        <p
+          style={{
+            color: "var(--color-gray)",
+            fontSize: "1.1rem",
+            marginBottom: "2rem",
+            maxWidth: "500px",
+            lineHeight: "1.6",
+          }}
+        >
           عذراً، المجموعة التي تبحث عنها غير متوفرة حالياً. يمكنك استكشاف مجموعاتنا الأخرى أو العودة للصفحة الرئيسية.
         </p>
-        
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          <Link 
-            href="/" 
-            className="btn btn-primary"
-            style={{ textDecoration: 'none' }}
-          >
+        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+          <Link href="/" className="btn btn-primary" style={{ textDecoration: "none" }}>
             🏠 العودة للرئيسية
           </Link>
-          <Link 
-            href="/search" 
-            className="btn btn-outline"
-            style={{ textDecoration: 'none' }}
-          >
+          <Link href="/search" className="btn btn-outline" style={{ textDecoration: "none" }}>
             🔍 البحث عن المنتجات
           </Link>
         </div>
@@ -80,245 +115,177 @@ export default function CollectionPage({ params }) {
 
   return (
     <>
-      {/* Collection Header */}
-      <section style={{
-        background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)',
-        color: 'var(--color-white)',
-        padding: '3rem 2rem',
-        marginBottom: '3rem'
-      }}>
-        <div className="container" style={{ textAlign: 'center' }}>
+      {/* Header */}
+      <section
+        dir="rtl"
+        style={{
+          background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)",
+          color: "var(--color-white)",
+          padding: "3rem 2rem",
+          marginBottom: "3rem",
+        }}
+      >
+        <div className="container" style={{ textAlign: "center" }}>
           {/* Breadcrumb */}
-          <nav style={{ 
-            marginBottom: '2rem',
-            fontSize: '0.9rem',
-            opacity: 0.8 
-          }}>
-            <Link 
-              href="/" 
-              style={{ color: 'inherit', textDecoration: 'none' }}
-            >
+          <nav style={{ marginBottom: "2rem", fontSize: "0.9rem", opacity: 0.9 }}>
+            <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
               الرئيسية
             </Link>
-            <span style={{ margin: '0 0.5rem' }}>←</span>
+            <span style={{ margin: "0 0.5rem" }}>←</span>
             <span>المجموعات</span>
-            <span style={{ margin: '0 0.5rem' }}>←</span>
-            <span style={{ fontWeight: 600 }}>{collection.title}</span>
+            <span style={{ margin: "0 0.5rem" }}>←</span>
+            <span style={{ fontWeight: 700 }}>{collection.title}</span>
           </nav>
 
-          <h1 style={{
-            fontSize: '3rem',
-            fontWeight: 700,
-            marginBottom: '1rem',
-            textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
-          }}>
+          <h1
+            style={{
+              fontSize: "3rem",
+              fontWeight: 800,
+              marginBottom: "1rem",
+              textShadow: "2px 2px 4px rgba(0,0,0,0.25)",
+            }}
+          >
             🎯 {collection.title}
           </h1>
-          
-          {collection.description && (
-            <div style={{
-              fontSize: '1.2rem',
-              marginBottom: '2rem',
-              opacity: 0.9,
-              maxWidth: '600px',
-              margin: '0 auto 2rem',
-              lineHeight: '1.6'
-            }} 
-            dangerouslySetInnerHTML={{ 
-              __html: collection.descriptionHtml || collection.description 
-            }} />
+
+          {Boolean(collection.descriptionHtml || collection.description) && (
+            <div
+              style={{
+                fontSize: "1.15rem",
+                marginBottom: "2rem",
+                opacity: 0.95,
+                maxWidth: "700px",
+                marginInline: "auto",
+                lineHeight: 1.7,
+              }}
+              dangerouslySetInnerHTML={{
+                __html: collection.descriptionHtml || collection.description,
+              }}
+            />
           )}
 
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '2rem',
-            flexWrap: 'wrap'
-          }}>
-            <div style={{
-              background: 'rgba(255,255,255,0.2)',
-              padding: '0.8rem 1.5rem',
-              borderRadius: '25px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.3)'
-            }}>
-              <span style={{ fontWeight: 600 }}>
-                📦 {collection.products?.length || 0} منتج متوفر
-              </span>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "1rem",
+              flexWrap: "wrap",
+            }}
+          >
+            <div
+              style={{
+                background: "rgba(255,255,255,0.2)",
+                padding: "0.7rem 1.2rem",
+                borderRadius: 22,
+                backdropFilter: "blur(8px)",
+                border: "1px solid rgba(255,255,255,0.35)",
+                fontWeight: 700,
+              }}
+            >
+              📦 {collection.products.length} منتج
             </div>
-
-            <div style={{
-              background: 'rgba(255,255,255,0.2)',
-              padding: '0.8rem 1.5rem',
-              borderRadius: '25px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.3)'
-            }}>
-              <span style={{ fontWeight: 600 }}>
-                🚚 توصيل مجاني
-              </span>
+            <div
+              style={{
+                background: "rgba(255,255,255,0.2)",
+                padding: "0.7rem 1.2rem",
+                borderRadius: 22,
+                backdropFilter: "blur(8px)",
+                border: "1px solid rgba(255,255,255,0.35)",
+                fontWeight: 700,
+              }}
+            >
+              🚚 توصيل مجاني
             </div>
           </div>
         </div>
       </section>
 
-      {/* Products Section */}
-      <section className="container" style={{ paddingBottom: '4rem' }}>
-        {/* Filter/Sort Controls */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '3rem',
-          padding: '1.5rem',
-          background: 'var(--color-white)',
-          borderRadius: 'var(--border-radius-lg)',
-          boxShadow: 'var(--shadow)',
-          flexWrap: 'wrap',
-          gap: '1rem'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem'
-          }}>
-            <span style={{ 
-              fontWeight: 600, 
-              color: 'var(--color-primary)',
-              fontSize: '1.1rem'
-            }}>
+      {/* Controls */}
+      <section className="container" dir="rtl" style={{ paddingBottom: "3rem" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "2rem",
+            padding: "1rem",
+            background: "var(--color-white)",
+            borderRadius: "12px",
+            boxShadow: "0 6px 18px rgba(0,0,0,.06)",
+            gap: "1rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <span style={{ fontWeight: 700, color: "var(--color-primary)", fontSize: "1rem" }}>
               ترتيب حسب:
             </span>
-            
-            <select style={{
-              padding: '0.5rem 1rem',
-              borderRadius: 'var(--border-radius)',
-              border: '2px solid var(--color-gray-light)',
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              minWidth: '150px'
-            }}>
-              <option>الأحدث</option>
-              <option>السعر: من الأقل للأعلى</option>
-              <option>السعر: من الأعلى للأقل</option>
-              <option>الأكثر مبيعاً</option>
-              <option>الأعلى تقييماً</option>
+            <select
+              style={{
+                padding: "0.5rem 0.9rem",
+                borderRadius: 10,
+                border: "2px solid #e5e7eb",
+                fontSize: ".95rem",
+                minWidth: 180,
+                cursor: "pointer",
+              }}
+              defaultValue="newest"
+            >
+              <option value="newest">الأحدث</option>
+              <option value="price-asc">السعر: من الأقل للأعلى</option>
+              <option value="price-desc">السعر: من الأعلى للأقل</option>
+              <option value="bestseller">الأكثر مبيعاً</option>
             </select>
           </div>
 
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1rem'
-          }}>
-            <span style={{ 
-              color: 'var(--color-gray)',
-              fontSize: '0.9rem'
-            }}>
-              عرض {collection.products?.length || 0} من {collection.products?.length || 0} منتج
-            </span>
-
-            <div style={{
-              display: 'flex',
-              gap: '0.5rem'
-            }}>
-              <button style={{
-                padding: '0.5rem',
-                border: '2px solid var(--color-primary)',
-                background: 'var(--color-primary)',
-                color: 'var(--color-white)',
-                borderRadius: 'var(--border-radius-sm)',
-                cursor: 'pointer'
-              }}>
-                ⊞
-              </button>
-              <button style={{
-                padding: '0.5rem',
-                border: '2px solid var(--color-gray-light)',
-                background: 'transparent',
-                color: 'var(--color-gray)',
-                borderRadius: 'var(--border-radius-sm)',
-                cursor: 'pointer'
-              }}>
-                ⚏
-              </button>
-            </div>
+          <div style={{ color: "#6b7280", fontSize: ".95rem" }}>
+            عرض {collection.products.length} من {collection.products.length} منتج
           </div>
         </div>
 
-        {/* Products Grid */}
-        {collection.products?.length > 0 ? (
-          <div className="grid" style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '2rem',
-            justifyContent: 'center'
-          }}>
-            {collection.products.map((product, index) => (
-              <div 
-                key={product.handle}
-                className="fade-in"
-                style={{
-                  animationDelay: `${index * 0.1}s`
-                }}
-              >
-                <ProductCard product={product} locale={locale} />
+        {/* Products */}
+        {collection.products.length ? (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+              gap: "1.25rem",
+            }}
+          >
+            {collection.products.map((product, i) => (
+              <div key={product.id} className="fade-in" style={{ animationDelay: `${i * 0.06}s` }}>
+                <ProductCard product={product} locale="ar" />
               </div>
             ))}
           </div>
         ) : (
-          <div style={{
-            textAlign: 'center',
-            padding: '4rem 2rem',
-            background: 'var(--color-white)',
-            borderRadius: 'var(--border-radius-lg)',
-            boxShadow: 'var(--shadow)'
-          }}>
-            <div style={{
-              fontSize: '3rem',
-              marginBottom: '1rem'
-            }}>
-              📦
-            </div>
-            
-            <h3 style={{
-              fontSize: '1.5rem',
-              color: 'var(--color-primary)',
-              marginBottom: '1rem'
-            }}>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "3rem 1.5rem",
+              background: "var(--color-white)",
+              borderRadius: "12px",
+              boxShadow: "0 6px 18px rgba(0,0,0,.06)",
+            }}
+          >
+            <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>📦</div>
+            <h3 style={{ fontSize: "1.35rem", color: "var(--color-primary)", marginBottom: "0.5rem" }}>
               لا توجد منتجات في هذه المجموعة حالياً
             </h3>
-            
-            <p style={{
-              color: 'var(--color-gray)',
-              marginBottom: '2rem',
-              maxWidth: '400px',
-              margin: '0 auto 2rem'
-            }}>
+            <p style={{ color: "#6b7280", maxWidth: 420, margin: "0 auto 1.25rem" }}>
               نعمل على إضافة منتجات جديدة قريباً. تابعونا للحصول على آخر التحديثات!
             </p>
-
-            <Link 
-              href="/" 
-              className="btn btn-primary"
-              style={{ textDecoration: 'none' }}
-            >
+            <Link href="/" className="btn btn-primary" style={{ textDecoration: "none" }}>
               استكشف المجموعات الأخرى
             </Link>
           </div>
         )}
 
-        {/* Load More Button */}
-        {collection.products?.length >= 12 && (
-          <div style={{
-            textAlign: 'center',
-            marginTop: '3rem'
-          }}>
-            <button className="btn btn-outline" style={{
-              padding: '1rem 2rem',
-              fontSize: '1.1rem'
-            }}>
+        {/* Load more (placeholder) */}
+        {collection.products.length >= 24 && (
+          <div style={{ textAlign: "center", marginTop: "2rem" }}>
+            <button className="btn btn-outline" style={{ padding: "0.9rem 1.8rem", fontSize: "1.05rem" }}>
               عرض المزيد من المنتجات
             </button>
           </div>
@@ -327,14 +294,13 @@ export default function CollectionPage({ params }) {
 
       <style jsx>{`
         .fade-in {
-          animation: fadeInUp 0.6s ease-out forwards;
           opacity: 0;
+          animation: fadeInUp 0.5s ease-out forwards;
         }
-        
         @keyframes fadeInUp {
           from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(18px);
           }
           to {
             opacity: 1;
