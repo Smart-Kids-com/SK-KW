@@ -1,42 +1,48 @@
 // app/products/[handle]/page.js
 import Link from "next/link";
 
-// اجعل الصفحة ديناميكية دائماً (لا كاش)
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 async function fetchProduct(handle) {
   const domain = process.env.SHOPIFY_STORE_DOMAIN;
   const token = process.env.SHOPIFY_STOREFRONT_API_TOKEN;
+  if (!domain || !token || !handle) return null;
+
   const endpoint = `https://${domain}/api/2024-07/graphql.json`;
   const query = `
     query ProductByHandle($handle: String!) {
       productByHandle(handle: $handle) {
-        id title description handle
+        id
+        title
+        description
+        handle
         images(first: 6) { edges { node { url altText } } }
         priceRange { minVariantPrice { amount currencyCode } }
       }
     }
   `;
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "X-Shopify-Storefront-Access-Token": token,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ query, variables: { handle } }),
-    cache: "no-store", // موجودة لضمان التحديث دائماً
-  });
-  if (!res.ok) return null;
-  const json = await res.json();
-  return json?.data?.productByHandle || null;
+
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "X-Shopify-Storefront-Access-Token": token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query, variables: { handle } }),
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json?.data?.productByHandle ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export default async function ProductPage({ params }) {
-  // فكّ ترميز الهاندل (مهم للهاندلات العربية)
-  const raw = params.handle;
-  const handle = decodeURIComponent(raw);
-
+  const handle = decodeURIComponent(params.handle || "");
   const product = await fetchProduct(handle);
 
   if (!product) {
@@ -65,11 +71,18 @@ export default async function ProductPage({ params }) {
               style={{ width: "100%", borderRadius: 16 }}
             />
           )}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginTop: 8 }}>
-            {imgs.slice(1).map((im, i) => (
-              <img key={i} src={im.url} alt={im.altText || product.title} style={{ width: "100%", borderRadius: 8 }} />
-            ))}
-          </div>
+          {!!imgs.slice(1).length && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginTop: 8 }}>
+              {imgs.slice(1).map((im, i) => (
+                <img
+                  key={i}
+                  src={im.url}
+                  alt={im.altText || product.title}
+                  style={{ width: "100%", borderRadius: 8 }}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <div>
@@ -78,8 +91,7 @@ export default async function ProductPage({ params }) {
           <div style={{ color: "#444", lineHeight: 1.7, marginBottom: 16, whiteSpace: "pre-line" }}>
             {product.description}
           </div>
-          {/* زر مؤقت — اربطه لاحقًا بعربة التسوق */}
-          <Link href={`/cart`} className="btn btn-primary">
+          <Link href="/cart" className="btn btn-primary">
             أضِف إلى العربة
           </Link>
         </div>

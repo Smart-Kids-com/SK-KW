@@ -1,13 +1,20 @@
 /* === Smart Kids — globals.css (مطابق لـ Shopify settings_data.json) === */
 @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Amiri:wght@400;700&display=swap');
 
-/* Tokens من Shopify */
+/* ========= Tokens ========= */
 :root{
-  /* scheme-1 */
+  /* Base colors */
   --bg:#370e3e;
   --text:#ffffff;
   --btn:#9422af;
   --btn-label:#ffffff;
+
+  /* Needed by components */
+  --color-primary:#370e3e;
+  --color-secondary:#6c50b5;
+  --color-white:#ffffff;
+  --color-gray:#6b7280;
+  --color-gray-light:#e5e7eb;
 
   /* Typography */
   --font-head:'Assistant',system-ui,Arial;
@@ -19,13 +26,7 @@
   --page-w:1600px;
   --grid-x:28px;
   --grid-y:28px;
-  --section-space:4rem; /* spacing_sections=4 */
-
-  /* Buttons */
-  --btn-radius:4px;
-  --btn-border:3px;
-  --btn-border-color:rgba(255,255,255,.75);
-  --btn-shadow:8px 8px 15px rgba(0,0,0,.45);
+  --section-space:4rem;
 
   /* Inputs */
   --input-radius:4px;
@@ -50,9 +51,19 @@
 
   /* Badges */
   --badge-radius:2px;
+
+  /* SK design tokens */
+  --sk-gold:#FFC033;
+  --sk-purple-1:#4a2f86;
+  --sk-purple-2:#6c50b5;
+  --sk-lavender-1:#cfc9ff;
+  --sk-lavender-2:#bdb7ff;
+  --sk-navy-1:#081a36;
+  --sk-navy-2:#122a52;
+  --sk-orange-glow:#ff7a00;
 }
 
-/* Base */
+/* ========= Base ========= */
 *{box-sizing:border-box}
 html,body{margin:0}
 body{
@@ -60,34 +71,21 @@ body{
   font-family:var(--font-body); font-size:var(--body-scale);
   line-height:1.6; direction:rtl; text-align:right;
 }
-h1,h2,h3,h4,h5,h6{font-family:var(--font-head)}
+h1,h2,h3,h4,h5,h6{font-family:var(--font-head);margin:0 0 .6em}
 h1{font-size:calc(2rem * var(--head-scale))}
 h2{font-size:calc(1.6rem * var(--head-scale))}
 h3{font-size:calc(1.3rem * var(--head-scale))}
-
 a{color:var(--btn);text-decoration:none;transition:transform .2s ease,color .2s ease}
 a:hover{color:#b83bc9;transform:translateY(-1px)}
 
 .container{max-width:var(--page-w);margin-inline:auto;padding-inline:clamp(12px,2vw,28px)}
 .section{padding-block:var(--section-space)}
 
-/* Grid (Collections/Products) */
+/* Grid */
 .grid{display:grid;gap:var(--grid-y) var(--grid-x)}
 .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
-
-/* Buttons */
-.btn{
-  display:inline-block;padding:.75rem 1.25rem;font-weight:600;
-  background:var(--btn); color:var(--btn-label);
-  border:var(--btn-border) solid var(--btn-border-color);
-  border-radius:var(--btn-radius); box-shadow:var(--btn-shadow);
-  transition:transform .2s ease,box-shadow .2s ease
-}
-.btn:hover{transform:translateY(-2px);box-shadow:0 14px 28px rgba(0,0,0,.25),0 10px 10px rgba(0,0,0,.22)}
-.btn--outline{background:transparent;color:var(--btn);border-color:var(--btn);box-shadow:none}
-.btn--outline:hover{background:var(--btn);color:var(--btn-label)}
 
 /* Inputs */
 input,select,textarea{
@@ -102,8 +100,6 @@ input,select,textarea{
   background:#fff;color:#121212;border-radius:var(--card-radius);
   box-shadow:var(--card-shadow);padding:1rem
 }
-
-/* Product card alignment per Shopify (right) */
 .product-card{text-align:right}
 
 /* Media */
@@ -112,57 +108,45 @@ img,video{max-width:100%;height:auto;border-radius:var(--media-radius);box-shado
 /* Drawer / Cart */
 .drawer{border-top:var(--drawer-border);box-shadow:var(--drawer-shadow);background:var(--bg);color:var(--text)}
 
-/* Popup / Modal */
+/* Popup */
 .popup{border:var(--popup-border);border-radius:var(--popup-radius);box-shadow:var(--popup-shadow);background:var(--bg);color:var(--text)}
 
 /* Badges */
 .badge{display:inline-block;border-radius:var(--badge-radius);padding:.2rem .5rem}
 
-/* Responsive */
-@media (max-width:1200px){.grid-4{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media (max-width:768px){
-  .container{padding-inline:16px}
-  .grid-3,.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .btn{padding:.6rem 1rem}
-}
-/* ====== SK design tokens ====== */
-:root{
-  --sk-gold: #FFC033;               /* لون النص في الأزرار/النقاط */
-  --sk-purple-1:#4a2f86;            /* تدرّج البنفسجي الأساسي */
-  --sk-purple-2:#6c50b5;
-  --sk-lavender-1:#cfc9ff;          /* خلفيات النقاط */
-  --sk-lavender-2:#bdb7ff;
-  --sk-navy-1:#081a36;              /* للزر الأزرق الغامق */
-  --sk-navy-2:#122a52;
-  --sk-orange-glow:#ff7a00;         /* وهج خفيف يمين */
-}
-
-/* ====== Buttons System (pill) ====== */
+/* ========= Buttons (موحّد) ========= */
 .btn{
-  --h: 52px;
+  --h:52px;
   display:inline-flex; align-items:center; justify-content:center;
-  min-height: var(--h); padding: 0 28px;
+  min-height:var(--h); padding:0 28px;
   border-radius:9999px; font-weight:800; text-decoration:none; cursor:pointer;
-  transition: transform .12s ease, box-shadow .2s ease, background .2s ease;
-  user-select:none;
+  transition:transform .12s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+  user-select:none; border:0;
 }
-.btn:active{ transform: translateY(1px) scale(.99); }
-.btn:disabled{ opacity:.6; pointer-events:none; }
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn:disabled{opacity:.6;pointer-events:none}
 
-/* Primary (بنفسجي كالصور) */
-.btn--primary{
-  color: var(--sk-gold);
-  background: linear-gradient(180deg,var(--sk-purple-2),var(--sk-purple-1));
+/* Primary */
+.btn--primary,.btn-primary{
+  color:var(--sk-gold);
+  background:linear-gradient(180deg,var(--sk-purple-2),var(--sk-purple-1));
   box-shadow:
     inset 0 2px 8px rgba(255,255,255,.08),
     inset 0 -2px 10px rgba(0,0,0,.25),
-    0 8px 24px rgba(76, 48, 150, .35);
+    0 8px 24px rgba(76,48,150,.35);
 }
-.btn--primary:hover{ filter: brightness(1.05); }
+.btn--primary:hover,.btn-primary:hover{filter:brightness(1.05)}
 
-/* Navy glow (أزرار add to cart كما بالصورة الثالثة) */
+/* Outline */
+.btn--outline,.btn-outline{
+  background:transparent;color:var(--btn);
+  border:2px solid var(--btn); box-shadow:none
+}
+.btn--outline:hover,.btn-outline:hover{background:var(--btn);color:var(--btn-label)}
+
+/* Navy glow */
 .btn--navyGlow{
-  color: var(--sk-gold);
+  color:var(--sk-gold);
   background:
     radial-gradient(120px 60px at 95% 60%, rgba(255,122,0,.35), transparent 60%),
     linear-gradient(180deg,var(--sk-navy-2),var(--sk-navy-1));
@@ -171,187 +155,71 @@ img,video{max-width:100%;height:auto;border-radius:var(--media-radius);box-shado
     inset 0 -2px 12px rgba(0,0,0,.35),
     0 12px 28px rgba(8,26,54,.45);
 }
-.btn--navyGlow:hover{ filter: brightness(1.06); }
+.btn--navyGlow:hover{filter:brightness(1.06)}
+.btn--sm{--h:42px;padding:0 18px;font-size:.95rem}
+.btn--md{--h:52px;font-size:1.05rem}
+.btn--lg{--h:60px;font-size:1.15rem}
+.btn--xl{--h:68px;font-size:1.35rem}
 
-/* أحجام */
-.btn--sm{ --h:42px; padding:0 18px; font-size:.95rem; }
-.btn--md{ --h:52px; font-size:1.05rem; }
-.btn--lg{ --h:60px; font-size:1.15rem; }
-.btn--xl{ --h:68px; font-size:1.35rem; }
-
-/* ====== Swiper pagination: أرقام 1..5 بنفس ستايل النقاط ====== */
-.homepage-slideshow :global(.swiper-pagination){
-  display:flex; gap:12px; justify-content:flex-end; /* يمين (RTL) */
-  margin-top:.75rem; position:static;
+/* ========= Swiper pagination للأرقام ========= */
+.homepage-slideshow .swiper-pagination{
+  display:flex; gap:12px; justify-content:flex-end; margin-top:.75rem; position:static;
 }
-.homepage-slideshow :global(.swiper-pagination-bullet){
+.homepage-slideshow .swiper-pagination-bullet{
   width:42px; height:42px; border-radius:9999px;
   display:flex; align-items:center; justify-content:center;
-  background: radial-gradient(circle at 40% 35%, var(--sk-lavender-1), var(--sk-lavender-2));
-  color: var(--sk-gold); font-weight:900; font-size:1.1rem;
+  background:radial-gradient(circle at 40% 35%, var(--sk-lavender-1), var(--sk-lavender-2));
+  color:var(--sk-gold); font-weight:900; font-size:1.1rem;
   box-shadow:
     inset 0 2px 8px rgba(255,255,255,.25),
     inset 0 -3px 10px rgba(0,0,0,.15),
     0 6px 18px rgba(108,80,181,.25);
-  opacity:1; /* مهم عشان Swiper بيقللها افتراضياً */
+  opacity:1;
 }
-.homepage-slideshow :global(.swiper-pagination-bullet-active){
-  transform: scale(1.06);
+.homepage-slideshow .swiper-pagination-bullet-active{
+  transform:scale(1.06);
   box-shadow:
     inset 0 3px 10px rgba(255,255,255,.30),
     inset 0 -4px 12px rgba(0,0,0,.20),
     0 10px 24px rgba(108,80,181,.38);
 }
-/* === Home page styles moved from <style jsx> === */
-.sec-title {
-  text-align: center;
-  font-size: 1.9rem;
-  color: #1f2937;
-  margin: 0 0 16px;
-  line-height: 1.4;
-}
-.video-wrap {
-  max-width: 1200px;
-  margin: 0 auto 40px;
-  padding: 0 16px;
-}
-.video-wrap.full {
-  max-width: none;
-  margin: 0 0 40px;
-  padding: 0;
-}
-.video-frame {
-  width: 100%;
-}
-.banner {
-  max-width: 1200px;
-  margin: 0 auto 40px;
-  padding: 0 16px;
-  text-align: center;
-}
-.banner-img {
-  width: 100%;
-  border-radius: 16px;
-  display: block;
-}
-.banner-ctas {
-  margin-top: 12px;
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-.banner-ctas.single {
-  justify-content: center;
-}
-.collection-block {
-  max-width: 1200px;
-  margin: 0 auto 48px;
-  padding: 0 16px;
-}
-.collection-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-.view-all {
-  color: #4f46e5;
-  text-decoration: none;
-  font-weight: 700;
-}
-.collection-cta {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 12px;
-}
+
+/* ========= Home sections ========= */
+.sec-title{ text-align:center; font-size:1.9rem; color:#1f2937; margin:0 0 16px; line-height:1.4 }
+.video-wrap{max-width:1200px;margin:0 auto 40px;padding:0 16px}
+.video-wrap.full{max-width:none;margin:0 0 40px;padding:0}
+.video-frame{width:100%}
+.banner{max-width:1200px;margin:0 auto 40px;padding:0 16px;text-align:center}
+.banner-img{width:100%;border-radius:16px;display:block}
+.banner-ctas{margin-top:12px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.banner-ctas.single{justify-content:center}
+.collection-block{max-width:1200px;margin:0 auto 48px;padding:0 16px}
+.collection-head{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:14px}
+.view-all{color:#4f46e5;text-decoration:none;font-weight:700}
+.collection-cta{display:flex;flex-direction:column;align-items:center;gap:8px;justify-content:center;margin-top:12px}
 
 /* شبكة المنتجات */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.card{
+  background:#fff;border-radius:12px;text-decoration:none;color:inherit;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  transition:transform .15s ease, box-shadow .2s ease; display:flex; flex-direction:column; overflow:hidden;
 }
-.card {
-  background: #fff;
-  border-radius: 12px;
-  text-decoration: none;
-  color: inherit;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  transition: transform .15s ease, box-shadow .2s ease;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(0,0,0,.12);
-}
-.thumb {
-  width: 100%;
-  aspect-ratio: 4/3;
-  background: #f3f4f6;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-}
-.thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.info {
-  padding: 12px 12px 16px;
-  display: grid;
-  gap: 8px;
-  justify-items: start;
-}
-.title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #1f2937;
-  line-height: 1.4;
-}
-.price {
-  color: #ef4444;
-  font-weight: 800;
-  font-size: 0.95rem;
-}
+.card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.12)}
+.thumb{width:100%;aspect-ratio:4/3;background:#f3f4f6;display:grid;place-items:center;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.info{padding:12px 12px 16px;display:grid;gap:8px;justify-items:start}
+.title{font-size:1rem;font-weight:700;color:#1f2937;line-height:1.4}
+.price{color:#ef4444;font-weight:800;font-size:.95rem}
 
-/* أزرار موحّدة */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  padding: 10px 18px;
-  font-weight: 800;
-  text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
-}
-.btn-primary {
-  background: #eeb60f;
-  color: #1f2937;
-  box-shadow: 0 6px 0 #c1960e;
-}
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 0 #c1960e;
-}
-.btn-outline {
-  background: #fff;
-  color: #7c3aed;
-  border: 2px solid #7c3aed;
-}
-.btn-outline:hover {
-  transform: translateY(-2px);
-  background: #f8f5ff;
-}
+/* ========= Side menu colors ========= */
+#sk-side-menu{background:var(--bg)!important;color:var(--text)!important}
+#sk-side-menu a{color:#fff!important}
 
-@media (max-width: 768px) {
-  .sec-title { font-size: 1.5rem; }
+/* ========= Responsive ========= */
+@media (max-width:1200px){.grid-4{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:768px){
+  .container{padding-inline:16px}
+  .grid-3,.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sec-title{font-size:1.5rem}
 }
