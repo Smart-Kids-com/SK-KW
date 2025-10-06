@@ -1,13 +1,87 @@
+// app/cart/page.js
 "use client";
-import { useCart } from "../../lib/cart";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function CartPage() {
-  const { cart, removeItem, updateQuantity } = useCart();
+  const [cart, setCart] = useState(null);
   const [note, setNote] = useState("");
+  const cartId = typeof window !== "undefined" ? localStorage.getItem("cartId") : null;
+
+  const items = useMemo(() => {
+    if (!cart?.lines?.edges) return [];
+    return cart.lines.edges.map(({ node }) => ({
+      lineId: node.id,
+      variantId: node.merchandise?.id,
+      title:
+        node.merchandise?.product?.title ||
+        node.merchandise?.title ||
+        "Item",
+      image: node.merchandise?.product?.featuredImage?.url || "",
+      price: Number(node.merchandise?.price?.amount ?? 0),
+      quantity: Number(node.quantity ?? 0),
+    }));
+  }, [cart]);
+
+  const subtotal = Number(cart?.cost?.subtotalAmount?.amount ?? 0);
+  const checkoutUrl = cart?.checkoutUrl || "/checkout";
+
+  async function refresh() {
+    const id = localStorage.getItem("cartId");
+    if (!id) { setCart(null); return; }
+    const res = await fetch("/api/cart", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "get", cartId: id }),
+    });
+    const data = await res.json();
+    if (data?.cart?.id) {
+      localStorage.setItem("cartId", data.cart.id);
+      setCart(data.cart);
+    } else {
+      setCart(null);
+    }
+  }
+
+  async function updateQuantity(variantId, nextQ) {
+    if (!cart?.id) return;
+    // ابحث عن lineId لهذا الـvariant
+    const line = items.find(i => i.variantId === variantId);
+    if (!line) return;
+    const res = await fetch("/api/cart", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "update",
+        cartId: cart.id,
+        lineId: line.lineId,
+        quantity: Number(nextQ),
+      }),
+    });
+    const data = await res.json();
+    if (data?.cart) setCart(data.cart);
+  }
+
+  async function removeItem(variantId) {
+    if (!cart?.id) return;
+    const line = items.find(i => i.variantId === variantId);
+    if (!line) return;
+    const res = await fetch("/api/cart", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "remove",
+        cartId: cart.id,
+        lineId: line.lineId,
+      }),
+    });
+    const data = await res.json();
+    if (data?.cart) setCart(data.cart);
+  }
+
+  useEffect(() => { refresh(); }, []);
 
   // عربة التسوق فارغة
-  if (!cart.items.length) {
+  if (!items.length) {
     return (
       <section
         style={{
@@ -117,6 +191,7 @@ export default function CartPage() {
           متابعة الشراء
         </a>
       </div>
+
       {/* رؤوس الأعمدة */}
       <div style={{
         display: "flex",
@@ -133,13 +208,13 @@ export default function CartPage() {
         <span style={{ flex: 1, textAlign: "left" }}>الإجمالي</span>
       </div>
 
-      {/* المنتجات في عربة التسوق */}
+      {/* المنتجات */}
       <div style={{
         padding: "16px 24px 0 24px",
         borderBottom: "1.6px solid #8b5d9e",
         marginBottom: "18px"
       }}>
-        {cart.items.map(item => (
+        {items.map(item => (
           <div
             key={item.variantId}
             style={{
@@ -163,6 +238,7 @@ export default function CartPage() {
                 flexShrink: 0,
               }}
             />
+
             {/* تفاصيل المنتج */}
             <div style={{ flex: 2 }}>
               <div style={{
@@ -174,6 +250,7 @@ export default function CartPage() {
               }}>
                 {item.title}
               </div>
+
               <div style={{
                 color: "#d0b7e8",
                 fontSize: "1.06rem",
@@ -182,13 +259,9 @@ export default function CartPage() {
               }}>
                 KWD {Number(item.price).toLocaleString("en-KW", { minimumFractionDigits: 3 })}
               </div>
+
               {/* التحكم في العدد */}
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                marginTop: "7px"
-              }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "7px" }}>
                 <button
                   onClick={() => updateQuantity(item.variantId, Math.max(1, item.quantity - 1))}
                   style={{
@@ -204,14 +277,11 @@ export default function CartPage() {
                     boxShadow: "0 0 18px #ffd94d44",
                   }}
                 >−</button>
-                <span style={{
-                  color: "#fff",
-                  fontSize: "1.19rem",
-                  fontWeight: 600,
-                  width: 32,
-                  display: "inline-block",
-                  textAlign: "center"
-                }}>{item.quantity}</span>
+
+                <span style={{ color: "#fff", fontSize: "1.19rem", fontWeight: 600, width: 32, display: "inline-block", textAlign: "center" }}>
+                  {item.quantity}
+                </span>
+
                 <button
                   onClick={() => updateQuantity(item.variantId, Math.min(99, item.quantity + 1))}
                   style={{
@@ -227,17 +297,11 @@ export default function CartPage() {
                     boxShadow: "0 0 18px #ffd94d44",
                   }}
                 >+</button>
+
                 {/* زر حذف */}
                 <button
                   onClick={() => removeItem(item.variantId)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#ffd94d",
-                    fontSize: "1.6rem",
-                    cursor: "pointer",
-                    marginRight: "16px"
-                  }}
+                  style={{ background: "none", border: "none", color: "#ffd94d", fontSize: "1.6rem", cursor: "pointer", marginRight: "16px" }}
                   aria-label="حذف المنتج"
                   title="حذف المنتج"
                 >
@@ -248,21 +312,10 @@ export default function CartPage() {
                 </button>
               </div>
             </div>
+
             {/* السعر الإجمالي */}
-            <div style={{
-              flex: 1,
-              textAlign: "left",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-end",
-              justifyContent: "center",
-              height: "100%",
-            }}>
-              <div style={{
-                color: "#fff",
-                fontSize: "1.19rem",
-                fontWeight: 600
-              }}>
+            <div style={{ flex: 1, textAlign: "left", display: "flex", flexDirection: "column", alignItems: "flex-end", justifyContent: "center", height: "100%" }}>
+              <div style={{ color: "#fff", fontSize: "1.19rem", fontWeight: 600 }}>
                 KWD {(item.price * item.quantity).toLocaleString("en-KW", { minimumFractionDigits: 3 })}
               </div>
             </div>
@@ -270,18 +323,9 @@ export default function CartPage() {
         ))}
       </div>
 
-      {/* إضافة ملاحظة */}
+      {/* ملاحظة */}
       <div style={{ padding: "0 24px", margin: "22px 0 0 0" }}>
-        <label
-          htmlFor="note"
-          style={{
-            color: "#ffd94d",
-            fontWeight: 600,
-            fontSize: "1.15rem",
-            marginBottom: "8px",
-            display: "block"
-          }}
-        >
+        <label htmlFor="note" style={{ color: "#ffd94d", fontWeight: 600, fontSize: "1.15rem", marginBottom: "8px", display: "block" }}>
           إضافة ملاحظة
         </label>
         <textarea
@@ -307,70 +351,21 @@ export default function CartPage() {
       </div>
 
       {/* الإجمالي وزر الدفع */}
-      <div style={{
-        textAlign: "center",
-        margin: "18px 0 0 0",
-        padding: "0 24px"
-      }}>
-        <div style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          alignItems: "center",
-          fontWeight: 700,
-          fontSize: "1.21rem",
-          marginBottom: "9px"
-        }}>
+      <div style={{ textAlign: "center", margin: "18px 0 0 0", padding: "0 24px" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", fontWeight: 700, fontSize: "1.21rem", marginBottom: "9px" }}>
           <span style={{ color: "#ffd94d", marginLeft: 12 }}>الإجمالي</span>
           <span style={{ color: "#fff", fontWeight: 600, fontSize: "1.18rem" }}>
-            {(cart.subtotal).toLocaleString("en-KW", { minimumFractionDigits: 3 })} KWD
+            {subtotal.toLocaleString("en-KW", { minimumFractionDigits: 3 })} KWD
           </span>
         </div>
-        <div style={{
-          color: "#fff",
-          fontSize: "1.02rem",
-          marginBottom: "19px"
-        }}>
-          Taxes included. Discounts and{" "}
-          <a href="/shipping" style={{ color: "#ffd94d", textDecoration: "underline" }}>
-            shipping
-          </a>{" "}
-          calculated at checkout.
+        <div style={{ color: "#fff", fontSize: "1.02rem", marginBottom: "19px" }}>
+          Taxes included. Discounts and <a href="/shipping" style={{ color: "#ffd94d", textDecoration: "underline" }}>shipping</a> calculated at checkout.
         </div>
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          marginBottom: "12px"
-        }}>
-          <span style={{
-            background: "#2ee86c",
-            color: "#fff",
-            borderRadius: "20px",
-            padding: "8px 22px",
-            fontWeight: 700,
-            fontSize: "1.14rem",
-            boxShadow: "0 2px 8px #0002",
-            marginInlineEnd: "4px"
-          }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
+          <span style={{ background: "#2ee86c", color: "#fff", borderRadius: "20px", padding: "8px 22px", fontWeight: 700, fontSize: "1.14rem", boxShadow: "0 2px 8px #0002", marginInlineEnd: "4px" }}>
             Rewards
           </span>
-          <a
-            href="/checkout"
-            style={{
-              flex: 1,
-              background: "#2e093d",
-              color: "#fff",
-              borderRadius: "14px",
-              fontWeight: 700,
-              fontSize: "1.27rem",
-              padding: "16px 0",
-              textDecoration: "none",
-              textAlign: "center",
-              boxShadow: "0 0 16px #fff1",
-              border: "none",
-              outline: "none"
-            }}
-          >
+          <a href={checkoutUrl} style={{ flex: 1, background: "#2e093d", color: "#fff", borderRadius: "14px", fontWeight: 700, fontSize: "1.27rem", padding: "16px 0", textDecoration: "none", textAlign: "center", boxShadow: "0 0 16px #fff1", border: "none", outline: "none" }}>
             الذهاب للدفع
           </a>
         </div>
