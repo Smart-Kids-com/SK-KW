@@ -1,5 +1,4 @@
 import Link from "next/link";
-
 export default function CollectionGrid({ collections }) {
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center" }}>
