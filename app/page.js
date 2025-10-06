@@ -1,10 +1,34 @@
+"use client";
 import Link from "next/link";
 import { getCollections, getProducts, formatKWD } from "@/lib/shopify";
+import { useState, useEffect } from "react";
 
-export default async function HomePage() {
-  // جلب البيانات من Shopify
-  const collections = await getCollections();
-  const products = await getProducts();
+export default function HomePage() {
+  const [collections, setCollections] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [collectionsData, productsData] = await Promise.all([
+          getCollections(),
+          getProducts()
+        ]);
+        setCollections(collectionsData);
+        setProducts(productsData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>جاري التحميل...</div>;
+  }
 
   const heroSlides = [
     {
