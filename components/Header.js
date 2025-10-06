@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import SideMenuCollections from "./SideMenuCollections";
-
 // أيقونات
 function MenuIcon(props) {
   return (

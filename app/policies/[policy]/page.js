@@ -1,5 +1,4 @@
 import { fetchShopifyGraphQL } from "@/lib/shopify";
-
 const mapKey = (k) => ({
   "privacy-policy":"privacyPolicy",
   "refund-policy":"refundPolicy",

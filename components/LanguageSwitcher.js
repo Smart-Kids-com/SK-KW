@@ -6,7 +6,6 @@ export default function LanguageSwitcher() {
 
   const switchTo = locale === 'ar' ? 'en' : 'ar'
   const label = switchTo === 'ar' ? 'العربية' : 'English'
-
   return (
     <button
       onClick={() => router.push(asPath, asPath, { locale: switchTo })}
