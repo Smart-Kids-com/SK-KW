@@ -1,5 +1,5 @@
+"use client";
 import { useRouter } from 'next/router'
-
 export default function LanguageSwitcher() {
   const router = useRouter()
   const { locale, asPath } = router
