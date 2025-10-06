@@ -18,7 +18,7 @@ async function fetchCollectionProducts(handle, first = 8) {
   const token = process.env.SHOPIFY_STOREFRONT_API_TOKEN;
   if (!domain || !token) return { products: [], error: "Missing Shopify env" };
 
-  const endpoint = `https://${domain}/api/2024-07/graphql.json`;
+  const endpoint = `https://${domain}/api/2025-07/graphql.json`;
   const query = `
     query CollectionProducts($handle: String!, $first: Int!) {
       collectionByHandle(handle: $handle) {

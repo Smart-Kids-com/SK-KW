@@ -249,7 +249,7 @@ const shopifyHomeTemplate = {
         "description": "",
         "show_description": false,
         "description_style": "body",
-        "collection": "تسوق-جميع-منتجاتنا-الآن",
+        "collection": " تسوق-جميع-منتجاتنا-الآن",
         "products_to_show": 25,
         "columns_desktop": 4,
         "full_width": true,

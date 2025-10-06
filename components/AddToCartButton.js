@@ -1,33 +1,39 @@
+// components/AddToCartButton.js
 "use client";
-import { useCart } from "../lib/cart";
-import { useCartDrawer } from "../lib/CartDrawerContext";
+import { useState } from "react";
 
-export default function AddToCartButton({ product, variantId, quantity = 1 }) {
-  const { addItem } = useCart();
-  const { openDrawer } = useCartDrawer();
+export default function AddToCartButton({ variantId, quantity = 1, goToCheckout = false, children }) {
+  const [loading, setLoading] = useState(false);
 
-  function handleAdd() {
-    addItem(product, variantId, quantity);
-    openDrawer(product); // يفتح المنزلقة مع بيانات المنتج المضاف
+  async function add() {
+    if (!variantId) return alert("Missing variantId (ProductVariant GID)");
+    setLoading(true);
+
+    const cartId = typeof window !== "undefined" ? localStorage.getItem("cartId") || null : null;
+
+    const res = await fetch("/api/cart", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "add", cartId, variantId, quantity }),
+    });
+
+    const data = await res.json();
+    setLoading(false);
+
+    if (data?.cart?.id) {
+      localStorage.setItem("cartId", data.cart.id);
+      if (goToCheckout && data.cart.checkoutUrl) {
+        window.location.href = data.cart.checkoutUrl;
+      }
+    } else {
+      console.error(data);
+      alert(data?.error || "Failed to add to cart");
+    }
   }
 
   return (
-    <button
-      onClick={handleAdd}
-      style={{
-        background: "#ffd94d",
-        color: "#3d0856",
-        border: "none",
-        borderRadius: "10px",
-        padding: "12px 30px",
-        fontWeight: 700,
-        fontSize: "1.1rem",
-        cursor: "pointer",
-        boxShadow: "0 2px 12px #ffd94d44",
-        transition: "all .18s"
-      }}
-    >
-      أضف إلى عربة التسوق
+    <button onClick={add} disabled={loading} style={{ padding: "10px 16px", borderRadius: 8 }}>
+      {loading ? "Adding..." : (children || "Add to Cart")}
     </button>
   );
 }
