@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Kids KW Icons Generator</title>
+    <style>
+        canvas {
+            border: 1px solid #ccc;
+            margin: 10px;
+        }
+        .icon-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+        }
+        .icon-item {
+            text-align: center;
+        }
+        .download-btn {
+            background: #9422af;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Smart Kids KW - Icon Generator</h1>
+    <div class="icon-container" id="iconContainer"></div>
+
+    <script>
+        const sizes = [
+            { size: 16, name: 'favicon-16x16.png' },
+            { size: 32, name: 'favicon-32x32.png' },
+            { size: 180, name: 'apple-touch-icon.png' },
+            { size: 192, name: 'android-chrome-192x192.png' },
+            { size: 512, name: 'android-chrome-512x512.png' },
+            { size: 1200, name: 'smart-kids-logo-og.png' }
+        ];
+
+        function generateIcon(size, filename) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // خلفية بنفسجية
+            ctx.fillStyle = '#9422af';
+            ctx.fillRect(0, 0, size, size);
+
+            // نص SK باللون الأبيض
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${Math.floor(size * 0.4)}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('SK', size / 2, size / 2);
+
+            // إضافة حدود مدورة للأحجام الكبيرة
+            if (size >= 180) {
+                ctx.globalCompositeOperation = 'destination-in';
+                ctx.beginPath();
+                ctx.roundRect(0, 0, size, size, size * 0.2);
+                ctx.fill();
+            }
+
+            return canvas;
+        }
+
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // إنشاء جميع الأيقونات
+        sizes.forEach(({ size, name }) => {
+            const canvas = generateIcon(size, name);
+            const container = document.createElement('div');
+            container.className = 'icon-item';
+            
+            const title = document.createElement('h3');
+            title.textContent = `${size}x${size}px`;
+            
+            const btn = document.createElement('button');
+            btn.className = 'download-btn';
+            btn.textContent = `Download ${name}`;
+            btn.onclick = () => downloadCanvas(canvas, name);
+            
+            container.appendChild(title);
+            container.appendChild(canvas);
+            container.appendChild(btn);
+            
+            document.getElementById('iconContainer').appendChild(container);
+        });
+
+        // إنشاء favicon.ico
+        function generateFavicon() {
+            const canvas = generateIcon(32, 'favicon.ico');
+            const btn = document.createElement('button');
+            btn.className = 'download-btn';
+            btn.textContent = 'Download favicon.ico';
+            btn.onclick = () => downloadCanvas(canvas, 'favicon.ico');
+            
+            const container = document.createElement('div');
+            container.className = 'icon-item';
+            const title = document.createElement('h3');
+            title.textContent = 'favicon.ico';
+            
+            container.appendChild(title);
+            container.appendChild(canvas);
+            container.appendChild(btn);
+            
+            document.getElementById('iconContainer').appendChild(container);
+        }
+
+        generateFavicon();
+    </script>
+</body>
+</html>

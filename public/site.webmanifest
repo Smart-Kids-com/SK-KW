@@ -1,0 +1,41 @@
+{
+  "name": "Smart Kids KW - ألعاب تعليمية للأطفال",
+  "short_name": "Smart Kids KW",
+  "description": "أفضل الألعاب التعليمية والقصص التفاعلية للأطفال في الكويت",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#9422af",
+  "lang": "ar",
+  "dir": "rtl",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["shopping", "education", "kids"],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshots/mobile-1.png",
+      "sizes": "430x932",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+}
