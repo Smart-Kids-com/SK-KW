@@ -1,4 +1,5 @@
 "use client";
+"use client";
 import Link from 'next/link';
 export default function Footer() {
   return (
@@ -209,21 +210,24 @@ export default function Footer() {
             flexWrap: 'wrap',
             fontSize: '0.85rem'
           }}>
-            <a href="/refund" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
-              Refund policy
-            </a>
-            <a href="/privacy" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
-              Privacy policy
-            </a>
-            <a href="/terms" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
-              Terms of service
-            </a>
-            <a href="/shipping" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
-              Shipping policy
-            </a>
-            <a href="/contact" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
-              Contact information
-            </a>
+            <Link href="/policies/refund-policy" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
+              سياسة الإرجاع
+            </Link>
+            <Link href="/policies/privacy-policy" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
+              سياسة الخصوصية
+            </Link>
+            <Link href="/policies/terms-of-service" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
+              شروط الخدمة
+            </Link>
+            <Link href="/policies/shipping-policy" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
+              سياسة الشحن
+            </Link>
+            <Link href="/about" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
+              من نحن
+            </Link>
+            <Link href="/contact" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }}>
+              اتصل بنا
+            </Link>
           </div>
         </div>
 

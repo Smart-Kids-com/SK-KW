@@ -217,9 +217,91 @@ img,video{max-width:100%;height:auto;border-radius:var(--media-radius);box-shado
 #sk-side-menu a{color:#fff!important}
 
 /* ========= Responsive ========= */
-@media (max-width:1200px){.grid-4{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:1200px){
+  .grid-4{grid-template-columns:repeat(3,minmax(0,1fr))}
+  :root{--page-w:1200px}
+}
+
 @media (max-width:768px){
   .container{padding-inline:16px}
   .grid-3,.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}
   .sec-title{font-size:1.5rem}
+  :root{
+    --section-space:2rem;
+    --grid-x:16px;
+    --grid-y:16px;
+  }
+  
+  h1{font-size:2rem}
+  h2{font-size:1.5rem}
+  h3{font-size:1.3rem}
+  
+  .grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+}
+
+@media (max-width:480px){
+  .container{padding-inline:12px}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr;gap:12px}
+  
+  :root{
+    --section-space:1.5rem;
+    --grid-x:12px;
+    --grid-y:12px;
+  }
+  
+  h1{font-size:1.8rem}
+  h2{font-size:1.4rem}
+  h3{font-size:1.2rem}
+  
+  .info{padding:10px}
+  .title{font-size:0.9rem}
+  .price{font-size:0.85rem}
+}
+
+/* ========= WhatsApp Float Responsive ========= */
+@media (max-width:768px){
+  /* WhatsApp floating button adjustment for mobile */
+  [style*="position: fixed"][style*="bottom: 20px"] {
+    bottom: 15px !important;
+    right: 15px !important;
+    width: 50px !important;
+    height: 50px !important;
+  }
+  
+  [style*="position: fixed"][style*="bottom: 20px"] svg {
+    width: 25px !important;
+    height: 25px !important;
+  }
+}
+
+/* ========= Global Responsive Utilities ========= */
+.mobile-only {
+  display: none;
+}
+
+.desktop-only {
+  display: block;
+}
+
+@media (max-width:768px){
+  .mobile-only {
+    display: block;
+  }
+  
+  .desktop-only {
+    display: none;
+  }
+  
+  /* Ensure text doesn't overflow on mobile */
+  * {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  /* Better button spacing on mobile */
+  button, .btn {
+    min-height: 44px;
+    padding: 12px 20px;
+  }
 }
