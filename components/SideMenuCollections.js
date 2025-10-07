@@ -1,22 +1,50 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { sideMenu } from "../lib/menuData";
 
+function encodePath(p = "") {
+  return p
+    .replace(/^\/+/, "") // شيل أي سلاشات في البداية
+    .split("/")
+    .map(seg => encodeURIComponent(seg))
+    .join("/");
+}
+
+function buildHref(item) {
+  // لو فيه href في البيانات، استخدمه كما هو (مع تنظيف وترميز)
+  if (item.href !== undefined) return encodePath(item.href);
+
+  const h = (item.handle || "").trim();
+  if (!h) return ""; // الهوم
+  // لو الـ handle أصلاً فيه prefix معروف سيبه
+  if (h.startsWith("collections/") || h.startsWith("pages/") || h.startsWith("blogs/")) {
+    return encodePath(h);
+  }
+  // اعتبره handle لمجموعة
+  return encodePath(`collections/${h}`);
+}
+
 export default function SideMenuCollections({ onSelect }) {
+  const pathname = usePathname(); // بيرجع بشكل يبدأ بـ "/"
+  const current = pathname.replace(/^\/+/, ""); // خلّيه بدون "/"
+
   return (
     <nav className="sk-side-menu" dir="rtl">
       <ul className="sk-list">
         {sideMenu.map((item, i) => {
-          const href =
-            item.href ||
-            (item.handle ? `/collections/${encodeURIComponent(item.handle)}` : "#");
+          const href = buildHref(item); // لا تبدأ بـ "/"
+          const isActive =
+            href === "" ? current === "" : current === href || current.startsWith(`${href}/`);
+
           return (
             <li key={`menu-${i}-${item.title}`} className="sk-item">
               <Link
-                href={href}
+                href={href}                // مفيش "/" في البداية
+                prefetch={false}
                 onClick={onSelect}
-                className="sk-link"
+                className={`sk-link${isActive ? " is-active" : ""}`}
                 aria-label={item.title}
               >
                 {item.title}
@@ -40,27 +68,20 @@ export default function SideMenuCollections({ onSelect }) {
           display: grid;
           gap: 10px;
         }
-        .sk-item {
-          margin: 0;
-        }
+        .sk-item { margin: 0; }
         .sk-link {
           display: block;
-          width: 100%;
           text-decoration: none;
           color: #fff;
           font-size: 1.05rem;
           font-weight: 700;
           padding: 10px 12px;
           border-radius: 10px;
-          transition: background 0.2s ease, transform 0.1s ease;
+          transition: background .2s ease, transform .1s ease;
         }
-        .sk-link:hover,
-        .sk-link:focus-visible {
-          background: rgba(255, 255, 255, 0.08);
-        }
-        .sk-link:active {
-          transform: translateY(1px);
-        }
+        .sk-link:hover, .sk-link:focus-visible { background: rgba(255,255,255,.08); }
+        .sk-link:active { transform: translateY(1px); }
+        .sk-link.is-active { background: rgba(255,255,255,.14); }
       `}</style>
     </nav>
   );
