@@ -2,518 +2,110 @@
 import Link from "next/link";
 import { getProducts, formatKWD } from "@/lib/shopify";
 import { useState, useEffect } from "react";
+// lib/homepageData.js
+// ===================
+// مصدر الحقيقة لبيانات الصفحة الرئيسية
 
-export default function HomePage() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+// سرعة السلايدر (ms)
+export const AUTOPLAY_MS = 9000;
 
-  // المجموعات المميزة للصفحة الرئيسية
-  const featuredCollections = [
-    {
-      id: "featured-1",
-      title: "اكتشف أحدث إصداراتنا للأطفال",
-      handle: encodeURIComponent("اكتشف-أحدث-إصداراتنا-للأطفال"),
-      description: "أحدث الكتب والألعاب التعليمية المبتكرة",
-      image: { url: "//smart-kids.me/cdn/shop/collections/new-releases.jpg?v=1726066734&width=600" }
-    },
-    {
-      id: "featured-2", 
-      title: "عروض مكتبتي الإسلامية",
-      handle: encodeURIComponent("عروض-مكتبتي-الإسلامية"),
-      description: "مجموعة متنوعة من الكتب الإسلامية للأطفال",
-      image: { url: "//smart-kids.me/cdn/shop/collections/islamic-library.jpg?v=1726066734&width=600" }
-    },
-    {
-      id: "featured-3",
-      title: "قصصي الصوتية المسموعة", 
-      handle: encodeURIComponent("قصصي-الصوتية-المسموعة"),
-      description: "قصص صوتية تفاعلية وممتعة للأطفال",
-      image: { url: "//smart-kids.me/cdn/shop/collections/audio-stories.jpg?v=1726066734&width=600" }
-    },
-    {
-      id: "featured-4",
-      title: "ابدأ رحلتك مع القلم الناطق",
-      handle: encodeURIComponent("ابدأ-رحلتك-مع-القلم-الناطق") + "/" + encodeURIComponent("القلم-الناطق"),
-      description: "القلم التفاعلي الذكي للتعلم والمرح",
-      image: { url: "//smart-kids.me/cdn/shop/collections/talking-pen.jpg?v=1726066734&width=600" }
-    },
-    {
-      id: "featured-5",
-      title: "كتبي التفاعلية الحركية",
-      handle: encodeURIComponent("كتبي-التفاعلية-الحركية"),
-      description: "كتب تفاعلية مليئة بالأنشطة الحركية",
-      image: { url: "//smart-kids.me/cdn/shop/collections/interactive-books.jpg?v=1726066734&width=600" }
-    },
-    {
-      id: "featured-6",
-      title: "مونتيسوري",
-      handle: encodeURIComponent("مونتيسوري"),
-      description: "ألعاب ومواد تعليمية بمنهج مونتيسوري",
-      image: { url: "//smart-kids.me/cdn/shop/collections/montessori.jpg?v=1726066734&width=600" }
-    }
-  ];
+// 1) السلايدر الأول (5 شرائح)
+export const slidesPrimary = [
+  {
+    image: "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/CACBDA84-1389-4CC4-B050-3B0244AE7EF0.png?v=1757991506",
+    heading: "العرض التعليمي التفاعلي الصوتي",
+    subheading: "أصوات الحيوانات+ يوم في حياة طفل",
+    button_label: "اطلب العرض",
+    link: "/collections/عروض-القصص-التفاعلية",
+  },
+  {
+    image: "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/2_ee3fd101-3134-4523-a4de-84f0b0e1048f.png?v=1751053202",
+    heading: "قلمي السحري",
+    subheading: "كتبي الناطقة 22 كتاباً ناطقاً بالقلم",
+    button_label: "تصفح عرض الحقيبة",
+    link: "/products/الحقيبة-التعليمية-الناطقة-بالقلم-عربي-إنجليزي",
+  },
+  {
+    image: "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/5_ba4fbd2f-e7fe-4cf7-ba1d-0e9f5e233a71.png?v=1746954628",
+    heading: "القصص ثلاثية الأبعاد",
+    subheading: "التشويق بكل صفحة",
+    button_label: "تصفح العرض",
+    link: "/products/استمتع-برحلة-تفاعلية-مع-8-قصص-ثلاثية-الأبعاد",
+  },
+  {
+    image: "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/F71B6DAA-F5D1-4964-9EFD-54A2EF5874B2.png?v=1746206589",
+    heading: "قصص الأنبياء-12 كتاباً",
+    subheading: "اقتفِ أثر الأنبياء 👣",
+    button_label: "دع أطفالك يتعلمون منهم📖🕋",
+    link: "/products/قصص-الأنبياء-12-25-نبياً",
+  },
+  {
+    image: "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/0110-8150864765604275633.jpg?v=1755421795",
+    heading: "عرض ال 29 كتاباً للصغار",
+    subheading: "العرض الذهبي",
+    button_label: "!اطلب الآن",
+    link: "/collections/الكُتب-المُحببة-للأطفال",
+  },
+];
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const productsData = await getProducts();
-        setProducts(productsData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, []);
+// 2) السلايدر الثاني (5 شرائح)
+export const slidesSecondary = [
+  {
+    image: "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/2_b2a829e7-3d4b-49fc-baae-66c1d6f715d7.png?v=1754362385",
+    heading: "Education Kids Boxes",
+    subheading: "<strong>Letters And Words</strong>",
+    button_label: "العرض المدرسي المميز",
+    link: "/products/حقيبة-أنا-أركب-الكلمات-مع-3-حقائب-مونتيسوري-التفاعلية",
+  },
+  {
+    image: "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/1_3935205c-67ae-4194-bfe7-b4ec7481ee09.png?v=1751054736",
+    heading: "Reading Pen",
+    subheading: "With Learning Books",
+    button_label: "قلم القراءة المتدرجة الناطق",
+    link: "/collections/ابدأ-رحلتك-مع-القلم-الناطق",
+  },
+  {
+    image: "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Slidshow.png?v=1751332513",
+    heading: "Interactive Stories",
+    subheading: "",
+    button_label: "احصل على العرض الآن",
+    link: "/collections/عروض-القصص-التفاعلية",
+  },
+  {
+    image: "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Slidshow_6ce563f1-be3b-4998-b5ce-53d5ea447d37.png?v=1751332917",
+    heading: "Discover The Kids 3D Stories",
+    subheading: "<strong>القصص ثلاثية الأبعاد</strong>",
+    button_label: "اطلب العرض",
+    link: "/collections/عروض-القصص-التفاعلية",
+  },
+  {
+    image: "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/c376a0415b19dc4b35ab2f32cf34bb90.png?v=1744026189",
+    heading: "Audio storybooks",
+    subheading: "<strong>أصوات الحيوانات</strong>",
+    button_label: "اطلبها الآن",
+    link: "/collections/قصصي-الصوتية-المسموعة",
+  },
+];
 
-  if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>جاري التحميل...</div>;
-  }
+// 3) الفيديوهات (روابط مباشرة)
+export const videos = {
+  video_XrwaL: "https://cdn.shopify.com/videos/c/o/v/d3552b70e41d475f8a6f0ecd16a68a69.mp4",
+  video_fPhkf: "https://cdn.shopify.com/videos/c/o/v/c4aa7dd97a1949dda74cdd56f619666f.mov",
+  // video_TmY8GD: "أضف الرابط هنا لو حابب نفعّله"
+};
 
-  const heroSlides = [
-    {
-      image: "//smart-kids.me/cdn/shop/files/slides-banners-home-3-mobile.png?v=1726066734&width=1200",
-      title: "مجموعة ألعاب تعليمية متنوعة",
-      subtitle: "تطوير مهارات طفلك بطريقة ممتعة وتفاعلية"
-    },
-    {
-      image: "//smart-kids.me/cdn/shop/files/slides-banners-home-2-mobile.png?v=1726066734&width=1200", 
-      title: "قصص تفاعلية للأطفال",
-      subtitle: "عالم من المغامرات والتعلم"
-    },
-    {
-      image: "//smart-kids.me/cdn/shop/files/slides-banners-home-1-mobile.png?v=1726066734&width=1200",
-      title: "ألعاب ذكية وتعليمية",
-      subtitle: "استكشف مجموعتنا الحصرية"
-    }
-  ];
+// 4) بانرات الصور
+export const banners = {
+  image_banner: "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/F316B75B-DCC6-4857-852B-84ACD098C4BA.png?v=1743407135",
+  image_banner_k6GzWz: "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/12_0b33362f-ac9c-42a6-b66d-141bd30f535b.png?v=1746954673",
+  // image_banner_BVDeYf: { left:"", right:"" } // لو حابب نفعل بانر بصورتين ابعت الروابط
+};
 
-  return (
-    <main style={{
-      direction: "rtl",
-      fontFamily: "'Amiri', serif"
-    }}>
-      {/* Hero Slider */}
-      <section style={{
-        position: "relative",
-        marginBottom: "3rem"
-      }}>
-        <div style={{
-          position: "relative",
-          height: "60vh",
-          minHeight: "400px",
-          background: `linear-gradient(135deg, rgba(148, 34, 175, 0.8) 0%, rgba(124, 29, 138, 0.8) 100%), url(${heroSlides[0].image})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "white",
-          textAlign: "center"
-        }}>
-          <div style={{
-            maxWidth: "800px",
-            padding: "2rem"
-          }}>
-            <h1 style={{
-              fontSize: "clamp(2rem, 5vw, 4rem)",
-              fontWeight: 700,
-              marginBottom: "1rem",
-              textShadow: "2px 2px 4px rgba(0,0,0,0.3)"
-            }}>
-              {heroSlides[0].title}
-            </h1>
-            <p style={{
-              fontSize: "clamp(1.1rem, 3vw, 1.5rem)",
-              marginBottom: "2rem",
-              opacity: 0.95,
-              textShadow: "1px 1px 2px rgba(0,0,0,0.3)"
-            }}>
-              {heroSlides[0].subtitle}
-            </p>
-            <Link
-              href="/collections"
-              style={{
-                display: "inline-block",
-                padding: "1rem 2.5rem",
-                backgroundColor: "white",
-                color: "#9422af",
-                textDecoration: "none",
-                borderRadius: 50,
-                fontSize: "1.2rem",
-                fontWeight: 600,
-                transition: "all 0.3s ease",
-                boxShadow: "0 4px 20px rgba(255,255,255,0.3)"
-              }}
-            >
-              🛍️ تسوق الآن
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Categories Section */}
-      <section style={{
-        maxWidth: "1400px",
-        margin: "0 auto",
-        padding: "3rem 2rem"
-      }}>
-        <div style={{
-          textAlign: "center",
-          marginBottom: "3rem"
-        }}>
-          <h2 style={{
-            fontSize: "clamp(2rem, 4vw, 3rem)",
-            fontWeight: 700,
-            color: "#2d3748",
-            marginBottom: "1rem"
-          }}>
-            🎯 تصفح حسب الفئة
-          </h2>
-          <p style={{
-            fontSize: "1.2rem",
-            color: "#718096",
-            maxWidth: "600px",
-            margin: "0 auto"
-          }}>
-            اكتشف مجموعاتنا المتنوعة من الألعاب التعليمية والقصص التفاعلية
-          </p>
-        </div>
-
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: "2rem",
-          marginBottom: "4rem"
-        }}>
-          {featuredCollections.map((collection) => (
-            <Link
-              key={collection.id}
-              href={`/collections/${collection.handle}`}
-              style={{
-                textDecoration: "none",
-                color: "inherit"
-              }}
-            >
-              <div style={{
-                backgroundColor: "white",
-                borderRadius: 20,
-                overflow: "hidden",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-                transition: "all 0.3s ease",
-                border: "1px solid rgba(148, 34, 175, 0.08)"
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-8px)";
-                e.currentTarget.style.boxShadow = "0 16px 48px rgba(148, 34, 175, 0.25)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.12)";
-              }}
-              >
-                <div style={{
-                  position: "relative",
-                  paddingBottom: "60%",
-                  overflow: "hidden"
-                }}>
-                  {collection.image?.url ? (
-                    <img
-                      src={collection.image.url}
-                      alt={collection.title}
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        transition: "transform 0.3s ease"
-                      }}
-                    />
-                  ) : (
-                    <div style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      height: "100%",
-                      background: `linear-gradient(135deg, #9422af 0%, #7c1d8a 100%)`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "4rem"
-                    }}>
-                      🎁
-                    </div>
-                  )}
-                </div>
-                <div style={{
-                  padding: "1.5rem"
-                }}>
-                  <h3 style={{
-                    fontSize: "1.3rem",
-                    fontWeight: 600,
-                    color: "#2d3748",
-                    marginBottom: "0.5rem"
-                  }}>
-                    {collection.title}
-                  </h3>
-                  {collection.description && (
-                    <p style={{
-                      fontSize: "0.95rem",
-                      color: "#718096",
-                      lineHeight: "1.5",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden"
-                    }}>
-                      {collection.description}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Featured Products */}
-      <section style={{
-        backgroundColor: "#f8f9fa",
-        padding: "4rem 2rem"
-      }}>
-        <div style={{
-          maxWidth: "1400px",
-          margin: "0 auto"
-        }}>
-          <div style={{
-            textAlign: "center",
-            marginBottom: "3rem"
-          }}>
-            <h2 style={{
-              fontSize: "clamp(2rem, 4vw, 3rem)",
-              fontWeight: 700,
-              color: "#2d3748",
-              marginBottom: "1rem"
-            }}>
-              ⭐ المنتجات المميزة
-            </h2>
-            <p style={{
-              fontSize: "1.2rem",
-              color: "#718096",
-              maxWidth: "600px",
-              margin: "0 auto"
-            }}>
-              أفضل اختياراتنا من الألعاب التعليمية والقصص التفاعلية
-            </p>
-          </div>
-
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-            gap: "2rem"
-          }}>
-            {products.slice(0, 8).map((product) => (
-              <Link
-                key={product.id}
-                href={`/products/${product.handle}`}
-                style={{
-                  textDecoration: "none",
-                  color: "inherit"
-                }}
-              >
-                <div style={{
-                  backgroundColor: "white",
-                  borderRadius: 16,
-                  overflow: "hidden",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-                  transition: "all 0.3s ease",
-                  border: "1px solid rgba(148, 34, 175, 0.08)"
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-8px)";
-                  e.currentTarget.style.boxShadow = "0 16px 48px rgba(148, 34, 175, 0.25)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.12)";
-                }}
-                >
-                  <div style={{
-                    position: "relative",
-                    paddingBottom: "75%",
-                    overflow: "hidden"
-                  }}>
-                    {product.featuredImage?.url ? (
-                      <img
-                        src={product.featuredImage.url}
-                        alt={product.title}
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          transition: "transform 0.3s ease"
-                        }}
-                      />
-                    ) : (
-                      <div style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "3rem"
-                      }}>
-                        🎁
-                      </div>
-                    )}
-                  </div>
-                  <div style={{
-                    padding: "1.5rem"
-                  }}>
-                    <h3 style={{
-                      fontSize: "1.2rem",
-                      fontWeight: 600,
-                      color: "#2d3748",
-                      marginBottom: "0.75rem",
-                      lineHeight: "1.4",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden"
-                    }}>
-                      {product.title}
-                    </h3>
-                    <div style={{
-                      fontSize: "1.4rem",
-                      fontWeight: 700,
-                      color: "#9422af"
-                    }}>
-                      {formatKWD(product.priceRange?.minVariantPrice?.amount || 0)}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          <div style={{
-            textAlign: "center",
-            marginTop: "3rem"
-          }}>
-            <Link
-              href="/collections"
-              style={{
-                display: "inline-block",
-                padding: "1rem 2.5rem",
-                backgroundColor: "#9422af",
-                color: "white",
-                textDecoration: "none",
-                borderRadius: 50,
-                fontSize: "1.2rem",
-                fontWeight: 600,
-                transition: "all 0.3s ease",
-                boxShadow: "0 4px 20px rgba(148, 34, 175, 0.3)"
-              }}
-            >
-              🛍️ عرض جميع المنتجات
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Us */}
-      <section style={{
-        maxWidth: "1400px",
-        margin: "0 auto",
-        padding: "4rem 2rem"
-      }}>
-        <div style={{
-          textAlign: "center",
-          marginBottom: "3rem"
-        }}>
-          <h2 style={{
-            fontSize: "clamp(2rem, 4vw, 3rem)",
-            fontWeight: 700,
-            color: "#2d3748",
-            marginBottom: "1rem"
-          }}>
-            ✨ لماذا تختار Smart Kids؟
-          </h2>
-        </div>
-
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-          gap: "2rem"
-        }}>
-          {[
-            {
-              icon: "🚚",
-              title: "توصيل سريع",
-              desc: "توصيل خلال 24-48 ساعة لجميع محافظات الكويت"
-            },
-            {
-              icon: "💯",
-              title: "ضمان الجودة",
-              desc: "منتجات أصلية ومضمونة من أفضل الماركات العالمية"
-            },
-            {
-              icon: "🎓",
-              title: "تعليمي وممتع",
-              desc: "ألعاب تجمع بين التعلم والمتعة لتنمية مهارات طفلك"
-            },
-            {
-              icon: "🔄",
-              title: "سهولة الإرجاع",
-              desc: "إمكانية الإرجاع والاستبدال خلال 7 أيام"
-            }
-          ].map((feature, index) => (
-            <div
-              key={index}
-              style={{
-                backgroundColor: "white",
-                padding: "2rem",
-                borderRadius: 16,
-                textAlign: "center",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
-                border: "1px solid rgba(148, 34, 175, 0.05)"
-              }}
-            >
-              <div style={{
-                fontSize: "3rem",
-                marginBottom: "1rem"
-              }}>
-                {feature.icon}
-              </div>
-              <h3 style={{
-                fontSize: "1.3rem",
-                fontWeight: 600,
-                color: "#2d3748",
-                marginBottom: "0.75rem"
-              }}>
-                {feature.title}
-              </h3>
-              <p style={{
-                color: "#718096",
-                lineHeight: "1.6"
-              }}>
-                {feature.desc}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-    </main>
-  );
-}
+// 5) أقسام المجموعات (بالترتيب المطلوب)
+export const featuredHandles = [
+  { id: "featured_collection",        handle: "عروض-القصص-التفاعلية",         title: "عروض القصص التفاعلية" },
+  { id: "featured_collection_3UMHaT", handle: "اكتشف-أحدث-إصداراتنا-للأطفال", title: "اكتشف أحدث إصداراتنا للأطفال" },
+  { id: "featured_collection_YLCaLW", handle: "الكُتب-المُحببة-للأطفال",      title: "الكتب المُحببة للأطفال" },
+  { id: "featured_collection_cBQJ3H", handle: "عروض-مكتبتي-الإسلامية",        title: "عروض مكتبتي الإسلامية" },
+  { id: "featured_collection_c83Hk",  handle: "القصص-المفردة-للأطفال",         title: "القصص المفردة للأطفال" }, // الأخير
+];
