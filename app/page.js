@@ -1,21 +1,62 @@
 "use client";
 import Link from "next/link";
-import { getCollections, getProducts, formatKWD } from "@/lib/shopify";
+import { getProducts, formatKWD } from "@/lib/shopify";
 import { useState, useEffect } from "react";
 
 export default function HomePage() {
-  const [collections, setCollections] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // المجموعات المميزة للصفحة الرئيسية
+  const featuredCollections = [
+    {
+      id: "featured-1",
+      title: "اكتشف أحدث إصداراتنا للأطفال",
+      handle: encodeURIComponent("اكتشف-أحدث-إصداراتنا-للأطفال"),
+      description: "أحدث الكتب والألعاب التعليمية المبتكرة",
+      image: { url: "//smart-kids.me/cdn/shop/collections/new-releases.jpg?v=1726066734&width=600" }
+    },
+    {
+      id: "featured-2", 
+      title: "عروض مكتبتي الإسلامية",
+      handle: encodeURIComponent("عروض-مكتبتي-الإسلامية"),
+      description: "مجموعة متنوعة من الكتب الإسلامية للأطفال",
+      image: { url: "//smart-kids.me/cdn/shop/collections/islamic-library.jpg?v=1726066734&width=600" }
+    },
+    {
+      id: "featured-3",
+      title: "قصصي الصوتية المسموعة", 
+      handle: encodeURIComponent("قصصي-الصوتية-المسموعة"),
+      description: "قصص صوتية تفاعلية وممتعة للأطفال",
+      image: { url: "//smart-kids.me/cdn/shop/collections/audio-stories.jpg?v=1726066734&width=600" }
+    },
+    {
+      id: "featured-4",
+      title: "ابدأ رحلتك مع القلم الناطق",
+      handle: encodeURIComponent("ابدأ-رحلتك-مع-القلم-الناطق") + "/" + encodeURIComponent("القلم-الناطق"),
+      description: "القلم التفاعلي الذكي للتعلم والمرح",
+      image: { url: "//smart-kids.me/cdn/shop/collections/talking-pen.jpg?v=1726066734&width=600" }
+    },
+    {
+      id: "featured-5",
+      title: "كتبي التفاعلية الحركية",
+      handle: encodeURIComponent("كتبي-التفاعلية-الحركية"),
+      description: "كتب تفاعلية مليئة بالأنشطة الحركية",
+      image: { url: "//smart-kids.me/cdn/shop/collections/interactive-books.jpg?v=1726066734&width=600" }
+    },
+    {
+      id: "featured-6",
+      title: "مونتيسوري",
+      handle: encodeURIComponent("مونتيسوري"),
+      description: "ألعاب ومواد تعليمية بمنهج مونتيسوري",
+      image: { url: "//smart-kids.me/cdn/shop/collections/montessori.jpg?v=1726066734&width=600" }
+    }
+  ];
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [collectionsData, productsData] = await Promise.all([
-          getCollections(),
-          getProducts()
-        ]);
-        setCollections(collectionsData);
+        const productsData = await getProducts();
         setProducts(productsData);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -146,7 +187,7 @@ export default function HomePage() {
           gap: "2rem",
           marginBottom: "4rem"
         }}>
-          {collections.slice(0, 6).map((collection, index) => (
+          {featuredCollections.map((collection) => (
             <Link
               key={collection.id}
               href={`/collections/${collection.handle}`}

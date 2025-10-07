@@ -82,7 +82,7 @@ export default function Header() {
       <header style={{ width: "100%", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         {/* شريط الإعلان (كله رابط) */}
         <Link
-          href="/collections/مونتيسوري"
+          href="/collections/%D9%85%D9%88%D9%86%D8%AA%D9%8A%D8%B3%D9%88%D8%B1%D9%8A"
           style={{
             display: "block",
             background: "#3d0856",
