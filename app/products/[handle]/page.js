@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 export default function ProductPage({ params }) {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mainImage, setMainImage] = useState(null);
 
   useEffect(() => {
     async function fetchProduct() {
@@ -19,6 +20,7 @@ export default function ProductPage({ params }) {
           notFound();
         }
         setProduct(data);
+        setMainImage(data?.featuredImage?.url || null);
       } catch (error) {
         console.error('Error fetching product:', error);
       } finally {
@@ -32,10 +34,6 @@ export default function ProductPage({ params }) {
     return <div style={{ padding: '2rem', textAlign: 'center' }}>جاري التحميل...</div>;
   }
 
-  if (!product) {
-    notFound();
-  }
-  
   if (!product) {
     notFound();
   }
@@ -61,7 +59,7 @@ export default function ProductPage({ params }) {
       }}>
         <Link href="/" style={{ color: "#9422af", textDecoration: "none" }}>الرئيسية</Link>
         <span style={{ margin: "0 0.5rem" }}>←</span>
-        <Link href="/collections" style={{ color: "#9422af", textDecoration: "none" }}>المجموعات</Link>
+        <Link href="/collections" style={{ color: "#9422af", textDecoration: "none" }}>كل المجموعات</Link>
         <span style={{ margin: "0 0.5rem" }}>←</span>
         <span>{product.title}</span>
       </div>
@@ -87,10 +85,10 @@ export default function ProductPage({ params }) {
             position: "relative"
           }}>
             <div style={{ position: "relative", paddingBottom: "100%" }}>
-              {product.featuredImage?.url ? (
+              {mainImage ? (
                 <img
-                  src={product.featuredImage.url}
-                  alt={product.featuredImage.altText || product.title}
+                  src={mainImage}
+                  alt={product.featuredImage?.altText || product.title}
                   style={{
                     position: "absolute",
                     top: 0,
@@ -127,7 +125,8 @@ export default function ProductPage({ params }) {
               gap: "0.75rem"
             }}>
               {images.map((image, index) => (
-                <div
+                <button
+                  type="button"
                   key={index}
                   style={{
                     backgroundColor: "white",
@@ -135,16 +134,12 @@ export default function ProductPage({ params }) {
                     overflow: "hidden",
                     cursor: "pointer",
                     transition: "all 0.2s ease",
-                    border: "2px solid transparent"
+                    border: "2px solid " + (mainImage === image.url ? "#9422af" : "transparent"),
+                    padding: 0
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "#9422af";
-                    e.currentTarget.style.transform = "scale(1.05)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "transparent";
-                    e.currentTarget.style.transform = "scale(1)";
-                  }}
+                  onClick={() => setMainImage(image.url)}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.04)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
                 >
                   <div style={{ position: "relative", paddingBottom: "100%" }}>
                     <img
@@ -160,7 +155,7 @@ export default function ProductPage({ params }) {
                       }}
                     />
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           )}
@@ -222,7 +217,7 @@ export default function ProductPage({ params }) {
                 {product.availableForSale ? "✅" : "❌"}
               </span>
               <span style={{ fontWeight: 600 }}>
-                {product.availableForSale ? "متوفر في المخزون" : "غير متوفر حالياً"}
+                {product.availableForSale ? "متوفر في المخزون" : "نفذت الكميةغير متوفر حالياً"}
               </span>
             </div>
 
@@ -385,6 +380,6 @@ export default function ProductPage({ params }) {
           )}
         </div>
       </div>
-    </main>
-  );
+  </main>
+);
 }
