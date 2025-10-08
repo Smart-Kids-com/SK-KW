@@ -36,7 +36,7 @@ lib\shopify.js
 lib\theme.js
 locales\ar.json
 locales\en.json
-pages\_app.js
+pages\app.js
 public\"Logo of SK Smart Kids with a colorful character and text."
 public\locales\ar\ar.json
 public\locales\en\en.json
