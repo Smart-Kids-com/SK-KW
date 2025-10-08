@@ -603,3 +603,13 @@ function SlideCard({ s }) {
   );
 }
 // ========= المكون الرئيسي للصفحة الرئيسية =========
+export default function HomePage() {
+  return (
+    <main style={{ direction: "rtl", fontFamily: "'Amiri', serif" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "2rem" }}>
+        <h1>الصفحة الرئيسية</h1>
+        <p>مرحباً بكم في Smart Kids Kuwait</p>
+      </div>
+    </main>
+  );
+}
