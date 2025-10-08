@@ -1,137 +1,102 @@
-  // app/api/cart/route.js
-  import { NextResponse } from "next/server";
-  import { fetchShopifyGraphQL } from "@/lib/shopify";
+// app/api/cart/route.js
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
-  // حقول كارت مشتركة
-  const CART_FIELDS = `
-    id
-    checkoutUrl
-    totalQuantity
-    cost { subtotalAmount { amount currencyCode } }
-    lines(first: 100) {
-      edges {
-        node {
-          id
-          quantity
-          cost { totalAmount { amount currencyCode } }
-          merchandise {
-            __typename
-            ... on ProductVariant {
-              id
-              title
-              price { amount currencyCode }
-              product { title featuredImage { url altText } }
-            }
-          }
-        }
-      }
-      pageInfo { hasNextPage endCursor }
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { createCart, getCart, addLines, updateLines, removeLines } from '@/lib/cart';
+
+const CART_COOKIE = 'cartId';
+const cookieOptions = {
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: true,
+  path: '/',
+  maxAge: 60 * 60 * 24 * 30
+};
+
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const fromParam = searchParams.get('id');
+    const jar = cookies();
+    const id = fromParam || jar.get(CART_COOKIE)?.value;
+    if (!id) return NextResponse.json({ cart: null }, { status: 200 });
+
+    const cart = await getCart(id);
+    if (!cart) {
+      jar.set(CART_COOKIE, '', { ...cookieOptions, maxAge: 0 });
+      return NextResponse.json({ cart: null }, { status: 200 });
     }
-  `;
-
-  // Queries/Mutations
-  const CART_QUERY = /* GraphQL */ `
-    query cart($id: ID!) {
-      cart(id: $id) { ${CART_FIELDS} }
-    }
-  `;
-
-  const CART_CREATE = /* GraphQL */ `
-    mutation cartCreate($lines:[CartLineInput!]) {
-      cartCreate(input:{ lines:$lines }) {
-        cart { ${CART_FIELDS} }
-        userErrors { message }
-      }
-    }
-  `;
-
-  const CART_LINES_ADD = /* GraphQL */ `
-    mutation cartLinesAdd($cartId:ID!, $lines:[CartLineInput!]!) {
-      cartLinesAdd(cartId:$cartId, lines:$lines) {
-        cart { ${CART_FIELDS} }
-        userErrors { message }
-      }
-    }
-  `;
-
-  const CART_LINES_UPDATE = /* GraphQL */ `
-    mutation cartLinesUpdate($cartId:ID!, $lines:[CartLineUpdateInput!]!) {
-      cartLinesUpdate(cartId:$cartId, lines:$lines) {
-        cart { ${CART_FIELDS} }
-        userErrors { message }
-      }
-    }
-  `;
-
-  const CART_LINES_REMOVE = /* GraphQL */ `
-    mutation cartLinesRemove($cartId:ID!, $lineIds:[ID!]!) {
-      cartLinesRemove(cartId:$cartId, lineIds:$lineIds) {
-        cart { ${CART_FIELDS} }
-        userErrors { message }
-      }
-    }
-  `;
-
-  export async function POST(req) {
-    const body = await req.json();
-    const { action } = body || {};
-
-    try {
-      if (action === "get") {
-        const { cartId } = body;
-        if (!cartId) return NextResponse.json({ cart: null });
-        const d = await fetchShopifyGraphQL(CART_QUERY, { id: cartId });
-        return NextResponse.json({ cart: d?.cart || null });
-      }
-
-      if (action === "add") {
-        const { cartId, variantId, quantity = 1 } = body;
-        if (!variantId) return NextResponse.json({ error: "Missing variantId" }, { status: 400 });
-        const lines = [{ merchandiseId: variantId, quantity: Number(quantity) }];
-
-        if (cartId) {
-          const d = await fetchShopifyGraphQL(CART_LINES_ADD, { cartId, lines });
-          const err = d?.cartLinesAdd?.userErrors?.[0]?.message;
-          if (err) return NextResponse.json({ error: err }, { status: 400 });
-          return NextResponse.json({ cart: d?.cartLinesAdd?.cart });
-        } else {
-          const d = await fetchShopifyGraphQL(CART_CREATE, { lines });
-          const err = d?.cartCreate?.userErrors?.[0]?.message;
-          if (err) return NextResponse.json({ error: err }, { status: 400 });
-          return NextResponse.json({ cart: d?.cartCreate?.cart });
-        }
-      }
-
-      if (action === "update") {
-        const { cartId, lineId, quantity } = body;
-        if (!cartId || !lineId || typeof quantity !== "number")
-          return NextResponse.json({ error: "Missing cartId/lineId/quantity" }, { status: 400 });
-
-        const d = await fetchShopifyGraphQL(CART_LINES_UPDATE, {
-          cartId,
-          lines: [{ id: lineId, quantity: Math.max(1, Math.min(99, quantity)) }],
-        });
-        const err = d?.cartLinesUpdate?.userErrors?.[0]?.message;
-        if (err) return NextResponse.json({ error: err }, { status: 400 });
-        return NextResponse.json({ cart: d?.cartLinesUpdate?.cart });
-      }
-
-      if (action === "remove") {
-        const { cartId, lineId } = body;
-        if (!cartId || !lineId)
-          return NextResponse.json({ error: "Missing cartId/lineId" }, { status: 400 });
-
-        const d = await fetchShopifyGraphQL(CART_LINES_REMOVE, {
-          cartId,
-          lineIds: [lineId],
-        });
-        const err = d?.cartLinesRemove?.userErrors?.[0]?.message;
-        if (err) return NextResponse.json({ error: err }, { status: 400 });
-        return NextResponse.json({ cart: d?.cartLinesRemove?.cart });
-      }
-
-      return NextResponse.json({ error: "Unsupported action" }, { status: 400 });
-    } catch (e) {
-      return NextResponse.json({ error: e?.message || "Unknown error" }, { status: 500 });
-    }
+    jar.set(CART_COOKIE, cart.id, cookieOptions);
+    return NextResponse.json({ cart }, { status: 200 });
+  } catch (e) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
+}
+
+export async function POST(request) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const lines = Array.isArray(body?.lines) ? body.lines : [];
+    const attributes = Array.isArray(body?.attributes) ? body.attributes : [];
+    const cart = await createCart({ lines, attributes });
+    cookies().set(CART_COOKIE, cart.id, cookieOptions);
+    return NextResponse.json({ cart }, { status: 201 });
+  } catch (e) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}
+
+export async function PUT(request) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const jar = cookies();
+    const id = body?.id || jar.get(CART_COOKIE)?.value;
+    if (!id) return NextResponse.json({ error: 'Missing cart id' }, { status: 400 });
+
+    let cart = null;
+    if (body?.type === 'add') {
+      if (!Array.isArray(body.lines) || !body.lines.length) {
+        return NextResponse.json({ error: 'lines required for add' }, { status: 400 });
+      }
+      cart = await addLines(id, body.lines);
+    } else if (body?.type === 'update') {
+      if (!Array.isArray(body.lines) || !body.lines.length) {
+        return NextResponse.json({ error: 'lines required for update' }, { status: 400 });
+      }
+      cart = await updateLines(id, body.lines);
+    } else if (body?.type === 'remove') {
+      if (!Array.isArray(body.lineIds) || !body.lineIds.length) {
+        return NextResponse.json({ error: 'lineIds required for remove' }, { status: 400 });
+      }
+      cart = await removeLines(id, body.lineIds);
+    } else {
+      return NextResponse.json({ error: 'type must be one of add|update|remove' }, { status: 400 });
+    }
+
+    jar.set(CART_COOKIE, cart.id, cookieOptions);
+    return NextResponse.json({ cart }, { status: 200 });
+  } catch (e) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const jar = cookies();
+    const id = body?.id || jar.get(CART_COOKIE)?.value;
+    if (!id) return NextResponse.json({ error: 'Missing cart id' }, { status: 400 });
+
+    const lineIds = Array.isArray(body?.lineIds) ? body.lineIds : [];
+    if (!lineIds.length) {
+      return NextResponse.json({ error: 'lineIds required for delete' }, { status: 400 });
+    }
+    const cart = await removeLines(id, lineIds);
+    jar.set(CART_COOKIE, cart.id, cookieOptions);
+    return NextResponse.json({ cart }, { status: 200 });
+  } catch (e) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}

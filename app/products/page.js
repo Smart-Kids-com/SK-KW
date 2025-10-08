@@ -4,6 +4,89 @@ import Link from "next/link";
 import WishlistButton from "@/components/WishlistButton";
 import { notFound } from "next/navigation";
 
+function AddFromCollectionButton({ product }) {
+  const variants = product?.variants?.edges?.map(e => e.node) ?? [];
+  const singleVariantId = variants.length === 1 ? variants[0]?.id : null;
+
+  if (!singleVariantId) {
+    return (
+      <Link
+        href={`/products/${product.handle}`}
+        style={{
+          display: "inline-block",
+          width: "100%",
+          padding: "0.75rem 1rem",
+          backgroundColor: "#9422af",
+          color: "white",
+          textDecoration: "none",
+          border: "none",
+          borderRadius: 8,
+          fontSize: "1rem",
+          fontWeight: 600,
+          textAlign: "center"
+        }}
+      >
+        عرض المنتج
+      </Link>
+    );
+  }
+
+  return (
+    <form
+      action="/api/cart"
+      method="post"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        try {
+          await fetch("/api/cart", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: "add",
+              lines: [{ merchandiseId: singleVariantId, quantity: 1 }]
+            }),
+          });
+          // اختياري: إعادة توجيه للسلة
+          window.location.href = "/cart";
+        } catch (err) {
+          console.error(err);
+        }
+      }}
+      style={{ width: "100%" }}
+    >
+      <button
+        type="submit"
+        style={{
+          width: "100%",
+          padding: "0.75rem 1rem",
+          backgroundColor: "#9422af",
+          color: "white",
+          border: "none",
+          borderRadius: 8,
+          fontSize: "1rem",
+          fontWeight: 600,
+          cursor: "pointer",
+          transition: "all 0.2s ease",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "0.5rem"
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = "#7c1d8a";
+          e.currentTarget.style.transform = "translateY(-2px)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = "#9422af";
+          e.currentTarget.style.transform = "translateY(0)";
+        }}
+      >
+        🛒 أضف إلى عربة التسوق 
+      </button>
+    </form>
+  );
+}
+
 export default async function CollectionPage({ params }) {
   const { handle } = params;
   const collection = await getCollectionByHandle(handle);
@@ -56,7 +139,7 @@ export default async function CollectionPage({ params }) {
           fontSize: "1.1rem",
           opacity: 0.9
         }}>
-          📦 {collection.products.length} منتج متاح
+          📦 {collection.products.length} المنتج متوفر
         </div>
       </div>
 
@@ -159,7 +242,7 @@ export default async function CollectionPage({ params }) {
                       fontSize: "0.8rem",
                       fontWeight: 600
                     }}>
-                      خصم
+                      عرض خاص
                     </div>
                   )}
                 </div>
@@ -208,39 +291,8 @@ export default async function CollectionPage({ params }) {
                   )}
                 </div>
 
-                {/* Add to Cart Button */}
-                <button
-                  style={{
-                    width: "100%",
-                    padding: "0.75rem 1rem",
-                    backgroundColor: "#9422af",
-                    color: "white",
-                    border: "none",
-                    borderRadius: 8,
-                    fontSize: "1rem",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "0.5rem"
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = "#7c1d8a";
-                    e.target.style.transform = "translateY(-2px)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = "#9422af";
-                    e.target.style.transform = "translateY(0)";
-                  }}
-                  onClick={() => {
-                    // Add to cart functionality
-                    console.log('Add to cart:', product.id);
-                  }}
-                >
-                  🛒 أضف إلى السلة
-                </button>
+                {/* Add / View Button */}
+                <AddFromCollectionButton product={product} />
               </div>
             </div>
           ))}
@@ -255,8 +307,8 @@ export default async function CollectionPage({ params }) {
           color: "#718096"
         }}>
           <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>📦</div>
-          <h2 style={{ color: "#2d3748", marginBottom: "1rem" }}>لا توجد منتجات في هذه المجموعة</h2>
-          <p>نعمل على إضافة منتجات جديدة قريباً</p>
+          <h2 style={{ color: "#2d3748", marginBottom: "1rem" }}>المجموعة تحت الإنشاء</h2>
+          <p>نعمل على إضافة منتجات جديدة </p>
           <Link 
             href="/collections"
             style={{
@@ -274,6 +326,6 @@ export default async function CollectionPage({ params }) {
           </Link>
         </div>
       )}
-    </main>
-  );
+  </main>
+);
 }
