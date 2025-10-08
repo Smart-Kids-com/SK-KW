@@ -1,4 +1,3 @@
-"use client";
 
 // app/about-us/page.js
 export const dynamic = "force-dynamic";
