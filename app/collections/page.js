@@ -66,9 +66,7 @@ export default async function CollectionsIndex() {
     </main>
   );
 }
-// app/collections/page.js (تعديل بسيط)
-import { getCollections } from "@/lib/shopify";
-import Link from "next/link";
+
 
 export default async function CollectionsIndex() {
   let collections = await getCollections(100);
