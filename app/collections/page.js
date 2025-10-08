@@ -1,3 +1,4 @@
+// app/collections/page.js
 "use client";
 import { getCollections } from "@/lib/shopify";
 import Link from "next/link";
@@ -78,7 +79,7 @@ export default function CollectionsIndex() {
             {collections.map(collection => (
               <Link
                 key={collection.id}
-                href={`/collections/${collection.handle}`}
+                href={`/collections/${encodeURIComponent(collection.handle)}`}
                 style={{
                   textDecoration: "none",
                   color: "inherit"
@@ -184,7 +185,22 @@ export default function CollectionsIndex() {
                       {collection.title}
                     </h2>
                     
-                    {collection.description && (
+                    {collection.descriptionHtml ? (
+                      <div
+                        style={{
+                          fontSize: "1rem",
+                          color: "#718096",
+                          lineHeight: "1.6",
+                          marginBottom: "1.5rem",
+                          flex: 1,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden"
+                        }}
+                        dangerouslySetInnerHTML={{ __html: collection.descriptionHtml }}
+                      />
+                    ) : collection.description ? (
                       <p style={{
                         fontSize: "1rem",
                         color: "#718096",
@@ -198,7 +214,7 @@ export default function CollectionsIndex() {
                       }}>
                         {collection.description}
                       </p>
-                    )}
+                    ) : null}
 
                     {/* View Collection Button */}
                     <div style={{
