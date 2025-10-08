@@ -214,5 +214,5 @@ const HTML = `
 `;
 
 export default function AboutUsPage() {
-  return <div dangerouslySetInnerHTML={{ __html: HTML }} />;
+  return <div dangerouslySetInnerHTML={'{ __html: HTML }'} />;
 }

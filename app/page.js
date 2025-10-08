@@ -1,7 +1,7 @@
-// app/page.js
-// Headless homepage that mirrors your Shopify index.json (order + sections)
-
+"use client";
 import Link from "next/link";
+import { getProducts, formatKWD } from "@/lib/shopify";
+import { useState, useEffect } from "react";
 
 // ========= إعدادات عامة =========
 // عدّل الـ CDN_BASE لو مسار ملفات متجرك مختلف
