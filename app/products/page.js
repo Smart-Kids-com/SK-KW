@@ -1,4 +1,4 @@
-import { getCollectionByHandle } from "@/lib/shopify";
+import { getProducts } from "@/lib/shopify";
 import { formatKWD } from "@/lib/shopify";
 import Link from "next/link";
 import WishlistButton from "@/components/WishlistButton";
@@ -87,13 +87,11 @@ function AddFromCollectionButton({ product }) {
   );
 }
 
-export default async function CollectionPage({ params }) {
-  const { handle } = params;
-  const collection = await getCollectionByHandle(handle);
+export default async function AllProductsPage() {
+  // Get all products instead of collection-specific products
+  const products = await getProducts(100);
 
-  if (!collection) {
-    notFound();
-  }
+  // No need to check for collection since we're showing all products
 
   return (
     <main style={{ 
