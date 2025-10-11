@@ -7,29 +7,43 @@ import { cookies } from 'next/headers';
 import { createCart, getCart, addLines, updateLines, removeLines } from '@/lib/cart';
 
 const CART_COOKIE = 'cartId';
-const cookieOptions = {
+const cookieOptionsBase = {
   httpOnly: true,
   sameSite: 'lax',
-  secure: true,
+  secure: process.env.NODE_ENV === 'production',
   path: '/',
-  maxAge: 60 * 60 * 24 * 30
+  maxAge: 60 * 60 * 24 * 30 // 30 days
 };
+
+async function ensureCartAndCookie(jar) {
+  const id = jar.get(CART_COOKIE)?.value;
+  if (id) {
+    const cart = await getCart(id).catch(() => null);
+    if (cart?.id) {
+      jar.set(CART_COOKIE, cart.id, cookieOptionsBase);
+      return cart;
+    }
+  }
+  const cart = await createCart({ lines: [], attributes: [] });
+  jar.set(CART_COOKIE, cart.id, cookieOptionsBase);
+  return cart;
+}
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const fromParam = searchParams.get('id');
     const jar = cookies();
-    const id = fromParam || jar.get(CART_COOKIE)?.value;
-    if (!id) return NextResponse.json({ cart: null }, { status: 200 });
 
-    const cart = await getCart(id);
-    if (!cart) {
-      jar.set(CART_COOKIE, '', { ...cookieOptions, maxAge: 0 });
-      return NextResponse.json({ cart: null }, { status: 200 });
+    let cart = null;
+    if (fromParam) {
+      cart = await getCart(fromParam).catch(() => null);
+      if (cart?.id) jar.set(CART_COOKIE, cart.id, cookieOptionsBase);
+    } else {
+      cart = await ensureCartAndCookie(jar);
     }
-    jar.set(CART_COOKIE, cart.id, cookieOptions);
-    return NextResponse.json({ cart }, { status: 200 });
+
+    return NextResponse.json({ cart: cart ?? null }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
@@ -41,7 +55,7 @@ export async function POST(request) {
     const lines = Array.isArray(body?.lines) ? body.lines : [];
     const attributes = Array.isArray(body?.attributes) ? body.attributes : [];
     const cart = await createCart({ lines, attributes });
-    cookies().set(CART_COOKIE, cart.id, cookieOptions);
+    cookies().set(CART_COOKIE, cart.id, cookieOptionsBase);
     return NextResponse.json({ cart }, { status: 201 });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
@@ -53,7 +67,10 @@ export async function PUT(request) {
     const body = await request.json().catch(() => ({}));
     const jar = cookies();
     const id = body?.id || jar.get(CART_COOKIE)?.value;
-    if (!id) return NextResponse.json({ error: 'Missing cart id' }, { status: 400 });
+    if (!id) {
+      const cart = await ensureCartAndCookie(jar);
+      return NextResponse.json({ cart, note: 'new cart created' }, { status: 200 });
+    }
 
     let cart = null;
     if (body?.type === 'add') {
@@ -75,7 +92,7 @@ export async function PUT(request) {
       return NextResponse.json({ error: 'type must be one of add|update|remove' }, { status: 400 });
     }
 
-    jar.set(CART_COOKIE, cart.id, cookieOptions);
+    jar.set(CART_COOKIE, cart.id, cookieOptionsBase);
     return NextResponse.json({ cart }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
@@ -87,14 +104,17 @@ export async function DELETE(request) {
     const body = await request.json().catch(() => ({}));
     const jar = cookies();
     const id = body?.id || jar.get(CART_COOKIE)?.value;
-    if (!id) return NextResponse.json({ error: 'Missing cart id' }, { status: 400 });
+    if (!id) {
+      const cart = await ensureCartAndCookie(jar);
+      return NextResponse.json({ cart, note: 'new cart created' }, { status: 200 });
+    }
 
     const lineIds = Array.isArray(body?.lineIds) ? body.lineIds : [];
     if (!lineIds.length) {
       return NextResponse.json({ error: 'lineIds required for delete' }, { status: 400 });
     }
     const cart = await removeLines(id, lineIds);
-    jar.set(CART_COOKIE, cart.id, cookieOptions);
+    jar.set(CART_COOKIE, cart.id, cookieOptionsBase);
     return NextResponse.json({ cart }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
