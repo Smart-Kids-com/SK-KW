@@ -27,7 +27,7 @@ function LineAttributes({ attrs }) {
 export default async function CartPage() {
   const jar = cookies();
   const cartId = jar.get('cartId')?.value || null;
-  const cart = cartId ? await getCart(cartId) : null;
+  const cart = cartId ? await getCart(cartId).catch(() => null) : null;
 
   if (!cart || !cart.lines?.edges?.length) {
     return (
@@ -79,7 +79,7 @@ export default async function CartPage() {
           الإجمالي: {formatMoney(cart.cost?.totalAmount?.amount, currency)}
         </div>
         <Link
-          href={`/checkout?cartId=${encodeURIComponent(cart.id)}`}
+          href={cart.checkoutUrl || `/checkout?cartId=${encodeURIComponent(cart.id)}`}
           style={{ background: '#111', color: '#fff', padding: '12px 18px', borderRadius: 8, textDecoration: 'none' }}
         >
           إتمام الشراء

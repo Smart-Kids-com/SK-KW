@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getProducts, formatKWD } from "@/lib/shopify";
 import { useState, useEffect } from "react";
 
+const STORE_DOMAIN = process.env.NEXT_PUBLIC_STORE_DOMAIN || "smart-kids.me";
+
 // ========= إعدادات عامة =========
 // عدّل الـ CDN_BASE لو مسار ملفات متجرك مختلف
 // يحوّل shopify://* إلى روابط فعلية + يحوّل روابط كولكشن/برودكت لمسارات موقعك
@@ -10,13 +12,13 @@ function resolveMedia(url) {
   if (!url) return "";
   if (url.startsWith("shopify://shop_images/")) {
     const file = url.replace("shopify://shop_images/", "");
-    return `/cdn/shop/files/${file}`;
+    return `https://${STORE_DOMAIN}/cdn/shop/files/${file}`;
   }
   if (url.startsWith("shopify://files/")) {
     // ملاحظة: ملفات الفيديو/الملفات العامة أحيانًا تبقى على نفس CDN الصور
     // لو ما اشتغل، حط رابط الفيديو المباشر (mp4/mov) زي ما عملت أنت سابقًا.
     const file = url.replace("shopify://files/", "");
-    return `/cdn/shop/files/${file}`;
+    return `https://${STORE_DOMAIN}/cdn/shop/files/${file}`;
   }
   return url; // http(s) عادي
 }
