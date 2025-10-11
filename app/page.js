@@ -553,7 +553,9 @@ function SlideCard({ s }) {
               style={{ margin: 0, fontSize: "1.15rem", fontWeight: 700 }}
               // لو خايف من روابط داخل heading تعمل nested links، استخدم السطر التالي بدلًا من السطر الحالي:
               // dangerouslySetInnerHTML={{ __html: (s.heading || "").replace(/<\/?a[^>]*>/g, "") }}
-              dangerouslySetInnerHTML={{ __html: s.heading }}
+              dangerouslySetInnerHTML={{
+              __html: (s.heading || "").replace(/<\/?a[^>]*>/g, "")
+            }}
             />
           )}
 
