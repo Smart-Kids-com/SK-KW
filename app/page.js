@@ -5,20 +5,18 @@ import { useState, useEffect } from "react";
 
 // ========= إعدادات عامة =========
 // عدّل الـ CDN_BASE لو مسار ملفات متجرك مختلف
-const CDN_BASE = "https://cdn.shopify.com/s/files/1/0697/3318/7805";
-
 // يحوّل shopify://* إلى روابط فعلية + يحوّل روابط كولكشن/برودكت لمسارات موقعك
 function resolveMedia(url) {
   if (!url) return "";
   if (url.startsWith("shopify://shop_images/")) {
     const file = url.replace("shopify://shop_images/", "");
-    return `${CDN_BASE}/files/${file}`;
+    return `/cdn/shop/files/${file}`;
   }
   if (url.startsWith("shopify://files/")) {
     // ملاحظة: ملفات الفيديو/الملفات العامة أحيانًا تبقى على نفس CDN الصور
     // لو ما اشتغل، حط رابط الفيديو المباشر (mp4/mov) زي ما عملت أنت سابقًا.
     const file = url.replace("shopify://files/", "");
-    return `${CDN_BASE}/files/${file}`;
+    return `/cdn/shop/files/${file}`;
   }
   return url; // http(s) عادي
 }
