@@ -9,6 +9,6 @@ export default function HomePage() {
     <main>
       <HomeSlider slides={slidesPrimary} />
       <HomeSlider slides={slidesSecondary} variant="secondary" />
-    </main>
-  );
+  </main>
+);
 }
