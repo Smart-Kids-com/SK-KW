@@ -1,6 +1,4 @@
 "use client";
-import HomeSlider from "@/components/HomeSlider";
-import { AUTOPLAY_MS, slidesPrimary, slidesSecondary } from "@/lib/homepageData";
 import Link from "next/link";
 import { useMemo } from "react";
 
