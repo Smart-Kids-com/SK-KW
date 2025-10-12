@@ -1,0 +1,148 @@
+.slider {
+  position: relative;
+}
+
+/* المسار الذي يحتوي السلايدز */
+.track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  gap: 12px;
+  padding-bottom: 8px;
+}
+
+/* كل سلايد */
+.slide {
+  flex: 0 0 85%;
+  max-width: 85%;
+  scroll-snap-align: center;
+}
+
+/* على الديسكتوب نخليهم في صف سوا */
+@media (min-width: 992px) {
+  .track {
+    overflow-x: visible;
+    gap: 16px;
+  }
+  .slide {
+    flex: 1 1 auto;
+    max-width: unset;
+  }
+}
+
+/* الكارد العام */
+.card {
+  display: block;
+  border: 1px solid rgba(148, 34, 175, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  color: #111;
+  text-decoration: none;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+}
+
+/* نسبة الصورة */
+.ratio {
+  position: relative;
+  padding-bottom: 56%; /* 16:9 */
+}
+
+/* الصورة */
+.media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* جسم الكارد */
+.body {
+  padding: 12px;
+}
+
+.ttl {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.sub {
+  margin: 0.45rem 0 0;
+  color: #718096;
+}
+
+/* زر */
+.btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 0.65rem 1rem;
+  background: #9422af;
+  color: #fff;
+  border-radius: 10px;
+  font-weight: 700;
+  border: 2px solid #9422af;
+  text-decoration: none;
+}
+
+/* الدوتس */
+.dotRow {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.dot.active {
+  background: #111;
+}
+
+/* الأسهم */
+.arrow {
+  position: absolute;
+  top: 42%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: none; /* موبايل مخفي */
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.arrow.left {
+  left: 8px;
+}
+
+.arrow.right {
+  right: 8px;
+}
+
+/* على الديسكتوب نُظهر الأسهم */
+@media (min-width: 992px) {
+  .arrow {
+    display: flex;
+  }
+}
