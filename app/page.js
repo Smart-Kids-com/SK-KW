@@ -1,15 +1,15 @@
 // app/page.js
 "use client";
 
-import { slidesPrimary, slidesSecondary, homepageData, } from "@/lib/homepageData";
+import {homepage} from "@/lib/homepageData";
 import HomeSlider from "@/components/HomeSlider";
 
 
 export default function HomePage() {
   return (
     <main>
-      <HomeSlider slides={slidesPrimary} />
-      <HomeSlider slides={slidesSecondary} variant="secondary" />
+      <HomeSlider slides={homepage.slidesPrimary} />
+      <HomeSlider slides={homepage.slidesSecondary} variant="secondary" />
   </main>
 );
 }
