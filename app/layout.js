@@ -117,8 +117,14 @@ export default function RootLayout({ children }) {
         <GoogleAnalytics GA_MEASUREMENT_ID="G-XXXXXXXXXX" />
         <StructuredData />
         <CartDrawerProvider>
+          {/* ← طبقة التأثير العائمة على كل الصفحات */}
+          <OverlayChrome />
+          
           <Header />
-          <main>{children}</main>
+          {/* مسافة علويّة/سفليّة بسيطة حتى لا يُغطّي الـ overlay المحتوى */}
+          <main style={{ paddingTop: 'calc(56px + 12px)', paddingBottom: 'calc(64px + 16px)' }}>
+            {children}
+          </main>
           <Footer />
           <CartDrawer />
           <WhatsAppFloat />
