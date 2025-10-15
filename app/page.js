@@ -61,7 +61,7 @@ const INDEX_DATA = {
             heading_size: "h1",
             subheading: "أصوات الحيوانات+ يوم في حياة طفل",
             button_label: "اطلب العرض",
-            link: "shopify://collections/عروض-القصص-التفاعلية",
+            link: "shopify://collections",
             button_style_secondary: true,
             box_align: "middle-center",
             show_text_box: true,
@@ -216,7 +216,7 @@ const INDEX_DATA = {
             heading_size: "h2",
             subheading: "",
             button_label: "احصل على العرض الآن",
-            link: "shopify://collections/عروض-القصص-التفاعلية",
+            link: "shopify://collections",
             button_style_secondary: true,
             box_align: "bottom-center",
             show_text_box: true,
@@ -232,11 +232,11 @@ const INDEX_DATA = {
             image:
               "shopify://shop_images/Slidshow_6ce563f1-be3b-4998-b5ce-53d5ea447d37.png",
             heading:
-              '<a href="/collections/عروض-القصص-التفاعلية" title="عروض القصص التفاعلية">Discover The Kids 3D Stories</a>',
+              '<a href="/collections" title="عروض القصص التفاعلية">Discover The Kids 3D Stories</a>',
             heading_size: "h2",
             subheading: "<strong>القصص ثلاثية الأبعاد</strong>",
             button_label: "اطلب العرض",
-            link: "shopify://collections/عروض-القصص-التفاعلية",
+            link: "shopify://collections",
             button_style_secondary: true,
             box_align: "middle-center",
             show_text_box: true,
@@ -251,11 +251,11 @@ const INDEX_DATA = {
           settings: {
             image: "shopify://shop_images/c376a0415b19dc4b35ab2f32cf34bb90.png",
             heading:
-              '<a href="/collections/قصصي-الصوتية-المسموعة" title="قصصي الصوتية المسموعة"><strong>Audio storybooks</strong></a>',
+              '<a href="/collections" title="قصصي الصوتية المسموعة"><strong>Audio storybooks</strong></a>',
             heading_size: "h2",
             subheading: "<strong>أصوات الحيوانات</strong>",
             button_label: "اطلبها الآن",
-            link: "shopify://collections/قصصي-الصوتية-المسموعة",
+            link: "shopify://collections",
             button_style_secondary: true,
             box_align: "middle-center",
             show_text_box: true,
@@ -327,7 +327,7 @@ const INDEX_DATA = {
           type: "buttons",
           settings: {
             button_label_1: "تصفح المكتبة الصوتية",
-            button_link_1: "shopify://collections/قصصي-الصوتية-المسموعة",
+            button_link_1: "shopify://collections",
             button_style_secondary_1: true,
             button_label_2: "",
             button_link_2:
@@ -367,7 +367,7 @@ const INDEX_DATA = {
           type: "buttons",
           settings: {
             button_label_1: "",
-            button_link_1: "shopify://collections/قصصي-الصوتية-المسموعة",
+            button_link_1: "shopify://collections",
             button_style_secondary_1: true,
             button_label_2: "تصفح عرض ال 12 قصة تفاعلية",
             button_link_2:
