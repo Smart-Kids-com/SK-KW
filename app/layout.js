@@ -1,20 +1,27 @@
-import HomeSlider from '@/components/HomeSlider';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-/**
- * Layout component that wraps its children with a div and includes OverlayChrome.
- *
- * @param {Object} props - The props object.
- * @param {React.ReactNode} props.children - The content to be rendered inside the layout.
- * @returns {JSX.Element} The rendered layout component.
- */
-export default function Layout({ children }) {
+// app/layout.js
+import "../styles/globals.css";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import Analytics from "@/components/Analytics";
+import OverlayChrome from "@/components/OverlayChrome";
+import WhatsAppFloat from "@/components/WhatsAppFloat";
+
+export const metadata = {
+  title: "Smart Kids KW",
+  description: "متجر تعليمي للأطفال",
+};
+
+export default function RootLayout({ children }) {
   return (
-    <div>
-      <Header />
-      <HomeSlider />
-      <main>{children}</main>
-      <Footer />
-    </div>
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
+      <body>
+        <Analytics />
+        <OverlayChrome />
+        <Header />
+        {children}
+        <Footer />
+        <WhatsAppFloat />
+      </body>
+    </html>
   );
 }
