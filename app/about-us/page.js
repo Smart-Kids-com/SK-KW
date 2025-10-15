@@ -208,7 +208,7 @@ const HTML = `
         <a class="btn ghost" href="/shipping-policy">سياسة الشحن</a>
         <a class="btn ghost" href="/refund-policy">الاسترجاع والاستبدال</a>
       </div>
-    </div>
+    </div>  
   </section>
 </div>
 `;
