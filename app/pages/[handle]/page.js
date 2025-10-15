@@ -25,7 +25,7 @@ export default async function StaticPage({ params }) {
       {isContact && (
         <form
           method="post"
-          action="https://smart-kids.me/contact#contact_form"
+          action="/contact"
           style={{ marginTop: 24, display: "grid", gap: 12, maxWidth: 700 }}
         >
           <input type="hidden" name="form_type" value="contact" />
