@@ -12,11 +12,11 @@ export default async function Policy({ params }) {
   const QUERY = /* GraphQL */ `
     query Policies($language: LanguageCode!) @inContext(language: $language) {
       shop {
-        privacyPolicy { title body }
-        refundPolicy { title body }
-        termsOfService { title body }
-        shippingPolicy { title body }
-        contactInformation { title body }
+        privacyPolicy { title body } سياسة الخصوصية
+        refundPolicy { title body } سياسة الاسترجاع والاستبدال
+        termsOfService { title body } شروط الخدمة
+        shippingPolicy { title body } سياسة الشحن
+        contactInformation { title body } معلومات التواصل
       }
     }
   `;
