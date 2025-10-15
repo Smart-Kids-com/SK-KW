@@ -1,8 +1,5 @@
-import OverlayChrome from '@/components/OverlayChrome';
-import homepagedata from '@/lib/homepageData';
+import HomeSlider from '@/components/HomeSlider';
 import Header from '@/components/Header';
-import '@/styles/globals.css';
-import shopifyHomeTemplate from '@/lib/shopifyHomeTemplate';
 /**
  * Layout component that wraps its children with a div and includes OverlayChrome.
  *
@@ -15,7 +12,7 @@ export default function Layout({ children }) {
     <div>
       <OverlayChrome />
       <Header />
-      {shopifyHomeTemplate(homepagedata)}
+      <HomeSlider />
       <main>{children}</main>
     </div>
   );
