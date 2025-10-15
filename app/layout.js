@@ -1,6 +1,8 @@
 import OverlayChrome from '@/components/OverlayChrome';
 import homepagedata from '@/lib/homepageData';
 import Header from '@/components/Header';
+import '@/styles/globals.css';
+import HomepageSlideshow from '@/components/HomepageSlideshow';
 /**
  * Layout component that wraps its children with a div and includes OverlayChrome.
  *
@@ -13,7 +15,9 @@ export default function Layout({ children }) {
     <div>
       <OverlayChrome />
       <Header />
+
       <main>{children}</main>
+      <HomepageSlideshow slides={homepagedata.slides} />
     </div>
   );
 }
