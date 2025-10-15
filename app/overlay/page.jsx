@@ -90,7 +90,8 @@ export default function Page() {
         <div className="chrome">
           <header ref={topRef} className="top" aria-label="شريط علوي">
             <div className="bar">
-              <strong style={{ fontWeight: 900, fontSize: 16 }}>Smart — Liquid</strong>
+              <strong style={{ fontWeight: 900, fontSize: 16 }}>Smart</strong> Smart kids kuwait
+              <span style={{ marginInline: 8 }}>|</span>
               <nav style={{ display: "flex", gap: 8 }}>
                 <a className="btn" href="#">بحث</a>
                 <a className="btn" href="#">حساب</a>
