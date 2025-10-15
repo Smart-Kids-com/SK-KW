@@ -1,5 +1,6 @@
 import HomeSlider from '@/components/HomeSlider';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 /**
  * Layout component that wraps its children with a div and includes OverlayChrome.
  *
@@ -13,6 +14,7 @@ export default function Layout({ children }) {
       <Header />
       <HomeSlider />
       <main>{children}</main>
+      <Footer />
     </div>
   );
 }
