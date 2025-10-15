@@ -204,7 +204,7 @@ const HTML = `
       </div>
       <p class="muted" style="margin:0;"><br></p>
       <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;">
-        <a class="btn ghost" href="mailto:Kuwait-info@smart-kids.me">Kuwait-info@smart-kids.me</a>
+        <a class="btn ghost" href="mailto:kuwait-info@smart-kids.me">kuwait-info@smart-kids.me</a>
         <a class="btn ghost" href="/shipping-policy">سياسة الشحن</a>
         <a class="btn ghost" href="/refund-policy">الاسترجاع والاستبدال</a>
       </div>
