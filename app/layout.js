@@ -1,4 +1,4 @@
-
+import OverlayChrome from '@/components/OverlayChrome';
 
 /**
  * Layout component that wraps its children with a div and includes OverlayChrome.
@@ -11,7 +11,7 @@ export default function Layout({ children }) {
   return (
     <div>
       <OverlayChrome />
-      {children}
+      <main>{children}</main>
     </div>
   );
 }
