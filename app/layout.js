@@ -1,135 +1,128 @@
-import OverlayChrome from "@/components/OverlayChrome";
-import '../styles/globals.css';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import WhatsAppFloat from '../components/WhatsAppFloat';
-import StructuredData from '../components/StructuredData';
-import { GoogleAnalytics } from '../components/Analytics';
-import { CartDrawerProvider } from '../lib/CartDrawerContext';
-import CartDrawer from '../components/CartDrawer';
+"use client";
 
-export const metadata = {
-  title: {
-    default: 'Smart Kids KW - ألعاب تعليمية وقصص تفاعلية للأطفال في الكويت',
-    template: '%s | Smart Kids KW'
-  },
-  description: 'متجر Smart Kids الكويت - أفضل الألعاب التعليمية والقصص التفاعلية للأطفال. تسوق الآن واحصل على توصيل مجاني للطلبات أكثر من 20 د.ك',
-  keywords: [
-    'ألعاب تعليمية',
-    'قصص أطفال',
-    'ألعاب أطفال الكويت',
-    'تعليم الأطفال',
-    'قصص تفاعلية',
-    'Smart Kids',
-    'منتسوري',
-    'تنمية مهارات الطفل',
-    'ألعاب ذكية',
-    'كتب أطفال'
-  ],
-  authors: [{ name: 'Smart Kids KW' }],
-  creator: 'Smart Kids KW',
-  publisher: 'Smart Kids KW',
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  metadataBase: new URL('https://smartkidskw.com'),
-  alternates: {
-    canonical: '/',
-    languages: {
-      'ar-KW': '/',
-      'ar': '/',
-    },
-  },
-  openGraph: {
-    title: 'Smart Kids KW - ألعاب تعليمية وقصص تفاعلية للأطفال',
-    description: 'أفضل الألعاب التعليمية والقصص التفاعلية للأطفال في الكويت. توصيل مجاني للطلبات أكثر من 20 د.ك',
-    url: 'https://smartkidskw.com',
-    siteName: 'Smart Kids KW',
-    images: [
-      {
-        url: '/images/smart-kids-logo-og.png',
-        width: 1200,
-        height: 630,
-        alt: 'Smart Kids KW - ألعاب تعليمية للأطفال',
-      }
-    ],
-    locale: 'ar_KW',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Smart Kids KW - ألعاب تعليمية للأطفال',
-    description: 'أفضل الألعاب التعليمية والقصص التفاعلية للأطفال في الكويت',
-    images: ['/images/smart-kids-logo-og.png'],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  icons: {
-    icon: [
-      { url: '/favicon.ico' },
-      { url: '/icon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/icon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
-    ],
-    other: [
-      {
-        rel: 'mask-icon',
-        url: '/safari-pinned-tab.svg',
-        color: '#9422af',
-      },
-    ],
-  },
-  manifest: '/site.webmanifest',
-  other: {
-    'msapplication-TileColor': '#9422af',
-    'theme-color': '#9422af',
-    'apple-mobile-web-app-capable': 'yes',
-    'apple-mobile-web-app-status-bar-style': 'default',
-    'apple-mobile-web-app-title': 'Smart Kids KW',
-    'mobile-web-app-capable': 'yes',
-  },
-};
+import { useEffect, useRef } from "react";
 
-export default function RootLayout({ children }) {
+export default function Page() {
+  const topRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const el = topRef.current;
+    if (!el) return;
+
+    const onScroll = () => {
+      const y = window.scrollY || document.documentElement.scrollTop || 0;
+      if (y > 4) el.classList.add("scrolled");
+      else el.classList.remove("scrolled");
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <html lang="ar" dir="rtl">
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      </head>
-      <body>
-        <GoogleAnalytics GA_MEASUREMENT_ID="G-XXXXXXXXXX" />
-        <StructuredData />
-        <CartDrawerProvider>
-          {/* ← طبقة التأثير العائمة على كل الصفحات */}
-          <OverlayChrome />
-          
-          <Header />
-          {/* مسافة علويّة/سفليّة بسيطة حتى لا يُغطّي الـ overlay المحتوى */}
-          <main style={{ paddingTop: 'calc(56px + 12px)', paddingBottom: 'calc(64px + 16px)' }}>
-            {children}
-          </main>
-          <Footer />
-          <CartDrawer />
-          <WhatsAppFloat />
-        </CartDrawerProvider>
-      </body>
-    </html>
+    <div dir="rtl" lang="ar">
+      <style jsx global>{`
+        @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap");
+
+        :root{
+          --chrome-h:56px; --tabbar-h:64px;
+          --bg-0:#0f0a17; --bg-1:#1a1226; --ink:#fff;
+          --lg-blur:14px; --lg-sat:150%; --lg-regular:.20; --lg-clear:.08; --lg-brd:.26;
+        }
+        *{box-sizing:border-box}
+        html,body{margin:0}
+        body{font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.65}
+
+        /* خلفية عامة */
+        .wrap{
+          min-height:100svh;
+          background:
+            radial-gradient(900px 520px at 85% -10%, #3a2163 0%, rgba(58,33,99,0) 60%),
+            linear-gradient(180deg, var(--bg-1), var(--bg-0));
+          color:var(--ink);
+        }
+
+        /* طبقة Overlay فقط */
+        .chrome{position:fixed; inset-inline:0; z-index:1000; pointer-events:none}
+        .chrome *{pointer-events:auto}
+
+        .top{top:0; padding:8px 12px; height:var(--chrome-h); display:flex; align-items:center; justify-content:center}
+        .bar{
+          width:min(100%,1100px); border-radius:12px; padding:10px 12px;
+          display:flex; align-items:center; justify-content:space-between; gap:10px;
+          border:1px solid rgba(255,255,255,var(--lg-brd));
+          -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat));
+                  backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat));
+          background:rgba(255,255,255,var(--lg-clear));
+          box-shadow:0 14px 32px rgba(0,0,0,.28);
+          transition:background .25s ease;
+        }
+        .scrolled .bar{ background:rgba(255,255,255,var(--lg-regular)); }
+
+        .bottom{bottom:0; padding:8px 12px; height:var(--tabbar-h); display:flex; align-items:flex-start; justify-content:center}
+        .tab{
+          width:min(100%,560px); border-radius:14px; padding:8px;
+          display:flex; align-items:center; justify-content:space-around;
+          border:1px solid rgba(255,255,255,var(--lg-brd));
+          -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat));
+                  backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat));
+          background:rgba(255,255,255,var(--lg-clear));
+          box-shadow:0 14px 32px rgba(0,0,0,.28);
+        }
+        .tab a{color:#fff; text-decoration:none; padding:10px 14px; border-radius:12px}
+        .tab a.is-active{background:rgba(255,255,255,.14)}
+
+        /* محتوى تحت الـ overlay (بدون منتجات) */
+        .content{ padding-top:calc(var(--chrome-h) + 12px); padding-bottom:calc(var(--tabbar-h) + 16px); }
+        .container{ max-width:1100px; margin:0 auto; padding:24px 16px; }
+        .card{
+          border-radius:16px; padding:16px;
+          background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+        }
+
+        /* مساحة تمرير لتجربة التأثير */
+        .spacer{ height:160vh }
+      `}</style>
+
+      <div className="wrap">
+        {/* Overlay */}
+        <div className="chrome">
+          <header ref={topRef} className="top" aria-label="شريط علوي">
+            <div className="bar">
+              <strong style={{ fontWeight: 900, fontSize: 16 }}>Smart — Liquid</strong>
+              <nav style={{ display: "flex", gap: 8 }}>
+                <a className="btn" href="#">بحث</a>
+                <a className="btn" href="#">حساب</a>
+                <a className="btn" href="#">سلة</a>
+              </nav>
+            </div>
+          </header>
+
+          <footer className="bottom" aria-label="تاب بار">
+            <nav className="tab">
+              <a className="is-active" href="#">الرئيسية</a>
+              <a href="#">المفضلة</a>
+              <a href="#">السلة</a>
+              <a href="#">الحساب</a>
+            </nav>
+          </footer>
+        </div>
+
+        {/* محتوى تجريبي بسيط فقط */}
+        <main className="content" aria-label="المحتوى">
+          <div className="container">
+            <div className="card">
+              <h1 style={{margin:"0 0 .5rem", fontWeight:900}}>تأثير Liquid Overlay</h1>
+              <p style={{margin:0, opacity:.9}}>
+                هذا مجرد محتوى بسيط لاختبار التأثير. مرّر الصفحة لأعلى/أسفل لتلاحظ تغيّر شريط الأعلى.
+              </p>
+            </div>
+
+            <div className="spacer" aria-hidden="true" />
+          </div>
+        </main>
+      </div>
+    </div>
   );
 }
