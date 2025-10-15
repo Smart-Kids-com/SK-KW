@@ -1,5 +1,5 @@
 import OverlayChrome from '@/components/OverlayChrome';
-
+import './globals.css';
 /**
  * Layout component that wraps its children with a div and includes OverlayChrome.
  *
