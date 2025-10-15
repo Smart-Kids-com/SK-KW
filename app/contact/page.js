@@ -344,7 +344,7 @@ export default function ContactPage() {
               قد تجد إجابة سؤالك في قسم الأسئلة الشائعة
             </p>
             <a 
-              href="/faq" 
+              href="/about-us" 
               style={{
                 display: "inline-block",
                 padding: "0.75rem 1.5rem",
