@@ -202,7 +202,7 @@ export default function Footer() {
 
         {/* Payment Methods */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem', textAlign: 'center' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', fontSize: '0.9rem', color: 'rgba(63, 0, 51, 0.8)' }}>
             <img src="https://cdn.shopify.com/shopifycloud/checkout-web/assets/1636e49a98c1bfc06ec1.svg" alt="KNET" style={{ width: 51, height: 28 }} />
             <img src="https://cdn.shopify.com/shopifycloud/checkout-web/assets/c1.en/assets/mastercard.1c4_lyMp.svg" alt="MasterCard" style={{ width: 51, height: 28 }} />
             <img src="https://cdn.shopify.com/shopifycloud/checkout-web/assets/c1.en/assets/visa.sxIq5Dot.svg" alt="VISA" style={{ width: 51, height: 28 }} />
