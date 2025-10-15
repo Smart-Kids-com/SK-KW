@@ -10,10 +10,18 @@ export default function OverlayChrome() {
     const el = topRef.current;
     if (!el) return;
 
+    const THRESHOLD = 120; // يظهر بعد 120px تمرير
+
     const onScroll = () => {
       const y = window.scrollY || document.documentElement.scrollTop || 0;
-      if (y > 4) el.classList.add("scrolled");
-      else el.classList.remove("scrolled");
+      // تبديل حالتين: نشِط/غير نشِط + تغميق بسيط
+      if (y > THRESHOLD) {
+        el.classList.add("active");
+        el.classList.add("scrolled");
+      } else {
+        el.classList.remove("active");
+        if (y <= 4) el.classList.remove("scrolled");
+      }
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -23,7 +31,6 @@ export default function OverlayChrome() {
 
   return (
     <>
-      {/* CSS بسيط بدون styled-jsx */}
       <style>{`
         :root{
           --chrome-h:56px;
@@ -34,11 +41,16 @@ export default function OverlayChrome() {
         /* طبقة التأثير فقط (لا تمنع اللمس) */
         .lg-chrome{ position:fixed; left:0; right:0; z-index:9999; pointer-events:none; }
 
+        /* الشريط العلوي */
         .lg-top{
-          position:fixed; top:0; padding:8px 12px; height:var(--chrome-h);
+          position:fixed; top:0; left:0; right:0;
+          padding:8px 12px; height:var(--chrome-h);
           display:flex; align-items:center; justify-content:center;
-          left:0; right:0;
+          /* افتراضيًا مخفي */
+          opacity:0; transform: translateY(-10px); transition: opacity .25s ease, transform .25s ease;
         }
+        /* يظهر بعد التمرير */
+        .lg-top.active{ opacity:1; transform: translateY(0); }
 
         .lg-bar{
           width:min(100%,1100px);
@@ -50,14 +62,13 @@ export default function OverlayChrome() {
           box-shadow: 0 14px 32px rgba(0,0,0,.28);
           transition: background .25s ease;
         }
-
-        /* يغمق قليلاً عند أول تمرير */
+        /* تغميق خفيف */
         .scrolled .lg-bar{ background: rgba(255,255,255,var(--lg-regular)); }
 
         /* لا نص ولا أزرار إطلاقًا */
         .lg-bar > *{ display:none !important; }
 
-        /* تحسين موبايل */
+        /* موبايل */
         @media (max-width:640px){
           :root{ --chrome-h:52px; }
           .lg-top{ padding-top: calc(env(safe-area-inset-top) + 6px); padding-inline:8px; }
