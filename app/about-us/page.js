@@ -91,8 +91,8 @@ const HTML = `
         <h6 class="lead" style="text-align:right;"><strong>في الأطفال المبتكرون <span style="color:#08280e;">نؤمن أن القراءة رحلة تبدأ بسؤال صغير. نقدّم منتجات تعليمية مبتكرة وترفيهية للأطفال، بتركيز على تنمية المهارات اللغوية والحركية والعقلية، ومحتوى عربيّ عالي الجودة يُنمّي الفضول والخيال، ويُسعد الأطفال والأهل معًا.</span></strong></h6>
         <div class="ph"><img decoding="async" alt="بانر المتجر" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Store__png.jpg?v=1757870508"></div>
         <div class="btns">
-          <a href="https://smart-kids.me" class="btn">تسوّق الآن</a>
-          <a href="https://smart-kids.me/policies/contact-information" class="btn ghost">تواصل معنا</a>
+          <a href="/" class="btn">تسوّق الآن</a>
+<a href="/policies/contact-information" class="btn ghost">تواصل معنا</a>
         </div>
       </div>
     </div>
@@ -188,8 +188,8 @@ const HTML = `
         <h2 style="margin:0;">جاهزين نختار سوي أول كتاب؟</h2>
         <p style="margin:0 0 8px;">تواصل معنا على واتساب لأي استفسار أو ساعدنا نرشّح لك المناسب لعمر طفلك.</p>
         <div class="row">
-          <a class="btn" href="https://wa.me/" rel="noopener" target="_blank">تحدث معنا الآن</a>
-          <a class="btn ghost" href="https://smart-kids.me/policies/contact-information">معلومات التواصل</a>
+          <a class="btn" href="https://wa.me/96550424642" rel="noopener" target="_blank">تحدث معنا الآن</a>
+          <a class="btn ghost" href="/policies/contact-information">معلومات التواصل</a>
         </div>
       </div>
     </section>
@@ -214,5 +214,5 @@ const HTML = `
 `;
 
 export default function AboutUsPage() {
-  return <div dangerouslySetInnerHTML={'{ __html: HTML }'} />;
+  return <div dangerouslySetInnerHTML={{ __html: HTML }} />;
 }

@@ -238,8 +238,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <strong>البريد الإلكتروني</strong><br/>
-                  <a href="mailto:info@smartkidskw.com" style={{ color: "#9422af", textDecoration: "none" }}>
-                    info@smartkidskw.com
+                  <a href="mailto:kuwait-info@smart-kids.me" style={{ color: "#9422af", textDecoration: "none" }}>
+                    kuwait-info@smart-kids.me
                   </a>
                 </div>
               </div>
