@@ -46,8 +46,8 @@ export default function OverlayChrome() {
           position:fixed; top:0; left:0; right:0;
           padding:8px 12px; height:var(--chrome-h);
           display:flex; align-items:center; justify-content:center;
-          /* افتراضيًا مخفي */
-          opacity:0; transform: translateY(-10px); transition: opacity .25s ease, transform .25s ease;
+          opacity:0; transform: translateY(-10px);
+          transition: opacity .25s ease, transform .25s ease;
         }
         /* يظهر بعد التمرير */
         .lg-top.active{ opacity:1; transform: translateY(0); }
@@ -74,6 +74,9 @@ export default function OverlayChrome() {
           .lg-top{ padding-top: calc(env(safe-area-inset-top) + 6px); padding-inline:8px; }
           .lg-bar{ padding:8px 10px; border-radius:10px; }
         }
+
+        /* إخفاء التأثير بالكامل */
+        .lg-chrome{ display: none !important; }
       `}</style>
 
       {/* شريط زجاجي بصري فقط */}
