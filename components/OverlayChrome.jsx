@@ -23,62 +23,53 @@ export default function OverlayChrome() {
 
   return (
     <>
-      <style jsx global>{`
+      {/* CSS بسيط بدون styled-jsx */}
+      <style>{`
         :root{
-          --chrome-h:56px; --tabbar-h:64px;
-          --lg-blur:14px; --lg-sat:150%; --lg-regular:.20; --lg-clear:.08; --lg-brd:.26;
+          --chrome-h:56px;
+          --lg-blur:14px; --lg-sat:150%;
+          --lg-regular:.20; --lg-clear:.08; --lg-brd:.26;
         }
-        .lg-chrome{position:fixed; inset-inline:0; z-index:1000; pointer-events:none}
-        .lg-chrome *{pointer-events:auto}
 
-        .lg-top{top:0; padding:8px 12px; height:var(--chrome-h); display:flex; align-items:center; justify-content:center}
+        /* طبقة التأثير فقط (لا تمنع اللمس) */
+        .lg-chrome{ position:fixed; left:0; right:0; z-index:9999; pointer-events:none; }
+
+        .lg-top{
+          position:fixed; top:0; padding:8px 12px; height:var(--chrome-h);
+          display:flex; align-items:center; justify-content:center;
+          left:0; right:0;
+        }
+
         .lg-bar{
-          width:min(100%,1100px); border-radius:12px; padding:10px 12px;
-          display:flex; align-items:center; justify-content:space-between; gap:10px;
+          width:min(100%,1100px);
+          border-radius:12px; padding:10px 12px;
           border:1px solid rgba(255,255,255,var(--lg-brd));
-          -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat));
-                  backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat));
-          background:rgba(255,255,255,var(--lg-clear));
-          box-shadow:0 14px 32px rgba(0,0,0,.28);
-          transition:background .25s ease;
+          -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat));
+                  backdrop-filter:  blur(var(--lg-blur)) saturate(var(--lg-sat));
+          background: rgba(255,255,255,var(--lg-clear));
+          box-shadow: 0 14px 32px rgba(0,0,0,.28);
+          transition: background .25s ease;
         }
-        .scrolled .lg-bar{ background:rgba(255,255,255,var(--lg-regular)); }
 
-        .lg-bottom{bottom:0; padding:8px 12px; height:var(--tabbar-h); display:flex; align-items:flex-start; justify-content:center}
-        .lg-tab{
-          width:min(100%,560px); border-radius:14px; padding:8px;
-          display:flex; align-items:center; justify-content:space-around;
-          border:1px solid rgba(255,255,255,var(--lg-brd));
-          -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat));
-                  backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat));
-          background:rgba(255,255,255,var(--lg-clear));
-          box-shadow:0 14px 32px rgba(0,0,0,.28);
+        /* يغمق قليلاً عند أول تمرير */
+        .scrolled .lg-bar{ background: rgba(255,255,255,var(--lg-regular)); }
+
+        /* لا نص ولا أزرار إطلاقًا */
+        .lg-bar > *{ display:none !important; }
+
+        /* تحسين موبايل */
+        @media (max-width:640px){
+          :root{ --chrome-h:52px; }
+          .lg-top{ padding-top: calc(env(safe-area-inset-top) + 6px); padding-inline:8px; }
+          .lg-bar{ padding:8px 10px; border-radius:10px; }
         }
-        .lg-tab a{color:#fff; text-decoration:none; padding:10px 14px; border-radius:12px}
-        .lg-tab a.is-active{background:rgba(255,255,255,.14)}
       `}</style>
 
-      <div className="lg-chrome" aria-hidden="false">
-        <header ref={topRef} className="lg-top" aria-label="شريط علوي">
-          <div className="lg-bar">
-            <strong style={{ fontWeight: 900, fontSize: 16 }}>Smart — Liquid</strong>
-            <nav style={{ display: "flex", gap: 8 }}>
-              <a className="lg-btn" href="#">بحث</a>
-              <a className="lg-btn" href="#">حساب</a>
-              <a className="lg-btn" href="#">سلة</a>
-            </nav>
-          </div>
+      {/* شريط زجاجي بصري فقط */}
+      <div className="lg-chrome" aria-hidden="true">
+        <header ref={topRef} className="lg-top">
+          <div className="lg-bar"></div>
         </header>
-
-        {/* اختياري: لو لا تريد التاب السفلي لاحقًا أخبرني وأرسل نسخة بدونه */}
-        <footer className="lg-bottom" aria-label="تاب بار">
-          <nav className="lg-tab">
-            <a className="is-active" href="#">الرئيسية</a>
-            <a href="#">المفضلة</a>
-            <a href="#">السلة</a>
-            <a href="#">الحساب</a>
-          </nav>
-        </footer>
       </div>
     </>
   );
