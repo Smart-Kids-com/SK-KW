@@ -1,5 +1,6 @@
 // app/layout.js (Root Layout - Server Component)
-import './globals.css';
+
+import homepageData from '@/lib/homepageData';
 
 export const metadata = {
   title: 'Smart Kids KW',
