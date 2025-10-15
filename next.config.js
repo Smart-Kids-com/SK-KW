@@ -1,8 +1,10 @@
+// next.config.js
 const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -10,15 +12,28 @@ const nextConfig = {
     };
     return config;
   },
+
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'cdn.shopify.com', pathname: '/s/files/**' }, // Shopify
       { protocol: 'https', hostname: 'smartkidskw.com', pathname: '/**' },         // موقعك
     ],
   },
+
   env: {
     SHOPIFY_STORE_DOMAIN: process.env.SHOPIFY_STORE_DOMAIN,
     SHOPIFY_STOREFRONT_API_TOKEN: process.env.SHOPIFY_STOREFRONT_API_TOKEN,
   },
+
+  async redirects() {
+    return [
+      // فهرس السياسات → صفحة تواصل (مؤقت)
+      { source: '/policies', destination: '/contact-information', permanent: false },
+
+      // أي سياسة تحت /policies/... → بدون /policies
+      { source: '/policies/:path*', destination: '/:path*', permanent: true },
+    ];
+  },
 };
+
 module.exports = nextConfig;
