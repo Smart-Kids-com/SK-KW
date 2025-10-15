@@ -10,7 +10,6 @@ import Header from '@/components/Header';
 export default function Layout({ children }) {
   return (
     <div>
-      <OverlayChrome />
       <Header />
       <HomeSlider />
       <main>{children}</main>
