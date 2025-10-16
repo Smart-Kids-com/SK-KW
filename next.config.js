@@ -15,8 +15,8 @@ const nextConfig = {
 
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'cdn.shopify.com', pathname: '/s/files/**' }, // Shopify
-      { protocol: 'https', hostname: 'smartkidskw.com', pathname: '/**' },         // موقعك
+      { protocol: 'https', hostname: 'cdn.shopify.com', pathname: '/s/files/' }, // Shopify
+      { protocol: 'https', hostname: 'smartkidskw.com', pathname: '/' },         // موقعك
     ],
   },
 
