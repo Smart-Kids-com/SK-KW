@@ -1,13 +1,6 @@
 "use client";
 import Link from "next/link";
-import { 
-  AUTOPLAY_MS, 
-  slidesPrimary, 
-  slidesSecondary, 
-  videos, 
-  banners, 
-  featuredHandles 
-} from '@/lib/homepageData';
+import homepageData from '@/lib/homepageData';
 import { getProducts, formatKWD } from "@/lib/shopify";
 import HomepageSlideshow from "@/components/HomepageSlideshow";
 import { useState, useEffect } from "react";
