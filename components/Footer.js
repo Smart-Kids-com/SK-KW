@@ -316,10 +316,10 @@ export default function Footer() {
               fontSize: "0.85rem",
             }}
           >
-            <Link href="/refund-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
-              سياسة الإرجاع
+            <Link href="/ar/policies/refund-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
+              سياسة الاسترجاع والاستبدال
             </Link>
-            <Link href="/privacy-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
+            <Link href="/ar/policies/privacy-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
               سياسة الخصوصية
             </Link>
             <Link href="/terms-of-service" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
@@ -328,7 +328,7 @@ export default function Footer() {
             <Link href="/shipping-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
               سياسة الشحن
             </Link>
-            <Link href="/about" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
+            <Link href="/about-us" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
               من نحن
             </Link>
             <Link href="/contact-information" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
