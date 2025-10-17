@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 export default function PoliciesIndex() {
   // Minimal test: link a single handle exactly as you want it live
   const items = [
-    { href: "/ar/policies/refund-policy", label: "سياسة الاسترجاع والاستبدال" }, // ← test this one first
+    { href: "policies/refund-policy", label: "سياسة الاسترجاع والاستبدال" }, // ← test this one first
   ];
 
   return (
