@@ -437,10 +437,10 @@ const INDEX_DATA = {
           type: "buttons",
           settings: {
             button_label_1: "تصفح القصص الإسلامية",
-            button_link_1: "shopify://collections/عروض-مكتبتي-الإسلامية",
+            button_link_1: "https://collections/عروض-مكتبتي-الإسلامية",
             button_style_secondary_1: true,
             button_label_2: "تصفح الكتب التفاعلية",
-            button_link_2: "shopify://collections/كتبي-التفاعلية-الحركية",
+            button_link_2: "https://collections/كتبي-التفاعلية-الحركية",
             button_style_secondary_2: true,
           },
         },

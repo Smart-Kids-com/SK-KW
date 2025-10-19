@@ -1,22 +1,22 @@
 import { fetchShopifyGraphQL } from "@/lib/shopify";
 
 const mapKey = (k) => ({
-  "privacy-policy":"privacyPolicy",
-  "refund-policy":"refundPolicy",
-  "terms-of-service":"termsOfService",
-  "shipping-policy":"shippingPolicy",
-  "contact-information":"contactInformation",
+  "/page/privacy-policy": { body: "privacyPolicyBody", handle: "privacyPolicyHandle", title: "privacyPolicyTitle" },
+  "/page/refund-policy": { body: "refundPolicyBody", handle: "refundPolicyHandle", title: "refundPolicyTitle" },
+  "/page/terms-of-service": { body: "termsOfServiceBody", handle: "termsOfServiceHandle", title: "termsOfServiceTitle" },
+  "/page/shipping-policy": { body: "shippingPolicyBody", handle: "shippingPolicyHandle", title: "shippingPolicyTitle" },
+  "/page/contact-information": { body: "contactInformationBody", handle: "contactInformationHandle", title: "contactInformationTitle" },
 }[k]);
 
 export default async function Policy({ params }) {
   const QUERY = /* GraphQL */ `
     query Policies($language: LanguageCode!) @inContext(language: $language) {
       shop {
-        privacyPolicy { title body } سياسة الخصوصية
-        refundPolicy { title body } سياسة الاسترجاع والاستبدال
-        termsOfService { title body } شروط الخدمة
-        shippingPolicy { title body } سياسة الشحن
-        contactInformation { title body } معلومات التواصل
+        privacy-policy { title body } سياسة الخصوصية
+        refund-policy { title body } سياسة الاسترجاع والاستبدال
+        terms-of-service { title body } شروط الخدمة
+        shipping-policy { title body } سياسة الشحن
+        contact-information { title body } معلومات التواصل
       }
     }
   `;
