@@ -1,11 +1,12 @@
 import Link from "next/link";
+
 export default function CollectionGrid({ collections }) {
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: 32, justifyContent: "center" }}>
       {collections.map(col => (
         <Link
           key={col.handle}
-          href={`/collections/${col.handle}`}
+          href={`/collections/${encodeURIComponent(col.handle)}`}
           style={{
             width: 260,
             background: "#fff",
@@ -17,12 +18,18 @@ export default function CollectionGrid({ collections }) {
             color: "#222"
           }}
         >
-          <img
-            src={col.image?.url}
-            alt={col.image?.altText || col.title}
-            style={{ width: 220, height: 170, objectFit: "cover", borderRadius: 8 }}
-          />
-          <h2 style={{ fontWeight: 600, margin: "1rem 0 0.5rem", fontSize: "1.15rem", color: "var(--color-primary)" }}>
+          {col.image?.url ? (
+            <img
+              src={col.image.url}
+              alt={col.image?.altText || col.title}
+              style={{ width: 220, height: 170, objectFit: "cover", borderRadius: 8 }}
+            />
+          ) : (
+            <div style={{ width: 220, height: 170, display: "grid", placeItems: "center", background: "#f6f6f6", borderRadius: 8 }}>
+              📚
+            </div>
+          )}
+          <h2 style={{ fontWeight: 600, margin: "1rem 0 0.5rem", fontSize: "1.15rem", color: "var(--color-primary, #9422af)" }}>
             {col.title}
           </h2>
         </Link>

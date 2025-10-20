@@ -9,7 +9,7 @@ export default async function StaticPageAR({ params }) {
   `;
   const data = await fetchShopifyGraphQL(QUERY, { language: "AR", handle: params.handle });
   const page = data?.page;
-  const isContact = params.handle === "contact-us"; // نفس الـhandle في المتجر
+  const isContact = params.handle === "contact-us"; // نفس الـ handle في المتجر
 
   if (!page) {
     return <main style={{ padding: 24, direction: "rtl" }}>غير موجود.</main>;

@@ -1,63 +1,28 @@
-// components/HomeSlider.jsx
 "use client";
 import Link from "next/link";
-import styles from "./HomeSlider.module.css"; // لو عندك الملف، وإلا احذف هذا السطر
+import styles from "./HomeSlider.module.css";
 
+/**
+ * Simple responsive grid of promotional cards (secondary slider look).
+ * Props: slides = [{ image, heading, subheading, button_label, link }]
+ */
 function SlideCard({ s }) {
   return (
-    <Link
-      href={s.link || "#"}
-      style={{ textDecoration: "none", color: "inherit" }}
-    >
-      <div
-        style={{
-          borderRadius: 12,
-          overflow: "hidden",
-          boxShadow:
-            "0 10px 25px rgba(0,0,0,.15), 0 2px 8px rgba(0,0,0,.08)",
-          background: "#fff",
-        }}
-      >
-        <div style={{ position: "relative", paddingBottom: "56%" }}>
-          <img
-            src={s.image}
-            alt={s.heading || "slide"}
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
-          />
+    <Link href={s.link || "#"} style={{ textDecoration: "none", color: "inherit" }}>
+      <div className={styles.card}>
+        <div className={styles.ratio}>
+          <img src={s.image} alt={s.heading || "slide"} className={styles.media} />
         </div>
+
         {(s.heading || s.subheading || s.button_label) && (
-          <div style={{ padding: 14 }}>
-            {s.heading && (
-              <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 800 }}>
-                {s.heading}
-              </h3>
-            )}
+          <div className={styles.body}>
+            {s.heading && <h3 className={styles.ttl}>{s.heading}</h3>}
             {s.subheading && (
-              <p style={{ margin: "6px 0 0", color: "#64748b" }}>
+              <p className={styles.sub}>
                 <span dangerouslySetInnerHTML={{ __html: s.subheading }} />
               </p>
             )}
-            {s.button_label && (
-              <div
-                style={{
-                  marginTop: 10,
-                  display: "inline-block",
-                  padding: "8px 12px",
-                  borderRadius: 10,
-                  background: "#9422af",
-                  color: "#fff",
-                  fontWeight: 700,
-                }}
-              >
-                {s.button_label}
-              </div>
-            )}
+            {s.button_label && <span className={styles.btn}>{s.button_label}</span>}
           </div>
         )}
       </div>
@@ -66,15 +31,10 @@ function SlideCard({ s }) {
 }
 
 export default function HomeSlider({ slides = [], title = "" }) {
+  if (!slides?.length) return null;
   return (
     <section style={{ margin: "32px 0" }}>
-      <div
-        style={{
-          maxWidth: 1400,
-          margin: "0 auto",
-          padding: "0 16px",
-        }}
-      >
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 16px" }}>
         {title && (
           <h2
             style={{
@@ -82,24 +42,27 @@ export default function HomeSlider({ slides = [], title = "" }) {
               margin: "0 0 18px",
               color: "#2d3748",
               fontSize: "1.8rem",
+              fontWeight: 800
             }}
             dangerouslySetInnerHTML={{ __html: title }}
           />
         )}
 
         <div
+          className={styles.track}
           style={{
-            display: "grid",
+            display: "flex",
             gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
             gap: 16,
           }}
-          className={styles?.grid || undefined}
         >
           {slides.map((s, i) => (
-            <SlideCard key={i} s={s} />
+            <div key={i} className={styles.slide}>
+              <SlideCard s={s} />
+            </div>
           ))}
         </div>
       </div>
     </section>
-  );
+  );
 }
