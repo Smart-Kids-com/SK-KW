@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 
 export default function StructuredData() {
   useEffect(() => {
-    // Organization Schema
     const organizationSchema = {
       "@context": "https://schema.org",
       "@type": "Organization",
@@ -22,12 +21,9 @@ export default function StructuredData() {
         "addressCountry": "KW",
         "addressLocality": "الكويت"
       },
-      "sameAs": [
-        "https://wa.me/96550424642"
-      ]
+      "sameAs": ["https://wa.me/96550424642"]
     };
 
-    // WebSite Schema
     const websiteSchema = {
       "@context": "https://schema.org",
       "@type": "WebSite",
@@ -41,7 +37,6 @@ export default function StructuredData() {
       }
     };
 
-    // Store Schema
     const storeSchema = {
       "@context": "https://schema.org",
       "@type": "Store",
@@ -63,28 +58,14 @@ export default function StructuredData() {
         "longitude": "47.9774"
       },
       "openingHoursSpecification": [
-        {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
-          "opens": "09:00",
-          "closes": "22:00"
-        },
-        {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Friday", "Saturday"],
-          "opens": "10:00",
-          "closes": "23:00"
-        }
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Sunday","Monday","Tuesday","Wednesday","Thursday"], "opens": "09:00", "closes": "22:00" },
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Friday","Saturday"], "opens": "10:00", "closes": "23:00" }
       ]
     };
 
-    // إضافة Schema إلى الصفحة
     const addSchema = (schema, id) => {
       const existingScript = document.getElementById(id);
-      if (existingScript) {
-        existingScript.remove();
-      }
-      
+      if (existingScript) existingScript.remove();
       const script = document.createElement('script');
       script.type = 'application/ld+json';
       script.id = id;
@@ -95,7 +76,6 @@ export default function StructuredData() {
     addSchema(organizationSchema, 'organization-schema');
     addSchema(websiteSchema, 'website-schema');
     addSchema(storeSchema, 'store-schema');
-
   }, []);
 
   return null;

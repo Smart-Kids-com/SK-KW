@@ -2,7 +2,7 @@ import { fetchShopifyGraphQL } from "@/lib/shopify";
 
 const mapKey = (k) => ({
   "/page/privacy-policy": { body: "privacyPolicyBody", handle: "privacyPolicyHandle", title: "privacyPolicyTitle" },
-  "/page/refund-policy": { body: "refundPolicyBody", handle: "refundPolicyHandle", title: "refundPolicyTitle" },
+  "/policies/refund-policy": { body: "policies/refundPolicyBody", handle: "policies/refund-policy", title: "refundPolicy" },
   "/page/terms-of-service": { body: "termsOfServiceBody", handle: "termsOfServiceHandle", title: "termsOfServiceTitle" },
   "/page/shipping-policy": { body: "shippingPolicyBody", handle: "shippingPolicyHandle", title: "shippingPolicyTitle" },
   "/page/contact-information": { body: "contactInformationBody", handle: "contactInformationHandle", title: "contactInformationTitle" },
