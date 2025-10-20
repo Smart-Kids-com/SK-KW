@@ -1,12 +1,16 @@
 "use client";
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay, A11y } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
 import Link from "next/link";
-
-export default function HomepageSlideshow({ slides, autoplayMs = 9000 }) {
+// مفيش أي import لـ "swiper/css" هنا
+/**
+ * Simple hero slideshow for the homepage.
+ * Props:
+ *  - slides: [{ image, heading, subheading, button_label, link }]
+ *  - autoplayMs: number (default 9000)
+ */
+export default function HomepageSlideshow({ slides = [], autoplayMs = 9000 }) {
   if (!Array.isArray(slides) || slides.length === 0) return null;
 
   return (
@@ -20,7 +24,7 @@ export default function HomepageSlideshow({ slides, autoplayMs = 9000 }) {
         pagination={{
           clickable: true,
           renderBullet: (index, className) =>
-            `<span class="${className}">${index + 1}</span>`,
+            <span class="${className}">${index + 1}</span>,
         }}
       >
         {slides.map((s, i) => (
@@ -30,6 +34,8 @@ export default function HomepageSlideshow({ slides, autoplayMs = 9000 }) {
                 src={s.image}
                 alt={s.heading || `slide-${i + 1}`}
                 className="slide-image"
+                loading="eager"
+                fetchPriority="high"
               />
               <div className="slide-text">
                 {s.heading && <h1 className="slide-heading">{s.heading}</h1>}
@@ -54,17 +60,17 @@ export default function HomepageSlideshow({ slides, autoplayMs = 9000 }) {
         .homepage-slideshow {
           position: relative;
           width: 100%;
-          max-width: 1200px;
+          max-width: 1400px;
           margin: 0 auto 2rem;
           border-radius: 20px;
           overflow: hidden;
+          background: #fff;
         }
         .slide-content {
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          background: #fff;
         }
         .slide-image {
           width: 100%;
@@ -72,21 +78,21 @@ export default function HomepageSlideshow({ slides, autoplayMs = 9000 }) {
           border-bottom: 1px solid #eee;
         }
         .slide-text {
-          padding: 2rem;
+          padding: 1.5rem;
           text-align: center;
         }
         .slide-heading {
-          font-size: 2.2rem;
+          font-size: clamp(1.6rem, 2.2vw, 2.4rem);
           font-weight: 800;
-          color: #1f2937; /* تأكيد وضوح النص */
+          color: #1f2937;
+          margin: 0;
         }
         .slide-subheading {
-          font-size: 1.1rem;
-          margin: 0.75rem 0 1rem;
+          font-size: 1.05rem;
+          margin: 0.6rem 0 0.9rem;
           color: #374151;
         }
 
-        /* زر السلايدر (محلياً فقط داخل السلايدر) */
         .btn {
           display: inline-flex;
           align-items: center;
@@ -100,23 +106,20 @@ export default function HomepageSlideshow({ slides, autoplayMs = 9000 }) {
           background: #eeb60f;
           color: #1f2937;
           box-shadow: 0 6px 0 #c1960e;
+          padding: 12px 22px;
+          font-size: 1.05rem;
         }
         .btn--primary:hover {
           transform: translateY(-2px);
           box-shadow: 0 8px 0 #c1960e;
         }
-        .btn--xl {
-          padding: 12px 22px;
-          font-size: 1.05rem;
-        }
 
-        /* ====== Pagination 1..5 على اليمين (RTL) ====== */
         :global(.homepage-slideshow .swiper-pagination) {
           position: static;
           margin-top: 0.75rem;
           display: flex;
           gap: 10px;
-          justify-content: flex-end; /* يمين */
+          justify-content: flex-end;
           align-items: center;
         }
         :global(.homepage-slideshow .swiper-pagination-bullet) {
@@ -134,7 +137,7 @@ export default function HomepageSlideshow({ slides, autoplayMs = 9000 }) {
             inset 0 2px 8px rgba(255, 255, 255, 0.25),
             inset 0 -3px 10px rgba(0, 0, 0, 0.15),
             0 6px 18px rgba(108, 80, 181, 0.25);
-          opacity: 1; /* منع الشفافية الافتراضية */
+          opacity: 1;
         }
         :global(.homepage-slideshow .swiper-pagination-bullet-active) {
           transform: scale(1.06);
@@ -144,7 +147,6 @@ export default function HomepageSlideshow({ slides, autoplayMs = 9000 }) {
             0 10px 24px rgba(108, 80, 181, 0.38);
         }
 
-        /* ====== أسهم التنقّل (تصغيرها وتحسينها) ====== */
         :global(.homepage-slideshow .swiper-button-next),
         :global(.homepage-slideshow .swiper-button-prev) {
           width: 36px;
@@ -156,16 +158,7 @@ export default function HomepageSlideshow({ slides, autoplayMs = 9000 }) {
           font-size: 18px;
           font-weight: 800;
         }
-
-        @media (max-width: 768px) {
-          .slide-text {
-            padding: 1.25rem;
-          }
-          .slide-heading {
-            font-size: 1.6rem;
-          }
-        }
       `}</style>
-    </div>
-  );
+ </div>
+);
 }

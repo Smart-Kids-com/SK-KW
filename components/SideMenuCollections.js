@@ -2,46 +2,27 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { sideMenu } from "../lib/menuData";
+import { sideMenu } from "@/lib/menuData";
 
-function encodePath(p = "") {
-  return p
-    .replace(/^\/+/, "") // شيل أي سلاشات في البداية
-    .split("/")
-    .map(seg => encodeURIComponent(seg))
-    .join("/");
-}
-
-function buildHref(item) {
-  // لو فيه href في البيانات، استخدمه كما هو (مع تنظيف وترميز)
-  if (item.href !== undefined) return encodePath(item.href);
-
-  const h = (item.handle || "").trim();
-  if (!h) return ""; // الهوم
-  // لو الـ handle أصلاً فيه prefix معروف سيبه
-  if (h.startsWith("collections/") || h.startsWith("pages/") || h.startsWith("blogs/")) {
-    return encodePath(h);
-  }
-  // اعتبره handle لمجموعة
-  return encodePath(`collections/${h}`);
-}
-
+/**
+ * Side menu listing main collections/pages.
+ * Expects sideMenu = [{ title, href }], with href starting with "/".
+ */
 export default function SideMenuCollections({ onSelect }) {
-  const pathname = usePathname(); // بيرجع بشكل يبدأ بـ "/"
-  const current = pathname.replace(/^\/+/, ""); // خلّيه بدون "/"
+  const pathname = usePathname() || "/";
+  const normalize = (p) => p.replace(/\/+$/, ""); // trim trailing slash
 
   return (
     <nav className="sk-side-menu" dir="rtl">
       <ul className="sk-list">
         {sideMenu.map((item, i) => {
-          const href = buildHref(item); // لا تبدأ بـ "/"
-          const isActive =
-            href === "" ? current === "" : current === href || current.startsWith(`${href}/`);
+          const href = item.href || "/";
+          const isActive = normalize(pathname) === normalize(href) || normalize(pathname).startsWith(normalize(href) + "/");
 
           return (
             <li key={`menu-${i}-${item.title}`} className="sk-item">
               <Link
-                href={href}                // مفيش "/" في البداية
+                href={href}
                 prefetch={false}
                 onClick={onSelect}
                 className={`sk-link${isActive ? " is-active" : ""}`}

@@ -1,5 +1,5 @@
 'use client';
-// app/collections/page.js (تعديل بسيط)
+// app/collections/page.js
 import { getCollections } from "@/lib/shopify";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -10,15 +10,11 @@ export default function CollectionsIndex() {
   useEffect(() => {
     async function loadCollections() {
       let data = await getCollections(100);
-      
-      // Dawn: sort = "alphabetical"
       data = data
         .slice()
         .sort((a, b) => (a.title || "").localeCompare(b.title || "", "ar"));
-      
       setCollections(data);
     }
-    
     loadCollections();
   }, []);
 
@@ -51,7 +47,7 @@ export default function CollectionsIndex() {
               {c.image?.url ? (
                 <img
                   src={c.image.url}
-                  alt={c.image.altText || c.title}
+                  alt={c.image?.altText || c.title}
                   style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
                 />
               ) : (
@@ -71,7 +67,7 @@ export default function CollectionsIndex() {
         @media (max-width: 768px) {
           main { padding: 1rem; }
           div[style*="grid-template-columns"] {
-            grid-template-columns: repeat(2, minmax(0, 1fr)); /* Dawn: 2 موبايل */
+            grid-template-columns: repeat(2, minmax(0, 1fr));
           }
         }
       `}</style>

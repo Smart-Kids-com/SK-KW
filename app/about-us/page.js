@@ -91,7 +91,7 @@ const HTML = `
         <h6 class="lead" style="text-align:right;"><strong>في الأطفال المبتكرون <span style="color:#08280e;">نؤمن أن القراءة رحلة تبدأ بسؤال صغير. نقدّم منتجات تعليمية مبتكرة وترفيهية للأطفال، بتركيز على تنمية المهارات اللغوية والحركية والعقلية، ومحتوى عربيّ عالي الجودة يُنمّي الفضول والخيال، ويُسعد الأطفال والأهل معًا.</span></strong></h6>
         <div class="ph"><img decoding="async" alt="بانر المتجر" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Store__png.jpg?v=1757870508"></div>
         <div class="btns">
-          <a href="/" class="btn">تسوّق الآن</a>
+          <a href="/" class="btn">تسوق الآن</a>
 <a href="/contact-information" class="btn ghost">تواصل معنا</a>
         </div>
       </div>
@@ -206,7 +206,7 @@ const HTML = `
       <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;">
         <a class="btn ghost" href="mailto:kuwait-info@smart-kids.me">kuwait-info@smart-kids.me</a>
         <a class="btn ghost" href="/shipping-policy">سياسة الشحن</a>
-        <a class="btn ghost" href="/refund-policy">الاسترجاع والاستبدال</a>
+        <a class="btn ghost" href="/policies/refund-policy">سياسة الاسترجاع والاستبدال</a>
       </div>
     </div>  
   </section>

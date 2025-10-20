@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import SideMenuCollections from "./SideMenuCollections";
-// أيقونات
+
 function MenuIcon(props) {
   return (
     <svg {...props} width="28" height="28" viewBox="0 0 32 32" fill="none">
@@ -54,11 +54,9 @@ function CartIcon(props) {
 
 export default function Header() {
   const [open, setOpen] = useState(false);
-
   const openMenu = () => setOpen(true);
   const closeMenu = () => setOpen(false);
 
-  // إغلاق بالـ ESC + منع سكرول عند الفتح
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && setOpen(false);
     if (open) {
@@ -72,7 +70,6 @@ export default function Header() {
     }
   }, [open]);
 
-  // إغلاق عند الضغط على أي رابط داخل البانل (تفويض)
   const handlePanelClick = (e) => {
     const a = e.target.closest("a");
     if (a) setOpen(false);
@@ -81,7 +78,6 @@ export default function Header() {
   return (
     <>
       <header style={{ width: "100%", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-        {/* شريط الإعلان (كله رابط) */}
         <Link
           href="/collections"
           style={{
@@ -89,44 +85,18 @@ export default function Header() {
             background: "#3d0856",
             color: "#fff",
             textAlign: "center",
-            fontSize: "1.25rem",
-            fontWeight: 500,
-            padding: "0.9rem 0 0.85rem 0",
+            fontSize: "1.1rem",
+            fontWeight: 600,
+            padding: "0.8rem 0",
             letterSpacing: "0.01em",
             position: "relative",
             direction: "rtl",
             textDecoration: "none",
           }}
         >
-          <span
-            style={{
-              position: "absolute",
-              right: 16,
-              fontSize: 0,
-              top: "50%",
-              transform: "translateY(-50%)",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 22,
-              height: 22,
-            }}
-            aria-hidden="true"
-          >
-            <svg width="22" height="22" viewBox="0 0 30 30" fill="none">
-              <path
-                d="M13 8l5 7-5 7"
-                stroke="#fff"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
           التوصيل مجاناً للطلبات بقيمة 20 د.ك أو أكثر
         </Link>
 
-        {/* الهيدر الأبيض */}
         <div
           style={{
             background: "#fff",
@@ -138,7 +108,6 @@ export default function Header() {
             position: "relative",
           }}
         >
-          {/* زر القائمة - يسار */}
           <button
             aria-label="فتح القائمة"
             aria-expanded={open}
@@ -157,7 +126,6 @@ export default function Header() {
             <MenuIcon />
           </button>
 
-          {/* الشعار - وسط */}
           <Link
             href="/"
             style={{
@@ -182,7 +150,6 @@ export default function Header() {
             />
           </Link>
 
-          {/* أيقونات - يمين */}
           <div
             style={{
               display: "flex",
@@ -205,14 +172,6 @@ export default function Header() {
                 backgroundColor: "#25D366",
                 borderRadius: "50%",
                 transition: "all 0.2s ease"
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = "scale(1.1)";
-                e.target.style.boxShadow = "0 4px 12px rgba(37, 211, 102, 0.4)";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = "scale(1)";
-                e.target.style.boxShadow = "none";
               }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
@@ -240,7 +199,6 @@ export default function Header() {
         </div>
       </header>
 
-      {/* ===== القائمة الجانبية ===== */}
       {/* Overlay */}
       <div
         onClick={closeMenu}
@@ -281,7 +239,6 @@ export default function Header() {
           if (e.key === "Escape") closeMenu();
         }}
       >
-        {/* رأس البانل */}
         <div
           style={{
             display: "flex",
@@ -308,9 +265,8 @@ export default function Header() {
           </button>
         </div>
 
-        {/* عناصر القائمة */}
         <div style={{ overflowY: "auto", padding: "10px 12px" }}>
-          <SideMenuCollections />
+          <SideMenuCollections onSelect={closeMenu} />
         </div>
       </aside>
     </>

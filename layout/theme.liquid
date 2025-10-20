@@ -1,11 +1,20 @@
 <!DOCTYPE html>
-<html lang="{{ request.locale.iso_code }}">
+<html lang="{{ request.locale.iso_code }}" dir="rtl">
+  <!-- تعليق حرج: تفعيل اتجاه RTL على كل صفحات الثيم. -->
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    {%- comment -%}
+      ✅ توجيه السيو إلى موقع Next الأساسي + منع فهرسة Shopify
+    {%- endcomment -%}
+    <meta name="robots" content="noindex, nofollow">
+    {%- assign _primary_site_base_url = "https://smartkidskw.com" -%}
+    <link rel="canonical" href="{{ _primary_site_base_url }}{{ request.path }}">
+    <!-- تعليق حرج: لازم يفضل الـ canonical على الدومين الأساسي smartkidskw.com لتفادي المحتوى المكرر. -->
+
     <meta name="theme-color" content="">
-    <link rel="canonical" href="{{ canonical_url }}">
 
     {%- if settings.favicon != blank -%}
       <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
@@ -33,7 +42,6 @@
       {{ body_font_italic | font_face: font_display: 'swap' }}
       {{ body_font_bold_italic | font_face: font_display: 'swap' }}
       {{ settings.type_header_font | font_face: font_display: 'swap' }}
-      /* Add further global style overrides if you use custom CSS */
     {% endstyle %}
 
     {%- unless settings.type_body_font.system? -%}
@@ -52,16 +60,58 @@
     {{ 'section-main-product.css' | asset_url | stylesheet_tag }}
     {{ 'section-password.css' | asset_url | stylesheet_tag }}
 
+    <!-- JSON-LD ثابت (منع التكرار مع Next): Organization -->
+    <script id="organization-schema" type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Smart Kids KW",
+      "alternateName": "سمارت كيدز الكويت",
+      "url": "https://smartkidskw.com",
+      "logo": "https://smartkidskw.com/logo-sk-smart-kids.png",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "‪+965-50424642‬",
+        "contactType": "customer service",
+        "availableLanguage": ["Arabic", "English"]
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "KW",
+        "addressLocality": "الكويت"
+      },
+      "sameAs": ["https://wa.me/96550424642"]
+    }
+    </script>
+    <!-- تعليق حرج: احتفظ بهنا فقط (Shopify). لا تضف نفس الـ JSON-LD ثانية في صفحات Next. -->
+
+    <!-- JSON-LD ثابت: Website -->
+    <script id="website-schema" type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Smart Kids KW",
+      "alternateName": "سمارت كيدز الكويت",
+      "url": "https://smartkidskw.com",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://smartkidskw.com/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <!-- تعليق حرج: تجنّب تكرار نفس الاسكيمة في نفس الصفحة لتفادي تحذيرات Google. -->
+
     <script src="{{ 'global.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'details-modal.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'theme-editor.js' | asset_url }}" defer="defer"></script>
-    <!-- Add other script includes as needed -->
   </head>
 
   <body class="gradient">
     <a class="skip-to-content-link button visually-hidden" href="#MainContent">
       {{ 'accessibility.skip_to_text' | t }}
     </a>
+
     {% section 'header' %}
 
     <main id="MainContent">
@@ -69,8 +119,9 @@
     </main>
 
     {% section 'footer' %}
+
     <ul hidden>
       <li id="a11y-new-window-message">{{ 'accessibility.link_messages.new_window' | t }}</li>
     </ul>
-  </body>
+  </body>
 </html>
