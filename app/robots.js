@@ -1,3 +1,4 @@
+// app/robots.js أو ./robots.js (حسب هيكل مشروعك)
 export default function robots() {
   return {
     rules: {

@@ -4,12 +4,8 @@ import { notFound } from "next/navigation";
 import { getCollectionByHandle } from "@/lib/shopify";
 
 export default async function CollectionPage({ params }) {
-  // ناخد الـ handle من الرابط
   const handle = decodeURIComponent(params.handle);
-
-  // نسحب بيانات المجموعة من Shopify
   const collection = await getCollectionByHandle(handle, 48);
-
   if (!collection) return notFound();
 
   const products = collection.products || [];
@@ -23,7 +19,6 @@ export default async function CollectionPage({ params }) {
         minHeight: "100vh",
       }}
     >
-      {/* Header */}
       <div
         style={{
           background:
@@ -56,7 +51,6 @@ export default async function CollectionPage({ params }) {
         )}
       </div>
 
-      {/* Products Grid */}
       <div style={{ maxWidth: 1400, margin: "0 auto", padding: "0 2rem 4rem" }}>
         {products.length ? (
           <div
@@ -71,10 +65,7 @@ export default async function CollectionPage({ params }) {
               <Link
                 key={p.id}
                 href={`/products/${encodeURIComponent(p.handle)}`}
-                style={{
-                  textDecoration: "none",
-                  color: "inherit",
-                }}
+                style={{ textDecoration: "none", color: "inherit" }}
               >
                 <div
                   style={{
@@ -84,12 +75,6 @@ export default async function CollectionPage({ params }) {
                     boxShadow: "0 8px 24px rgba(0,0,0,.08)",
                     border: "1px solid rgba(148,34,175,.08)",
                     transition: "transform .2s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-6px)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
                   }}
                 >
                   <div

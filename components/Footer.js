@@ -316,23 +316,23 @@ export default function Footer() {
               fontSize: "0.85rem",
             }}
           >
-            <Link href="/refund-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
-              سياسة الإرجاع
+            <Link href="/policies/refund-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
+              سياسة الاسترجاع والاستبدال
             </Link>
-            <Link href="/privacy-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
+            <Link href="/policies/privacy-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
               سياسة الخصوصية
             </Link>
-            <Link href="/terms-of-service" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
+            <Link href="/policies/terms-of-service" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
               شروط الخدمة
             </Link>
-            <Link href="/shipping-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
+            <Link href="policies/shipping-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
               سياسة الشحن
             </Link>
-            <Link href="/about" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
+            <Link href="Pages/about-us" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
               من نحن
             </Link>
-            <Link href="/contact-information" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
-              اتصل بنا
+            <Link href="Page/contact-information" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
+              معلومات التواصل
             </Link>
           </div>
         </div>

@@ -1,20 +1,27 @@
-import HomeSlider from '@/components/HomeSlider';
+// app/layout.js (Root Layout - Server Component)
+
+// ===== Swiper global CSS =====
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+
+// ===== Site chrome =====
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-/**
- * Layout component that wraps its children with a div and includes OverlayChrome.
- *
- * @param {Object} props - The props object.
- * @param {React.ReactNode} props.children - The content to be rendered inside the layout.
- * @returns {JSX.Element} The rendered layout component.
- */
-export default function Layout({ children }) {
+
+export const metadata = {
+  title: 'Smart Kids KW',
+  description: 'متجر تعليم وترفيه للأطفال في الكويت - ألعاب تعليمية، قصص تفاعلية، وأدوات تنمية مهارات الأطفال.',
+};
+
+export default function RootLayout({ children }) {
   return (
-    <div>
-      <Header />
-      <HomeSlider />
-      <main>{children}</main>
-      <Footer />
-    </div>
-  );
+    <html lang="ar" dir="rtl">
+      <body style={{ margin: 0, background: '#370e3e', color: '#fff' }}>
+        <Header />
+        {children}
+        <Footer />
+      </body>
+  </html>
+);
 }
