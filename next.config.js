@@ -20,12 +20,32 @@ const nextConfig = {
   env: {
     SHOPIFY_STORE_DOMAIN: process.env.SHOPIFY_STORE_DOMAIN,
     SHOPIFY_STOREFRONT_API_TOKEN: process.env.SHOPIFY_STOREFRONT_API_TOKEN,
-    // ← التاريخ المطلوب
     SHOPIFY_API_VERSION: process.env.SHOPIFY_API_VERSION || '2025-07',
   },
 
   async redirects() {
     return [
+      // 🔐 إخفاء مسار فحص البيئة
+      { source: '/api/check-env', destination: '/404', permanent: true },
+
+      // 🧭 توحيد “جميع المنتجات”
+      { source: '/products', destination: '/collections/all', permanent: true },
+
+      // ✅ إصلاح روابط السياسات الشائعة
+      { source: '/privacy-policy', destination: '/policies/privacy-policy', permanent: true },
+      { source: '/refund-policy', destination: '/policies/refund-policy', permanent: true },
+      { source: '/terms-of-service', destination: '/policies/terms-of-service', permanent: true },
+      { source: '/shipping-policy', destination: '/policies/shipping-policy', permanent: true },
+
+      // ✅ إصلاح حروف كبيرة/مسار قديم للصفحات
+      { source: '/Pages/about-us', destination: '/pages/about-us', permanent: true },
+      { source: '/Pages/Page/contact-information', destination: '/policies/contact-information', permanent: true },
+      { source: '/Page/contact-information', destination: '/policies/contact-information', permanent: true },
+
+      // ✅ المدونة الافتراضية (News) لمنع خطأ $handle=null
+      { source: '/blogs', destination: '/blogs/news', permanent: true },
+
+      // السياسات (قديمة لديك مسبقًا)
       { source: '/policies', destination: '/contact-information', permanent: false },
       { source: '/policies/:path*', destination: '/:path*', permanent: true },
     ];
