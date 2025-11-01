@@ -141,9 +141,9 @@ export default function Header() {
               src="https://smart-kids.me/cdn/shop/files/Logo_smart_kids-of-header-tag.png?v=1756574543&width=1340"
               alt="شعار SK Smart Kids"
               style={{
-                height: 84,
+                height: 64,
                 width: "auto",
-                maxWidth: 320,
+                maxWidth: 220,
                 objectFit: "contain",
                 imageRendering: "auto",
               }}
