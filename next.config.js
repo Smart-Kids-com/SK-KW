@@ -38,9 +38,9 @@ const nextConfig = {
       { source: '/shipping-policy', destination: '/policies/shipping-policy', permanent: true },
 
       // ✅ إصلاح حروف كبيرة/مسار قديم للصفحات
-      { source: '/Pages/about-us', destination: '/pages/about-us', permanent: true },
-      { source: '/Pages/Page/contact-information', destination: '/policies/contact-information', permanent: true },
-      { source: '/Page/contact-information', destination: '/policies/contact-information', permanent: true },
+      { source: '/pages/about-us', destination: '/pages/about-us', permanent: true },
+      { source: '/pages/contact-information', destination: '/policies/contact-information', permanent: true },
+      { source: '/pages/contact-information', destination: '/policies/contact-information', permanent: true },
 
       // ✅ المدونة الافتراضية (News) لمنع خطأ $handle=null
       { source: '/blogs', destination: '/blogs/news', permanent: true },
