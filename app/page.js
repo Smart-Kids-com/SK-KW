@@ -197,7 +197,7 @@ export default function HomePage() {
           heading="تصفح عرض الــ 12 قصة"
           sub=""
           ctaLabel="اذهب للمجموعة"
-          ctaHref="/products/حرك-شاهد-تفاعل-مع-12-كتاباً-تفاعلياً"
+          ctaHref={`/products/${encodeURIComponent("حرك-شاهد-تفاعل-مع-12-كتاباً-تفاعلياً")}`}
         />
 
         {/* 5) أقسام المجموعات المختارة */}
