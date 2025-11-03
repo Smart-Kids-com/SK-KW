@@ -1,3 +1,4 @@
+// app/login/page.js
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -31,14 +32,14 @@ export default function LoginPage() {
       });
 
       const data = await response.json();
-      
-      if (data.success) {
+
+      if (data?.success && data?.accessToken) {
         localStorage.setItem("customerToken", data.accessToken);
         router.push("/account");
       } else {
-        setError(data.error || "حدث خطأ");
+        setError(data?.error || "حدث خطأ");
       }
-    } catch (err) {
+    } catch {
       setError("حدث خطأ في الاتصال");
     } finally {
       setLoading(false);
@@ -46,19 +47,17 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    // سيتم تفعيله عبر Shopify Customer Accounts API
     window.location.href = "/api/auth/google";
   };
 
   const handleFacebookLogin = () => {
-    // سيتم تفعيله عبر Shopify Customer Accounts API  
     window.location.href = "/api/auth/facebook";
   };
 
   return (
-    <div className="login-container" style={{ 
-      maxWidth: 400, 
-      margin: "2rem auto", 
+    <div className="login-container" style={{
+      maxWidth: 400,
+      margin: "2rem auto",
       padding: "2rem",
       border: "1px solid #ddd",
       borderRadius: 8,
@@ -69,10 +68,10 @@ export default function LoginPage() {
       </h1>
 
       {error && (
-        <div style={{ 
-          color: "red", 
-          backgroundColor: "#ffeaea", 
-          padding: "0.5rem", 
+        <div style={{
+          color: "red",
+          backgroundColor: "#ffeaea",
+          padding: "0.5rem",
           marginBottom: "1rem",
           borderRadius: 4,
           textAlign: "center"
@@ -91,13 +90,7 @@ export default function LoginPage() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
-                style={{
-                  width: "100%",
-                  padding: "0.5rem",
-                  border: "1px solid #ccc",
-                  borderRadius: 4,
-                  marginTop: "0.25rem"
-                }}
+                style={{ width: "100%", padding: "0.5rem", border: "1px solid #ccc", borderRadius: 4, marginTop: "0.25rem" }}
               />
             </div>
             <div style={{ marginBottom: "1rem" }}>
@@ -107,13 +100,7 @@ export default function LoginPage() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 required
-                style={{
-                  width: "100%",
-                  padding: "0.5rem",
-                  border: "1px solid #ccc",
-                  borderRadius: 4,
-                  marginTop: "0.25rem"
-                }}
+                style={{ width: "100%", padding: "0.5rem", border: "1px solid #ccc", borderRadius: 4, marginTop: "0.25rem" }}
               />
             </div>
           </>
@@ -126,13 +113,7 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            style={{
-              width: "100%",
-              padding: "0.5rem",
-              border: "1px solid #ccc",
-              borderRadius: 4,
-              marginTop: "0.25rem"
-            }}
+            style={{ width: "100%", padding: "0.5rem", border: "1px solid #ccc", borderRadius: 4, marginTop: "0.25rem" }}
           />
         </div>
 
@@ -143,13 +124,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            style={{
-              width: "100%",
-              padding: "0.5rem",
-              border: "1px solid #ccc",
-              borderRadius: 4,
-              marginTop: "0.25rem"
-            }}
+            style={{ width: "100%", padding: "0.5rem", border: "1px solid #ccc", borderRadius: 4, marginTop: "0.25rem" }}
           />
         </div>
 
@@ -176,7 +151,6 @@ export default function LoginPage() {
         <span style={{ color: "#666" }}>أو</span>
       </div>
 
-      {/* أزرار تسجيل الدخول الاجتماعي */}
       <button
         onClick={handleGoogleLogin}
         style={{
@@ -232,13 +206,7 @@ export default function LoginPage() {
         <button
           type="button"
           onClick={() => setIsLogin(!isLogin)}
-          style={{
-            background: "none",
-            border: "none",
-            color: "#9422af",
-            textDecoration: "underline",
-            cursor: "pointer"
-          }}
+          style={{ background: "none", border: "none", color: "#9422af", textDecoration: "underline", cursor: "pointer" }}
         >
           {isLogin ? "ليس لديك حساب؟ إنشاء حساب جديد" : "لديك حساب؟ تسجيل الدخول"}
         </button>

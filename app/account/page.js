@@ -1,12 +1,11 @@
+// app/account/page.js
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function AccountPage() {
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     loadCustomer();
@@ -19,8 +18,7 @@ export default function AccountPage() {
         setLoading(false);
         return;
       }
-
-      // محاكاة تحميل بيانات العميل - سيتم ربطها بـ Shopify لاحقاً
+      // محاكاة بيانات حساب — استبدلها لاحقاً بنداء فعلي لـ Shopify
       setTimeout(() => {
         setCustomer({
           firstName: "أحمد",
@@ -29,7 +27,7 @@ export default function AccountPage() {
           orders: []
         });
         setLoading(false);
-      }, 1000);
+      }, 500);
     } catch (err) {
       console.error(err);
       setLoading(false);
@@ -94,13 +92,7 @@ export default function AccountPage() {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
-        {/* معلومات الحساب */}
-        <div style={{ 
-          backgroundColor: "#f8f9fa", 
-          padding: "1.5rem", 
-          borderRadius: 8,
-          border: "1px solid #e9ecef"
-        }}>
+        <div style={{ backgroundColor: "#f8f9fa", padding: "1.5rem", borderRadius: 8, border: "1px solid #e9ecef" }}>
           <h2 style={{ marginBottom: "1rem", color: "#495057" }}>معلومات الحساب</h2>
           <div style={{ marginBottom: "0.5rem" }}>
             <strong>الاسم:</strong> {customer.firstName} {customer.lastName}
@@ -110,13 +102,7 @@ export default function AccountPage() {
           </div>
         </div>
 
-        {/* روابط سريعة */}
-        <div style={{ 
-          backgroundColor: "#f8f9fa", 
-          padding: "1.5rem", 
-          borderRadius: 8,
-          border: "1px solid #e9ecef"
-        }}>
+        <div style={{ backgroundColor: "#f8f9fa", padding: "1.5rem", borderRadius: 8, border: "1px solid #e9ecef" }}>
           <h2 style={{ marginBottom: "1rem", color: "#495057" }}>روابط سريعة</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
             <Link href="/collections" style={{ color: "#9422af", textDecoration: "none" }}>🛍️ تسوق المنتجات</Link>
@@ -126,21 +112,13 @@ export default function AccountPage() {
         </div>
       </div>
 
-      {/* قائمة الطلبات */}
       <div style={{ marginTop: "2rem" }}>
         <h2 style={{ marginBottom: "1rem", color: "#495057" }}>طلباتي الأخيرة</h2>
-        
-        <div style={{ 
-          textAlign: "center", 
-          padding: "3rem",
-          backgroundColor: "#f8f9fa",
-          borderRadius: 8,
-          color: "#666"
-        }}>
+        <div style={{ textAlign: "center", padding: "3rem", backgroundColor: "#f8f9fa", borderRadius: 8, color: "#666" }}>
           <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📦</div>
           <div style={{ fontSize: "1.1rem", marginBottom: "0.5rem" }}>لم تقم بأي طلبات بعد</div>
           <div style={{ marginBottom: "1.5rem" }}>ابدأ التسوق الآن واستمتع بمنتجاتنا المميزة!</div>
-          <Link 
+          <Link
             href="/collections"
             style={{
               padding: "0.75rem 2rem",
