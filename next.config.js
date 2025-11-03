@@ -43,25 +43,19 @@ const nextConfig = {
       { source: "/refund-policy", destination: "/policies/refund-policy", permanent: true },
       { source: "/terms-of-service", destination: "/policies/terms-of-service", permanent: true },
       { source: "/shipping-policy", destination: "/policies/shipping-policy", permanent: true },
+      { source: "/contact-information", destination: "/policies/contact-information", permanent: true },
 
       // مسارات صفحات ثابتة يجب أن تذهب إلى صفحات Shopify
       { source: "/about-us", destination: "/pages/about-us", permanent: true },
       { source: "/contact-us", destination: "/pages/contact-us", permanent: true },
 
-      // ربط الجذر مباشرة لسياسة معلومات التواصل
-      { source: "/contact-information", destination: "/policies/contact-information", permanent: true },
-
       // إصلاح مسارات قديمة بحروف كبيرة/غير قياسية
       { source: "/Pages/about-us", destination: "/pages/about-us", permanent: true },
       { source: "/Pages/contact-information", destination: "/policies/contact-information", permanent: true },
       { source: "/Page/contact-information", destination: "/policies/contact-information", permanent: true },
-      { source: "/Pages/Page/contact-information", destination: "/policies/contact-information", permanent: true },
-
-      // لو عندك روابط داخلية إلى /pages/contact-information خلّيها تتحول للسياسة الصحيحة
-      { source: "/pages/contact-information", destination: "/policies/contact-information", permanent: true },
 
       // منع خطأ blogs/$handle=null: اجعل /blogs تذهب افتراضيًا لمدونة news
-      { source: "/blogs", destination: "/blogs/news", permanent: true },
+      { source: "/مضمون", destination: "/blogs/news/المبتكرون-الصغار-في-الكويت", permanent: true },
     ];
   },
 };

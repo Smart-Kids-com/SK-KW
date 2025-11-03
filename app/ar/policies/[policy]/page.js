@@ -20,7 +20,7 @@ function normalizePolicy(param = "") {
     case "shipping-policy":
       return { type: "shopPolicy", field: "shippingPolicy" };
     case "contact-information":
-      return { type: "page", handle: "contact-information" };
+      return { type: "shopPolicy", field: "contact-information" };
     default:
       return { type: "unknown", handle: h };
   }
@@ -37,6 +37,7 @@ async function fetchPoliciesAR(pageHandle = null) {
         refundPolicy    { title body }
         termsOfService  { title body }
         shippingPolicy  { title body }
+        ContactInformation  { title body }
       }
       pageByHandle: page(handle: $pageHandle) {
         title

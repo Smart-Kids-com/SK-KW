@@ -11,6 +11,7 @@ const SHOP_POLICIES_MAP = {
   "refund-policy": "refundPolicy",
   "terms-of-service": "termsOfService",
   "shipping-policy": "shippingPolicy",
+  "contact-information": "contactInformation",
 };
 
 const AR_TITLES_FALLBACK = {
@@ -32,6 +33,7 @@ async function fetchShopPolicy(policyHandle) {
         refundPolicy    { title body }
         termsOfService  { title body }
         shippingPolicy  { title body }
+        contactInformation { title body }
       }
     }
   `;
