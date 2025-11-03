@@ -1,45 +1,67 @@
+// app/api/auth/route.js
 import { NextResponse } from "next/server";
 import { customerLogin, createCustomer } from "@/lib/shopify";
 
 export async function POST(request) {
   try {
-    const { action, email, password, firstName, lastName } = await request.json();
+    const payload = await request.json().catch(() => ({}));
+    const action = payload?.action;
 
     if (action === "login") {
-      // تسجيل الدخول
-      const accessToken = await customerLogin(email, password);
-      return NextResponse.json({
-        success: true,
-        accessToken: accessToken.accessToken,
-        expiresAt: accessToken.expiresAt
-      });
-    } 
-    
-    else if (action === "register") {
-      // إنشاء حساب جديد
-      const customer = await createCustomer(email, password, firstName, lastName);
-      
-      // تسجيل دخول تلقائي بعد التسجيل
-      const accessToken = await customerLogin(email, password);
-      
-      return NextResponse.json({
-        success: true,
-        customer,
-        accessToken: accessToken.accessToken,
-        expiresAt: accessToken.expiresAt
-      });
+      const { email, password } = payload || {};
+      if (!email || !password) {
+        return NextResponse.json(
+          { success: false, error: "البريد وكلمة المرور مطلوبان" },
+          { status: 400 }
+        );
+      }
+
+      const token = await customerLogin(email, password);
+      return NextResponse.json(
+        {
+          success: true,
+          accessToken: token.accessToken,
+          expiresAt: token.expiresAt,
+        },
+        { status: 200 }
+      );
     }
 
-    return NextResponse.json({
-      success: false,
-      error: "Invalid action"
-    }, { status: 400 });
+    if (action === "register") {
+      const { email, password, firstName = "", lastName = "" } = payload || {};
+      if (!email || !password) {
+        return NextResponse.json(
+          { success: false, error: "البريد وكلمة المرور مطلوبان" },
+          { status: 400 }
+        );
+      }
 
+      // إنشاء العميل
+      const customer = await createCustomer(email, password, firstName, lastName);
+
+      // تسجيل الدخول مباشرة بعد الإنشاء
+      const token = await customerLogin(email, password);
+
+      return NextResponse.json(
+        {
+          success: true,
+          customer,
+          accessToken: token.accessToken,
+          expiresAt: token.expiresAt,
+        },
+        { status: 200 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: "Invalid action" },
+      { status: 400 }
+    );
   } catch (error) {
     console.error("Auth error:", error);
-    return NextResponse.json({
-      success: false,
-      error: error.message || "Authentication failed"
-    }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: error?.message || "Authentication failed" },
+      { status: 400 }
+    );
   }
 }
