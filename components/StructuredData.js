@@ -6,13 +6,13 @@ export default function StructuredData() {
     const organizationSchema = {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "Smart Kids KW",
-      "alternateName": "سمارت كيدز الكويت",
+      "name": "Smart Kids Kuwait BookStore",
+      "alternateName": "موقع الأطفال المبتكرون في الكويت",
       "url": "https://smartkidskw.com",
       "logo": "https://smartkidskw.com/logo-sk-smart-kids.png",
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "+965-50424642",
+        "telephone": "+965-600035393",
         "contactType": "customer service",
         "availableLanguage": ["Arabic", "English"]
       },
@@ -21,14 +21,14 @@ export default function StructuredData() {
         "addressCountry": "KW",
         "addressLocality": "الكويت"
       },
-      "sameAs": ["https://wa.me/96550424642"]
+      "sameAs": ["https://wa.me/965600035393"]
     };
 
     const websiteSchema = {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "Smart Kids KW",
-      "alternateName": "سمارت كيدز الكويت",
+      "name": "Smart Kids Kuwait BookStore",
+      "alternateName": "متجر الأطفال المبتكرون الكويت",
       "url": "https://smartkidskw.com",
       "potentialAction": {
         "@type": "SearchAction",
@@ -40,10 +40,10 @@ export default function StructuredData() {
     const storeSchema = {
       "@context": "https://schema.org",
       "@type": "Store",
-      "name": "Smart Kids KW",
-      "description": "متجر الألعاب التعليمية والقصص التفاعلية للأطفال في الكويت",
+      "name": "Smart Kids Kuwait BookStore",
+      "description": "متجر الكتب التعليمية والقصص التفاعلية للأطفال في الكويت",
       "url": "https://smartkidskw.com",
-      "telephone": "+965-50424642",
+      "telephone": "+965-600035393",
       "priceRange": "1-100 KWD",
       "paymentAccepted": "Cash, Credit Card",
       "currenciesAccepted": "KWD",
