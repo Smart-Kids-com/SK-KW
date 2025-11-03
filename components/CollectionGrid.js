@@ -34,6 +34,6 @@ export default function CollectionGrid({ collections }) {
           </h2>
         </Link>
       ))}
-    </div>
-  );
+ </div>
+);
 }
