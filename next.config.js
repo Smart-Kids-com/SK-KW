@@ -23,7 +23,7 @@ const nextConfig = {
     ],
   },
 
-  // توحيد نسخة الـ API مع lib/shopify.js لتجنب تضارب الإصدارات
+  // توحيد نسخة الـ API مع lib/shopify.js لتجنّب تضارب الإصدارات
   env: {
     SHOPIFY_STORE_DOMAIN: process.env.SHOPIFY_STORE_DOMAIN,
     SHOPIFY_STOREFRONT_API_TOKEN: process.env.SHOPIFY_STOREFRONT_API_TOKEN,
@@ -53,9 +53,11 @@ const nextConfig = {
       { source: "/Pages/about-us", destination: "/pages/about-us", permanent: true },
       { source: "/Pages/contact-information", destination: "/policies/contact-information", permanent: true },
       { source: "/Page/contact-information", destination: "/policies/contact-information", permanent: true },
+      { source: "/pages/contact-information", destination: "/policies/contact-information", permanent: true },
 
-      // منع خطأ blogs/$handle=null: اجعل /blogs تذهب افتراضيًا لمدونة news
-      { source: "/مضمون", destination: "/blogs/news/المبتكرون-الصغار-في-الكويت", permanent: true },
+      // المدوّنة: منع handle = null + دعم رابط عربي "مضمون"
+      { source: "/blogs", destination: "/blogs/news", permanent: true },
+      { source: "/مضمون", destination: "/blogs/news", permanent: true },
     ];
   },
 };
