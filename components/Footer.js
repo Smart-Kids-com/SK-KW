@@ -154,7 +154,7 @@ export default function Footer() {
                 alignItems: "center",
               }}
             >
-              {/* روابط السوشيال */}
+              {/* روابط السوشيال (كما هي) */}
               <a
                 href="https://www.facebook.com/KuwaitSmartKids"
                 style={{
@@ -317,22 +317,19 @@ export default function Footer() {
             }}
           >
             <Link href="/policies/refund-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
-              سياسة الاسترجاع والاستبدال
+              Refund policy
             </Link>
             <Link href="/policies/privacy-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
-              سياسة الخصوصية
+              Privacy policy
             </Link>
             <Link href="/policies/terms-of-service" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
-              شروط الخدمة
+              Terms of service
             </Link>
-            <Link href="policies/shipping-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
-              سياسة الشحن
+            <Link href="/policies/shipping-policy" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
+              Shipping policy
             </Link>
-            <Link href="Pages/about-us" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
-              من نحن
-            </Link>
-            <Link href="Page/contact-information" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
-              معلومات التواصل
+            <Link href="/policies/contact-information" style={{ color: "rgba(255,255,255,0.7)", textDecoration: "none" }}>
+              Contact information
             </Link>
           </div>
         </div>
