@@ -23,7 +23,7 @@ const nextConfig = {
     ],
   },
 
-  // وحّدنا الافتراضي هنا مع lib/shopify.js (2024-07) لتجنب تضارب الإصدارات
+  // توحيد نسخة الـ API مع lib/shopify.js لتجنب تضارب الإصدارات
   env: {
     SHOPIFY_STORE_DOMAIN: process.env.SHOPIFY_STORE_DOMAIN,
     SHOPIFY_STOREFRONT_API_TOKEN: process.env.SHOPIFY_STOREFRONT_API_TOKEN,
@@ -48,8 +48,12 @@ const nextConfig = {
       { source: "/about-us", destination: "/pages/about-us", permanent: true },
       { source: "/contact-us", destination: "/pages/contact-us", permanent: true },
 
+      // ربط الجذر مباشرة لسياسة معلومات التواصل
+      { source: "/contact-information", destination: "/policies/contact-information", permanent: true },
+
       // إصلاح مسارات قديمة بحروف كبيرة/غير قياسية
       { source: "/Pages/about-us", destination: "/pages/about-us", permanent: true },
+      { source: "/Pages/contact-information", destination: "/policies/contact-information", permanent: true },
       { source: "/Page/contact-information", destination: "/policies/contact-information", permanent: true },
       { source: "/Pages/Page/contact-information", destination: "/policies/contact-information", permanent: true },
 

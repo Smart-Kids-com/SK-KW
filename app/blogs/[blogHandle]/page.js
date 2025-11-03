@@ -1,57 +1,31 @@
-// app/blogs/[blogHandle]/page.js
-import Link from "next/link";
 import { fetchShopifyGraphQL } from "@/lib/shopify";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export default async function BlogList({ params }) {
-  const blogHandle = params?.blogHandle; // ✅ الاسم الصحيح
   const QUERY = /* GraphQL */ `
     query BlogByHandle($language: LanguageCode!, $handle: String!, $first: Int = 20) @inContext(language: $language) {
       blog(handle: $handle) {
-        title
-        handle
+        title handle
         articles(first: $first) {
-          edges {
-            node {
-              handle
-              title
-              excerptHtml
-              image { url altText }
-              publishedAt
-            }
-          }
+          edges { node { handle title excerptHtml image { url altText } publishedAt } }
         }
       }
     }
   `;
-  const data = await fetchShopifyGraphQL(QUERY, { language: "EN", handle: blogHandle, first: 20 });
+  const handle = params.blogHandle; // ← الإصلاح هنا
+  const data = await fetchShopifyGraphQL(QUERY, { language: "EN", handle, first: 20 });
   const blog = data?.blog;
-  if (!blog) return <main style={{ padding:24 }}>Not found.</main>;
-
+  if (!blog) return <main style={{padding:24}}>Not found.</main>;
   const items = blog.articles.edges.map(e => e.node);
-
   return (
     <main style={{ padding:24, maxWidth:1000, margin:"0 auto" }}>
       <h1>{blog.title}</h1>
       <div style={{ display:"grid", gap:16, gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))" }}>
         {items.map(a => (
-          <Link
-            key={a.handle}
-            href={`/blogs/${encodeURIComponent(blog.handle)}/${encodeURIComponent(a.handle)}`}
-            style={{ textDecoration:"none", color:"inherit", border:"1px solid #eee", borderRadius:12, padding:12, display:"block" }}
-          >
-            {a.image?.url && (
-              <img
-                src={a.image.url}
-                alt={a.image.altText || a.title}
-                style={{ width:"100%", height:150, objectFit:"cover", borderRadius:8 }}
-              />
-            )}
+          <a key={a.handle} href={`/blogs/${blog.handle}/${a.handle}`} style={{ textDecoration:"none", color:"inherit", border:"1px solid #eee", borderRadius:12, padding:12 }}>
+            {a.image?.url && <img src={a.image.url} alt={a.image.altText||a.title} style={{ width:"100%", height:150, objectFit:"cover", borderRadius:8 }} />}
             <div style={{ fontWeight:600, marginTop:8 }}>{a.title}</div>
             {a.excerptHtml && <div dangerouslySetInnerHTML={{ __html: a.excerptHtml }} />}
-          </Link>
+          </a>
         ))}
       </div>
     </main>
