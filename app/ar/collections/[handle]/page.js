@@ -1,5 +1,5 @@
-// app/ar/collections/[handle]/page.js
-import { fetchShopifyGraphQL } from "@/lib/shopify";
+import { fetchShopifyGraphQL, formatKWD } from "@/lib/shopify";
+import AddToCartButton from "@/components/AddToCartButton";
 
 export default async function CollectionPage({ params }) {
   const QUERY = /* GraphQL */ `
@@ -17,6 +17,7 @@ export default async function CollectionPage({ params }) {
               title
               featuredImage { url altText }
               priceRange { minVariantPrice { amount currencyCode } }
+              variants(first: 1) { edges { node { id availableForSale } } }
             }
           }
           pageInfo { hasNextPage endCursor }
@@ -32,7 +33,9 @@ export default async function CollectionPage({ params }) {
   });
 
   const col = data?.collection;
-  if (!col) return <main style={{ padding: 24, direction: "rtl" }}>غير موجود.</main>;
+  if (!col) {
+    return <main style={{ padding: 24, direction: "rtl" }}>غير موجود.</main>;
+  }
 
   const items = col.products?.edges?.map((e) => e.node) ?? [];
 
@@ -50,28 +53,63 @@ export default async function CollectionPage({ params }) {
 
       {col.description && <p style={{ maxWidth: 900 }}>{col.description}</p>}
 
-      <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", marginTop: 16 }}>
-        {items.map((p) => (
-          <a
-            key={p.id}
-            href={`/ar/products/${p.handle}`}
-            style={{ textDecoration: "none", color: "inherit", border: "1px solid #eee", borderRadius: 12, padding: 12 }}
-          >
-            {p.featuredImage?.url ? (
-              <img
-                src={p.featuredImage.url}
-                alt={p.featuredImage.altText || p.title}
-                style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 8 }}
-              />
-            ) : (
-              <div style={{ width: "100%", height: 160, background: "#f3f4f6", borderRadius: 8 }} />
-            )}
-            <div style={{ marginTop: 8, fontWeight: 600 }}>{p.title}</div>
-            <div style={{ opacity: 0.8, marginTop: 4 }}>
-              {p.priceRange?.minVariantPrice?.amount} {p.priceRange?.minVariantPrice?.currencyCode}
+      <div
+        style={{
+          display: "grid",
+          gap: 16,
+          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+          marginTop: 16,
+        }}
+      >
+        {items.map((p) => {
+          const firstVariantId = p.variants?.edges?.[0]?.node?.id;
+          const priceAmt = p.priceRange?.minVariantPrice?.amount;
+          const priceStr = priceAmt ? formatKWD(priceAmt) : null;
+
+          return (
+            <div
+              key={p.id}
+              style={{
+                textDecoration: "none",
+                color: "inherit",
+                border: "1px solid #eee",
+                borderRadius: 12,
+                padding: 12,
+                background: "#fff",
+              }}
+            >
+              <a
+                href={`/ar/products/${p.handle}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                {p.featuredImage?.url ? (
+                  <img
+                    src={p.featuredImage.url}
+                    alt={p.featuredImage.altText || p.title}
+                    style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 8 }}
+                  />
+                ) : (
+                  <div style={{ width: "100%", height: 160, background: "#f3f4f6", borderRadius: 8 }} />
+                )}
+                <div style={{ marginTop: 8, fontWeight: 700, color: "#1f2937" }}>
+                  {p.title}
+                </div>
+                <div style={{ marginTop: 4, opacity: 0.9, fontWeight: 800, color: "#ef4444" }}>
+                  {priceStr}
+                </div>
+              </a>
+
+              {/* زر اشترِ الآن من شبكة المجموعات */}
+              {firstVariantId && (
+                <div style={{ marginTop: 8 }}>
+                  <AddToCartButton variantId={firstVariantId} goToCheckout>
+                    اشترِ الآن
+                  </AddToCartButton>
+                </div>
+              )}
             </div>
-          </a>
-        ))}
+          );
+        })}
       </div>
     </main>
   );

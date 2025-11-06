@@ -124,7 +124,7 @@ export default function ProductsCarousel({ products = [], title, viewAllHref }) 
           margin-top: 12px;
         }
         .view-all {
-          color: #4f46e5;
+          color: #d11783ff;
           text-decoration: none;
           font-weight: 700;
         }
