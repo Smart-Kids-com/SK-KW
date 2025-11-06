@@ -12,7 +12,7 @@ export default function StructuredData() {
       "logo": "https://smartkidskw.com/logo-sk-smart-kids.png",
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "+965-600035393",
+        "telephone": "+965-66635393",
         "contactType": "customer service",
         "availableLanguage": ["Arabic", "English"]
       },
@@ -21,7 +21,7 @@ export default function StructuredData() {
         "addressCountry": "KW",
         "addressLocality": "الكويت"
       },
-      "sameAs": ["https://wa.me/965600035393"]
+      "sameAs": ["https://wa.me/96566635393"]
     };
 
     const websiteSchema = {
@@ -43,7 +43,7 @@ export default function StructuredData() {
       "name": "Smart Kids Kuwait BookStore",
       "description": "متجر الكتب التعليمية والقصص التفاعلية للأطفال في الكويت",
       "url": "https://smartkidskw.com",
-      "telephone": "+965-600035393",
+      "telephone": "+965-66635393",
       "priceRange": "1-100 KWD",
       "paymentAccepted": "Cash, Credit Card",
       "currenciesAccepted": "KWD",
