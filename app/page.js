@@ -185,7 +185,7 @@ async function loadCollectionsForHomepage(handles = [], limit = 12) {
 
 export default async function HomePage() {
   const vids = Object.values(videos || {});
-  const v1 = vids[0] || null; // مربّع
+  const v1 = vids[0] || null; // 1:1
   const v2 = vids[1] || null; // 9:16
 
   const collections = await loadCollectionsForHomepage(featuredHandles, 12);
@@ -227,10 +227,7 @@ export default async function HomePage() {
               padding: "0 var(--spacing-grid-horizontal)",
             }}
           >
-            <HomepageSlideshow
-              slides={slidesPrimary}
-              autoplayMs={AUTOPLAY_MS}
-            />
+            <HomepageSlideshow slides={slidesPrimary} autoplayMs={AUTOPLAY_MS} />
           </div>
         </section>
 
@@ -251,9 +248,10 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* الفيديوهات/البنرات حسب المقاسات التي طلبتها */}
+        {/* فيديوهات وبنرات */}
         {v1 && <VideoBlock src={v1} ratio="1 / 1" />}
         {v2 && <VideoBlock src={v2} ratio="9 / 16" />}
+
         <ImageBanner
           src={banners.image_banner}
           heading=""
@@ -267,18 +265,13 @@ export default async function HomePage() {
           heading=""
           sub=""
           ctaLabel="تصفح عرض ال 12 قصة"
-          ctaHref={`/products/${encodeURIComponent(
-            "حرك-شاهد-تفاعل-مع-12-كتاباً-تفاعلياً"
-          )}`}
+          ctaHref={`/products/${encodeURIComponent("حرك-شاهد-تفاعل-مع-12-كتاباً-تفاعلياً")}`}
           ratio="1 / 1"
         />
 
-        {/* كل مجموعة + كاروسيل منتجاتها */}
+        {/* مجموعات + كاروسيل منتجات */}
         {collections.map((c) => (
-          <section
-            key={c.id}
-            style={{ marginBottom: "var(--spacing-sections)" }}
-          >
+          <section key={c.id} style={{ marginBottom: "var(--spacing-sections)" }}>
             <div
               style={{
                 maxWidth: "var(--page-width)",
@@ -339,6 +332,6 @@ export default async function HomePage() {
           </section>
         ))}
       </main>
-</>
-);
+    </>
+  );
 }
