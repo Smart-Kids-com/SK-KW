@@ -1,3 +1,5 @@
+// app/ar/collections/[handle]/page.js
+import Link from "next/link";
 import { fetchShopifyGraphQL, formatKWD } from "@/lib/shopify";
 import AddToCartButton from "@/components/AddToCartButton";
 
@@ -37,11 +39,13 @@ export default async function CollectionPage({ params }) {
     return <main style={{ padding: 24, direction: "rtl" }}>غير موجود.</main>;
   }
 
-  const items = col.products?.edges?.map((e) => e.node) ?? [];
+  const items = Array.isArray(col.products?.edges)
+    ? col.products.edges.map((e) => e.node)
+    : [];
 
   return (
     <main style={{ padding: 24, direction: "rtl", maxWidth: 1100, margin: "0 auto" }}>
-      <h1>{col.title}</h1>
+      <h1 style={{ marginBottom: 12 }}>{col.title}</h1>
 
       {col.image?.url && (
         <img
@@ -53,35 +57,19 @@ export default async function CollectionPage({ params }) {
 
       {col.description && <p style={{ maxWidth: 900 }}>{col.description}</p>}
 
-      <div
-        style={{
-          display: "grid",
-          gap: 16,
-          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-          marginTop: 16,
-        }}
-      >
+      <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", marginTop: 16 }}>
         {items.map((p) => {
           const firstVariantId = p.variants?.edges?.[0]?.node?.id;
-          const priceAmt = p.priceRange?.minVariantPrice?.amount;
-          const priceStr = priceAmt ? formatKWD(priceAmt) : null;
+          const priceText = formatKWD(p.priceRange?.minVariantPrice?.amount ?? 0);
+          // رابط نسبي ليرث /ar إن كانت موجودة
+          const href = `products/${encodeURIComponent(p.handle)}`;
 
           return (
             <div
               key={p.id}
-              style={{
-                textDecoration: "none",
-                color: "inherit",
-                border: "1px solid #eee",
-                borderRadius: 12,
-                padding: 12,
-                background: "#fff",
-              }}
+              style={{ border: "1px solid #eee", borderRadius: 12, padding: 12, background: "#fff" }}
             >
-              <a
-                href={`/ar/products/${p.handle}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
+              <Link href={href} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
                 {p.featuredImage?.url ? (
                   <img
                     src={p.featuredImage.url}
@@ -91,15 +79,10 @@ export default async function CollectionPage({ params }) {
                 ) : (
                   <div style={{ width: "100%", height: 160, background: "#f3f4f6", borderRadius: 8 }} />
                 )}
-                <div style={{ marginTop: 8, fontWeight: 700, color: "#1f2937" }}>
-                  {p.title}
-                </div>
-                <div style={{ marginTop: 4, opacity: 0.9, fontWeight: 800, color: "#ef4444" }}>
-                  {priceStr}
-                </div>
-              </a>
+                <div style={{ marginTop: 8, fontWeight: 600 }}>{p.title}</div>
+                <div style={{ opacity: 0.85, marginTop: 4 }}>{priceText}</div>
+              </Link>
 
-              {/* زر اشترِ الآن من شبكة المجموعات */}
               {firstVariantId && (
                 <div style={{ marginTop: 8 }}>
                   <AddToCartButton variantId={firstVariantId} goToCheckout>
