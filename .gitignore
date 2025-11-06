@@ -41,5 +41,9 @@ Thumbs.db
 coverage/
 .playwright/
 
-# Misc
+# Project-local misc
 *.local
+BRANDING_APPLY_REPORT.txt
+local.txt
+remote.txt
+tree-needed.txt
