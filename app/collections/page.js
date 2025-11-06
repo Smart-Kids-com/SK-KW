@@ -37,7 +37,7 @@ export default function CollectionsIndex() {
               display: "block",
               textDecoration: "none",
               color: "inherit",
-              background: "#fff",
+              background: "#370E3E",
               borderRadius: 12,
               overflow: "hidden",
               boxShadow: "0 8px 24px rgba(0,0,0,.08)",
@@ -51,7 +51,7 @@ export default function CollectionsIndex() {
                   style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
                 />
               ) : (
-                <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", background: "#f6f6f6" }}>
+                <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", background: "#370E3E" }}>
                   📚
                 </div>
               )}

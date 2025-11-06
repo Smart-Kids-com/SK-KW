@@ -7,9 +7,9 @@ import SideMenuCollections from "./SideMenuCollections";
 function MenuIcon(props) {
   return (
     <svg {...props} width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden>
-      <rect y="8" width="32" height="2" rx="1" fill="#2563eb" />
-      <rect y="15" width="32" height="2" rx="1" fill="#2563eb" />
-      <rect y="22" width="32" height="2" rx="1" fill="#2563eb" />
+      <rect y="8" width="32" height="2" rx="1" fill="#b50e83ff" />
+      <rect y="15" width="32" height="2" rx="1" fill="#c319a1ff" />
+      <rect y="22" width="32" height="2" rx="1" fill="#bd17a4ff" />
     </svg>
   );
 }
@@ -21,7 +21,7 @@ function SearchIcon(props) {
       height="28"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#2563eb"
+      stroke="#bd1569ff"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -40,7 +40,7 @@ function CartIcon(props) {
       height="28"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#2563eb"
+      stroke="#eb25acff"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -158,7 +158,7 @@ export default function Header() {
           {/* أيقونات */}
           <div className="sk-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <a
-              href="https://wa.me/965600035393"
+              href="https://wa.me/96566635393"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="واتساب"
@@ -177,12 +177,12 @@ export default function Header() {
             </a>
             <Link href="/search" aria-label="بحث"><SearchIcon /></Link>
             <Link href="/wishlist" aria-label="المفضلة">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" aria-hidden>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#eb25e8ff" strokeWidth="2" aria-hidden>
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
               </svg>
             </Link>
             <Link href="/account" aria-label="حسابي">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" aria-hidden>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d725ebff" strokeWidth="2" aria-hidden>
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
               </svg>
             </Link>
@@ -198,7 +198,7 @@ export default function Header() {
         style={{
           position: "fixed",
           inset: 0,
-          background: "rgba(0,0,0,0.35)",
+          background: "rgba(222, 22, 162, 0.35)",
           display: open ? "block" : "none",
           zIndex: 1000,
         }}
@@ -219,7 +219,7 @@ export default function Header() {
           maxWidth: "85vw",
           background: "#370e3e",
           color: "#fff",
-          boxShadow: "-2px 0 16px rgba(0,0,0,.25)",
+          boxShadow: "-2px 0 16px rgba(177, 38, 163, 0.25)",
           transform: open ? "translateX(0)" : "translateX(110%)",
           transition: "transform .25s ease",
           zIndex: 1001,
@@ -243,6 +243,6 @@ export default function Header() {
           <SideMenuCollections onSelect={closeMenu} />
         </div>
       </aside>
-    </>
-  );
+</>
+);
 }
