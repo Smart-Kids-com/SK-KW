@@ -27,7 +27,7 @@ const nextConfig = {
   env: {
     SHOPIFY_STORE_DOMAIN: process.env.SHOPIFY_STORE_DOMAIN,
     SHOPIFY_STOREFRONT_API_TOKEN: process.env.SHOPIFY_STOREFRONT_API_TOKEN,
-    SHOPIFY_API_VERSION: process.env.SHOPIFY_API_VERSION || "2025-07",
+    SHOPIFY_API_VERSION: process.env.SHOPIFY_API_VERSION || "2024-07",
   },
 
   async redirects() {
