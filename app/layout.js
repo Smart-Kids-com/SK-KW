@@ -1,9 +1,10 @@
 // app/layout.js (Root Layout - Server Component)
 
-// ===== Swiper global CSS =====
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+
+import { Suspense } from 'react';
 
 // ===== Site chrome =====
 import Header from '@/components/Header';
@@ -18,11 +19,9 @@ export const metadata = {
   description:
     'متجر تعليم وترفيه للأطفال في الكويت - ألعاب تعليمية، قصص تفاعلية، وأدوات تنمية مهارات الأطفال.',
   icons: {
-    icon: [
-      { url: '/favicon.png', type: 'image/png', sizes: '32x32' },
-    ],
+    icon: [{ url: '/favicon.png', type: 'image/png', sizes: '32x32' }],
   },
-  manifest: '/site.webmanifest', // موجود عندك في public
+  manifest: '/site.webmanifest',
 };
 
 export default function RootLayout({ children }) {
@@ -30,10 +29,21 @@ export default function RootLayout({ children }) {
     <html lang="ar" dir="rtl">
       <body style={{ margin: 0, background: '#370e3e', color: '#fff' }}>
         <CartDrawerProvider>
-          <Header />
-          {children}
-          <Footer />
-          <CartDrawer />
+          <Suspense fallback={null}>
+            <Header />
+          </Suspense>
+
+          <Suspense fallback={null}>
+            {children}
+          </Suspense>
+
+          <Suspense fallback={null}>
+            <Footer />
+          </Suspense>
+
+          <Suspense fallback={null}>
+            <CartDrawer />
+          </Suspense>
         </CartDrawerProvider>
       </body>
     </html>
