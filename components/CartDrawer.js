@@ -1,173 +1,116 @@
 "use client";
-import { useCartDrawer } from "../lib/CartDrawerContext";
+import Link from "next/link";
+import { useCartDrawer } from "@/lib/CartDrawerContext";
 
 export default function CartDrawer() {
-  const { open, lastAddedProduct, closeDrawer } = useCartDrawer();
+  const { isOpen, close, lastAdded, cart } = useCartDrawer();
 
-  if (!open || !lastAddedProduct) return null;
+  const goCheckout = () => {
+    const url = cart?.checkoutUrl;
+    if (url) window.location.href = url;
+  };
 
+  // ملاحظة: لما يكون مقفول بنحط pointerEvents: 'none' عشان مايحجبش الضغط على الصفحة
   return (
     <div
+      aria-hidden={!isOpen}
       style={{
         position: "fixed",
-        inset: 0,
+        insetInline: 0,
+        top: 0,
+        transform: isOpen ? "translateY(0%)" : "translateY(-110%)",
+        transition: "transform .25s ease",
         zIndex: 1000,
-        background: "rgba(41, 8, 87, 0.20)",
-        display: "flex",
-        justifyContent: "flex-end"
+        pointerEvents: isOpen ? "auto" : "none",
       }}
-      onClick={closeDrawer}
     >
-      <aside
-        onClick={(e) => e.stopPropagation()}
+      <div
+        // الحاوية الداخلية تاخد pointerEvents عشان الأزرار تشتغل لما يكون مفتوح
         style={{
-          width: "100%",
-          maxWidth: 440,
-          height: "100%",
-          background: "#fff",
-          boxShadow: "-2px 0 20px #2e093d22",
-          padding: "34px 20px 24px 20px",
-          overflowY: "auto",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          position: "relative",
-          animation: "slideInCartDrawer .28s"
+          margin: "0 auto",
+          maxWidth: 960,
+          background: "white",
+          borderRadius: "0 0 16px 16px",
+          boxShadow: "0 10px 40px rgba(0,0,0,.18)",
+          padding: "1rem",
+          direction: "rtl",
+          pointerEvents: "auto",
         }}
       >
-        {/* زر الإغلاق */}
-        <button
-          onClick={closeDrawer}
-          aria-label="إغلاق"
-          style={{
-            position: "absolute",
-            top: 18,
-            left: 18,
-            background: "none",
-            border: "none",
-            fontSize: 30,
-            color: "#3d0856",
-            cursor: "pointer",
-            lineHeight: 1,
-            padding: 0,
-            zIndex: 2
-          }}
-        >
-          ×
-        </button>
-
-        {/* رسالة النجاح */}
-        <div style={{
-          color: "#1b43c6",
-          fontWeight: 600,
-          fontSize: "1.22rem",
-          textAlign: "center",
-          margin: "0 0 18px 0",
-          display: "flex",
-          alignItems: "center",
-          gap: 6
-        }}>
-          <span style={{ fontSize: 24, color: "#2ee86c" }}>✔</span>
-          تم إضافة المنتج إلى عربة التسوق بنجاح
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", color: "#1e3a8a", marginBottom: ".75rem" }}>
+          <div>✓ تم إضافة المنتج إلى عربة التسوق بنجاح</div>
+          <button onClick={close} aria-label="إغلاق" style={{ background: "transparent", border: 0, fontSize: "1.4rem", cursor: "pointer", color: "#1e3a8a" }}>
+            ×
+          </button>
         </div>
 
-        {/* المنتج المضاف */}
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 18,
-          marginBottom: 30,
-          width: "100%"
-        }}>
-          <img
-            src={lastAddedProduct.image}
-            alt={lastAddedProduct.title}
-            style={{
-              width: 96,
-              height: 96,
-              borderRadius: 12,
-              objectFit: "cover",
-              background: "#f5f5f5",
-              border: "1.5px solid #e4e4e4"
-            }}
-          />
-          <div style={{
-            color: "#1b43c6",
-            fontSize: "1.11rem",
-            fontWeight: 500,
-            textAlign: "right"
-          }}>
-            {lastAddedProduct.title}
+        {lastAdded && (
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+            {lastAdded.image ? (
+              <img src={lastAdded.image} alt={lastAdded.title} style={{ width: 72, height: 72, borderRadius: 12, objectFit: "cover" }} />
+            ) : (
+              <div style={{ width: 72, height: 72, borderRadius: 12, background: "#f3f4f6" }} />
+            )}
+            <div style={{ color: "#1e3a8a" }}>
+              <div style={{ fontWeight: 700 }}>{lastAdded.title}</div>
+              <div style={{ opacity: 0.8, fontSize: ".95rem" }}>الكمية: {lastAdded.quantity}</div>
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* الأزرار */}
-        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 17 }}>
-          <a
+        <div style={{ display: "grid", gap: ".85rem" }}>
+          <Link
             href="/cart"
+            onClick={close}
             style={{
-              display: "block",
-              padding: "18px 0",
-              background: "#fff",
-              color: "#6b2da7",
-              border: "3px solid #6b2da7",
-              borderRadius: 16,
-              fontWeight: 700,
-              fontSize: "1.22rem",
-              marginBottom: 2,
               textAlign: "center",
-              boxShadow: "0 4px 16px #8b5d9e1a",
-              transition: "background .18s,color .18s",
-              textDecoration: "none"
+              padding: "0.9rem 1.2rem",
+              borderRadius: 14,
+              border: "2px solid #69207e",
+              background: "white",
+              color: "#69207e",
+              fontWeight: 700,
+              fontSize: "1rem",
+              boxShadow: "0 6px 16px rgba(0,0,0,.12)",
+              textDecoration: "none",
             }}
           >
             عرض عربة التسوق
-          </a>
-          <a
-            href="/checkout"
+          </Link>
+
+          <button
+            onClick={goCheckout}
             style={{
-              display: "block",
-              padding: "18px 0",
-              background: "#3d0856",
-              color: "#fff",
-              border: "none",
-              borderRadius: 16,
+              padding: "0.95rem 1.2rem",
+              borderRadius: 14,
+              border: "2px solid #2b0c36",
+              background: "#2b0c36",
+              color: "white",
               fontWeight: 700,
-              fontSize: "1.19rem",
-              marginBottom: 2,
-              textAlign: "center",
-              boxShadow: "0 4px 18px #6b2da755",
-              textDecoration: "none"
+              fontSize: "1rem",
+              boxShadow: "0 8px 22px rgba(0,0,0,.2)",
+              cursor: "pointer",
             }}
           >
             الذهاب للدفع
-          </a>
-          <a
-            href="/collections"
+          </button>
+
+          <button
+            onClick={close}
             style={{
-              display: "block",
-              padding: "10px 0 0 0",
-              background: "none",
-              color: "#6b2da7",
-              border: "none",
-              borderRadius: 0,
-              fontWeight: 500,
-              fontSize: "1.07rem",
-              textAlign: "center",
+              background: "transparent",
+              border: 0,
+              color: "#69207e",
               textDecoration: "underline",
-              marginTop: 6
+              fontWeight: 600,
+              padding: ".5rem 0",
+              cursor: "pointer",
             }}
           >
             متابعة الشراء
-          </a>
+          </button>
         </div>
-      </aside>
-      <style>{`
-        @keyframes slideInCartDrawer {
-          from { transform: translateX(100%); opacity: 0.3; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-      `}</style>
+      </div>
     </div>
   );
 }

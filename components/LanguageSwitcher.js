@@ -1,25 +1,26 @@
 "use client";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import Link, { useRouter } from 'next/navigation'
 export default function LanguageSwitcher() {
-  const router = useRouter()
-  const { locale, asPath } = router
+  const router = useRouter();
+  const pathname = usePathname() || "/";
+  const qs = useSearchParams()?.toString();
+  const isAr = pathname.startsWith("/ar");
 
-  const switchTo = locale === 'ar' ? 'en' : 'ar'
-  const label = switchTo === 'ar' ? 'العربية' : 'English'
+  const target = isAr
+    ? pathname.replace(/^\/ar(\/|$)/, "/") // إلى English
+    : (pathname === "/" ? "/ar" : `/ar${pathname}`); // إلى العربية
+
+  const href = qs ? `${target}?${qs}` : target;
+  const label = isAr ? "English" : "العربية";
+
   return (
     <button
-      onClick={() => router.push(asPath, asPath, { locale: switchTo })}
-      style={{
-        border: 'none',
-        background: 'none',
-        cursor: 'pointer',
-        fontWeight: 600,
-        fontSize: '1rem'
-      }}
+      onClick={() => router.push(href)}
+      style={{ border: "none", background: "none", color: "#fff", fontWeight: 700, cursor: "pointer" }}
       aria-label={`Switch to ${label}`}
     >
-      {label}
+      {label} ▾
     </button>
-  )
+  );
 }

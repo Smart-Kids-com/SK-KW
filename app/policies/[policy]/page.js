@@ -1,3 +1,4 @@
+// app/policies/[policy]/page.js
 export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
@@ -13,13 +14,13 @@ function normalizePolicy(param = "") {
     case "contact-information":
       return h;
     default:
-      return h;
+      return h; // unknown → سيُعالج بالفول-باك
   }
 }
 
 export default async function PolicyRoute({ params }) {
   const handle = normalizePolicy(params?.policy);
-  const LOCALE = "EN";
+  const LOCALE = "EN"; // هذا المسار غير /ar، فنعتمد الإنجليزية
   const USE_SHOPIFY = process.env.USE_SHOPIFY_POLICIES !== "0";
 
   let node = null;
@@ -27,7 +28,9 @@ export default async function PolicyRoute({ params }) {
   if (USE_SHOPIFY) {
     try {
       node = await getPolicyByHandleShopify(handle, LOCALE);
-    } catch {}
+    } catch {
+      // نتجاهل ونكمل بالفول-باك
+    }
   }
 
   if (!node) {
