@@ -1,8 +1,11 @@
+// app/products/[handle]/page.js
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getProductByHandle, searchProducts, formatKWD } from "@/lib/shopify";
 import AddToCartButton from "@/components/AddToCartButton";
 import WishlistButton from "@/components/WishlistButton";
+
+export const dynamic = "force-dynamic";
 
 export default async function ProductPage({ params }) {
   const rawHandle = decodeURIComponent(params.handle || "").trim();
@@ -25,7 +28,7 @@ export default async function ProductPage({ params }) {
     notFound();
   }
 
-  // ----- بقية الصفحة كما هي -----
+  // ----- بقية الصفحة -----
   const variants = Array.isArray(product.variants) ? product.variants : [];
   const firstVariant = variants[0] || null;
   const images = Array.isArray(product.images) ? product.images : [];
