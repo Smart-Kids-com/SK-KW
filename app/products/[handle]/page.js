@@ -1,17 +1,31 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getProductByHandle, formatKWD } from "@/lib/shopify";
+import { notFound, redirect } from "next/navigation";
+import { getProductByHandle, searchProducts, formatKWD } from "@/lib/shopify";
 import AddToCartButton from "@/components/AddToCartButton";
 import WishlistButton from "@/components/WishlistButton";
 
 export default async function ProductPage({ params }) {
-  const product = await getProductByHandle(params.handle);
+  const rawHandle = decodeURIComponent(params.handle || "").trim();
+
+  // 1) جرّب الهاندل كما هو
+  let product = await getProductByHandle(rawHandle);
+
+  // 2) لو فشل وكان الهاندل غير ASCII (عربي)، اعمل بحث ثم Redirect للـhandle القانوني
+  if (!product && /[^\u0000-\u007F]/.test(rawHandle)) {
+    const queryText = rawHandle.replace(/[-_]+/g, " ");
+    const hits = await searchProducts(queryText, 5, "RELEVANCE");
+    const best = Array.isArray(hits) ? hits.find(Boolean) : null;
+    if (best?.handle && best.handle !== rawHandle) {
+      // حوّل للرابط القانوني فورًا (ده بيحل 404 للهاندلات العربية)
+      redirect(`/products/${encodeURIComponent(best.handle)}`);
+    }
+  }
 
   if (!product) {
     notFound();
   }
 
-  // lib/shopify.js يرجّع arrays جاهزة (بدون .edges)
+  // ----- بقية الصفحة كما هي -----
   const variants = Array.isArray(product.variants) ? product.variants : [];
   const firstVariant = variants[0] || null;
   const images = Array.isArray(product.images) ? product.images : [];
@@ -64,7 +78,6 @@ export default async function ProductPage({ params }) {
       >
         {/* Product Images */}
         <div style={{ position: "sticky", top: "2rem" }}>
-          {/* Main Image (ثابت بدون سويتش — آمن/بسيط) */}
           <div
             style={{
               backgroundColor: "white",
@@ -77,6 +90,7 @@ export default async function ProductPage({ params }) {
           >
             <div style={{ position: "relative", paddingBottom: "100%" }}>
               {mainImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={mainImage}
                   alt={product.featuredImage?.altText || product.title}
@@ -107,7 +121,6 @@ export default async function ProductPage({ params }) {
             </div>
           </div>
 
-          {/* Thumbnails (عرض فقط) */}
           {images.length > 1 && (
             <div
               style={{
@@ -131,6 +144,7 @@ export default async function ProductPage({ params }) {
                   }}
                 >
                   <div style={{ position: "relative", paddingBottom: "100%" }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={image.url}
                       alt={image.altText || `${product.title} ${index + 1}`}
@@ -160,7 +174,6 @@ export default async function ProductPage({ params }) {
               marginBottom: "1.5rem",
             }}
           >
-            {/* Title */}
             <h1
               style={{
                 fontSize: "clamp(1.8rem, 4vw, 2.2rem)",
@@ -305,71 +318,6 @@ export default async function ProductPage({ params }) {
 
               <div style={{ display: "flex", alignItems: "center" }}>
                 <WishlistButton productId={product.id} size="large" />
-              </div>
-            </div>
-
-            {/* Badges */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                gap: "1rem",
-                marginBottom: "2rem",
-              }}
-            >
-              <div
-                style={{
-                  padding: "1rem",
-                  backgroundColor: "#f8f9fa",
-                  borderRadius: 8,
-                  textAlign: "center",
-                }}
-              >
-                <div style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>
-                  🚚
-                </div>
-                <div style={{ fontWeight: 600, color: "#2d3748" }}>
-                  توصيل سريع
-                </div>
-                <div style={{ fontSize: "0.9rem", color: "#718096" }}>
-                  خلال 24-48 ساعة
-                </div>
-              </div>
-              <div
-                style={{
-                  padding: "1rem",
-                  backgroundColor: "#f8f9fa",
-                  borderRadius: 8,
-                  textAlign: "center",
-                }}
-              >
-                <div style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>
-                  💯
-                </div>
-                <div style={{ fontWeight: 600, color: "#2d3748" }}>
-                  ضمان الجودة
-                </div>
-                <div style={{ fontSize: "0.9rem", color: "#718096" }}>
-                  منتجات أصلية
-                </div>
-              </div>
-              <div
-                style={{
-                  padding: "1rem",
-                  backgroundColor: "#f8f9fa",
-                  borderRadius: 8,
-                  textAlign: "center",
-                }}
-              >
-                <div style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>
-                  🔄
-                </div>
-                <div style={{ fontWeight: 600, color: "#2d3748" }}>
-                  سهولة الإرجاع
-                </div>
-                <div style={{ fontSize: "0.9rem", color: "#718096" }}>
-                  خلال 7 أيام
-                </div>
               </div>
             </div>
           </div>

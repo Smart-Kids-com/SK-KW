@@ -1,38 +1,58 @@
-
 "use client";
 import { useState } from "react";
+import { useCartDrawer } from "@/lib/CartDrawerContext"; // ← موجود عندك حسب القائمة
 
-export default function AddToCartButton({ variantId, quantity = 1, goToCheckout = false, children }) {
+export default function AddToCartButton({
+  variantId,
+  quantity = 1,
+  goToCheckout = false,
+  children,
+  style,
+  onAdded,
+}) {
   const [loading, setLoading] = useState(false);
 
-  async function add() {
+  // جرّب استخدام الكونتكست إن وُجد
+  let ctx = null;
+  try { ctx = useCartDrawer(); } catch { /* خارج الـProvider */ }
+
+  async function addDirect(qty) {
+    const res = await fetch("/api/cart", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "add",
+        lines: [{ merchandiseId: variantId, quantity: Number(qty) }],
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || "Failed to add to cart");
+    return data.cart;
+  }
+
+  async function add(e) {
     if (!variantId) return alert("Missing variantId (ProductVariant GID)");
     setLoading(true);
 
-    const cartId = typeof window !== "undefined" ? localStorage.getItem("cartId") || null : null;
+    const btnQty = Number(e?.currentTarget?.dataset?.qty || quantity || 1);
 
-    const res = await fetch("/api/cart", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "add", cartId, variantId, quantity }),
-    });
+    try {
+      const cart = ctx
+        ? await ctx.addToCart({ variantId, quantity: btnQty, openDrawer: !goToCheckout })
+        : await addDirect(btnQty);
 
-    const data = await res.json();
-    setLoading(false);
-
-    if (data?.cart?.id) {
-      localStorage.setItem("cartId", data.cart.id);
-      if (goToCheckout && data.cart.checkoutUrl) {
-        window.location.href = data.cart.checkoutUrl;
-      }
-    } else {
-      console.error(data);
-      alert(data?.error || "Failed to add to cart");
+      if (typeof onAdded === "function") onAdded(cart);
+      if (goToCheckout && cart?.checkoutUrl) window.location.href = cart.checkoutUrl;
+    } catch (err) {
+      console.error(err);
+      alert(err?.message || "Failed to add to cart");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <button onClick={add} disabled={loading} style={{ padding: "10px 16px", borderRadius: 8 }}>
+    <button onClick={add} disabled={loading} style={{ padding: "10px 16px", borderRadius: 12, ...(style || {}) }}>
       {loading ? "Adding..." : (children || "Add to Cart")}
     </button>
   );
