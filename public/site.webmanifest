@@ -1,10 +1,10 @@
 {
-  "name": "Smart Kids KW - ألعاب تعليمية للأطفال",
+  "name": "Smart Kids Kuwait BookStore - ألعاب تعليمية للأطفال",
   "short_name": "Smart Kids KW",
   "description": "أفضل الألعاب التعليمية والقصص التفاعلية للأطفال في الكويت",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#b36bff",
   "theme_color": "#9422af",
   "lang": "ar",
   "dir": "rtl",

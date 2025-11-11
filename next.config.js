@@ -32,6 +32,10 @@ const nextConfig = {
 
   async redirects() {
     return [
+      // إلغاء اللغة /ar بالكامل
+      { source: "/ar", destination: "/", permanent: true },
+      { source: "/ar/:path*", destination: "/:path*", permanent: true },
+
       // إخفاء مسار فحص البيئة
       { source: "/api/check-env", destination: "/404", permanent: true },
 
@@ -50,7 +54,6 @@ const nextConfig = {
       { source: "/contact-us", destination: "/pages/contact-us", permanent: true },
 
       // إصلاح مسارات قديمة بحروف كبيرة/غير قياسية
-      { source: "/Pages/about-us", destination: "/pages/about-us", permanent: true },
       { source: "/Pages/contact-information", destination: "/policies/contact-information", permanent: true },
       { source: "/Page/contact-information", destination: "/policies/contact-information", permanent: true },
       { source: "/pages/contact-information", destination: "/policies/contact-information", permanent: true },

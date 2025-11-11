@@ -174,7 +174,7 @@ export default function AllProductsPage() {
                       onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
                     />
                   ) : (
-                    <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", color: "#6b7280", fontSize: "3rem" }}>
+                    <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", color: "#881b67ff", fontSize: "3rem" }}>
                       📚
                     </div>
                   )}
@@ -205,7 +205,7 @@ export default function AllProductsPage() {
                       </span>
                       {product.compareAtPriceRange?.minVariantPrice?.amount && 
                        parseFloat(product.compareAtPriceRange.minVariantPrice.amount) > parseFloat(product.priceRange.minVariantPrice.amount) && (
-                        <span style={{ fontSize: "1rem", color: "#6b7280", textDecoration: "line-through" }}>
+                        <span style={{ fontSize: "1rem", color: "#791e6aff", textDecoration: "line-through" }}>
                           {formatKWD(product.compareAtPriceRange.minVariantPrice.amount)}
                         </span>
                       )}
@@ -219,7 +219,7 @@ export default function AllProductsPage() {
           ))}
         </div>
       ) : (
-        <div style={{ textAlign: "center", padding: "4rem 2rem", color: "#6b7280" }}>
+        <div style={{ textAlign: "center", padding: "4rem 2rem", color: "#6f0f4fff" }}>
           <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>📚</div>
           <h3 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>لا توجد منتجات</h3>
           <p>لم يتم العثور على أي منتجات في الوقت الحالي.</p>

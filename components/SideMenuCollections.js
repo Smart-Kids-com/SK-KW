@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { sideMenu } from "@/lib/menuData";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 /**
  * Side menu listing main collections/pages.
@@ -38,11 +37,10 @@ export default function SideMenuCollections({ onSelect }) {
         })}
       </ul>
 
-      {/* Language switcher section */}
+      {/* قسم اللغة (ثابت/شكلي فقط). احذفه إن ما تحتاجه. */}
       <div className="sk-lang">
         <span className="sk-lang-label">اللغة</span>
-        {/* زر بسيط يبدّل بين /ar و / (يحافظ على نفس الصفحة) */}
-        <LanguageSwitcher />
+        <span aria-label="اللغة الحالية" style={{ fontWeight: 700 }}>العربية</span>
       </div>
 
       <style jsx>{`
@@ -74,7 +72,6 @@ export default function SideMenuCollections({ onSelect }) {
         .sk-link:active { transform: translateY(1px); }
         .sk-link.is-active { background: rgba(255,255,255,.14); }
 
-        /* Language switcher style */
         .sk-lang {
           margin-top: 18px;
           padding-top: 14px;
@@ -86,16 +83,6 @@ export default function SideMenuCollections({ onSelect }) {
           font-size: .95rem;
           opacity: .9;
           font-weight: 700;
-        }
-        :global(button[aria-label^="Switch to"]) {
-          justify-self: start;
-          border: 1px solid rgba(255,255,255,.25);
-          border-radius: 12px;
-          padding: 8px 12px;
-          color: #fff;
-          background: transparent;
-          font-weight: 700;
-          cursor: pointer;
         }
       `}</style>
     </nav>

@@ -1,27 +1,20 @@
-// app/layout.js (Root Layout - Server Component)
-
+// app/layout.js
+import '@/styles/globals.css';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-import { Suspense } from 'react';
-
-// ===== Site chrome =====
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-
-// ===== Cart drawer (context + drawer) =====
-import { CartDrawerProvider } from '@/lib/CartDrawerContext';
 import CartDrawer from '@/components/CartDrawer';
+import { CartDrawerProvider } from '@/lib/CartDrawerContext';
+
+import { Suspense } from 'react';
 
 export const metadata = {
-  title: 'Smart Kids KW',
+  title: 'Smart Kids Kuwait BookStore - متجر الأطفال المبتكرون الكويت',
   description:
     'متجر تعليم وترفيه للأطفال في الكويت - ألعاب تعليمية، قصص تفاعلية، وأدوات تنمية مهارات الأطفال.',
-  icons: {
-    icon: [{ url: '/favicon.png', type: 'image/png', sizes: '32x32' }],
-  },
-  manifest: '/site.webmanifest',
 };
 
 export default function RootLayout({ children }) {
@@ -29,21 +22,18 @@ export default function RootLayout({ children }) {
     <html lang="ar" dir="rtl">
       <body style={{ margin: 0, background: '#370e3e', color: '#fff' }}>
         <CartDrawerProvider>
-          <Suspense fallback={null}>
+          {/* مهم: لا تجعل الفول باك null حتى لا يختفي <header> في SSR */}
+          <Suspense fallback={<header />}>
             <Header />
           </Suspense>
 
-          <Suspense fallback={null}>
-            {children}
-          </Suspense>
+          <main>{children}</main>
 
-          <Suspense fallback={null}>
+          <Suspense fallback={<footer />}>
             <Footer />
           </Suspense>
 
-          <Suspense fallback={null}>
-            <CartDrawer />
-          </Suspense>
+          <CartDrawer />
         </CartDrawerProvider>
       </body>
     </html>
