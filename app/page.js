@@ -195,7 +195,7 @@ export default async function HomePage() {
       <style>{`
         :root {
           --color-background: #370e3e;
-          --color-foreground: #ffffff;
+          --color-foreground: #f8a2f5ff;
           --page-width: 100%;
           --spacing-sections: 2rem;
           --spacing-grid-horizontal: 1rem;
