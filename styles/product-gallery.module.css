@@ -7,7 +7,7 @@
 .stage{
   position:relative;
   width:100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1; /* مربع ثابت */
   border-radius:18px;
   overflow:hidden;
   background:#0f1530;
@@ -79,3 +79,11 @@
 .thumbImg{ object-fit:cover; }
 .thumbPlaceholder{ display:block; width:100%; height:100%; background:#e5e7eb; }
 .active{ border-color:#8b5cf6; box-shadow:0 0 0 3px rgba(139,92,246,.35) }
+
+/* تحسينات للموبايل */
+@media (max-width: 640px){
+  .nav{ width:36px; height:36px; font-size:20px; }
+  .prev{ inset-inline-start:8px; }
+  .next{ inset-inline-end:8px; }
+  .thumb{ flex-basis:84px; height:84px; }
+}

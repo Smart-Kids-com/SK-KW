@@ -66,33 +66,46 @@ export async function PUT(request) {
   try {
     const body = await request.json().catch(() => ({}));
     const jar = cookies();
-    const id = body?.id || jar.get(CART_COOKIE)?.value;
+
+    // 1) ضَمّن وجود cartId قبل تنفيذ النوع
+    let id = body?.id || jar.get(CART_COOKIE)?.value;
     if (!id) {
-      const cart = await ensureCartAndCookie(jar);
-      return NextResponse.json({ cart, note: 'new cart created' }, { status: 200 });
+      const c = await ensureCartAndCookie(jar);
+      id = c.id;
     }
 
+    // 2) نفّذ العملية المطلوبة
     let cart = null;
-    if (body?.type === 'add') {
-      if (!Array.isArray(body.lines) || !body.lines.length) {
-        return NextResponse.json({ error: 'lines required for add' }, { status: 400 });
-      }
-      cart = await addLines(id, body.lines);
-    } else if (body?.type === 'update') {
-      if (!Array.isArray(body.lines) || !body.lines.length) {
-        return NextResponse.json({ error: 'lines required for update' }, { status: 400 });
-      }
-      cart = await updateLines(id, body.lines);
-    } else if (body?.type === 'remove') {
-      if (!Array.isArray(body.lineIds) || !body.lineIds.length) {
-        return NextResponse.json({ error: 'lineIds required for remove' }, { status: 400 });
-      }
-      cart = await removeLines(id, body.lineIds);
+    const type = body?.type;
+
+    if (type === 'add') {
+      const lines = Array.isArray(body.lines) ? body.lines : [];
+      if (!lines.length) return NextResponse.json({ error: 'lines required for add' }, { status: 400 });
+      cart = await addLines(id, lines);
+
+    } else if (type === 'update') {
+      const lines = Array.isArray(body.lines) ? body.lines : [];
+      if (!lines.length) return NextResponse.json({ error: 'lines required for update' }, { status: 400 });
+      cart = await updateLines(id, lines);
+
+    } else if (type === 'remove') {
+      const lineIds = Array.isArray(body.lineIds) ? body.lineIds : [];
+      if (!lineIds.length) return NextResponse.json({ error: 'lineIds required for remove' }, { status: 400 });
+      cart = await removeLines(id, lineIds);
+
+    } else if (type === 'clear') {
+      // اختياري: تفريغ السلة بالكامل
+      const current = await getCart(id).catch(() => null);
+      const allIds = current?.lines?.edges?.map(e => e?.node?.id).filter(Boolean) || [];
+      cart = allIds.length ? await removeLines(id, allIds) : (current || await getCart(id));
+
     } else {
-      return NextResponse.json({ error: 'type must be one of add|update|remove' }, { status: 400 });
+      return NextResponse.json({ error: 'type must be one of add|update|remove|clear' }, { status: 400 });
     }
 
-    jar.set(CART_COOKIE, cart.id, cookieOptionsBase);
+    // 3) ثبّت الكوكي مع الـ id الجديد (لو اتغيّر)
+    if (cart?.id) jar.set(CART_COOKIE, cart.id, cookieOptionsBase);
+
     return NextResponse.json({ cart }, { status: 200 });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
@@ -103,10 +116,10 @@ export async function DELETE(request) {
   try {
     const body = await request.json().catch(() => ({}));
     const jar = cookies();
-    const id = body?.id || jar.get(CART_COOKIE)?.value;
+    let id = body?.id || jar.get(CART_COOKIE)?.value;
     if (!id) {
-      const cart = await ensureCartAndCookie(jar);
-      return NextResponse.json({ cart, note: 'new cart created' }, { status: 200 });
+      const c = await ensureCartAndCookie(jar);
+      id = c.id;
     }
 
     const lineIds = Array.isArray(body?.lineIds) ? body.lineIds : [];

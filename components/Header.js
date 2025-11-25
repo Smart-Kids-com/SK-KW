@@ -9,9 +9,9 @@ import SideMenuCollections from "./SideMenuCollections";
 function MenuIcon(props) {
   return (
     <svg {...props} width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden>
-      <rect y="8" width="32" height="2" rx="1" fill="#b50e83ff" />
-      <rect y="15" width="32" height="2" rx="1" fill="#c319a1ff" />
-      <rect y="22" width="32" height="2" rx="1" fill="#bd17a4ff" />
+      <rect y="8" width="32" height="2" rx="1" fill="#470545ff" />
+      <rect y="15" width="32" height="2" rx="1" fill="#470545ff" />
+      <rect y="22" width="32" height="2" rx="1" fill="#470545ff" />
     </svg>
   );
 }
@@ -23,7 +23,7 @@ function SearchIcon(props) {
       height="28"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#bd1569ff"
+      stroke="#470545ff"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -42,7 +42,7 @@ function CartIcon(props) {
       height="28"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#eb25acff"
+      stroke="#470545ff"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -193,12 +193,12 @@ export default function Header() {
             </a>
             <Link href={withLocale("/search")} aria-label="بحث"><SearchIcon /></Link>
             <Link href={withLocale("/wishlist")} aria-label="المفضلة">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#eb25e8ff" strokeWidth="2" aria-hidden>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#470545ff" strokeWidth="2" aria-hidden>
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
               </svg>
             </Link>
             <Link href={withLocale("/account")} aria-label="حسابي">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d725ebff" strokeWidth="2" aria-hidden>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#470545ff" strokeWidth="2" aria-hidden>
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
               </svg>
             </Link>
