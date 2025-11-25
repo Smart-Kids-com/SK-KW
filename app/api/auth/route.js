@@ -62,6 +62,6 @@ export async function POST(request) {
     return NextResponse.json(
       { success: false, error: error?.message || "Authentication failed" },
       { status: 400 }
-    );
-  }
+);
+}
 }

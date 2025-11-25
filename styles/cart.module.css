@@ -1,14 +1,4 @@
 /* styles/cart.module.css */
-:root{
-  --bg:#2b0f35;
-  --panel:#3a1346;
-  --ink:#f9faff;
-  --muted:#d6cce8;
-  --accent:#ffd166;
-  --mint:#64fff6;
-  --violet:#b36bff;
-  --danger:#ff5a7a;
-}
 
 .cartWrap{
   background: radial-gradient(600px 400px at 80% 0%, rgba(179,107,255,.12), transparent 60%),

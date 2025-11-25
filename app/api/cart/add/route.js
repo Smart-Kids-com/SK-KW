@@ -1,26 +1,98 @@
 // app/api/cart/add/route.js
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
-
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { ensureCartAndCookie, CART_COOKIE, cookieOptionsBase, Facade } from '@/lib/server/shopify-cart';
+import { connectToDB } from '@/lib/db';
+import Cart from '@/models/Cart';
+import Product from '@/models/Product';
+import { randomUUID } from 'crypto';
 
-export async function POST(request) {
+export async function POST(req) {
   try {
-    const jar = cookies();
-    const body = await request.json().catch(() => ({}));
-    const lines = Array.isArray(body?.lines) ? body.lines : [];
+    const body = await req.json();
+    const { productId, qty = 1 } = body;
 
-    if (!lines.length) {
-      return NextResponse.json({ success: false, error: 'lines is required (array of CartLineInput)' }, { status: 400 });
+    if (!productId) {
+      return NextResponse.json(
+        { message: 'productId is required' },
+        { status: 400 }
+      );
     }
 
-    const cart = await ensureCartAndCookie(jar);
-    const updated = await Facade.add(cart.id, lines);
-    jar.set(CART_COOKIE, updated.id, cookieOptionsBase);
-    return NextResponse.json({ success: true, cart: updated }, { status: 200 });
-  } catch (e) {
-    return NextResponse.json({ success: false, error: e?.message || 'add failed' }, { status: 500 });
+    await connectToDB();
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return NextResponse.json(
+        { message: 'Product not found' },
+        { status: 404 }
+      );
+    }
+
+    const cookieStore = cookies();
+    let cartId = cookieStore.get('cartId')?.value;
+
+    // لو مفيش كارت قبل كده نعمل واحد جديد
+    let cart;
+    if (!cartId) {
+      cart = await Cart.create({
+        items: [{ product: product._id, qty, price: product.price }],
+      });
+
+      cartId = cart._id.toString();
+
+      // نسيّب الـ cartId في Cookie
+      const res = NextResponse.json(
+        { message: 'Added to cart', cartId, count: qty },
+        { status: 200 }
+      );
+
+      res.cookies.set('cartId', cartId, {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        // حط مدة صلاحية مناسبة
+        maxAge: 60 * 60 * 24 * 7,
+      });
+
+      return res;
+    } else {
+      // فيه كارت موجود
+      cart = await Cart.findById(cartId);
+      if (!cart) {
+        cart = await Cart.create({
+          _id: cartId,
+          items: [],
+        });
+      }
+
+      const existingItem = cart.items.find(
+        (item) => item.product.toString() === product._id.toString()
+      );
+
+      if (existingItem) {
+        existingItem.qty += qty;
+      } else {
+        cart.items.push({
+          product: product._id,
+          qty,
+          price: product.price,
+        });
+      }
+
+      await cart.save();
+
+      const count = cart.items.reduce((sum, item) => sum + item.qty, 0);
+
+      return NextResponse.json(
+        { message: 'Added to cart', cartId, count },
+        { status: 200 }
+      );
+    }
+  } catch (err) {
+    console.error('POST /api/cart/add error:', err);
+    return NextResponse.json(
+      { message: 'Error while adding to cart' },
+      { status: 500 }
+    );
   }
 }

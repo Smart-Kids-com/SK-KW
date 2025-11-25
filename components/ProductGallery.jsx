@@ -93,7 +93,7 @@ export default function ProductGallery({ images = [], initialIndex = 0 }) {
             fill
             priority
             sizes="(max-width: 768px) 100vw, 720px"
-            className={s.stageImg}
+            className={s.stageImg} /* cover داخل مربع 1:1 */
           />
         ) : (
           <div className={s.stagePlaceholder}>No image</div>
