@@ -6,6 +6,7 @@
     <title>Smart Kids Kuwait - متجر الأطفال الذكي | 40,000+ منتج تعليمي</title>
     <meta name="description" content="متجر Smart Kids Kuwait - أكبر مجموعة من الألعاب التعليمية والكتب التفاعلية للأطفال. أكثر من 40,000 منتج تعليمي عالي الجودة.">
     <meta name="keywords" content="ألعاب تعليمية، كتب أطفال، مونتيسوري، قصص تفاعلية، العاب ذكية، تعليم الأطفال، Smart Kids Kuwait">
+    <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457">
     
     <!-- للتحميل السريع إلى المتجر الكامل -->
     <script>
@@ -238,21 +239,32 @@
         .cart {
             position: fixed;
             top: 20px;
-            left: 20px;
-            background: rgba(255,255,255,0.25);
+            right: 20px;
+            background: rgba(255,255,255,0.95);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.18);
-            padding: 1rem;
+            border: 2px solid #667eea;
+            padding: 1.5rem;
             border-radius: 20px;
             box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            min-width: 200px;
+            min-width: 250px;
+            max-width: 300px;
+            z-index: 1000;
+            transition: transform 0.3s;
+        }
+        
+        .cart:hover {
+            transform: translateY(-5px);
         }
         
         .cart-title {
             font-weight: bold;
             color: #667eea;
             margin-bottom: 1rem;
+            font-size: 1.2rem;
+            text-align: center;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
         }
         
         .cart-items {
@@ -409,6 +421,83 @@
             font-weight: bold;
         }
         
+        /* أيقونات تسجيل الدخول والحساب */
+        .user-icons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1001;
+        }
+        
+        .user-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--purple-dark);
+            text-decoration: none;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(31, 38, 135, 0.2);
+        }
+        
+        .user-icon:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(31, 38, 135, 0.3);
+            background: rgba(255,255,255,0.4);
+        }
+        
+        .user-icon.logged-in {
+            background: linear-gradient(45deg, var(--success-color), #20c997);
+            color: white;
+        }
+        
+        /* أيقونة واتساب الثابتة */
+        .whatsapp-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 25px;
+            right: 25px;
+            background: #25D366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(37, 211, 102, 0.6);
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(37, 211, 102, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+            }
+        }
+        
         /* تحسين عرض الصور */
         .product-image img {
             width: 100%;
@@ -435,15 +524,76 @@
     </style>
 </head>
 <body>
+    <!-- أيقونات تسجيل الدخول والحساب -->
+    <div class="user-icons">
+        <a href="./login.html" class="user-icon" id="loginIcon" title="تسجيل الدخول">
+            🔐
+        </a>
+        <a href="./profile.html" class="user-icon" id="profileIcon" title="حسابي">
+            👤
+        </a>
+    </div>
+
+    <!-- أيقونة واتساب الثابتة -->
+    <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
+        💬
+    </a>
+
+    <!-- Menu Toggle Button -->
+    <div class="menu-toggle" onclick="toggleMenu()">
+        ☰
+    </div>
+    
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" onclick="closeMenu()"></div>
+    
+    <!-- Slide Menu -->
+    <div class="slide-menu" id="slideMenu">
+        <button class="menu-close" onclick="closeMenu()">&times;</button>
+        
+        <div class="menu-header">
+            <h3>📚 المجموعات</h3>
+        </div>
+        
+        <ul class="collections-list">
+            <li><a href="./collections.html">🌟 جميع المجموعات</a></li>
+            <li><a href="./collection.html?category=الكتب والقصص">📖 الكتب والقصص</a></li>
+            <li><a href="./collection.html?category=الألعاب التعليمية">🧩 الألعاب التعليمية</a></li>
+            <li><a href="./collection.html?category=العلوم والتجارب">🔬 العلوم والتجارب</a></li>
+            <li><a href="./collection.html?category=الرياضيات والأرقام">🔢 الرياضيات والأرقام</a></li>
+            <li><a href="./collection.html?category=الفنون والحرف">🎨 الفنون والحرف</a></li>
+            <li><a href="./collection.html?category=ألعاب البناء">🏠 ألعاب البناء</a></li>
+            <li><a href="./collection.html?category=الألعاب الالكترونية">🔌 الألعاب الإلكترونية</a></li>
+            <li><a href="./collection.html?category=ألعاب الحركة">⚽ ألعاب الحركة</a></li>
+            <li><a href="./collection.html?category=ألعاب الذكاء">🧠 ألعاب الذكاء</a></li>
+            <li><a href="./collection.html?category=الإلكترونيات التعليمية">📱 الإلكترونيات التعليمية</a></li>
+            <li><a href="./collection.html?category=الموسيقى والأصوات">🎵 الموسيقى والأصوات</a></li>
+            <li><a href="./collection.html?category=التعليم المبكر">👶 التعليم المبكر</a></li>
+            <li><a href="./collection.html?category=الهدايا الخاصة">🎁 الهدايا الخاصة</a></li>
+        </ul>
+        
+        <div class="menu-footer">
+            <a href="./contact.html">📞 اتصل بنا</a>
+            <a href="./about.html">ℹ️ عن المتجر</a>
+            <a href="./profile.html">👤 الملف الشخصي</a>
+        </div>
+    </div>
+
     <div class="header">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
+            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" style="height: 80px; object-fit: contain;">
+        </div>
         <h1>🏪 Smart Kids Kuwait</h1>
         <p>متجر الألعاب التعليمية الذكية</p>
         <div style="margin-top: 1rem;">
             <a href="./products-full.html" style="display: inline-block; padding: 12px 24px; background: rgba(255,255,255,0.9); color: #6a4c93; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 0 0.5rem;">
-                🛍️ المتجر الكامل - 40,000+ منتج
+                🛍️ المتجر الكامل
             </a>
-            <a href="./admin-panel.html" style="display: inline-block; padding: 12px 24px; background: rgba(255,255,255,0.9); color: #6a4c93; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 0 0.5rem;">
-                👨‍💼 لوحة الإدارة
+            <a href="./collections.html" style="display: inline-block; padding: 12px 24px; background: rgba(255,255,255,0.9); color: #6a4c93; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 0 0.5rem;">
+                📚 المجموعات
+            </a>
+            <a href="./contact.html" style="display: inline-block; padding: 12px 24px; background: rgba(255,255,255,0.9); color: #6a4c93; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 0 0.5rem;">
+                📞 اتصل بنا
             </a>
         </div>
     </div>
@@ -741,9 +891,98 @@
                 alert('كلمة مرور خاطئة!');
             }
         }
+        
+        // Slide Menu Functions
+        function toggleMenu() {
+            const menu = document.getElementById('slideMenu');
+            const overlay = document.querySelector('.menu-overlay');
+            
+            menu.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+        
+        function closeMenu() {
+            const menu = document.getElementById('slideMenu');
+            const overlay = document.querySelector('.menu-overlay');
+            
+            menu.classList.remove('open');
+            overlay.classList.remove('show');
+        }
+        
+        // إغلاق القائمة عند الضغط على Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMenu();
+            }
+        });
+            const menu = document.getElementById('slideMenu');
+            const overlay = document.querySelector('.menu-overlay');
+            
+            menu.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+        
+        function closeMenu() {
+            const menu = document.getElementById('slideMenu');
+            const overlay = document.querySelector('.menu-overlay');
+            
+            menu.classList.remove('open');
+            overlay.classList.remove('show');
+        }
+        
+        // إغلاق القائمة عند الضغط على Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMenu();
+            }
+        });
     </script>
     
-    <!-- تحميل المنتجات من ملف JSON -->
-    <script src="products-loader.js"></script>
+    <!-- Footer -->
+    <footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 3rem 1rem 1rem; margin-top: 4rem; border-top: 1px solid rgba(255,255,255,0.3);">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
+                <div>
+                    <h3 style="color: var(--purple-dark); margin-bottom: 1rem; font-size: 1.3rem;">🏪 Smart Kids Kuwait</h3>
+                    <p style="color: #666; line-height: 1.6;">متجر الألعاب التعليمية الأول في الكويت</p>
+                    <p style="color: #666; line-height: 1.6;">نقدم أفضل المنتجات لتنمية قدرات أطفالكم</p>
+                </div>
+                
+                <div>
+                    <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">📞 تواصل معنا</h4>
+                    <p style="color: #666; margin-bottom: 0.5rem;">📱 واتساب: +965 66635393</p>
+                    <p style="color: #666; margin-bottom: 0.5rem;">📧 البريد: info@smartkidskw.com</p>
+                    <p style="color: #666; margin-bottom: 0.5rem;">📍 الكويت، الكويت</p>
+                </div>
+                
+                <div>
+                    <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">🔗 روابط سريعة</h4>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <a href="./about.html" style="color: #666; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--purple-dark)'" onmouseout="this.style.color='#666'">عن المتجر</a>
+                        <a href="./refund-policy.html" style="color: #666; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--purple-dark)'" onmouseout="this.style.color='#666'">سياسة الإرجاع</a>
+                        <a href="./terms-of-service.html" style="color: #666; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--purple-dark)'" onmouseout="this.style.color='#666'">شروط الخدمة</a>
+                        <a href="./contact.html" style="color: #666; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--purple-dark)'" onmouseout="this.style.color='#666'">اتصل بنا</a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">📱 تابعنا</h4>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" style="padding: 10px; background: #1877f2; color: white; border-radius: 8px; text-decoration: none; font-size: 1.2rem; transition: transform 0.3s;" title="فيسبوك" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📘</a>
+                        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" style="padding: 10px; background: linear-gradient(45deg, #f09433, #dc2743); color: white; border-radius: 8px; text-decoration: none; font-size: 1.2rem; transition: transform 0.3s;" title="إنستغرام" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📷</a>
+                        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" style="padding: 10px; background: #bd081c; color: white; border-radius: 8px; text-decoration: none; font-size: 1.2rem; transition: transform 0.3s;" title="بنترست" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📌</a>
+                        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" style="padding: 10px; background: #000; color: white; border-radius: 8px; text-decoration: none; font-size: 1.2rem; transition: transform 0.3s;" title="تيك توك" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">🎵</a>
+                        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" style="padding: 10px; background: #fffc00; color: #000; border-radius: 8px; text-decoration: none; font-size: 1.2rem; transition: transform 0.3s;" title="سناب شات" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">👻</a>
+                        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" style="padding: 10px; background: #ff0000; color: white; border-radius: 8px; text-decoration: none; font-size: 1.2rem; transition: transform 0.3s;" title="يوتيوب" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📺</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; padding-top: 2rem; border-top: 1px solid rgba(106, 76, 147, 0.2); color: #666;">
+                <p>&copy; 2024 Smart Kids Kuwait. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
 </body>
 </html>
