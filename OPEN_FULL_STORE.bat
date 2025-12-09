@@ -4,7 +4,7 @@ chcp 65001 >nul
 cls
 color 0E
 echo ╔═══════════════════════════════════════════════════╗
-echo ║       🛍️ Smart Kids Kuwait - المتجر الكامل 🛍️       ║
+echo ║       🛍️ Smart Kids Kuwait - المتجر  🛍️       ║
 echo ║              جميع المنتجات متاحة الآن!              ║  
 echo ╚═══════════════════════════════════════════════════╝
 echo.
@@ -16,7 +16,7 @@ echo  ✅ صور حقيقية عالية الجودة
 echo  ✅ أسعار حقيقية من Shopify
 echo.
 echo ╔════════════════════════════════════════════════════
-echo ║  1️⃣  🚀 فتح المتجر الكامل (products-full.html)
+echo ║  1️⃣  🚀 فتح المتجر  (products-full.html)
 echo ║  2️⃣  🏪 فتح المتجر التقليدي (index.html)  
 echo ║  3️⃣  👨‍💼 فتح لوحة الإدارة
 echo ║  4️⃣  📊 عرض تقرير التحديث
@@ -25,7 +25,7 @@ echo ╚════════════════════════
 set /p choice="اختر رقم: "
 
 if %choice%==1 (
-    echo 🚀 جاري فتح المتجر الكامل...
+    echo 🚀 جاري فتح المتجر ...
     start "" "products-full.html"
     goto MENU
 )
@@ -58,7 +58,7 @@ echo.
 echo 🔄 هل تريد فتح شيء آخر؟ 
 echo.
 echo ╔════════════════════════════════════════════════════
-echo ║  1️⃣  🚀 فتح المتجر الكامل (products-full.html)
+echo ║  1️⃣  🚀 فتح المتجر  (products-full.html)
 echo ║  2️⃣  🏪 فتح المتجر التقليدي (index.html)  
 echo ║  3️⃣  👨‍💼 فتح لوحة الإدارة
 echo ║  4️⃣  📊 عرض تقرير التحديث
@@ -67,7 +67,7 @@ echo ╚════════════════════════
 set /p choice="اختر رقم: "
 
 if %choice%==1 (
-    echo 🚀 جاري فتح المتجر الكامل...
+    echo 🚀 جاري فتح المتجر ...
     start "" "products-full.html"
     goto MENU
 )

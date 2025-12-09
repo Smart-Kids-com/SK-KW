@@ -37,7 +37,7 @@ SITE_URL=https://your-site.vercel.app
 بعد النشر، ستحصل على:
 
 - **الموقع الرئيسي:** `https://smart-kids-kuwait.vercel.app/`
-- **المتجر الكامل:** `https://smart-kids-kuwait.vercel.app/` (الافتراضي)
+- **المتجر :** `https://smart-kids-kuwait.vercel.app/` (الافتراضي)
 - **المتجر التقليدي:** `https://smart-kids-kuwait.vercel.app/store`
 - **لوحة الإدارة:** `https://smart-kids-kuwait.vercel.app/admin`
 
@@ -86,7 +86,7 @@ SITE_URL=https://your-site.vercel.app
 ## 📊 ما سيتم نشره:
 
 ### **الملفات الرئيسية:**
-- ✅ `products-full.html` - المتجر الكامل (الصفحة الرئيسية)
+- ✅ `products-full.html` - المتجر  (الصفحة الرئيسية)
 - ✅ `products-loader.js` - محرك تحميل المنتجات
 - ✅ `data/products_grouped.json` - قاعدة بيانات المنتجات
 - ✅ `index.html` - المتجر التقليدي
