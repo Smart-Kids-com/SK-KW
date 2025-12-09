@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المجموعات - Smart Kids Kuwait</title>
+    <meta name="description" content="تصفح مجموعات Smart Kids Kuwait المتنوعة - مونتيسوري، القصص التفاعلية، الكتب الإسلامية وأكثر">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --purple-dark: #6a4c93;
+            --purple-light: #9b59b6;
+            --glass-bg: rgba(255,255,255,0.25);
+            --glass-border: rgba(255,255,255,0.18);
+            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a4c93 0%, #9b59b6 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 2rem 1rem;
+            box-shadow: var(--glass-shadow);
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--purple-dark);
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .nav a {
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.9);
+            color: var(--purple-dark);
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .nav a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            background: white;
+        }
+        
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .collection-card {
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            transition: all 0.3s;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .collection-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        
+        .collection-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .collection-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--purple-dark);
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+        
+        .collection-description {
+            color: #555;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .collection-count {
+            background: linear-gradient(45deg, #6a4c93, #9b59b6);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        
+        .browse-btn {
+            width: 100%;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #6a4c93, #9b59b6);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .browse-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
+        }
+        
+        .stats-section {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        
+        .stats-title {
+            font-size: 1.5rem;
+            color: var(--purple-dark);
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-item {
+            background: rgba(255,255,255,0.3);
+            padding: 1rem;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--purple-dark);
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .collections-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .collection-card {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏷️ مجموعات Smart Kids Kuwait</h1>
+        <p>اكتشف مجموعاتنا المتنوعة من الألعاب والكتب التعليمية</p>
+    </div>
+    
+    <div class="container">
+        <div class="nav">
+            <a href="./products-full.html">🛍️ المتجر الكامل</a>
+            <a href="./index.html">🏠 الصفحة الرئيسية</a>
+            <a href="./admin-panel.html">👨‍💼 لوحة الإدارة</a>
+        </div>
+        
+        <div class="stats-section">
+            <div class="stats-title">📊 إحصائيات المجموعات</div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalProducts">420</div>
+                    <div class="stat-label">إجمالي المنتجات</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalCollections">14</div>
+                    <div class="stat-label">عدد المجموعات</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="avgProductsPerCollection">30</div>
+                    <div class="stat-label">متوسط المنتجات لكل مجموعة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">🏆</div>
+                    <div class="stat-label">جودة عالية</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="collections-grid" id="collectionsGrid">
+            <div class="loading">
+                <h3>📦 جاري تحميل المجموعات...</h3>
+                <p>يرجى الانتظار قليلاً</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="collections-manager.js"></script>
+    <script>
+        async function loadCollections() {
+            try {
+                if (!collectionsManager) {
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // انتظار تحميل المدير
+                }
+                
+                await collectionsManager.loadProducts();
+                const collections = collectionsManager.getAllCollections();
+                
+                renderCollections(collections);
+                updateStats(collections);
+                
+            } catch (error) {
+                console.error('خطأ في تحميل المجموعات:', error);
+                showError();
+            }
+        }
+        
+        function renderCollections(collections) {
+            const grid = document.getElementById('collectionsGrid');
+            
+            if (collections.length === 0) {
+                grid.innerHTML = `
+                    <div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: white;">
+                        <h3>⚠️ لا توجد مجموعات متوفرة</h3>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = collections.map(collection => `
+                <div class="collection-card" onclick="openCollection('${collection.key}')">
+                    <span class="collection-icon">${collection.icon}</span>
+                    <h3 class="collection-title">${collection.name}</h3>
+                    <p class="collection-description">${collection.description}</p>
+                    <div class="collection-count">${collection.productCount} منتج</div>
+                    <a href="collection.html?id=${collection.key}" class="browse-btn">
+                        تصفح المجموعة
+                    </a>
+                </div>
+            `).join('');
+        }
+        
+        function updateStats(collections) {
+            const totalProducts = collections.reduce((sum, col) => sum + col.productCount, 0);
+            const avgProducts = Math.round(totalProducts / collections.length);
+            
+            document.getElementById('totalProducts').textContent = totalProducts;
+            document.getElementById('totalCollections').textContent = collections.length;
+            document.getElementById('avgProductsPerCollection').textContent = avgProducts;
+        }
+        
+        function openCollection(collectionKey) {
+            window.location.href = `collection.html?id=${collectionKey}`;
+        }
+        
+        function showError() {
+            const grid = document.getElementById('collectionsGrid');
+            grid.innerHTML = `
+                <div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: #dc3545;">
+                    <h3>⚠️ خطأ في تحميل المجموعات</h3>
+                    <p>حدث خطأ أثناء تحميل البيانات. يرجى تحديث الصفحة.</p>
+                    <button onclick="location.reload()" style="padding: 10px 20px; margin-top: 1rem; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        تحديث الصفحة
+                    </button>
+                </div>
+            `;
+        }
+        
+        // بدء التحميل عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(loadCollections, 500); // تأخير قصير للتأكد من تحميل المدير
+        });
+    </script>
+</body>
+</html>
