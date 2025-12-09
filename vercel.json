@@ -3,11 +3,8 @@
   "outputDirectory": "./",
   "framework": null,
   "public": true,
-  "rewrites": [
-    { "source": "/", "destination": "/products-full.html" },
-    { "source": "/store", "destination": "/index.html" },
-    { "source": "/admin", "destination": "/admin-panel.html" }
-  ],
+  "cleanUrls": true,
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/(.*)",
