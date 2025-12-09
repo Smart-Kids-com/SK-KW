@@ -7,14 +7,6 @@
     <meta name="description" content="متجر Smart Kids Kuwait - أكبر مجموعة من الألعاب التعليمية والكتب التفاعلية للأطفال. أكثر من 40,000 منتج تعليمي عالي الجودة.">
     <meta name="keywords" content="ألعاب تعليمية، كتب أطفال، مونتيسوري، قصص تفاعلية، العاب ذكية، تعليم الأطفال، Smart Kids Kuwait">
     <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457">
-    
-    <!-- للتحميل السريع إلى المتجر  -->
-    <script>
-        // توجيه تلقائي للمتجر  إذا لم يكن هناك hash محدد
-        if (window.location.hash === '' || window.location.hash === '#') {
-            window.location.href = './products-full.html';
-        }
-    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -258,11 +250,30 @@
             gap: 1rem;
             font-weight: bold;
             color: var(--purple-dark);
+            cursor: pointer;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+        }
+        
+        .dropdown-arrow {
+            transition: transform 0.3s;
+            font-size: 0.8rem;
+        }
+        
+        .menu-section-title.expanded .dropdown-arrow {
+            transform: rotate(180deg);
         }
         
         .menu-submenu {
             padding-right: 2rem;
             margin-top: 0.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .menu-submenu.show {
+            max-height: 500px;
         }
         
         .menu-subitem {
@@ -1514,6 +1525,29 @@
             padding: 3rem;
             grid-column: 1 / -1;
         }
+        
+        .browse-all-container {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .browse-all-btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #6a4c93, #9b59b6);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(106, 76, 147, 0.3);
+        }
+        
+        .browse-all-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(106, 76, 147, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -1569,11 +1603,12 @@
             </a>
             
             <div class="menu-section">
-                <div class="menu-section-title">
+                <div class="menu-section-title" onclick="toggleSubmenu(this)">
                     <span class="menu-icon">📚</span>
                     <span class="menu-text">المجموعات</span>
+                    <span class="dropdown-arrow">▼</span>
                 </div>
-                <div class="menu-submenu">
+                <div class="menu-submenu" id="collectionsSubmenu">
                     <a href="./collections.html#montessori" class="menu-subitem">🎯 مونتيسوري</a>
                     <a href="./collections.html#stories" class="menu-subitem">📖 عالم القصص والحكايات المصورة</a>
                     <a href="./collections.html#bestseller" class="menu-subitem">⭐ الأفضل مبيعاً</a>
@@ -1699,22 +1734,23 @@
             </div>
         </section>
 
-        <!-- قسم المنتجات -->
+        <!-- قسم المنتجات المميزة -->
         <section class="products-section">
             <div class="container">
-                <h2 class="section-title">🛍️ منتجاتنا المميزة</h2>
+                <h2 class="section-title">🌟 منتجات مميزة</h2>
+                <p class="section-subtitle">مختارات خاصة من أفضل منتجاتنا</p>
                 
-                <!-- البحث والفلترة -->
-                <div class="search-container">
-                    <input type="text" class="search-input" placeholder="🔍 ابحث في المنتجات..." 
-                           oninput="productsLoader && productsLoader.searchProducts(this.value)">
-                </div>
-                
-                <div class="products" id="products">
+                <div class="featured-products" id="products">
                     <div class="loading">
-                        <h3>📦 جاري تحميل المنتجات...</h3>
+                        <h3>📦 جاري تحميل المنتجات المميزة...</h3>
                         <p>يرجى الانتظار قليلاً</p>
                     </div>
+                </div>
+                
+                <div class="browse-all-container">
+                    <a href="./products-full.html" class="browse-all-btn">
+                        🛍️ تصفح جميع المنتجات (+420 منتج)
+                    </a>
                 </div>
             </div>
         </section>
@@ -1821,6 +1857,14 @@
             
             menu.classList.remove('open');
             overlay.classList.remove('show');
+        }
+        
+        function toggleSubmenu(element) {
+            const submenu = element.nextElementSibling;
+            const arrow = element.querySelector('.dropdown-arrow');
+            
+            submenu.classList.toggle('show');
+            element.classList.toggle('expanded');
         }
         
         // إغلاق القائمة بـ Escape
@@ -1959,7 +2003,15 @@
                 displayProducts(products.slice(0, 12)); // عرض أول 12 منتج
             } catch (error) {
                 console.error('خطأ في تحميل المنتجات:', error);
-                displaySampleProducts();
+                document.getElementById('products').innerHTML = `
+                    <div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: #dc3545;">
+                        <h3>⚠️ خطأ في تحميل المنتجات</h3>
+                        <p>حدث خطأ أثناء تحميل المنتجات. يرجى تحديث الصفحة أو المحاولة لاحقاً.</p>
+                        <a href="./products-full.html" style="display: inline-block; margin-top: 1rem; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+                            انتقل للمتجر الكامل
+                        </a>
+                    </div>
+                `;
             }
         }
 
@@ -2190,6 +2242,15 @@
             if (e.key === 'Escape') {
                 closeMenu();
             }
+        });
+    </script>
+
+    <!-- تحميل المنتجات -->
+    <script src="products-loader.js"></script>
+    <script>
+        // تشغيل محمل المنتجات عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            window.productsLoader = new ProductsLoader();
         });
     </script>
 
