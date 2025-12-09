@@ -19,29 +19,24 @@ class ProductsLoader {
 
     async loadProducts() {
         try {
-            // محاولة تحميل المنتجات من ملف products_grouped.json
-            const response = await fetch('./data/products_grouped.json');
+            // تحميل المنتجات من ملف products.json الجديد
+            const response = await fetch('./products.json');
             if (!response.ok) throw new Error('فشل في تحميل الملف');
             
             const data = await response.json();
             
-            // تحويل البيانات إلى تنسيق مبسط
-            this.products = data
-                .filter(product => product.published && product.status === 'active')
-                .map(product => ({
-                    id: product.handle || Math.random().toString(36),
-                    name: product.title || 'منتج بدون اسم',
-                    description: this.extractDescription(product.body_html),
-                    price: this.extractPrice(product),
-                    image: this.extractImage(product),
-                    category: product.type || 'عام',
-                    tags: product.tags || [],
-                    vendor: product.vendor || 'Smart Kids Kuwait',
-                    seo: {
-                        title: product.seo_title,
-                        description: product.seo_description
-                    }
-                }));
+            // استخدام البيانات مباشرة
+            this.products = data.map(product => ({
+                id: product.id,
+                name: product.title,
+                description: product.description,
+                price: product.price,
+                image: product.emoji || '🎁',
+                category: product.category,
+                tags: [],
+                vendor: 'Smart Kids Kuwait',
+                inStock: product.inStock
+            }));
                 
         } catch (error) {
             console.error('خطأ في معالجة البيانات:', error);

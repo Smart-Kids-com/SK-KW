@@ -219,6 +219,68 @@
             }
         }
         
+        /* أيقونات المستخدم */
+        .user-icons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        .user-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            text-decoration: none;
+            font-size: 1.3rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .user-icon:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        
+        /* أيقونة واتساب */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: #25d366;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            z-index: 1000;
+            transition: all 0.3s;
+            animation: pulse 2s infinite;
+        }
+        
+        .whatsapp-float:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); }
+            50% { box-shadow: 0 4px 15px rgba(37, 211, 102, 0.7), 0 0 0 10px rgba(37, 211, 102, 0.1); }
+            100% { box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); }
+        }
+        
         /* هيدر مضغوط ومنظم */
         .main-header {
             background: var(--glass-bg);
@@ -379,73 +441,156 @@
         </div>
         
         <div class="collections-grid" id="collectionsGrid">
-            <div class="loading">
-                <h3>📦 جاري تحميل المجموعات...</h3>
-                <p>يرجى الانتظار قليلاً</p>
+            <!-- مونتيسوري -->
+            <div class="collection-card" id="montessori">
+                <span class="collection-icon">🎯</span>
+                <h3 class="collection-title">مونتيسوري</h3>
+                <p class="collection-description">منهج مونتيسوري التعليمي المتطور لتنمية مهارات الطفل بطريقة علمية</p>
+                <div class="collection-count">عدد المنتجات قريباً</div>
+                <button class="browse-btn" onclick="openCollection('montessori')">تصفح المجموعة</button>
+            </div>
+
+            <!-- عالم القصص والحكايات المصورة -->
+            <div class="collection-card" id="stories">
+                <span class="collection-icon">📖</span>
+                <h3 class="collection-title">عالم القصص والحكايات المصورة</h3>
+                <p class="collection-description">قصص مصورة وحكايات ممتعة تجذب الأطفال وتنمي خيالهم</p>
+                <div class="collection-count">عدد المنتجات قريباً</div>
+                <button class="browse-btn" onclick="openCollection('stories')">تصفح المجموعة</button>
+            </div>
+
+            <!-- الأفضل مبيعاً -->
+            <div class="collection-card" id="bestseller">
+                <span class="collection-icon">⭐</span>
+                <h3 class="collection-title">Smart Kids Kuwait الأفضل مبيعاً</h3>
+                <p class="collection-description">أكثر المنتجات مبيعاً وتميزاً في متجرنا</p>
+                <div class="collection-count">عدد المنتجات قريباً</div>
+                <button class="browse-btn" onclick="openCollection('bestseller')">تصفح المجموعة</button>
+            </div>
+
+            <!-- أحدث إصداراتنا للأطفال -->
+            <div class="collection-card" id="new-releases">
+                <span class="collection-icon">🆕</span>
+                <h3 class="collection-title">اكتشف أحدث إصداراتنا للأطفال</h3>
+                <p class="collection-description">آخر المنتجات الجديدة والمبتكرة للأطفال</p>
+                <div class="collection-count">عدد المنتجات قريباً</div>
+                <button class="browse-btn" onclick="openCollection('new-releases')">تصفح المجموعة</button>
+            </div>
+
+            <!-- قصصي الصوتية المسموعة -->
+            <div class="collection-card" id="audio-stories">
+                <span class="collection-icon">🎵</span>
+                <h3 class="collection-title">قصصي الصوتية المسموعة</h3>
+                <p class="collection-description">قصص مسموعة وتفاعلية لتطوير مهارات الاستماع</p>
+                <div class="collection-count">عدد المنتجات قريباً</div>
+                <button class="browse-btn" onclick="openCollection('audio-stories')">تصفح المجموعة</button>
+            </div>
+
+            <!-- عروض القصص التفاعلية -->
+            <div class="collection-card" id="interactive-stories">
+                <span class="collection-icon">🎭</span>
+                <h3 class="collection-title">عروض القصص التفاعلية</h3>
+                <p class="collection-description">عروض وقصص تفاعلية مميزة وممتعة</p>
+                <div class="collection-count">عدد المنتجات قريباً</div>
+                <button class="browse-btn" onclick="openCollection('interactive-stories')">تصفح المجموعة</button>
+            </div>
+
+            <!-- القصص المفردة للأطفال -->
+            <div class="collection-card" id="single-stories">
+                <span class="collection-icon">📚</span>
+                <h3 class="collection-title">القصص المفردة للأطفال</h3>
+                <p class="collection-description">قصص منفردة متنوعة ومناسبة لجميع الأعمار</p>
+                <div class="collection-count">عدد المنتجات قريباً</div>
+                <button class="browse-btn" onclick="openCollection('single-stories')">تصفح المجموعة</button>
+            </div>
+
+            <!-- أنا أقرأ بنفسي -->
+            <div class="collection-card" id="self-reading">
+                <span class="collection-icon">👦</span>
+                <h3 class="collection-title">أنا أقرأ بنفسي</h3>
+                <p class="collection-description">كتب لتعليم الأطفال القراءة المستقلة والثقة بالنفس</p>
+                <div class="collection-count">عدد المنتجات قريباً</div>
+                <button class="browse-btn" onclick="openCollection('self-reading')">تصفح المجموعة</button>
+            </div>
+
+            <!-- كتبي التفاعلية الحركية -->
+            <div class="collection-card" id="interactive-books">
+                <span class="collection-icon">🏃</span>
+                <h3 class="collection-title">كتبي التفاعلية الحركية</h3>
+                <p class="collection-description">كتب تفاعلية تجمع بين القراءة والحركة والنشاط</p>
+                <div class="collection-count">عدد المنتجات قريباً</div>
+                <button class="browse-btn" onclick="openCollection('interactive-books')">تصفح المجموعة</button>
+            </div>
+
+            <!-- عروض مكتبتي الإسلامية -->
+            <div class="collection-card" id="islamic-library">
+                <span class="collection-icon">🕌</span>
+                <h3 class="collection-title">عروض مكتبتي الإسلامية</h3>
+                <p class="collection-description">كتب ومواد إسلامية تعليمية للأطفال</p>
+                <div class="collection-count">عدد المنتجات قريباً</div>
+                <button class="browse-btn" onclick="openCollection('islamic-library')">تصفح المجموعة</button>
+            </div>
+
+            <!-- ابدأ رحلتك مع القلم الناطق -->
+            <div class="collection-card" id="talking-pen">
+                <span class="collection-icon">🖊️</span>
+                <h3 class="collection-title">ابدأ رحلتك مع القلم الناطق</h3>
+                <p class="collection-description">أقلام ناطقة وكتب تفاعلية لتعليم ممتع</p>
+                <div class="collection-count">عدد المنتجات قريباً</div>
+                <button class="browse-btn" onclick="openCollection('talking-pen')">تصفح المجموعة</button>
+            </div>
+
+            <!-- موسوعات التاريخ المصور -->
+            <div class="collection-card" id="history">
+                <span class="collection-icon">🏛️</span>
+                <h3 class="collection-title">موسوعات التاريخ المصور</h3>
+                <p class="collection-description">موسوعات تاريخية مصورة لتعليم التاريخ بطريقة شيقة</p>
+                <div class="collection-count">عدد المنتجات قريباً</div>
+                <button class="browse-btn" onclick="openCollection('history')">تصفح المجموعة</button>
+            </div>
+
+            <!-- الكتب المحببة للأطفال -->
+            <div class="collection-card" id="favorite-books">
+                <span class="collection-icon">💝</span>
+                <h3 class="collection-title">الكُتب المُحببة للأطفال</h3>
+                <p class="collection-description">مجموعة الكتب الأكثر حباً وتفضيلاً لدى الأطفال</p>
+                <div class="collection-count">عدد المنتجات قريباً</div>
+                <button class="browse-btn" onclick="openCollection('favorite-books')">تصفح المجموعة</button>
+            </div>
+
+            <!-- تسوق جميع منتجاتنا الآن -->
+            <div class="collection-card" id="all-products">
+                <span class="collection-icon">🛒</span>
+                <h3 class="collection-title">تسوق جميع منتجاتنا الآن</h3>
+                <p class="collection-description">جميع منتجاتنا في مكان واحد للتصفح والشراء</p>
+                <div class="collection-count">+420 منتج</div>
+                <button class="browse-btn" onclick="window.location.href='./products-full.html'">تصفح جميع المنتجات</button>
             </div>
         </div>
     </div>
 
-    <script src="collections-manager.js"></script>
     <script>
-        async function loadCollections() {
-            try {
-                if (!collectionsManager) {
-                    await new Promise(resolve => setTimeout(resolve, 1000)); // انتظار تحميل المدير
-                }
-                
-                await collectionsManager.loadProducts();
-                const collections = collectionsManager.getAllCollections();
-                
-                renderCollections(collections);
-                updateStats(collections);
-                
-            } catch (error) {
-                console.error('خطأ في تحميل المجموعات:', error);
-                showError();
-            }
-        }
-        
-        function renderCollections(collections) {
-            const grid = document.getElementById('collectionsGrid');
-            
-            if (collections.length === 0) {
-                grid.innerHTML = `
-                    <div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: white;">
-                        <h3>⚠️ لا توجد مجموعات متوفرة</h3>
-                    </div>
-                `;
-                return;
-            }
-            
-            grid.innerHTML = collections.map(collection => `
-                <div class="collection-card" onclick="openCollection('${collection.key}')">
-                    <span class="collection-icon">${collection.icon}</span>
-                    <h3 class="collection-title">${collection.name}</h3>
-                    <p class="collection-description">${collection.description}</p>
-                    <div class="collection-count">${collection.productCount} منتج</div>
-                    <a href="collection.html?id=${collection.key}" class="browse-btn">
-                        تصفح المجموعة
-                    </a>
-                </div>
-            `).join('');
-        }
-        
-        function updateStats(collections) {
-            const totalProducts = collections.reduce((sum, col) => sum + col.productCount, 0);
-            const avgProducts = Math.round(totalProducts / collections.length);
-            
-            document.getElementById('totalProducts').textContent = totalProducts;
-            document.getElementById('totalCollections').textContent = collections.length;
-            document.getElementById('avgProductsPerCollection').textContent = avgProducts;
-        }
-        
         function openCollection(collectionKey) {
-            window.location.href = `collection.html?id=${collectionKey}`;
+            // توجيه لصفحة المنتجات مع فلتر المجموعة
+            window.location.href = `./products-full.html#${collectionKey}`;
         }
         
-        function showError() {
-            const grid = document.getElementById('collectionsGrid');
+        // تحديث أيقونات المستخدم
+        function updateUserIcons() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            const loginIcon = document.getElementById('loginIcon');
+            const profileIcon = document.getElementById('profileIcon');
+            
+            if (isLoggedIn) {
+                loginIcon.style.display = 'none';
+                profileIcon.style.display = 'block';
+            } else {
+                loginIcon.style.display = 'block';
+                profileIcon.style.display = 'none';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', updateUserIcons);
             grid.innerHTML = `
                 <div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: #dc3545;">
                     <h3>⚠️ خطأ في تحميل المجموعات</h3>
