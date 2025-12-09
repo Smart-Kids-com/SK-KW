@@ -3,7 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Kids Store - متجر الأطفال الذكي</title>
+    <title>Smart Kids Kuwait - متجر الأطفال الذكي | 40,000+ منتج تعليمي</title>
+    <meta name="description" content="متجر Smart Kids Kuwait - أكبر مجموعة من الألعاب التعليمية والكتب التفاعلية للأطفال. أكثر من 40,000 منتج تعليمي عالي الجودة.">
+    <meta name="keywords" content="ألعاب تعليمية، كتب أطفال، مونتيسوري، قصص تفاعلية، العاب ذكية، تعليم الأطفال، Smart Kids Kuwait">
+    
+    <!-- للتحميل السريع إلى المتجر الكامل -->
+    <script>
+        // توجيه تلقائي للمتجر الكامل إذا لم يكن هناك hash محدد
+        if (window.location.hash === '' || window.location.hash === '#') {
+            window.location.href = './products-full.html';
+        }
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -426,8 +436,16 @@
 </head>
 <body>
     <div class="header">
-        <h1>🏪 Smart Kids Store</h1>
+        <h1>🏪 Smart Kids Kuwait</h1>
         <p>متجر الألعاب التعليمية الذكية</p>
+        <div style="margin-top: 1rem;">
+            <a href="./products-full.html" style="display: inline-block; padding: 12px 24px; background: rgba(255,255,255,0.9); color: #6a4c93; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 0 0.5rem;">
+                🛍️ المتجر الكامل - 40,000+ منتج
+            </a>
+            <a href="./admin-panel.html" style="display: inline-block; padding: 12px 24px; background: rgba(255,255,255,0.9); color: #6a4c93; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 0 0.5rem;">
+                👨‍💼 لوحة الإدارة
+            </a>
+        </div>
     </div>
     
     <div class="cart">
