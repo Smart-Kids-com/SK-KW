@@ -33,16 +33,98 @@
             line-height: 1.6;
         }
         
-        .header {
+        /* هيدر مضغوط ومنظم */
+        .main-header {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
             padding: 1rem;
-            box-shadow: var(--glass-shadow);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo-img {
+            height: 60px;
+            object-fit: contain;
+        }
+        
+        .logo-text h1 {
+            color: var(--purple-dark);
+            font-size: 1.5rem;
+            margin: 0;
+            line-height: 1.2;
+        }
+        
+        .logo-text p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+            line-height: 1.2;
+        }
+        
+        .main-nav {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .nav-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.9);
+            color: var(--purple-dark);
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .nav-btn:hover {
+            background: var(--purple-dark);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .logo-section {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .main-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
         }
         
         .nav-container {
@@ -80,11 +162,7 @@
             color: var(--purple-dark);
         }
         
-        .header h1 {
-            color: #6a4c93;
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
+
         
         .container {
             max-width: 1200px;
@@ -579,24 +657,29 @@
         </div>
     </div>
 
-    <div class="header">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
-            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" style="height: 80px; object-fit: contain;">
+    <!-- هيدر مضغوط ومنظم -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" class="logo-img">
+                <div class="logo-text">
+                    <h1>🏪 Smart Kids Kuwait</h1>
+                    <p>متجر الألعاب التعليمية الذكية</p>
+                </div>
+            </div>
+            <nav class="main-nav">
+                <a href="./products-full.html" class="nav-btn">
+                    🛍️ المتجر الكامل
+                </a>
+                <a href="./collections.html" class="nav-btn">
+                    📚 المجموعات
+                </a>
+                <a href="./contact.html" class="nav-btn">
+                    📞 اتصل بنا
+                </a>
+            </nav>
         </div>
-        <h1>🏪 Smart Kids Kuwait</h1>
-        <p>متجر الألعاب التعليمية الذكية</p>
-        <div style="margin-top: 1rem;">
-            <a href="./products-full.html" style="display: inline-block; padding: 12px 24px; background: rgba(255,255,255,0.9); color: #6a4c93; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 0 0.5rem;">
-                🛍️ المتجر الكامل
-            </a>
-            <a href="./collections.html" style="display: inline-block; padding: 12px 24px; background: rgba(255,255,255,0.9); color: #6a4c93; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 0 0.5rem;">
-                📚 المجموعات
-            </a>
-            <a href="./contact.html" style="display: inline-block; padding: 12px 24px; background: rgba(255,255,255,0.9); color: #6a4c93; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 0 0.5rem;">
-                📞 اتصل بنا
-            </a>
-        </div>
-    </div>
+    </header>
     
     <div class="cart">
         <div class="cart-title">🛒 السلة</div>
