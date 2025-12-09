@@ -86,30 +86,7 @@ class ProductsLoader {
         
         // صورة افتراضية
         return 'https://via.placeholder.com/300x300?text=' + encodeURIComponent(product.title || 'منتج');
-    }
-
-    getDefaultProducts() {
-        // منتجات افتراضية في حالة فشل التحميل
-        return [
-            {
-                id: 'default-1',
-                name: 'ألعاب الألغاز الذكية',
-                description: 'مجموعة ألغاز تطور التفكير النقدي والإبداع',
-                price: 18.0,
-                image: 'https://via.placeholder.com/300x300?text=ألغاز',
-                category: 'ألعاب تعليمية',
-                tags: ['تعليمي', 'ذكاء']
-            },
-            {
-                id: 'default-2', 
-                name: 'روبوت تعليمي',
-                description: 'روبوت ذكي لتعلم البرمجة والتحكم',
-                price: 45.0,
-                image: 'https://via.placeholder.com/300x300?text=روبوت',
-                category: 'تكنولوجيا',
-                tags: ['روبوت', 'برمجة']
-            }
-        ];
+    
     }
 
     renderProducts(productsToShow = null) {
