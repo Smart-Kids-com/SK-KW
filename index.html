@@ -892,7 +892,6 @@
             grid-column: 1 / -1;
             color: var(--purple-dark);
         }
-        }
         
         .footer-section h3 {
             color: var(--purple-dark);
@@ -1986,22 +1985,6 @@
                     </div>
                 `;
             });
-            
-            productsContainer.innerHTML = html;
-        }
-
-        function displaySampleProducts() {
-            const sampleProducts = [
-                { title: 'ألعاب الألغاز الذكية', description: 'مجموعة ألغاز تطور التفكير النقدي', price: '18.000', emoji: '🧩' },
-                { title: 'روبوت تعليمي', description: 'روبوت ذكي لتعلم البرمجة', price: '45.000', emoji: '🤖' },
-                { title: 'طقم الفنون للأطفال', description: 'أدوات رسم وتلوين كاملة', price: '12.000', emoji: '🎨' },
-                { title: 'مختبر العلوم المصغر', description: 'تجارب علمية آمنة وممتعة', price: '35.000', emoji: '🔬' },
-                { title: 'مكعبات البناء الذكية', description: 'مكعبات تفاعلية لتنمية المهارات', price: '25.000', emoji: '🧱' },
-                { title: 'كتاب تعليمي تفاعلي', description: 'كتب ناطقة وتفاعلية', price: '15.000', emoji: '📚' }
-            ];
-            
-            displayProducts(sampleProducts);
-        }
 
         function addToCart(name, price, productId = null) {
             const existingItem = cart.find(item => item.name === name);
