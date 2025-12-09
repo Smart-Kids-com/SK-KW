@@ -9,11 +9,38 @@ class ProductsLoader {
     async init() {
         try {
             await this.loadProducts();
+            this.checkHashFilter();
             this.renderProducts();
             this.setupFilters();
         } catch (error) {
             console.error('خطأ في تحميل المنتجات:', error);
             this.showError();
+        }
+    }
+    
+    checkHashFilter() {
+        // فحص الhash في الURL لتطبيق فلتر المجموعة
+        const hash = window.location.hash.substring(1);
+        if (hash) {
+            const categoryMap = {
+                'montessori': 'مونتيسوري',
+                'stories': 'عالم القصص والحكايات المصورة',
+                'bestseller': 'Smart Kids Kuwait الأفضل مبيعاً',
+                'new-releases': 'اكتشف أحدث إصداراتنا للأطفال',
+                'audio-stories': 'قصصي الصوتية المسموعة',
+                'interactive-stories': 'عروض القصص التفاعلية',
+                'single-stories': 'القصص المفردة للأطفال',
+                'self-reading': 'أنا أقرأ بنفسي',
+                'interactive-books': 'كتبي التفاعلية الحركية',
+                'islamic-library': 'عروض مكتبتي الإسلامية',
+                'talking-pen': 'ابدأ رحلتك مع القلم الناطق',
+                'history': 'موسوعات التاريخ المصور',
+                'favorite-books': 'الكُتب المُحببة للأطفال'
+            };
+            
+            if (categoryMap[hash]) {
+                this.currentCategory = categoryMap[hash];
+            }
         }
     }
 
@@ -40,7 +67,7 @@ class ProductsLoader {
                 
         } catch (error) {
             console.error('خطأ في معالجة البيانات:', error);
-            // في حالة فشل التحميل، استخدم بيانات تجريبية
+            // في حالة فشل التحميل
             this.products = this.getDefaultProducts();
         }
     }
@@ -84,16 +111,31 @@ class ProductsLoader {
             return product.images[0].src;
         }
         
-        // صورة افتراضية
-        return 'https://via.placeholder.com/300x300?text=' + encodeURIComponent(product.title || 'منتج');
+        // استخدام emoji كصورة للمنتج
+        return product.emoji || '🎁';
     
+    }
+
+    filterProductsByCategory() {
+        if (this.currentCategory === 'الكل') {
+            return this.products;
+        }
+        
+        return this.products.filter(product => 
+            product.category === this.currentCategory
+        );
     }
 
     renderProducts(productsToShow = null) {
         const productsContainer = document.getElementById('products');
         if (!productsContainer) return;
 
-        const products = productsToShow || this.products;
+        let products = productsToShow || this.filterProductsByCategory();
+        
+        // إذا كنا في الصفحة الرئيسية، اعرض فقط أول 6 منتجات
+        if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
+            products = products.slice(0, 6);
+        }
         
         if (products.length === 0) {
             productsContainer.innerHTML = `
@@ -109,7 +151,7 @@ class ProductsLoader {
             <div class="product" data-category="${product.category}" data-id="${product.id}">
                 <div class="product-image">
                     <img src="${product.image}" alt="${product.name}" 
-                         onerror="this.src='https://via.placeholder.com/300x300?text=${encodeURIComponent(product.name)}'">
+                         onerror="this.style.display='none'">
                 </div>
                 <div class="product-info">
                     <div class="product-title">${product.name}</div>
@@ -211,6 +253,11 @@ class ProductsLoader {
         `;
     }
 
+    getDefaultProducts() {
+        // لا نعرض منتجات - نعتمد على ملف المنتجات الأساسي فقط
+        return [];
+    }
+
     showError() {
         const productsContainer = document.getElementById('products');
         if (productsContainer) {
@@ -231,4 +278,12 @@ class ProductsLoader {
 let productsLoader;
 document.addEventListener('DOMContentLoaded', function() {
     productsLoader = new ProductsLoader();
+    
+    // مراقبة تغيير الhash
+    window.addEventListener('hashchange', function() {
+        if (productsLoader) {
+            productsLoader.checkHashFilter();
+            productsLoader.renderProducts();
+        }
+    });
 });
