@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سياسة الشحن والتوصيل - Smart Kids Kuwait</title>
+    <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457">
+    <meta name="description" content="تفاصيل سياسة الشحن والتوصيل لمتجر Smart Kids Kuwait - مناطق التوصيل والأسعار">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --purple-dark: #6a4c93;
+            --purple-light: #9b59b6;
+            --glass-bg: rgba(255,255,255,0.25);
+            --glass-border: rgba(255,255,255,0.18);
+            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a4c93 0%, #9b59b6 100%);
+            color: #333;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 2rem 1rem;
+            box-shadow: var(--glass-shadow);
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header h1 {
+            font-size: 2.2rem;
+            color: var(--purple-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .nav a {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.9);
+            color: var(--purple-dark);
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .nav a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            background: white;
+        }
+        
+        .content {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: var(--glass-shadow);
+            margin: 2rem 0;
+        }
+        
+        .content h2 {
+            color: var(--purple-dark);
+            font-size: 1.6rem;
+            margin: 2rem 0 1rem;
+            border-bottom: 2px solid var(--purple-light);
+            padding-bottom: 0.5rem;
+        }
+        
+        .content h3 {
+            color: var(--purple-dark);
+            font-size: 1.3rem;
+            margin: 1.5rem 0 0.8rem;
+        }
+        
+        .content p {
+            margin-bottom: 1.2rem;
+            font-size: 1.1rem;
+        }
+        
+        .shipping-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .shipping-card {
+            background: linear-gradient(145deg, #f8f9ff, #e8f0ff);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .shipping-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .shipping-card h4 {
+            color: var(--purple-dark);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .price-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .price-table th {
+            background: var(--purple-dark);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .price-table td {
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .price-table tr:nth-child(even) {
+            background: #f8f9ff;
+        }
+        
+        .price-table tr:hover {
+            background: #e8f0ff;
+        }
+        
+        .info-box {
+            background: #e8f4fd;
+            border-right: 4px solid var(--info-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 10px;
+        }
+        
+        .success-box {
+            background: #e8f5e8;
+            border-right: 4px solid var(--success-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 10px;
+        }
+        
+        .warning-box {
+            background: #fef9e7;
+            border-right: 4px solid var(--warning-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 10px;
+        }
+        
+        .tracking-box {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        
+        .tracking-steps {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .tracking-step {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .tracking-step .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: white;
+            color: var(--purple-dark);
+            border-radius: 50%;
+            line-height: 40px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                padding: 2rem 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .shipping-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .price-table {
+                font-size: 0.9rem;
+            }
+            
+            .tracking-steps {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
+            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" style="height: 80px; object-fit: contain;">
+        </div>
+        <h1>🚚 سياسة الشحن والتوصيل</h1>
+        <p>Smart Kids Kuwait - معلومات الشحن والتسليم</p>
+    </div>
+    
+    <div class="container">
+        <div class="nav">
+            <a href="./index.html">🏠 الصفحة الرئيسية</a>
+            <a href="./products-full.html">🛍️ المتجر</a>
+            <a href="./terms-of-service.html">📋 الشروط والأحكام</a>
+            <a href="./contact.html">📞 اتصل بنا</a>
+        </div>
+        
+        <div class="content">
+            <div class="info-box">
+                <h3>📦 مرحباً بكم في خدمة التوصيل</h3>
+                <p>نحن في Smart Kids Kuwait نفخر بتقديم خدمة توصيل سريعة وموثوقة لجميع عملائنا في الكويت ودول مجلس التعاون الخليجي. نهدف لإيصال منتجاتكم التعليمية بأسرع وقت ممكن وبأعلى معايير الجودة.</p>
+            </div>
+
+            <h2>🌍 مناطق التوصيل</h2>
+            
+            <div class="shipping-grid">
+                <div class="shipping-card">
+                    <h4>🇰🇼 داخل الكويت</h4>
+                    <ul>
+                        <li><strong>محافظة العاصمة:</strong> الكويت، دسمان، الشرق</li>
+                        <li><strong>محافظة حولي:</strong> حولي، السالمية، الجابرية</li>
+                        <li><strong>محافظة الفروانية:</strong> الفروانية، الرقة، جليب الشيوخ</li>
+                        <li><strong>محافظة مبارك الكبير:</strong> صباح السالم، العدان</li>
+                        <li><strong>محافظة الأحمدي:</strong> الفحيحيل، المهبولة، الأحمدي</li>
+                        <li><strong>محافظة الجهراء:</strong> الجهراء، الصليبية، كاظمة</li>
+                    </ul>
+                </div>
+                
+                <div class="shipping-card">
+                    <h4>🌍 خارج الكويت</h4>
+                    <ul>
+                        <li><strong>السعودية:</strong> المنطقة الشرقية والرياض</li>
+                        <li><strong>الإمارات:</strong> دبي وأبوظبي والشارقة</li>
+                        <li><strong>البحرين:</strong> العاصمة المنامة</li>
+                        <li><strong>قطر:</strong> الدوحة والمناطق الرئيسية</li>
+                        <li><strong>عُمان:</strong> مسقط وصلالة (حسب المنتج)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2>💰 أسعار الشحن</h2>
+            
+            <table class="price-table">
+                <thead>
+                    <tr>
+                        <th>المنطقة</th>
+                        <th>الوزن/الحجم</th>
+                        <th>السعر</th>
+                        <th>وقت التسليم</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>محافظة العاصمة</strong></td>
+                        <td>حتى 2 كيلو</td>
+                        <td>2.000 د.ك</td>
+                        <td>24-48 ساعة</td>
+                    </tr>
+                    <tr>
+                        <td><strong>باقي المحافظات</strong></td>
+                        <td>حتى 2 كيلو</td>
+                        <td>3.000 د.ك</td>
+                        <td>2-3 أيام</td>
+                    </tr>
+                    <tr>
+                        <td><strong>المناطق النائية</strong></td>
+                        <td>حتى 2 كيلو</td>
+                        <td>5.000 د.ك</td>
+                        <td>3-5 أيام</td>
+                    </tr>
+                    <tr>
+                        <td><strong>دول الخليج</strong></td>
+                        <td>حتى 1 كيلو</td>
+                        <td>8.000 د.ك</td>
+                        <td>5-7 أيام</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="success-box">
+                <h3>🎁 الشحن المجاني</h3>
+                <ul>
+                    <li><strong>داخل الكويت:</strong> للطلبات 25 د.ك فأكثر</li>
+                    <li><strong>خارج الكويت:</strong> للطلبات 75 د.ك فأكثر</li>
+                    <li><strong>العروض الخاصة:</strong> شحن مجاني في المناسبات</li>
+                </ul>
+            </div>
+
+            <h2>⏱️ أوقات التسليم التفصيلية</h2>
+            
+            <div class="shipping-grid">
+                <div class="shipping-card">
+                    <h4>🏃 التوصيل السريع</h4>
+                    <p><strong>المناطق:</strong> العاصمة وحولي</p>
+                    <p><strong>الوقت:</strong> نفس اليوم (للطلبات قبل 12 ظهراً)</p>
+                    <p><strong>الرسوم الإضافية:</strong> +2.000 د.ك</p>
+                </div>
+                
+                <div class="shipping-card">
+                    <h4>📦 التوصيل العادي</h4>
+                    <p><strong>المناطق:</strong> جميع أنحاء الكويت</p>
+                    <p><strong>الوقت:</strong> 1-3 أيام عمل</p>
+                    <p><strong>أيام العمل:</strong> الأحد - الخميس</p>
+                </div>
+            </div>
+
+            <h2>📞 طرق التوصيل</h2>
+
+            <h3>🚚 شركات الشحن المعتمدة</h3>
+            <ul>
+                <li><strong>داخل الكويت:</strong> DHL Kuwait, Aramex, البريد الكويتي</li>
+                <li><strong>خارج الكويت:</strong> DHL Express, FedEx, UPS</li>
+                <li><strong>التوصيل المباشر:</strong> فريق التوصيل الخاص بنا</li>
+            </ul>
+
+            <div class="warning-box">
+                <h3>⚠️ تنبيهات مهمة</h3>
+                <ul>
+                    <li><strong>أيام العطل:</strong> لا يتم التوصيل في العطل الرسمية</li>
+                    <li><strong>الطقس:</strong> قد تتأثر مواعيد التسليم بالأحوال الجوية</li>
+                    <li><strong>المناطق الأمنية:</strong> قد تحتاج تصاريح خاصة</li>
+                    <li><strong>العنوان:</strong> تأكد من صحة العنوان لتجنب التأخير</li>
+                </ul>
+            </div>
+
+            <h2>📋 إجراءات التوصيل</h2>
+
+            <div class="tracking-box">
+                <h3>🔄 خطوات التوصيل</h3>
+                <div class="tracking-steps">
+                    <div class="tracking-step">
+                        <div class="step-number">1</div>
+                        <h4>تأكيد الطلب</h4>
+                        <p>استلام وتأكيد تفاصيل الطلب</p>
+                    </div>
+                    <div class="tracking-step">
+                        <div class="step-number">2</div>
+                        <h4>التحضير</h4>
+                        <p>تجهيز وتغليف المنتجات</p>
+                    </div>
+                    <div class="tracking-step">
+                        <div class="step-number">3</div>
+                        <h4>الشحن</h4>
+                        <p>تسليم الطلب لشركة الشحن</p>
+                    </div>
+                    <div class="tracking-step">
+                        <div class="step-number">4</div>
+                        <h4>التوصيل</h4>
+                        <p>وصول الطلب للعنوان المحدد</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>📱 تتبع الطلب</h3>
+            <div class="info-box">
+                <ul>
+                    <li><strong>رقم التتبع:</strong> سيتم إرساله عبر SMS و WhatsApp</li>
+                    <li><strong>التحديثات:</strong> إشعارات في كل مرحلة</li>
+                    <li><strong>الاستعلام:</strong> اتصل بخدمة العملاء في أي وقت</li>
+                    <li><strong>التطبيق:</strong> تتبع مباشر من خلال موقعنا</li>
+                </ul>
+            </div>
+
+            <h2>🏠 شروط الاستلام</h2>
+
+            <h3>✅ متطلبات الاستلام</h3>
+            <ul>
+                <li><strong>الهوية:</strong> إثبات الهوية مطلوب</li>
+                <li><strong>العمر:</strong> 18 سنة فأكثر للاستلام</li>
+                <li><strong>العنوان:</strong> يجب تطابق العنوان مع الطلب</li>
+                <li><strong>التوقيع:</strong> توقيع على إيصال الاستلام</li>
+            </ul>
+
+            <h3>❌ عدم وجود المستلم</h3>
+            <div class="warning-box">
+                <p><strong>في حالة عدم وجودك:</strong></p>
+                <ul>
+                    <li><strong>المحاولة الأولى:</strong> إعادة التوصيل مجاناً</li>
+                    <li><strong>المحاولة الثانية:</strong> رسوم إعادة توصيل 1.000 د.ك</li>
+                    <li><strong>المحاولة الثالثة:</strong> إرجاع الطلب للمتجر</li>
+                    <li><strong>التواصل:</strong> سنتصل قبل كل محاولة توصيل</li>
+                </ul>
+            </div>
+
+            <h2>📦 التعامل مع المنتجات</h2>
+
+            <h3>🛡️ حماية المنتجات</h3>
+            <ul>
+                <li><strong>التغليف:</strong> تغليف آمن ومقاوم للصدمات</li>
+                <li><strong>المواد الهشة:</strong> تغليف خاص للألعاب الحساسة</li>
+                <li><strong>العزل:</strong> حماية من الرطوبة والحرارة</li>
+                <li><strong>الملصقات:</strong> تعليمات التعامل واضحة</li>
+            </ul>
+
+            <h3>🔍 فحص الطلب</h3>
+            <div class="success-box">
+                <p><strong>عند الاستلام يرجى:</strong></p>
+                <ul>
+                    <li>فحص العبوة للتأكد من سلامتها</li>
+                    <li>مطابقة المحتويات مع قائمة الطلب</li>
+                    <li>التأكد من عدم وجود أضرار</li>
+                    <li>الإبلاغ فوراً عن أي مشكلة</li>
+                </ul>
+            </div>
+
+            <h2>🚫 المشاكل والحلول</h2>
+
+            <h3>⚠️ المشاكل الشائعة</h3>
+            <table class="price-table">
+                <thead>
+                    <tr>
+                        <th>المشكلة</th>
+                        <th>السبب المحتمل</th>
+                        <th>الحل</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>تأخير التوصيل</td>
+                        <td>ازدحام مرور، طقس سيء</td>
+                        <td>تواصل مع خدمة العملاء</td>
+                    </tr>
+                    <tr>
+                        <td>عدم وجود المستلم</td>
+                        <td>عدم توفر أحد بالعنوان</td>
+                        <td>جدولة موعد جديد</td>
+                    </tr>
+                    <tr>
+                        <td>عنوان خاطئ</td>
+                        <td>خطأ في إدخال العنوان</td>
+                        <td>تصحيح العنوان فوراً</td>
+                    </tr>
+                    <tr>
+                        <td>تلف المنتج</td>
+                        <td>خطأ في التعامل</td>
+                        <td>استبدال فوري مجاني</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>📞 خدمة العملاء والدعم</h2>
+
+            <div class="info-box">
+                <h3>🔗 طرق التواصل</h3>
+                <p><strong>📱 واتساب:</strong> +965 66635393</p>
+                <p><strong>📞 الخط الساخن:</strong> +965 XXXX XXXX</p>
+                <p><strong>📧 البريد الإلكتروني:</strong> shipping@smartkidskuwait.com</p>
+                <p><strong>⏰ أوقات العمل:</strong> الأحد - الخميس: 8:00 ص - 8:00 م</p>
+                <p><strong>📍 العنوان:</strong> مدينة الكويت، الكويت</p>
+            </div>
+
+            <div class="success-box">
+                <h3>💡 نصائح للحصول على أفضل خدمة</h3>
+                <ul>
+                    <li><strong>العنوان الدقيق:</strong> تأكد من صحة ووضوح العنوان</li>
+                    <li><strong>رقم الهاتف:</strong> تأكد من صحة رقم الهاتف</li>
+                    <li><strong>التوقيت:</strong> حدد أفضل أوقات التوصيل</li>
+                    <li><strong>التواصل:</strong> كن متاحاً للتواصل أثناء التوصيل</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

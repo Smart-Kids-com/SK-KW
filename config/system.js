@@ -58,7 +58,7 @@ const SYSTEM_CONFIG = {
     ADDRESS: 'الكويت',
     SOCIAL_MEDIA: {
       INSTAGRAM: '@smartkids_kuwait',
-      WHATSAPP: '+965-XXXXXXXX'
+      WHATSAPP: '+965-66635393'
     }
   },
   

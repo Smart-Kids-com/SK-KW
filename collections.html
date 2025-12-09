@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المجموعات - Smart Kids Kuwait</title>
     <meta name="description" content="تصفح مجموعات Smart Kids Kuwait المتنوعة - مونتيسوري، القصص التفاعلية، الكتب الإسلامية وأكثر">
+    <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457">
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -220,9 +221,27 @@
     </style>
 </head>
 <body>
+    <!-- أيقونات تسجيل الدخول والحساب -->
+    <div class="user-icons">
+        <a href="./login.html" class="user-icon" id="loginIcon" title="تسجيل الدخول">
+            🔐
+        </a>
+        <a href="./profile.html" class="user-icon" id="profileIcon" title="حسابي">
+            👤
+        </a>
+    </div>
+
+    <!-- أيقونة واتساب الثابتة -->
+    <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
+        💬
+    </a>
+
     <div class="header">
-        <h1>🏷️ مجموعات Smart Kids Kuwait</h1>
-        <p>اكتشف مجموعاتنا المتنوعة من الألعاب والكتب التعليمية</p>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
+            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" style="height: 80px; object-fit: contain;">
+        </div>
+        <h1>📚 مجموعات Smart Kids Kuwait</h1>
+        <p>استكشف مجموعاتنا المتنوعة من الألعاب والكتب التعليمية</p>
     </div>
     
     <div class="container">
@@ -338,5 +357,60 @@
             setTimeout(loadCollections, 500); // تأخير قصير للتأكد من تحميل المدير
         });
     </script>
+    <!-- Footer مع السوشال ميديا -->
+    <footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 2rem 1rem; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.3);">
+        <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+            <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">📱 تابعنا على وسائل التواصل الاجتماعي</h4>
+            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" style="padding: 10px 15px; background: #1877f2; color: white; border-radius: 25px; text-decoration: none; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📘 فيسبوك</a>
+                <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" style="padding: 10px 15px; background: linear-gradient(45deg, #f09433, #dc2743); color: white; border-radius: 25px; text-decoration: none; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📷 إنستغرام</a>
+                <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" style="padding: 10px 15px; background: #bd081c; color: white; border-radius: 25px; text-decoration: none; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📌 بنترست</a>
+                <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" style="padding: 10px 15px; background: #000; color: white; border-radius: 25px; text-decoration: none; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">🎵 تيك توك</a>
+                <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" style="padding: 10px 15px; background: #fffc00; color: #000; border-radius: 25px; text-decoration: none; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">👻 سناب شات</a>
+                <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" style="padding: 10px 15px; background: #ff0000; color: white; border-radius: 25px; text-decoration: none; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📺 يوتيوب</a>
+            </div>
+            <p style="color: #666; font-size: 0.9rem;">&copy; 2024 Smart Kids Kuwait - تابعونا لآخر العروض والمنتجات الجديدة</p>
+        </div>
+    </footer>
+
+    <script>
+        // تحديث أيقونات تسجيل الدخول
+        function updateUserIcons() {
+            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+            const loginIcon = document.getElementById('loginIcon');
+            const profileIcon = document.getElementById('profileIcon');
+            
+            if (isLoggedIn) {
+                loginIcon.innerHTML = '✓';
+                loginIcon.title = 'مسجل دخول';
+                loginIcon.classList.add('logged-in');
+                loginIcon.href = '#';
+                loginIcon.onclick = logout;
+                
+                profileIcon.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
+                profileIcon.style.color = 'white';
+            } else {
+                loginIcon.innerHTML = '🔐';
+                loginIcon.title = 'تسجيل الدخول';
+                loginIcon.classList.remove('logged-in');
+                loginIcon.href = './login.html';
+                loginIcon.onclick = null;
+            }
+        }
+        
+        function logout() {
+            if (confirm('هل تريد تسجيل الخروج؟')) {
+                localStorage.removeItem('userLoggedIn');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userName');
+                updateUserIcons();
+                alert('تم تسجيل الخروج بنجاح');
+            }
+        }
+        
+        // تحديث الأيقونات عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', updateUserIcons);
+    </script>
+
 </body>
 </html>
