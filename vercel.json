@@ -1,5 +1,31 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "echo 'Static site - no build needed'",
   "outputDirectory": "./",
-  "framework": null
+  "framework": null,
+  "public": true,
+  "rewrites": [
+    { "source": "/", "destination": "/products-full.html" },
+    { "source": "/store", "destination": "/index.html" },
+    { "source": "/admin", "destination": "/admin-panel.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/data/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control", 
+          "value": "public, max-age=3600"
+        }
+      ]
+    }
+  ]
 }
