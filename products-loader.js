@@ -46,12 +46,15 @@ class ProductsLoader {
 
     async loadProducts() {
         try {
+            console.log('بدء تحميل المنتجات من products.json...');
             // تحميل المنتجات من ملف products.json الجديد
             const response = await fetch('./products.json');
+            console.log('استجابة الخادم:', response.ok, response.status);
             if (!response.ok) throw new Error('فشل في تحميل الملف');
             
             const data = await response.json();
             
+            console.log('تم تحميل البيانات:', data.length, 'منتج');
             // استخدام البيانات مباشرة
             this.products = data.map(product => ({
                 id: product.id,
@@ -69,6 +72,7 @@ class ProductsLoader {
             console.error('خطأ في معالجة البيانات:', error);
             // في حالة فشل التحميل
             this.products = this.getDefaultProducts();
+            console.log('تم استخدام منتجات افتراضية:', this.products.length);
         }
     }
 
@@ -149,19 +153,13 @@ class ProductsLoader {
 
         productsContainer.innerHTML = products.map(product => `
             <div class="product" data-category="${product.category}" data-id="${product.id}">
-                <div class="product-image">
-                    <img src="${product.image}" alt="${product.name}" 
-                         onerror="this.style.display='none'">
-                </div>
-                <div class="product-info">
-                    <div class="product-title">${product.name}</div>
-                    <div class="product-description">${product.description}</div>
-                    <div class="product-category">التصنيف: ${product.category}</div>
-                    <div class="product-price">${product.price.toFixed(3)} د.ك</div>
-                    <button class="add-to-cart" onclick="addToCart('${product.name}', ${product.price}, '${product.id}')">
-                        إضافة للسلة
-                    </button>
-                </div>
+                <div class="product-image">${product.image}</div>
+                <h3>${product.name}</h3>
+                <p>${product.description}</p>
+                <div class="product-price">${parseFloat(product.price).toFixed(3)} د.ك</div>
+                <button class="add-to-cart" onclick="addToCart('${product.name}', ${parseFloat(product.price)}, '${product.id}')">
+                    إضافة للسلة
+                </button>
             </div>
         `).join('');
 
@@ -254,8 +252,42 @@ class ProductsLoader {
     }
 
     getDefaultProducts() {
-        // لا نعرض منتجات - نعتمد على ملف المنتجات الأساسي فقط
-        return [];
+        // منتجات احتياطية في حالة فشل تحميل الملف الرئيسي
+        return [
+            {
+                id: 1,
+                name: "كتب تعليمية للأطفال",
+                description: "مجموعة متنوعة من الكتب التعليمية المصممة خصيصاً للأطفال",
+                price: "12.500",
+                image: "📚",
+                category: "عالم القصص والحكايات المصورة",
+                tags: [],
+                vendor: "Smart Kids Kuwait",
+                inStock: true
+            },
+            {
+                id: 2,
+                name: "ألعاب تعليمية مونتيسوري",
+                description: "ألعاب تعليمية تتبع منهج مونتيسوري لتطوير مهارات الأطفال",
+                price: "18.000",
+                image: "🎯",
+                category: "مونتيسوري",
+                tags: [],
+                vendor: "Smart Kids Kuwait",
+                inStock: true
+            },
+            {
+                id: 3,
+                name: "قصص تفاعلية للأطفال",
+                description: "قصص تفاعلية ممتعة تنمي خيال الأطفال وحب القراءة",
+                price: "15.000",
+                image: "📖",
+                category: "عالم القصص والحكايات المصورة",
+                tags: [],
+                vendor: "Smart Kids Kuwait",
+                inStock: true
+            }
+        ];
     }
 
     showError() {
