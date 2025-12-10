@@ -61,7 +61,7 @@ class ProductsLoader {
                 name: product.title,
                 description: product.description,
                 price: product.price,
-                image: product.emoji || '🎁',
+                image: product.image || product.emoji || '🎁',
                 category: product.category,
                 tags: [],
                 vendor: 'Smart Kids Kuwait',
@@ -153,7 +153,12 @@ class ProductsLoader {
 
         productsContainer.innerHTML = products.map(product => `
             <div class="product" data-category="${product.category}" data-id="${product.id}">
-                <div class="product-image">${product.image}</div>
+                <div class="product-image">
+                    ${product.image && product.image.startsWith('http') ? 
+                        `<img src="${product.image}" alt="${product.name}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                         <div style="display: none; font-size: 3rem;">🎁</div>` 
+                        : `<div style="font-size: 3rem;">${product.image}</div>`}
+                </div>
                 <h3>${product.name}</h3>
                 <p>${product.description}</p>
                 <div class="product-price">${parseFloat(product.price).toFixed(3)} د.ك</div>
