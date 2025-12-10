@@ -774,29 +774,114 @@
             transform: translateY(-2px);
         }
         
-        /* السلة */
-        .cart {
+        /* أيقونة السلة */
+        .cart-icon {
+            position: fixed;
+            top: 20px;
+            right: 80px;
+            width: 50px;
+            height: 50px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: var(--glass-shadow);
+            z-index: 1000;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .cart-icon:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        /* نافذة السلة المنبثقة */
+        .cart-popup {
             position: fixed;
             top: 20px;
             right: 20px;
-            width: 300px;
+            width: 350px;
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: 20px;
             padding: 1.5rem;
             box-shadow: var(--glass-shadow);
-            z-index: 100;
-            max-height: 400px;
+            z-index: 1001;
+            max-height: 500px;
             overflow-y: auto;
+            display: none;
+            animation: slideIn 0.3s ease;
         }
         
-        .cart-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--purple-dark);
+        .cart-popup.show {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 1rem;
-            text-align: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        .cart-header h3 {
+            color: var(--purple-dark);
+            font-size: 1.3rem;
+        }
+        
+        .close-cart {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-cart:hover {
+            background: rgba(255,0,0,0.1);
+            color: #e74c3c;
         }
         
         .cart-item {
@@ -1819,9 +1904,18 @@
             </div>
         </section>
 
-        <!-- سلة التسوق -->
-        <div class="cart">
-            <div class="cart-title">🛒 السلة</div>
+        <!-- أيقونة السلة -->
+        <div class="cart-icon" onclick="toggleCart()">
+            🛒
+            <span class="cart-count" id="cartCount">0</span>
+        </div>
+
+        <!-- نافذة السلة المخفية -->
+        <div class="cart-popup" id="cartPopup">
+            <div class="cart-header">
+                <h3>🛒 سلة التسوق</h3>
+                <button class="close-cart" onclick="toggleCart()">×</button>
+            </div>
             <div class="cart-items" id="cartItems">
                 <p>السلة فارغة</p>
             </div>
@@ -1931,6 +2025,21 @@
             element.classList.toggle('expanded');
         }
         
+        function toggleCart() {
+            const cartPopup = document.getElementById('cartPopup');
+            cartPopup.classList.toggle('show');
+        }
+        
+        // إغلاق السلة عند الضغط خارجها
+        document.addEventListener('click', function(e) {
+            const cartPopup = document.getElementById('cartPopup');
+            const cartIcon = document.querySelector('.cart-icon');
+            
+            if (!cartPopup.contains(e.target) && !cartIcon.contains(e.target)) {
+                cartPopup.classList.remove('show');
+            }
+        });
+        
         // إغلاق القائمة بـ Escape
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
@@ -1970,6 +2079,12 @@
             if (cart.length === 0) {
                 cartItems.innerHTML = '<p>السلة فارغة</p>';
                 cartTotal.textContent = 'الإجمالي: 0.000 د.ك';
+                // Update cart counter for empty cart
+                const cartCounter = document.getElementById('cartCounter');
+                if (cartCounter) {
+                    cartCounter.textContent = '0';
+                    cartCounter.style.display = 'none';
+                }
                 return;
             }
             
@@ -1994,6 +2109,14 @@
             
             cartItems.innerHTML = html;
             cartTotal.textContent = `الإجمالي: ${total.toFixed(3)} د.ك`;
+            
+            // Update cart counter
+            const cartCounter = document.getElementById('cartCounter');
+            if (cartCounter) {
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                cartCounter.textContent = totalItems;
+                cartCounter.style.display = totalItems > 0 ? 'flex' : 'none';
+            }
         }
 
         function removeFromCart(index) {
@@ -2130,6 +2253,12 @@
             if (cart.length === 0) {
                 cartItems.innerHTML = '<p>السلة فارغة</p>';
                 cartTotal.textContent = 'الإجمالي: 0.000 د.ك';
+                // Update cart counter for empty cart
+                const cartCounter = document.getElementById('cartCounter');
+                if (cartCounter) {
+                    cartCounter.textContent = '0';
+                    cartCounter.style.display = 'none';
+                }
                 return;
             }
             
@@ -2148,13 +2277,21 @@
                                 ${item.quantity} × ${item.price.toFixed(3)} د.ك
                             </div>
                         </div>
-                        <button onclick="removeFromCart(${index})" style="background: #dc3545; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
+                        <button onclick="removeFromCart(${index})" style="background: #dc3545; color: white; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
                     </div>
                 `;
             });
             
             cartItems.innerHTML = html;
             cartTotal.textContent = `الإجمالي: ${total.toFixed(3)} د.ك`;
+            
+            // Update cart counter
+            const cartCounter = document.getElementById('cartCounter');
+            if (cartCounter) {
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                cartCounter.textContent = totalItems;
+                cartCounter.style.display = totalItems > 0 ? 'flex' : 'none';
+            }
         }
 
         function removeFromCart(index) {
