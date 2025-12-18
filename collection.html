@@ -497,7 +497,7 @@
     <div class="container">
         <div class="nav">
             <a href="./collections.html">🏷️ جميع المجموعات</a>
-            <a href="./products-full.html">🛍️ المتجر </a>
+            <a href="./products-full.html">🛍️ المتجر الكامل</a>
             <a href="./index.html">🏠 الصفحة الرئيسية</a>
 
         </div>
@@ -603,7 +603,7 @@
                     <div class="product" data-id="${product.handle}">
                         <div class="product-image">
                             <img src="${image}" alt="${product.title}" 
-                                 onerror="this.style.display='none'">
+                                 onerror="this.src='https://via.placeholder.com/300x300?text=${encodeURIComponent(product.title)}'">
                         </div>
                         <div class="product-info">
                             <div class="product-title">${product.title}</div>
@@ -658,7 +658,7 @@
             if (product.images && product.images.length > 0) {
                 return product.images[0].src;
             }
-            return product.emoji || '🎁'; // استخدام emoji بدلاً من placeholder
+            return `https://via.placeholder.com/300x300?text=${encodeURIComponent(product.title || 'منتج')}`;
         }
         
         function extractDescription(bodyHtml) {

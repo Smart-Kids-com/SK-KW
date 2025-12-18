@@ -9,7 +9,6 @@ class ProductsLoader {
     async init() {
         try {
             await this.loadProducts();
-            this.checkHashFilter();
             this.renderProducts();
             this.setupFilters();
         } catch (error) {
@@ -17,62 +16,37 @@ class ProductsLoader {
             this.showError();
         }
     }
-    
-    checkHashFilter() {
-        // فحص الhash في الURL لتطبيق فلتر المجموعة
-        const hash = window.location.hash.substring(1);
-        if (hash) {
-            const categoryMap = {
-                'montessori': 'مونتيسوري',
-                'stories': 'عالم القصص والحكايات المصورة',
-                'bestseller': 'Smart Kids Kuwait الأفضل مبيعاً',
-                'new-releases': 'اكتشف أحدث إصداراتنا للأطفال',
-                'audio-stories': 'قصصي الصوتية المسموعة',
-                'interactive-stories': 'عروض القصص التفاعلية',
-                'single-stories': 'القصص المفردة للأطفال',
-                'self-reading': 'أنا أقرأ بنفسي',
-                'interactive-books': 'كتبي التفاعلية الحركية',
-                'islamic-library': 'عروض مكتبتي الإسلامية',
-                'talking-pen': 'ابدأ رحلتك مع القلم الناطق',
-                'history': 'موسوعات التاريخ المصور',
-                'favorite-books': 'الكُتب المُحببة للأطفال'
-            };
-            
-            if (categoryMap[hash]) {
-                this.currentCategory = categoryMap[hash];
-            }
-        }
-    }
 
     async loadProducts() {
         try {
-            console.log('بدء تحميل المنتجات من products.json...');
-            // تحميل المنتجات من ملف products.json الجديد
-            const response = await fetch('./products.json');
-            console.log('استجابة الخادم:', response.ok, response.status);
+            // محاولة تحميل المنتجات من ملف products_grouped.json
+            const response = await fetch('./data/products_grouped.json');
             if (!response.ok) throw new Error('فشل في تحميل الملف');
             
             const data = await response.json();
             
-            console.log('تم تحميل البيانات:', data.length, 'منتج');
-            // استخدام البيانات مباشرة
-            this.products = data.map(product => ({
-                id: product.id,
-                name: product.title,
-                description: product.description,
-                price: product.price,
-                image: product.image || product.emoji || '🎁',
-                category: product.category,
-                tags: [],
-                vendor: 'Smart Kids Kuwait',
-                inStock: product.inStock
-            }));
+            // تحويل البيانات إلى تنسيق مبسط
+            this.products = data
+                .filter(product => product.published && product.status === 'active')
+                .map(product => ({
+                    id: product.handle || Math.random().toString(36),
+                    name: product.title || 'منتج بدون اسم',
+                    description: this.extractDescription(product.body_html),
+                    price: this.extractPrice(product),
+                    image: this.extractImage(product),
+                    category: product.type || 'عام',
+                    tags: product.tags || [],
+                    vendor: product.vendor || 'Smart Kids Kuwait',
+                    seo: {
+                        title: product.seo_title,
+                        description: product.seo_description
+                    }
+                }));
                 
         } catch (error) {
             console.error('خطأ في معالجة البيانات:', error);
-            // في حالة فشل التحميل
+            // في حالة فشل التحميل، استخدم بيانات تجريبية
             this.products = this.getDefaultProducts();
-            console.log('تم استخدام منتجات افتراضية:', this.products.length);
         }
     }
 
@@ -115,31 +89,39 @@ class ProductsLoader {
             return product.images[0].src;
         }
         
-        // استخدام emoji كصورة للمنتج
-        return product.emoji || '🎁';
-    
+        // صورة افتراضية
+        return 'https://via.placeholder.com/300x300?text=' + encodeURIComponent(product.title || 'منتج');
     }
 
-    filterProductsByCategory() {
-        if (this.currentCategory === 'الكل') {
-            return this.products;
-        }
-        
-        return this.products.filter(product => 
-            product.category === this.currentCategory
-        );
+    getDefaultProducts() {
+        // منتجات افتراضية في حالة فشل التحميل
+        return [
+            {
+                id: 'default-1',
+                name: 'ألعاب الألغاز الذكية',
+                description: 'مجموعة ألغاز تطور التفكير النقدي والإبداع',
+                price: 18.0,
+                image: 'https://via.placeholder.com/300x300?text=ألغاز',
+                category: 'ألعاب تعليمية',
+                tags: ['تعليمي', 'ذكاء']
+            },
+            {
+                id: 'default-2', 
+                name: 'روبوت تعليمي',
+                description: 'روبوت ذكي لتعلم البرمجة والتحكم',
+                price: 45.0,
+                image: 'https://via.placeholder.com/300x300?text=روبوت',
+                category: 'تكنولوجيا',
+                tags: ['روبوت', 'برمجة']
+            }
+        ];
     }
 
     renderProducts(productsToShow = null) {
         const productsContainer = document.getElementById('products');
         if (!productsContainer) return;
 
-        let products = productsToShow || this.filterProductsByCategory();
-        
-        // إذا كنا في الصفحة الرئيسية، اعرض فقط أول 6 منتجات
-        if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
-            products = products.slice(0, 6);
-        }
+        const products = productsToShow || this.products;
         
         if (products.length === 0) {
             productsContainer.innerHTML = `
@@ -154,17 +136,18 @@ class ProductsLoader {
         productsContainer.innerHTML = products.map(product => `
             <div class="product" data-category="${product.category}" data-id="${product.id}">
                 <div class="product-image">
-                    ${product.image && product.image.startsWith('http') ? 
-                        `<img src="${product.image}" alt="${product.name}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                         <div style="display: none; font-size: 3rem;">🎁</div>` 
-                        : `<div style="font-size: 3rem;">${product.image}</div>`}
+                    <img src="${product.image}" alt="${product.name}" 
+                         onerror="this.src='https://via.placeholder.com/300x300?text=${encodeURIComponent(product.name)}'">
                 </div>
-                <h3>${product.name}</h3>
-                <p>${product.description}</p>
-                <div class="product-price">${parseFloat(product.price).toFixed(3)} د.ك</div>
-                <button class="add-to-cart" onclick="addToCart('${product.name}', ${parseFloat(product.price)}, '${product.id}')">
-                    إضافة للسلة
-                </button>
+                <div class="product-info">
+                    <div class="product-title">${product.name}</div>
+                    <div class="product-description">${product.description}</div>
+                    <div class="product-category">التصنيف: ${product.category}</div>
+                    <div class="product-price">${product.price.toFixed(3)} د.ك</div>
+                    <button class="add-to-cart" onclick="addToCart('${product.name}', ${product.price}, '${product.id}')">
+                        إضافة للسلة
+                    </button>
+                </div>
             </div>
         `).join('');
 
@@ -256,45 +239,6 @@ class ProductsLoader {
         `;
     }
 
-    getDefaultProducts() {
-        // منتجات احتياطية في حالة فشل تحميل الملف الرئيسي
-        return [
-            {
-                id: 1,
-                name: "كتب تعليمية للأطفال",
-                description: "مجموعة متنوعة من الكتب التعليمية المصممة خصيصاً للأطفال",
-                price: "12.500",
-                image: "📚",
-                category: "عالم القصص والحكايات المصورة",
-                tags: [],
-                vendor: "Smart Kids Kuwait",
-                inStock: true
-            },
-            {
-                id: 2,
-                name: "ألعاب تعليمية مونتيسوري",
-                description: "ألعاب تعليمية تتبع منهج مونتيسوري لتطوير مهارات الأطفال",
-                price: "18.000",
-                image: "🎯",
-                category: "مونتيسوري",
-                tags: [],
-                vendor: "Smart Kids Kuwait",
-                inStock: true
-            },
-            {
-                id: 3,
-                name: "قصص تفاعلية للأطفال",
-                description: "قصص تفاعلية ممتعة تنمي خيال الأطفال وحب القراءة",
-                price: "15.000",
-                image: "📖",
-                category: "عالم القصص والحكايات المصورة",
-                tags: [],
-                vendor: "Smart Kids Kuwait",
-                inStock: true
-            }
-        ];
-    }
-
     showError() {
         const productsContainer = document.getElementById('products');
         if (productsContainer) {
@@ -315,12 +259,4 @@ class ProductsLoader {
 let productsLoader;
 document.addEventListener('DOMContentLoaded', function() {
     productsLoader = new ProductsLoader();
-    
-    // مراقبة تغيير الhash
-    window.addEventListener('hashchange', function() {
-        if (productsLoader) {
-            productsLoader.checkHashFilter();
-            productsLoader.renderProducts();
-        }
-    });
 });
