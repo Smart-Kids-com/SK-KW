@@ -1,30 +1,29 @@
 [
     {
         "id": 1,
-        "title": "عرض الـ 10 قصص التفاعلية وثلاثية الأبعاد",
-        "price": "30.000",
-        "description": "عرض حصري على مجموعة كاملة من 10 قصص تفاعلية وثلاثية الأبعاد للأطفال! مجموعة ممتعة الحيوانات + مجموعة يوم في",
-        "category": "عروض القصص التفاعلية",
-        "emoji": "📚",
-        "inStock": true,
-        "image": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/3_c24e7f79-0d91-42de-a5a1-73a24cc2d255.png?v=1764900346"
+        "name": "اسم المنتج الأول",
+        "price": 25.99,
+        "image": "https://via.placeholder.com/300x300",
+        "description": "وصف المنتج هنا",
+        "category": "ألعاب تعليمية",
+        "inStock": true
     },
     {
         "id": 2,
-        "title": "عرض الـ 11 قصة ثلاثية الأبعاد",
-        "price": "34.000",
-        "description": "العرض الأضخم! مجموعة كاملة من 11 قصة تفاعلية ثلاثية الأبعاد: ممتعة الحيوانات + أريد أن + قصص مميزة",
-        "category": "Smart Kids Kuwait الأفضل مبيعاً",
-        "emoji": "⭐",
-        "inStock": true,
-        "image": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/7_88aca36d-8dbe-4b25-aef8-242f6a86eb3a.png?v=1764900345"
+        "name": "اسم المنتج الثاني", 
+        "price": 15.50,
+        "image": "https://via.placeholder.com/300x300",
+        "description": "وصف المنتج هنا",
+        "category": "كتب أطفال",
+        "inStock": true
     },
     {
         "id": 3,
-        "title": "عرض الـ 12 قصة تفاعلية وثلاثية الأبعاد",
-        "price": "36.000",
-        "description": "العرض الأكبر! مجموعة شاملة من 12 قصة تفاعلية وثلاثية الأبعاد: ممتعة الحيوانات + يوم في + قصص مميزة",
-        "category": "عروض القصص التفاعلية",
-        "emoji": "🎊",
+        "name": "اسم المنتج الثالث",
+        "price": 35.00,
+        "image": "https://via.placeholder.com/300x300", 
+        "description": "وصف المنتج هنا",
+        "category": "ألعاب ذكاء",
         "inStock": true
     }
+]

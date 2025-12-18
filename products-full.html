@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Kids Store - متجر الأطفال الذكي </title>
+    <title>Smart Kids Store - متجر الأطفال الذكي الكامل</title>
     <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -639,6 +639,29 @@
     <!-- Menu Overlay -->
     <div class="menu-overlay" onclick="closeMenu()"></div>
     
+    <!-- Slide Menu -->
+    <div class="slide-menu" id="slideMenu">
+        <button class="menu-close" onclick="closeMenu()">&times;</button>
+        
+        <div class="menu-header">
+            <h3>📚 المجموعات</h3>
+        </div>
+        
+        <ul class="collections-list">
+            <li><a href="./collections.html">🌟 جميع المجموعات</a></li>
+            <li><a href="./collection.html?category=الكتب والقصص" onclick="filterByCategory('الكتب والقصص'); closeMenu(); return false;">📖 الكتب والقصص</a></li>
+            <li><a href="./collection.html?category=الألعاب التعليمية" onclick="filterByCategory('الألعاب التعليمية'); closeMenu(); return false;">🧩 الألعاب التعليمية</a></li>
+            <li><a href="./collection.html?category=العلوم والتجارب" onclick="filterByCategory('العلوم والتجارب'); closeMenu(); return false;">🔬 العلوم والتجارب</a></li>
+            <li><a href="./collection.html?category=الرياضيات والأرقام" onclick="filterByCategory('الرياضيات والأرقام'); closeMenu(); return false;">🔢 الرياضيات والأرقام</a></li>
+            <li><a href="./collection.html?category=الفنون والحرف" onclick="filterByCategory('الفنون والحرف'); closeMenu(); return false;">🎨 الفنون والحرف</a></li>
+            <li><a href="./collection.html?category=ألعاب البناء" onclick="filterByCategory('ألعاب البناء'); closeMenu(); return false;">🏠 ألعاب البناء</a></li>
+            <li><a href="./collection.html?category=الألعاب الالكترونية" onclick="filterByCategory('الألعاب الإلكترونية'); closeMenu(); return false;">🔌 الألعاب الإلكترونية</a></li>
+        </ul>
+        
+        <div class="menu-footer">
+            <a href="./index.html">🏠 الرئيسية</a>
+            <a href="./contact.html">📞 اتصل بنا</a>
+            <a href="./about.html">ℹ️ عننا</a>
         </div>
     </div>
 
@@ -701,7 +724,7 @@
             <h2>إتمام الطلب</h2>
             <form onsubmit="submitOrder(event)">
                 <div class="form-group">
-                    <label for="customerName">الاسم :</label>
+                    <label for="customerName">الاسم الكامل:</label>
                     <input type="text" id="customerName" required>
                 </div>
                 <div class="form-group">
