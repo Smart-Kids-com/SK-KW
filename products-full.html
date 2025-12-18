@@ -712,6 +712,19 @@
                    oninput="productsLoader && productsLoader.searchProducts(this.value)">
         </div>
         
+        <!-- Filters + Stats -->
+<div class="products-stats" id="productsStats" style="display:none;">
+  <div class="stats-info" id="statsInfo">إجمالي المنتجات: 0</div>
+</div>
+
+<div class="category-filters" id="categoryFilters" style="display:none;"></div>
+
+<div style="text-align:center; margin: 16px 0;">
+  <button id="loadMoreBtn" class="filter-btn" style="display:none; padding: 12px 22px;">
+    تحميل المزيد
+  </button>
+</div>
+
         <div class="products" id="products">
             <div class="loading">
                 <h3>📦 جاري تحميل المنتجات...</h3>

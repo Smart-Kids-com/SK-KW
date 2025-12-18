@@ -8,12 +8,6 @@
     <meta name="keywords" content="ألعاب تعليمية، كتب أطفال، مونتيسوري، قصص تفاعلية، العاب ذكية، تعليم الأطفال، Smart Kids Kuwait">
     <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457">
     
-    <!-- للتحميل السريع إلى المتجر الكامل -->
-    <script>
-        // توجيه تلقائي للمتجر الكامل إذا لم يكن هناك hash محدد
-        if (window.location.hash === '' || window.location.hash === '#') {
-            window.location.href = './products-full.html';
-        }
     </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -538,6 +532,7 @@
             color: white;
         }
         
+
         /* أيقونة واتساب الثابتة */
         .whatsapp-float {
             position: fixed;
@@ -616,19 +611,29 @@
     <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
         💬
     </a>
-
-    <!-- Menu Toggle Button -->
-    <div class="menu-toggle" onclick="toggleMenu()">
-        ☰
-    </div>
-    
-    <!-- Menu Overlay -->
-    <div class="menu-overlay" onclick="closeMenu()"></div>
-    
-    <!-- Slide Menu -->
-    <div class="slide-menu" id="slideMenu">
-        <button class="menu-close" onclick="closeMenu()">&times;</button>
         
+    <!-- Mobile Menu -->
+<button class="menu-btn" id="menuBtn" aria-label="فتح القائمة" aria-controls="sideMenu" aria-expanded="false">☰</button>
+<div class="menu-backdrop" id="menuBackdrop" hidden></div>
+
+<aside class="side-menu" id="sideMenu" aria-hidden="true">
+  <div class="side-menu__head">
+    <h3>📚 المجموعات</h3>
+    <button class="side-menu__close" id="menuClose" aria-label="إغلاق">×</button>
+  </div>
+
+  <nav class="side-menu__nav" id="categoriesMenu">
+    <!-- سيتم تعبئتها من categories.json -->
+  </nav>
+
+  <div class="side-menu__footer">
+    <a href="./collections.html">🌟 جميع المجموعات</a>
+    <a href="./contact.html">📞 اتصل بنا</a>
+    <a href="./about.html">ℹ️ عن المتجر</a>
+    <a href="./profile.html">👤 الملف الشخصي</a>
+  </div>
+</aside>
+ 
         <div class="menu-header">
             <h3>📚 المجموعات</h3>
         </div>
@@ -977,27 +982,66 @@
         
         // Slide Menu Functions
         function toggleMenu() {
-            const menu = document.getElementById('slideMenu');
-            const overlay = document.querySelector('.menu-overlay');
-            
-            menu.classList.toggle('open');
-            overlay.classList.toggle('show');
+           const menuBtn = document.getElementById('menuBtn');
+const sideMenu = document.getElementById('sideMenu');
+const menuBackdrop = document.getElementById('menuBackdrop');
+const menuClose = document.getElementById('menuClose');
+
+function openMenu(){
+  sideMenu.classList.add('is-open');
+  menuBackdrop.hidden = false;
+  sideMenu.setAttribute('aria-hidden','false');
+  menuBtn.setAttribute('aria-expanded','true');
+  document.body.style.overflow = 'hidden';
+}
+function closeMenu(){
+  sideMenu.classList.remove('is-open');
+  menuBackdrop.hidden = true;
+  sideMenu.setAttribute('aria-hidden','true');
+  menuBtn.setAttribute('aria-expanded','false');
+  document.body.style.overflow = '';
+}
+
+menuBtn?.addEventListener('click', openMenu);
+menuClose?.addEventListener('click', closeMenu);
+menuBackdrop?.addEventListener('click', closeMenu);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
         }
         
-        function closeMenu() {
-            const menu = document.getElementById('slideMenu');
-            const overlay = document.querySelector('.menu-overlay');
-            
-            menu.classList.remove('open');
-            overlay.classList.remove('show');
-        }
-        
-        // إغلاق القائمة عند الضغط على Escape
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeMenu();
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCartDisplay();
+            toggleMenu();
         });
+
+        async function loadCategoriesMenuFromProducts(limit = 14) {
+  const res = await fetch('/products.json', { cache: 'no-store' });
+  if (!res.ok) return;
+
+  const products = await res.json();
+  const counts = new Map();
+
+  for (const p of products) {
+    const c = (p.category || 'بدون تصنيف').toString().trim();
+    counts.set(c, (counts.get(c) || 0) + 1);
+  }
+
+  // رتب الفئات بالأكثر منتجات
+  const top = [...counts.entries()]
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, limit);
+
+  const el = document.getElementById('categoriesMenu');
+  if (!el) return;
+
+  el.innerHTML = top.map(([name, count]) => {
+    const url = `./collection.html?category=${encodeURIComponent(name)}`;
+    return `<a href="${url}">📁 ${name} <span style="opacity:.75">(${count})</span></a>`;
+  }).join('');
+}
+
+// شغّلها عند تحميل الصفحة
+loadCategoriesMenuFromProducts(14).catch(console.error);
+
     </script>
     
     <!-- Footer -->
