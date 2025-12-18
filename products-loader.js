@@ -1,8 +1,10 @@
-/* ===========================
-   Collections (14 groups)
-   (Copied from collections-manager.js)
-   =========================== */
+// products-loader.js
+// تحميل وعرض المنتجات من ملف JSON (Optimized: Pagination + Filters + Search)
+// ملاحظة: تم نقل تعريف المجموعات خارج الكلاس لتفادي أخطاء الـ Syntax.
 
+// ===============================
+// Collections (Your 14 groups)
+// ===============================
 const COLLECTIONS = {
   'montessori': {
     name: 'مونتيسوري',
@@ -76,7 +78,7 @@ const COLLECTIONS = {
   }
 };
 
-// أولوية المطابقة (استبعدنا all-products من التصنيف لأنه خاص بعرض الكل)
+// ترتيب أولوية المطابقة (لو المنتج طلع في أكثر من مجموعة)
 const COLLECTION_PRIORITY = [
   'interactive-offers',
   'bestsellers',
@@ -90,24 +92,26 @@ const COLLECTION_PRIORITY = [
   'stories-world',
   'islamic-library',
   'history-encyclopedia',
-  'favorite-books'
+  'favorite-books',
+  'all-products'
 ];
 
-function norm(v) {
+function _norm(v) {
   return (v ?? '').toString().trim().toLowerCase();
 }
 
-function getProductTags(product) {
+function _getProductTags(product) {
+  // Shopify export may be array or string
   if (Array.isArray(product.tags)) return product.tags;
   if (product.tags) return String(product.tags).split(',').map(t => t.trim()).filter(Boolean);
   return [];
 }
 
-function matchesCollection(product, collection) {
-  const productTags = getProductTags(product).map(norm);
-  const colTags = (collection.tags || []).map(norm);
+function _matchesCollection(rawProduct, collection) {
+  const productTags = _getProductTags(rawProduct).map(_norm);
+  const colTags = (collection.tags || []).map(_norm);
 
-  // 1) tags
+  // 1) match by tags
   for (const pt of productTags) {
     for (const ct of colTags) {
       if (!pt || !ct) continue;
@@ -115,55 +119,48 @@ function matchesCollection(product, collection) {
     }
   }
 
-  // 2) fallback in title/type/body_html
-  const hay = norm(`${product.title || ''} ${product.type || ''} ${product.body_html || ''}`);
+  // 2) fallback match by title/type/body_html
+  const hay = _norm(`${rawProduct.title || ''} ${rawProduct.type || ''} ${rawProduct.body_html || ''}`);
   return colTags.some(ct => ct && hay.includes(ct));
 }
 
-function getCollectionKeyForProduct(product) {
+function getCollectionKeyForProduct(rawProduct) {
   for (const key of COLLECTION_PRIORITY) {
     const col = COLLECTIONS[key];
     if (!col) continue;
-    if (matchesCollection(product, col)) return key;
+    if (_matchesCollection(rawProduct, col)) return key;
   }
   return null;
 }
 
-function getCategoryLabelForProduct(product) {
-  const key = getCollectionKeyForProduct(product);
-  if (key && COLLECTIONS[key]) return COLLECTIONS[key].name;
-  return (product.type && String(product.type).trim()) ? String(product.type).trim() : 'عام';
+// هذه هي الدالة التي ستُستخدم كـ category label
+function getCategoryLabelForProduct(rawProduct) {
+  const key = getCollectionKeyForProduct(rawProduct);
+  if (key) return COLLECTIONS[key].name;
+
+  // fallback لو ما اتطابقش مع أي مجموعة
+  return (rawProduct.type && String(rawProduct.type).trim()) ? String(rawProduct.type).trim() : 'عام';
 }
 
-function getIconForCategoryName(categoryName) {
-  const name = String(categoryName || '').trim();
-  for (const key of Object.keys(COLLECTIONS)) {
-    if (COLLECTIONS[key].name === name) return COLLECTIONS[key].icon || '📁';
-  }
-  return '📁';
+function safeCssEscape(v) {
+  // CSS.escape غير موجود في بعض المتصفحات القديمة
+  if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(v);
+  return String(v).replace(/["\\]/g, '\\$&');
 }
 
-function cssEscapeSafe(value) {
-  const s = String(value ?? '');
-  if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(s);
-  // fallback بسيط
-  return s.replace(/["\\]/g, '\\$&');
-}
-
-/* ===========================
-   Products Loader
-   =========================== */
-
+// ===============================
+// Products Loader
+// ===============================
 class ProductsLoader {
   constructor(options = {}) {
-    this.pageSize = options.pageSize ?? 24;
-    this.maxFilters = options.maxFilters ?? 14;
-
-    this.products = [];
-    this.filteredProducts = [];
+    this.pageSize = options.pageSize ?? 24;          // عدد المنتجات في كل دفعة
+    this.maxFilters = options.maxFilters ?? 14;      // عدد الفلاتر (نستخدم 14 مجموعة)
+    this.products = [];                               // كل المنتجات (صيغة مبسطة للعرض)
+    this._rawProducts = [];                           // المنتجات الخام من JSON (للمطابقة)
+    this.filteredProducts = [];                       // المنتجات بعد البحث/الفلترة
     this.currentCategory = 'الكل';
     this.query = '';
-    this.renderIndex = 0;
+    this.renderIndex = 0;                             // مؤشر pagination
     this.searchTimer = null;
 
     this.init();
@@ -175,7 +172,9 @@ class ProductsLoader {
       this.wireEvents();
 
       await this.loadProducts();
-      this.buildFilters();
+      this.buildFiltersFromCollections();
+      this.applyInitialCategoryFromURL();
+
       this.applyFiltersAndRender(true);
     } catch (error) {
       console.error('خطأ في تحميل المنتجات:', error);
@@ -198,9 +197,12 @@ class ProductsLoader {
   }
 
   wireEvents() {
-    this.loadMoreBtn.addEventListener('click', () => this.renderNextPage());
+    // زر تحميل المزيد
+    this.loadMoreBtn.addEventListener('click', () => {
+      this.renderNextPage();
+    });
 
-    // Add to cart delegation
+    // Event delegation لأزرار "إضافة للسلة"
     this.productsContainer.addEventListener('click', (e) => {
       const btn = e.target.closest('.add-to-cart');
       if (!btn) return;
@@ -210,15 +212,17 @@ class ProductsLoader {
       const id = btn.dataset.id || null;
 
       if (typeof window.addToCart === 'function') {
-        window.addToCart(name, price, id);
+        // مرر زر نفسه لتحسين ال UX (اختياري)
+        window.addToCart(name, price, id, btn);
       }
     });
 
-    // Filters delegation
+    // Event delegation للفلاتر
     this.filtersContainer.addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-category]');
       if (!btn) return;
-      this.filterByCategory(btn.dataset.category);
+      const cat = btn.dataset.category;
+      this.filterByCategory(cat);
     });
   }
 
@@ -228,29 +232,22 @@ class ProductsLoader {
       if (!response.ok) throw new Error('فشل في تحميل الملف');
 
       const data = await response.json();
+      this._rawProducts = data.filter(p => p.published && p.status === 'active');
 
-      this.products = data
-        .filter(product => product.published && product.status === 'active')
-        .map(product => ({
-          id: product.handle || Math.random().toString(36).slice(2),
-          name: product.title || 'منتج بدون اسم',
-          description: this.extractDescription(product.body_html),
-          price: this.extractPrice(product),
-          image: this.extractImage(product),
-
-          // هنا المهم: تصنيف المنتج حسب مجموعاتك الـ 14
-          category: getCategoryLabelForProduct(product),
-
-          tags: Array.isArray(product.tags)
-            ? product.tags
-            : (product.tags ? String(product.tags).split(',').map(t => t.trim()).filter(Boolean) : []),
-
-          vendor: product.vendor || 'Smart Kids Kuwait',
-          seo: {
-            title: product.seo_title,
-            description: product.seo_description
-          }
-        }));
+      this.products = this._rawProducts.map(raw => ({
+        id: raw.handle || Math.random().toString(36).slice(2),
+        name: raw.title || 'منتج بدون اسم',
+        description: this.extractDescription(raw.body_html),
+        price: this.extractPrice(raw),
+        image: this.extractImage(raw),
+        category: getCategoryLabelForProduct(raw), // <-- مهم: من 14 مجموعة
+        tags: _getProductTags(raw),
+        vendor: raw.vendor || 'Smart Kids Kuwait',
+        seo: {
+          title: raw.seo_title,
+          description: raw.seo_description
+        }
+      }));
 
     } catch (error) {
       console.error('خطأ في معالجة البيانات:', error);
@@ -260,30 +257,35 @@ class ProductsLoader {
 
   extractDescription(bodyHtml) {
     if (!bodyHtml) return 'وصف المنتج غير متوفر';
+
     const div = document.createElement('div');
     div.innerHTML = bodyHtml;
     const text = div.textContent || div.innerText || '';
+
     return text.length > 150 ? text.substring(0, 150) + '...' : text;
   }
 
-  extractPrice(product) {
-    if (product.variants && product.variants.length > 0) {
-      const variant = product.variants[0];
+  extractPrice(rawProduct) {
+    if (rawProduct.variants && rawProduct.variants.length > 0) {
+      const variant = rawProduct.variants[0];
       if (variant.price && variant.price > 0) {
         return parseFloat(variant.price);
       }
     }
 
-    const productType = (product.type || '').toLowerCase();
+    const productType = (rawProduct.type || '').toLowerCase();
     if (productType.includes('كتاب') || productType.includes('قصة')) return 15.0;
     if (productType.includes('علبة') || productType.includes('مونتيسوري')) return 25.0;
     if (productType.includes('عرض') || productType.includes('مجموعة')) return 35.0;
+
     return 20.0;
   }
 
-  extractImage(product) {
-    if (product.images && product.images.length > 0) return product.images[0].src;
-    return 'https://via.placeholder.com/600x600?text=' + encodeURIComponent(product.title || 'منتج');
+  extractImage(rawProduct) {
+    if (rawProduct.images && rawProduct.images.length > 0) {
+      return rawProduct.images[0].src;
+    }
+    return 'https://via.placeholder.com/600x600?text=' + encodeURIComponent(rawProduct.title || 'منتج');
   }
 
   getDefaultProducts() {
@@ -294,7 +296,7 @@ class ProductsLoader {
         description: 'مجموعة ألغاز تطور التفكير النقدي والإبداع',
         price: 18.0,
         image: 'https://via.placeholder.com/600x600?text=ألغاز',
-        category: 'مونتيسوري',
+        category: 'ألعاب تعليمية',
         tags: ['تعليمي', 'ذكاء']
       },
       {
@@ -303,13 +305,13 @@ class ProductsLoader {
         description: 'روبوت ذكي لتعلم البرمجة والتحكم',
         price: 45.0,
         image: 'https://via.placeholder.com/600x600?text=روبوت',
-        category: 'تسوق جميع منتجاتنا الآن',
+        category: 'تكنولوجيا',
         tags: ['روبوت', 'برمجة']
       }
     ];
   }
 
-  /* UI Helpers */
+  // -------- UI Helpers --------
   createFiltersContainer() {
     const container = document.createElement('div');
     container.id = 'categoryFilters';
@@ -352,53 +354,77 @@ class ProductsLoader {
     if (productsContainer && productsContainer.parentNode) {
       productsContainer.parentNode.insertBefore(wrap, productsContainer.nextSibling);
     }
+
     return btn;
   }
 
   escapeHtml(str) {
-    const s = String(str ?? '');
-    return s
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+    return String(str ?? '')
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
   }
 
-  /* Filters & Rendering */
-  buildFilters() {
+  // -------- Filters & Rendering --------
+  buildFiltersFromCollections() {
     const total = this.products.length;
 
-    // نبني قائمة الفلاتر حسب المجموعات (بدون all-products لأنه يساوي "الكل")
-    const keys = Object.keys(COLLECTIONS).filter(k => k !== 'all-products');
+    // احسب عدد المنتجات لكل مجموعة من 14 (حسب category label)
+    const counts = new Map();
+    for (const p of this.products) {
+      const c = (p.category || 'عام').toString().trim();
+      counts.set(c, (counts.get(c) || 0) + 1);
+    }
 
-    const items = keys.map(key => {
-      const col = COLLECTIONS[key];
-      const name = col.name;
-      const icon = col.icon || '📁';
-      const count = this.products.filter(p => p.category === name).length;
-      return { name, icon, count };
-    });
+    // رتب حسب COLLECTION_PRIORITY (أسماء المجموعة)
+    const ordered = COLLECTION_PRIORITY
+      .map(key => COLLECTIONS[key]?.name)
+      .filter(Boolean)
+      .map(name => [name, counts.get(name) || 0]);
 
-    // لو maxFilters أقل من 13 (اختياري)
-    const list = items.slice(0, this.maxFilters);
+    // حد أقصى 14 (مع all-products غالباً موجود)
+    const list = ordered.slice(0, this.maxFilters);
 
     this.filtersContainer.innerHTML = `
-      <button class="filter-btn active" data-category="الكل">🛍️ الكل (${total})</button>
-      ${list.map(it => `
-        <button class="filter-btn" data-category="${this.escapeHtml(it.name)}">
-          ${this.escapeHtml(it.icon)} ${this.escapeHtml(it.name)} (${it.count})
+      <button class="filter-btn active" data-category="الكل">الكل (${total})</button>
+      ${list.map(([cat, count]) => `
+        <button class="filter-btn" data-category="${this.escapeHtml(cat)}">
+          ${this.escapeHtml(cat)} (${count})
         </button>
       `).join('')}
     `;
   }
 
+  applyInitialCategoryFromURL() {
+    // يدعم: ?collection=montessori
+    // أو: ?category=اسم_الفئة
+    const params = new URLSearchParams(window.location.search);
+    const collectionKey = (params.get('collection') || '').trim();
+    const categoryName = (params.get('category') || '').trim();
+
+    if (collectionKey && COLLECTIONS[collectionKey]) {
+      this.currentCategory = COLLECTIONS[collectionKey].name;
+    } else if (categoryName) {
+      this.currentCategory = categoryName;
+    } else {
+      this.currentCategory = 'الكل';
+    }
+
+    // حاول تفعيل الزر عند وجود فئة
+    if (this.currentCategory !== 'الكل') {
+      // سيتم ضبط الـ active بعد render filters في filterByCategory
+      this.filterByCategory(this.currentCategory);
+    }
+  }
+
   filterByCategory(category) {
     this.currentCategory = category || 'الكل';
 
+    // Active state
     this.filtersContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-
-    const selector = `.filter-btn[data-category="${cssEscapeSafe(this.currentCategory)}"]`;
+    const selector = `.filter-btn[data-category="${safeCssEscape(this.currentCategory)}"]`;
     const activeBtn = this.filtersContainer.querySelector(selector);
     if (activeBtn) activeBtn.classList.add('active');
 
@@ -416,12 +442,15 @@ class ProductsLoader {
 
   applyFiltersAndRender(reset = true) {
     const q = this.query.trim().toLowerCase();
+
     let list = this.products;
 
+    // فلترة بالفئة
     if (this.currentCategory !== 'الكل') {
       list = list.filter(p => (p.category || 'عام') === this.currentCategory);
     }
 
+    // بحث
     if (q) {
       list = list.filter(p => {
         const hay = `${p.name} ${p.description} ${(p.category || '')} ${(p.tags || []).join(' ')}`.toLowerCase();
@@ -440,7 +469,7 @@ class ProductsLoader {
       this.productsContainer.innerHTML = `
         <div style="text-align: center; grid-column: 1 / -1; padding: 3rem;">
           <h3>لا توجد منتجات مطابقة</h3>
-          <p>جرّب تغيير البحث أو اختيار فئة أخرى</p>
+          <p>جرّب تغيير البحث أو اختيار مجموعة أخرى</p>
         </div>
       `;
       this.updateStats(0, this.currentCategory);
@@ -457,9 +486,7 @@ class ProductsLoader {
     const batch = this.filteredProducts.slice(start, end);
 
     const frag = document.createDocumentFragment();
-    for (const product of batch) {
-      frag.appendChild(this.createProductCard(product));
-    }
+    for (const product of batch) frag.appendChild(this.createProductCard(product));
 
     this.productsContainer.appendChild(frag);
     this.renderIndex = end;
@@ -483,7 +510,6 @@ class ProductsLoader {
     const nameEsc = this.escapeHtml(product.name);
     const descEsc = this.escapeHtml(product.description);
     const catEsc = this.escapeHtml(product.category);
-    const icon = this.escapeHtml(getIconForCategoryName(product.category));
 
     const img = document.createElement('img');
     img.src = product.image;
@@ -503,7 +529,7 @@ class ProductsLoader {
     info.innerHTML = `
       <div class="product-title">${nameEsc}</div>
       <div class="product-description">${descEsc}</div>
-      <div class="product-category">التصنيف: ${icon} ${catEsc}</div>
+      <div class="product-category">التصنيف: ${catEsc}</div>
       <div class="product-price">${Number(product.price).toFixed(3)} د.ك</div>
       <button class="add-to-cart"
               data-name="${encodeURIComponent(product.name)}"
@@ -515,14 +541,15 @@ class ProductsLoader {
 
     card.appendChild(imgWrap);
     card.appendChild(info);
+
     return card;
   }
 
   updateStats(count, category) {
     this.statsElement.innerHTML = `
       <div class="stats-info">
-        📊 إجمالي المنتجات: <strong>${count}</strong> منتج
-        ${category && category !== 'الكل' ? `في فئة: <strong>${this.escapeHtml(category)}</strong>` : ''}
+        إجمالي المنتجات: <strong>${count}</strong>
+        ${category && category !== 'الكل' ? `— مجموعة: <strong>${this.escapeHtml(category)}</strong>` : ''}
         ${this.query.trim() ? `— بحث: <strong>${this.escapeHtml(this.query.trim())}</strong>` : ''}
       </div>
     `;
@@ -534,7 +561,7 @@ class ProductsLoader {
         <div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: #dc3545;">
           <h3>⚠️ خطأ في تحميل المنتجات</h3>
           <p>حدث خطأ أثناء تحميل قائمة المنتجات. يرجى تحديث الصفحة أو المحاولة لاحقاً.</p>
-          <button onclick="location.reload()" style="padding: 10px 20px; margin-top: 1rem; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+          <button onclick="location.reload()" style="padding: 10px 20px; margin-top: 1rem; background: #007bff; color: white; border: none; border-radius: 10px; cursor: pointer;">
             تحديث الصفحة
           </button>
         </div>
@@ -545,9 +572,9 @@ class ProductsLoader {
 }
 
 // تشغيل المحمل عند تحميل الصفحة
-let productsLoader;
+window.productsLoader = null;
 document.addEventListener('DOMContentLoaded', function () {
-  productsLoader = new ProductsLoader({
+  window.productsLoader = new ProductsLoader({
     pageSize: 24,
     maxFilters: 14
   });
