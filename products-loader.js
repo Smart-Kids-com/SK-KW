@@ -1,13 +1,169 @@
-// تحميل وعرض المنتجات من ملف JSON (Optimized: Pagination + Filters + Search)
+/* ===========================
+   Collections (14 groups)
+   (Copied from collections-manager.js)
+   =========================== */
+
+const COLLECTIONS = {
+  'montessori': {
+    name: 'مونتيسوري',
+    tags: ['مونتيسوري', 'Montessori'],
+    icon: '🎯'
+  },
+  'stories-world': {
+    name: 'عالم القصص والحكايات المصورة',
+    tags: ['عالم القصص', 'حكايات مصورة', 'قصص مصورة'],
+    icon: '📚'
+  },
+  'bestsellers': {
+    name: 'Smart Kids Kuwait الأطفال المبتكرون الكويت الأفضل مبيعاً',
+    tags: ['الأفضل مبيعاً', 'bestseller', 'أكثر مبيعاً'],
+    icon: '⭐'
+  },
+  'latest-releases': {
+    name: 'اكتشف أحدث إصداراتنا للأطفال',
+    tags: ['اكتشف أحدث إصداراتنا للأطفال', 'إصدارات جديدة', 'أحدث'],
+    icon: '🆕'
+  },
+  'audio-stories': {
+    name: 'قصصي الصوتية المسموعة',
+    tags: ['قصصي الصوتية المسموعة', 'صوتية', 'مسموعة'],
+    icon: '🎧'
+  },
+  'interactive-offers': {
+    name: 'عروض القصص التفاعلية',
+    tags: ['عروض القصص التفاعلية', 'تفاعلية', 'عروض خاصة'],
+    icon: '🎁'
+  },
+  'single-stories': {
+    name: 'القصص المفردة للأطفال',
+    tags: ['القصص المفردة للأطفال', 'االقصص المفردة للأطفال', 'قصص مفردة'],
+    icon: '📖'
+  },
+  'self-reading': {
+    name: 'أنا أقرأ بنفسي',
+    tags: ['أنا أقرأ بنفسي', 'قراءة مستقلة'],
+    icon: '👶'
+  },
+  'interactive-books': {
+    name: 'كتبي التفاعلية الحركية',
+    tags: ['كتبي التفاعلية الحركية', 'تفاعلية حركية'],
+    icon: '🤸'
+  },
+  'islamic-library': {
+    name: 'عروض مكتبتي الإسلامية',
+    tags: ['عروض مكتبتي الإسلامية', 'إسلامية', 'مكتبة إسلامية'],
+    icon: '🕌'
+  },
+  'smart-pen': {
+    name: 'ابدأ رحلتك مع القلم الناطق',
+    tags: ['ابدأ رحلتك مع القلم الناطق', 'قلم ناطق', 'ناطق'],
+    icon: '🖊️'
+  },
+  'history-encyclopedia': {
+    name: 'موسوعات التاريخ المصور',
+    tags: ['موسوعات التاريخ المصور', 'تاريخ مصور', 'موسوعات'],
+    icon: '🏛️'
+  },
+  'favorite-books': {
+    name: 'الكُتب المُحببة للأطفال',
+    tags: ['الكُتب المُحببة للأطفال', 'محببة', 'المفضلة'],
+    icon: '💝'
+  },
+  'all-products': {
+    name: 'تسوق جميع منتجاتنا الآن',
+    tags: ['تسوق جميع منتجاتنا الآن', 'جميع المنتجات'],
+    icon: '🛍️'
+  }
+};
+
+// أولوية المطابقة (استبعدنا all-products من التصنيف لأنه خاص بعرض الكل)
+const COLLECTION_PRIORITY = [
+  'interactive-offers',
+  'bestsellers',
+  'latest-releases',
+  'montessori',
+  'smart-pen',
+  'audio-stories',
+  'interactive-books',
+  'self-reading',
+  'single-stories',
+  'stories-world',
+  'islamic-library',
+  'history-encyclopedia',
+  'favorite-books'
+];
+
+function norm(v) {
+  return (v ?? '').toString().trim().toLowerCase();
+}
+
+function getProductTags(product) {
+  if (Array.isArray(product.tags)) return product.tags;
+  if (product.tags) return String(product.tags).split(',').map(t => t.trim()).filter(Boolean);
+  return [];
+}
+
+function matchesCollection(product, collection) {
+  const productTags = getProductTags(product).map(norm);
+  const colTags = (collection.tags || []).map(norm);
+
+  // 1) tags
+  for (const pt of productTags) {
+    for (const ct of colTags) {
+      if (!pt || !ct) continue;
+      if (pt.includes(ct) || ct.includes(pt)) return true;
+    }
+  }
+
+  // 2) fallback in title/type/body_html
+  const hay = norm(`${product.title || ''} ${product.type || ''} ${product.body_html || ''}`);
+  return colTags.some(ct => ct && hay.includes(ct));
+}
+
+function getCollectionKeyForProduct(product) {
+  for (const key of COLLECTION_PRIORITY) {
+    const col = COLLECTIONS[key];
+    if (!col) continue;
+    if (matchesCollection(product, col)) return key;
+  }
+  return null;
+}
+
+function getCategoryLabelForProduct(product) {
+  const key = getCollectionKeyForProduct(product);
+  if (key && COLLECTIONS[key]) return COLLECTIONS[key].name;
+  return (product.type && String(product.type).trim()) ? String(product.type).trim() : 'عام';
+}
+
+function getIconForCategoryName(categoryName) {
+  const name = String(categoryName || '').trim();
+  for (const key of Object.keys(COLLECTIONS)) {
+    if (COLLECTIONS[key].name === name) return COLLECTIONS[key].icon || '📁';
+  }
+  return '📁';
+}
+
+function cssEscapeSafe(value) {
+  const s = String(value ?? '');
+  if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(s);
+  // fallback بسيط
+  return s.replace(/["\\]/g, '\\$&');
+}
+
+/* ===========================
+   Products Loader
+   =========================== */
+
 class ProductsLoader {
   constructor(options = {}) {
-    this.pageSize = options.pageSize ?? 24;          // عدد المنتجات في كل دفعة
-    this.maxFilters = options.maxFilters ?? 14;      // أقصى عدد فئات تظهر في الفلاتر
-    this.products = [];                               // كل المنتجات
-    this.filteredProducts = [];                       // المنتجات بعد البحث/الفلترة
+    this.pageSize = options.pageSize ?? 24;
+    this.maxFilters = options.maxFilters ?? 14;
+
+    this.products = [];
+    this.filteredProducts = [];
     this.currentCategory = 'الكل';
     this.query = '';
-    this.renderIndex = 0;                             // مؤشر pagination
+    this.renderIndex = 0;
     this.searchTimer = null;
 
     this.init();
@@ -31,26 +187,20 @@ class ProductsLoader {
     this.productsContainer = document.getElementById('products');
     if (!this.productsContainer) throw new Error('عنصر products غير موجود');
 
-    // Filters container
     this.filtersContainer =
       document.getElementById('categoryFilters') || this.createFiltersContainer();
 
-    // Stats container
     this.statsElement =
       document.getElementById('productsStats') || this.createStatsContainer();
 
-    // Load more button
     this.loadMoreBtn =
       document.getElementById('loadMoreBtn') || this.createLoadMoreButton();
   }
 
   wireEvents() {
-    // زر تحميل المزيد
-    this.loadMoreBtn.addEventListener('click', () => {
-      this.renderNextPage();
-    });
+    this.loadMoreBtn.addEventListener('click', () => this.renderNextPage());
 
-    // Event delegation لأزرار "إضافة للسلة"
+    // Add to cart delegation
     this.productsContainer.addEventListener('click', (e) => {
       const btn = e.target.closest('.add-to-cart');
       if (!btn) return;
@@ -64,12 +214,11 @@ class ProductsLoader {
       }
     });
 
-    // Event delegation للفلاتر
+    // Filters delegation
     this.filtersContainer.addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-category]');
       if (!btn) return;
-      const cat = btn.dataset.category;
-      this.filterByCategory(cat);
+      this.filterByCategory(btn.dataset.category);
     });
   }
 
@@ -88,8 +237,14 @@ class ProductsLoader {
           description: this.extractDescription(product.body_html),
           price: this.extractPrice(product),
           image: this.extractImage(product),
-          category: product.type || 'عام',
-          tags: Array.isArray(product.tags) ? product.tags : (product.tags ? String(product.tags).split(',').map(t => t.trim()) : []),
+
+          // هنا المهم: تصنيف المنتج حسب مجموعاتك الـ 14
+          category: getCategoryLabelForProduct(product),
+
+          tags: Array.isArray(product.tags)
+            ? product.tags
+            : (product.tags ? String(product.tags).split(',').map(t => t.trim()).filter(Boolean) : []),
+
           vendor: product.vendor || 'Smart Kids Kuwait',
           seo: {
             title: product.seo_title,
@@ -105,11 +260,9 @@ class ProductsLoader {
 
   extractDescription(bodyHtml) {
     if (!bodyHtml) return 'وصف المنتج غير متوفر';
-
     const div = document.createElement('div');
     div.innerHTML = bodyHtml;
     const text = div.textContent || div.innerText || '';
-
     return text.length > 150 ? text.substring(0, 150) + '...' : text;
   }
 
@@ -125,14 +278,11 @@ class ProductsLoader {
     if (productType.includes('كتاب') || productType.includes('قصة')) return 15.0;
     if (productType.includes('علبة') || productType.includes('مونتيسوري')) return 25.0;
     if (productType.includes('عرض') || productType.includes('مجموعة')) return 35.0;
-
     return 20.0;
   }
 
   extractImage(product) {
-    if (product.images && product.images.length > 0) {
-      return product.images[0].src;
-    }
+    if (product.images && product.images.length > 0) return product.images[0].src;
     return 'https://via.placeholder.com/600x600?text=' + encodeURIComponent(product.title || 'منتج');
   }
 
@@ -144,7 +294,7 @@ class ProductsLoader {
         description: 'مجموعة ألغاز تطور التفكير النقدي والإبداع',
         price: 18.0,
         image: 'https://via.placeholder.com/600x600?text=ألغاز',
-        category: 'ألعاب تعليمية',
+        category: 'مونتيسوري',
         tags: ['تعليمي', 'ذكاء']
       },
       {
@@ -153,13 +303,13 @@ class ProductsLoader {
         description: 'روبوت ذكي لتعلم البرمجة والتحكم',
         price: 45.0,
         image: 'https://via.placeholder.com/600x600?text=روبوت',
-        category: 'تكنولوجيا',
+        category: 'تسوق جميع منتجاتنا الآن',
         tags: ['روبوت', 'برمجة']
       }
     ];
   }
 
-  // -------- UI Helpers --------
+  /* UI Helpers */
   createFiltersContainer() {
     const container = document.createElement('div');
     container.id = 'categoryFilters';
@@ -202,41 +352,42 @@ class ProductsLoader {
     if (productsContainer && productsContainer.parentNode) {
       productsContainer.parentNode.insertBefore(wrap, productsContainer.nextSibling);
     }
-
     return btn;
   }
 
   escapeHtml(str) {
-    return String(str ?? '')
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;')
-      .replaceAll("'", '&#039;');
+    const s = String(str ?? '');
+    return s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
-  // -------- Filters & Rendering --------
+  /* Filters & Rendering */
   buildFilters() {
-    // احسب عدد المنتجات لكل فئة
-    const counts = new Map();
-    for (const p of this.products) {
-      const c = (p.category || 'عام').toString().trim();
-      counts.set(c, (counts.get(c) || 0) + 1);
-    }
-
-    // خذ أعلى maxFilters فئات (حسب العدد)
-    const topCategories = [...counts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, this.maxFilters);
-
-    // ابنِ أزرار الفلترة
     const total = this.products.length;
 
+    // نبني قائمة الفلاتر حسب المجموعات (بدون all-products لأنه يساوي "الكل")
+    const keys = Object.keys(COLLECTIONS).filter(k => k !== 'all-products');
+
+    const items = keys.map(key => {
+      const col = COLLECTIONS[key];
+      const name = col.name;
+      const icon = col.icon || '📁';
+      const count = this.products.filter(p => p.category === name).length;
+      return { name, icon, count };
+    });
+
+    // لو maxFilters أقل من 13 (اختياري)
+    const list = items.slice(0, this.maxFilters);
+
     this.filtersContainer.innerHTML = `
-      <button class="filter-btn active" data-category="الكل">الكل (${total})</button>
-      ${topCategories.map(([cat, count]) => `
-        <button class="filter-btn" data-category="${this.escapeHtml(cat)}">
-          ${this.escapeHtml(cat)} (${count})
+      <button class="filter-btn active" data-category="الكل">🛍️ الكل (${total})</button>
+      ${list.map(it => `
+        <button class="filter-btn" data-category="${this.escapeHtml(it.name)}">
+          ${this.escapeHtml(it.icon)} ${this.escapeHtml(it.name)} (${it.count})
         </button>
       `).join('')}
     `;
@@ -245,9 +396,10 @@ class ProductsLoader {
   filterByCategory(category) {
     this.currentCategory = category || 'الكل';
 
-    // Active state
     this.filtersContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = this.filtersContainer.querySelector(`.filter-btn[data-category="${CSS.escape(this.currentCategory)}"]`);
+
+    const selector = `.filter-btn[data-category="${cssEscapeSafe(this.currentCategory)}"]`;
+    const activeBtn = this.filtersContainer.querySelector(selector);
     if (activeBtn) activeBtn.classList.add('active');
 
     this.applyFiltersAndRender(true);
@@ -256,7 +408,6 @@ class ProductsLoader {
   searchProducts(query) {
     this.query = (query || '').toString();
 
-    // debounce
     clearTimeout(this.searchTimer);
     this.searchTimer = setTimeout(() => {
       this.applyFiltersAndRender(true);
@@ -265,15 +416,12 @@ class ProductsLoader {
 
   applyFiltersAndRender(reset = true) {
     const q = this.query.trim().toLowerCase();
-
     let list = this.products;
 
-    // فلترة بالفئة
     if (this.currentCategory !== 'الكل') {
       list = list.filter(p => (p.category || 'عام') === this.currentCategory);
     }
 
-    // بحث
     if (q) {
       list = list.filter(p => {
         const hay = `${p.name} ${p.description} ${(p.category || '')} ${(p.tags || []).join(' ')}`.toLowerCase();
@@ -288,7 +436,6 @@ class ProductsLoader {
       this.productsContainer.innerHTML = '';
     }
 
-    // في حال لا توجد نتائج
     if (this.filteredProducts.length === 0) {
       this.productsContainer.innerHTML = `
         <div style="text-align: center; grid-column: 1 / -1; padding: 3rem;">
@@ -301,7 +448,6 @@ class ProductsLoader {
       return;
     }
 
-    // ارسم أول صفحة
     this.renderNextPage();
   }
 
@@ -310,9 +456,7 @@ class ProductsLoader {
     const end = Math.min(start + this.pageSize, this.filteredProducts.length);
     const batch = this.filteredProducts.slice(start, end);
 
-    // Render batch باستخدام Fragment (أسرع)
     const frag = document.createDocumentFragment();
-
     for (const product of batch) {
       frag.appendChild(this.createProductCard(product));
     }
@@ -320,10 +464,8 @@ class ProductsLoader {
     this.productsContainer.appendChild(frag);
     this.renderIndex = end;
 
-    // تحديث الإحصائيات
     this.updateStats(this.filteredProducts.length, this.currentCategory);
 
-    // زر تحميل المزيد
     if (this.renderIndex < this.filteredProducts.length) {
       this.loadMoreBtn.style.display = 'inline-block';
       this.loadMoreBtn.textContent = `تحميل المزيد (${this.renderIndex}/${this.filteredProducts.length})`;
@@ -341,6 +483,7 @@ class ProductsLoader {
     const nameEsc = this.escapeHtml(product.name);
     const descEsc = this.escapeHtml(product.description);
     const catEsc = this.escapeHtml(product.category);
+    const icon = this.escapeHtml(getIconForCategoryName(product.category));
 
     const img = document.createElement('img');
     img.src = product.image;
@@ -360,7 +503,7 @@ class ProductsLoader {
     info.innerHTML = `
       <div class="product-title">${nameEsc}</div>
       <div class="product-description">${descEsc}</div>
-      <div class="product-category">التصنيف: ${catEsc}</div>
+      <div class="product-category">التصنيف: ${icon} ${catEsc}</div>
       <div class="product-price">${Number(product.price).toFixed(3)} د.ك</div>
       <button class="add-to-cart"
               data-name="${encodeURIComponent(product.name)}"
@@ -372,7 +515,6 @@ class ProductsLoader {
 
     card.appendChild(imgWrap);
     card.appendChild(info);
-
     return card;
   }
 
