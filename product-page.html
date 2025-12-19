@@ -113,7 +113,7 @@
     }
 
     fetch(DATA_URL, { cache: "no-store" })
-      .then(r => r.ok ? r.json() : Promise.reject("Failed to load products_grouped.json"))
+      .then(r => r.ok ? r.json() : Promise.reject("Failed to load products-loader.js"))
       .then(data => {
         const list = flattenProducts(data);
         const p = findProduct(list, target);
