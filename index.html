@@ -812,336 +812,52 @@
     </div>
   </div>
 
+  <script src="collections-manager.js"></script>
   <script>
     /* =======================
-       CART (Improved)
+       Collections Menu Loading (محسّن)
     ======================= */
-    let cart = [];
-    let orderCounter = 1000;
-
-    function openCart(){
-      document.body.classList.add('cart-open');
-      const drawer = document.getElementById('cartDrawer');
-      if (drawer) drawer.setAttribute('aria-hidden','false');
-    }
-
-    function closeCart(){
-      document.body.classList.remove('cart-open');
-      const drawer = document.getElementById('cartDrawer');
-      if (drawer) drawer.setAttribute('aria-hidden','true');
-    }
-
-    function updateCartBadge(){
-      const badge = document.getElementById('cartBadge');
-      if (!badge) return;
-      const count = Array.isArray(cart) ? cart.reduce((s,i)=> s + (i.quantity||0), 0) : 0;
-      badge.textContent = count;
-      badge.style.display = count > 0 ? 'inline-flex' : 'none';
-    }
-
-    function addToCart(name, price, productId = null, evt = null) {
-      const existingItem = cart.find(item => item.name === name);
-      if (existingItem) existingItem.quantity += 1;
-      else cart.push({ name, price, quantity: 1, id: productId });
-
-      updateCartDisplay();
-      openCart();
-
-      // تأثير زر (آمن بدون الاعتماد على event global)
-      const e = evt || window.event;
-      const btn = e && e.target ? e.target : null;
-      if (btn && btn.classList && btn.classList.contains('add-to-cart')) {
-        const originalText = btn.textContent;
-        const originalBg = btn.style.background;
-        btn.style.background = '#28a745';
-        btn.textContent = 'تمت الإضافة ✓';
-        setTimeout(() => {
-          btn.style.background = originalBg || '';
-          btn.textContent = originalText || 'إضافة للسلة';
-        }, 900);
-      }
-    }
-
-    function updateCartDisplay() {
-      const cartItems = document.getElementById('cartItems');
-      const cartTotal = document.getElementById('cartTotal');
-
-      if (!cartItems || !cartTotal) return;
-
-      if (cart.length === 0) {
-        cartItems.innerHTML = '<p>السلة فارغة</p>';
-        cartTotal.textContent = 'الإجمالي: 0.000 د.ك';
-        updateCartBadge();
-        return;
-      }
-
-      let html = '';
-      let total = 0;
-
-      cart.forEach((item, index) => {
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
-
-        html += `
-          <div class="cart-item">
-            <div>
-              <div style="font-weight: 900; font-size: 0.95rem;">${item.name}</div>
-              <div style="font-size: 0.85rem; color: #666;">
-                ${item.quantity} × ${Number(item.price).toFixed(3)} د.ك
-              </div>
-            </div>
-            <button onclick="removeFromCart(${index})"
-              style="background:#dc3545;color:#fff;border:0;border-radius:999px;width:30px;height:30px;cursor:pointer;font-size:16px;font-weight:900;">
-              ×
-            </button>
-          </div>
-        `;
-      });
-
-      cartItems.innerHTML = html;
-      cartTotal.textContent = `الإجمالي: ${total.toFixed(3)} د.ك`;
-      updateCartBadge();
-    }
-
-    function removeFromCart(index) {
-      cart.splice(index, 1);
-      updateCartDisplay();
-    }
-
-    function showCheckout() {
-      if (cart.length === 0) {
-        alert('السلة فارغة! أضف بعض المنتجات أولاً.');
-        return;
-      }
-
-      const orderForm = document.getElementById('orderForm');
-      const checkoutTotal = document.getElementById('checkoutTotal');
-
-      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      if (checkoutTotal) checkoutTotal.textContent = `${total.toFixed(3)} د.ك`;
-
-      if (orderForm) {
-        orderForm.style.display = 'block';
-        orderForm.scrollIntoView({ behavior: 'smooth' });
-      }
-      closeCart();
-    }
-
-    function submitOrder(event) {
-      event.preventDefault();
-
-      const orderData = {
-        orderNumber: `SK-${++orderCounter}`,
-        customerName: document.getElementById('customerName').value,
-        customerPhone: document.getElementById('customerPhone').value,
-        customerEmail: document.getElementById('customerEmail').value,
-        customerAddress: document.getElementById('customerAddress').value,
-        items: cart,
-        total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-        date: new Date().toLocaleString('ar-EG')
-      };
-
-      const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-      existingOrders.push(orderData);
-      localStorage.setItem('orders', JSON.stringify(existingOrders));
-
-      document.getElementById('orderNumber').textContent = orderData.orderNumber;
-      document.getElementById('successMessage').style.display = 'block';
-
-      cart = [];
-      updateCartDisplay();
-      event.target.reset();
-
-      setTimeout(() => {
-        document.getElementById('orderForm').style.display = 'none';
-        document.getElementById('successMessage').style.display = 'none';
-      }, 5000);
-    }
-
-    function showOrders() {
-      const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-      if (orders.length === 0) { alert('لا توجد طلبات بعد.'); return; }
-
-      let ordersHtml = '<h2 style="text-align:center;color:#6a4c93;margin:0 0 20px;">📋 الطلبات</h2>';
-      orders.forEach(order => {
-        ordersHtml += `
-          <div style="background:#fff;padding:1rem;margin:1rem 0;border-radius:14px;box-shadow:0 10px 20px rgba(0,0,0,0.08);border-right:5px solid #6a4c93;">
-            <h3 style="margin:0 0 10px;color:#333;">طلب رقم: ${order.orderNumber}</h3>
-            <p><strong>العميل:</strong> ${order.customerName}</p>
-            <p><strong>الهاتف:</strong> ${order.customerPhone}</p>
-            <p><strong>العنوان:</strong> ${order.customerAddress}</p>
-            <p><strong>التاريخ:</strong> ${order.date}</p>
-            <p style="font-weight:900;color:#28a745;"><strong>الإجمالي:</strong> ${order.total.toFixed(3)} د.ك</p>
-            <p><strong>المنتجات:</strong></p>
-            <ul style="padding-right: 20px;">
-              ${order.items.map(item => `<li>${item.name} (${item.quantity} × ${Number(item.price).toFixed(3)} د.ك)</li>`).join('')}
-            </ul>
-          </div>
-        `;
-      });
-
-      const newWindow = window.open('', '_blank');
-      newWindow.document.write(`
-        <html dir="rtl">
-          <head>
-            <title>الطلبات</title>
-            <meta charset="UTF-8" />
-            <style>
-              body { font-family: Arial, sans-serif; padding: 2rem; background: #f5f5f5; margin:0; }
-            </style>
-          </head>
-          <body>${ordersHtml}</body>
-        </html>
-      `);
-    }
-
-    function showAdmin() {
-      const password = prompt('كلمة المرور للإدارة:');
-      if (password === 'admin123') showOrders();
-      else alert('كلمة مرور خاطئة!');
-    }
-
-    /* =======================
-       MENU (Fixed + Clean)
-    ======================= */
-    function setupMenu(){
-      const menuBtn = document.getElementById('menuBtn');
-      const sideMenu = document.getElementById('sideMenu');
-      const menuBackdrop = document.getElementById('menuBackdrop');
-      const menuClose = document.getElementById('menuClose');
-
-      function openMenu(){
-        sideMenu.classList.add('is-open');
-        menuBackdrop.hidden = false;
-        sideMenu.setAttribute('aria-hidden','false');
-        menuBtn.setAttribute('aria-expanded','true');
-        document.body.style.overflow = 'hidden';
-      }
-      function closeMenu(){
-        sideMenu.classList.remove('is-open');
-        menuBackdrop.hidden = true;
-        sideMenu.setAttribute('aria-hidden','true');
-        menuBtn.setAttribute('aria-expanded','false');
-        document.body.style.overflow = '';
-      }
-
-      menuBtn && menuBtn.addEventListener('click', openMenu);
-      menuClose && menuClose.addEventListener('click', closeMenu);
-      menuBackdrop && menuBackdrop.addEventListener('click', closeMenu);
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
-
-      // زر السلة
-      const cartFab = document.getElementById('cartFab');
-      cartFab && cartFab.addEventListener('click', openCart);
-    }
-
-    /* =======================
-       YOUR 14 COLLECTIONS ONLY
-       (Replace old unwanted groups)
-    ======================= */
-    const COLLECTIONS = {
-      'montessori': { name: 'مونتيسوري', tags: ['مونتيسوري', 'Montessori'], icon: '🎯' },
-      'stories-world': { name: 'عالم القصص والحكايات المصورة', tags: ['عالم القصص', 'حكايات مصورة', 'قصص مصورة'], icon: '📚' },
-      'bestsellers': { name: 'Smart Kids Kuwait الأطفال المبتكرون الكويت الأفضل مبيعاً', tags: ['الأفضل مبيعاً', 'bestseller', 'أكثر مبيعاً'], icon: '⭐' },
-      'latest-releases': { name: 'اكتشف أحدث إصداراتنا للأطفال', tags: ['اكتشف أحدث إصداراتنا للأطفال', 'إصدارات جديدة', 'أحدث'], icon: '🆕' },
-      'audio-stories': { name: 'قصصي الصوتية المسموعة', tags: ['قصصي الصوتية المسموعة', 'صوتية', 'مسموعة'], icon: '🎧' },
-      'interactive-offers': { name: 'عروض القصص التفاعلية', tags: ['عروض القصص التفاعلية', 'تفاعلية', 'عروض خاصة'], icon: '🎁' },
-      'single-stories': { name: 'القصص المفردة للأطفال', tags: ['القصص المفردة للأطفال', 'االقصص المفردة للأطفال', 'قصص مفردة'], icon: '📖' },
-      'self-reading': { name: 'أنا أقرأ بنفسي', tags: ['أنا أقرأ بنفسي', 'قراءة مستقلة'], icon: '👶' },
-      'interactive-books': { name: 'كتبي التفاعلية الحركية', tags: ['كتبي التفاعلية الحركية', 'تفاعلية حركية'], icon: '🤸' },
-      'islamic-library': { name: 'عروض مكتبتي الإسلامية', tags: ['عروض مكتبتي الإسلامية', 'إسلامية', 'مكتبة إسلامية'], icon: '🕌' },
-      'smart-pen': { name: 'ابدأ رحلتك مع القلم الناطق', tags: ['ابدأ رحلتك مع القلم الناطق', 'قلم ناطق', 'ناطق'], icon: '🖊️' },
-      'history-encyclopedia': { name: 'موسوعات التاريخ المصور', tags: ['موسوعات التاريخ المصور', 'تاريخ مصور', 'موسوعات'], icon: '🏛️' },
-      'favorite-books': { name: 'الكُتب المُحببة للأطفال', tags: ['الكُتب المُحببة للأطفال', 'محببة', 'المفضلة'], icon: '💝' },
-      'all-products': { name: 'تسوق جميع منتجاتنا الآن', tags: ['تسوق جميع منتجاتنا الآن', 'جميع المنتجات'], icon: '🛍️' }
-    };
-
-    const COLLECTION_ORDER = [
-      'montessori',
-      'stories-world',
-      'bestsellers',
-      'latest-releases',
-      'audio-stories',
-      'interactive-offers',
-      'single-stories',
-      'self-reading',
-      'interactive-books',
-      'islamic-library',
-      'smart-pen',
-      'history-encyclopedia',
-      'favorite-books',
-      'all-products'
-    ];
-
-    function norm(v){ return (v ?? '').toString().trim().toLowerCase(); }
-    function getProductTags(product){
-      if (Array.isArray(product.tags)) return product.tags;
-      if (product.tags) return String(product.tags).split(',').map(t=>t.trim()).filter(Boolean);
-      return [];
-    }
-    function matchesCollection(product, collection){
-      const productTags = getProductTags(product).map(norm);
-      const colTags = (collection.tags || []).map(norm);
-
-      // match by tags
-      for (const pt of productTags){
-        for (const ct of colTags){
-          if (!pt || !ct) continue;
-          if (pt.includes(ct) || ct.includes(pt)) return true;
-        }
-      }
-
-      // fallback match in title/type/body_html
-      const hay = norm(`${product.title || ''} ${product.type || ''} ${product.body_html || ''}`);
-      return colTags.some(ct => ct && hay.includes(ct));
-    }
-
     async function loadCollectionsMenu(){
       const menu = document.getElementById('categoriesMenu');
       if (!menu) return;
 
-      // fallback render (بدون counts)
       function renderFallback(){
         menu.innerHTML = `
           <a href="./collections.html">🌟 جميع المجموعات <span class="side-menu__meta"></span></a>
-          ${COLLECTION_ORDER.map(key => {
+          ${[
+            'montessori', 'stories-world', 'bestsellers', 'latest-releases',
+            'audio-stories', 'interactive-offers', 'single-stories', 'self-reading',
+            'interactive-books', 'islamic-library', 'smart-pen', 'history-encyclopedia',
+            'favorite-books'
+          ].map(key => {
             const c = COLLECTIONS[key];
-            const url = `./collection.html?category=${encodeURIComponent(c.name)}&key=${encodeURIComponent(key)}`;
+            const url = `./collection.html?id=${encodeURIComponent(key)}`;
             return `<a href="${url}">${c.icon} ${c.name} <span class="side-menu__meta"></span></a>`;
           }).join('')}
         `;
       }
 
       try {
-        // استخدم نفس مصدر منتجاتك (تقدر تغيّره لو مسارك مختلف)
-        const res = await fetch('./data/products_grouped.json', { cache: 'no-store' });
-        if (!res.ok) { renderFallback(); return; }
+        if (!collectionsManager) {
+          initCollectionsManager();
+        }
+        await collectionsManager.loadProducts();
+        const collections = collectionsManager.getAllCollections();
 
-        const data = await res.json();
-        const products = Array.isArray(data) ? data.filter(p => p.published && p.status === 'active') : [];
-
-        // counts per collection
         const counts = {};
-        for (const key of COLLECTION_ORDER) counts[key] = 0;
-
-        for (const p of products){
-          for (const key of COLLECTION_ORDER){
-            const col = COLLECTIONS[key];
-            if (matchesCollection(p, col)) { counts[key]++; break; } // أول match فقط
-          }
+        for (const col of collections) {
+          counts[col.key] = col.productCount || 0;
         }
 
         menu.innerHTML = `
           <a href="./collections.html">🌟 جميع المجموعات <span class="side-menu__meta"></span></a>
-          ${COLLECTION_ORDER.map(key => {
-            const c = COLLECTIONS[key];
-            const count = counts[key] ?? 0;
-            const url = `./collection.html?category=${encodeURIComponent(c.name)}&key=${encodeURIComponent(key)}`;
-            return `<a href="${url}">${c.icon} ${c.name} <span class="side-menu__meta">(${count})</span></a>`;
+          ${collections.map(col => {
+            const url = `./collection.html?id=${encodeURIComponent(col.key)}`;
+            return `<a href="${url}">${col.icon} ${col.name} <span class="side-menu__meta">(${counts[col.key] || 0})</span></a>`;
           }).join('')}
         `;
       } catch (e){
-        console.error(e);
+        console.error('خطأ في تحميل المجموعات:', e);
         renderFallback();
       }
     }

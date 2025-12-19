@@ -6,161 +6,337 @@
   <title>صفحة المنتج</title>
 
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#fff;color:#111}
-    .wrap{max-width:1100px;margin:0 auto;padding:18px}
-    a{color:inherit}
-    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-    .card{border:1px solid #eee;border-radius:14px;padding:16px}
-    img{width:100%;height:auto;border-radius:12px;background:#f6f6f6}
-    .muted{color:#666}
-    .price{font-size:20px;font-weight:800;margin:10px 0}
-    .tag{display:inline-block;border:1px solid #ddd;border-radius:999px;padding:6px 10px;margin:4px 6px 0 0;font-size:13px}
-    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #6a4c93 0%, #9b59b6 100%);
+      color: #333;
+      min-height: 100vh;
+    }
+    
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      background: rgba(255,255,255,0.25);
+      backdrop-filter: blur(20px);
+      padding: 1rem;
+      border-radius: 15px;
+      color: white;
+    }
+    
+    .top a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 20px;
+      transition: all 0.3s;
+    }
+    
+    .top a:hover {
+      background: rgba(255,255,255,0.4);
+      transform: translateY(-2px);
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    }
+    
+    .card {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .img-wrapper {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 15px;
+      background: linear-gradient(45deg, #8e44ad, #c39bd3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-size: 4rem;
+    }
+    
+    .img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 15px;
+    }
+    
+    .img-wrapper.placeholder {
+      font-size: 3rem;
+      color: rgba(255,255,255,0.3);
+    }
+    
+    h1 {
+      color: #6a4c93;
+      font-size: 2rem;
+      margin: 0;
+      line-height: 1.3;
+    }
+    
+    .vendor {
+      color: #666;
+      font-size: 0.95rem;
+      font-style: italic;
+    }
+    
+    .price {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #6a4c93;
+      text-shadow: 0 0 10px rgba(106, 76, 147, 0.2);
+    }
+    
+    .desc {
+      color: #555;
+      line-height: 1.8;
+      padding: 1rem;
+      background: #f8f9ff;
+      border-radius: 12px;
+      border-right: 4px solid #9b59b6;
+    }
+    
+    .category {
+      color: #666;
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+      background: rgba(155, 89, 182, 0.1);
+      border-radius: 8px;
+      display: inline-block;
+    }
+    
+    .tag {
+      display: inline-block;
+      background: linear-gradient(45deg, #6a4c93, #9b59b6);
+      color: white;
+      padding: 6px 12px;
+      margin: 4px 4px 0 0;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+    
+    .muted {
+      color: #666;
+    }
+    
+    .status {
+      color: white;
+      text-align: center;
+      padding: 2rem;
+    }
+    
+    .error {
+      background: rgba(220, 53, 69, 0.9);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      .price {
+        font-size: 1.5rem;
+      }
+    }
   </style>
 </head>
 
 <body>
   <div class="wrap">
     <div class="top">
-      <a href="/products-full#products">← رجوع للمنتجات</a>
+      <a href="./index.html">← رجوع للرئيسية</a>
       <span id="crumb" class="muted"></span>
     </div>
 
-    <div id="status" class="muted">جاري تحميل المنتج…</div>
+    <div id="status" class="status">📦 جاري تحميل المنتج…</div>
 
     <div id="view" class="grid" style="display:none">
       <div class="card">
-        <img id="pImg" alt="">
+        <div class="img-wrapper" id="imgWrapper">
+          <img id="pImg" alt="" style="display:none">
+        </div>
       </div>
 
       <div class="card">
-        <h1 id="pName" style="margin:0 0 6px"></h1>
-        <div id="pVendor" class="muted"></div>
+        <h1 id="pName"></h1>
+        <div id="pVendor" class="vendor"></div>
         <div id="pPrice" class="price"></div>
-        <p id="pDesc" class="muted" style="line-height:1.9"></p>
+        
+        <div id="pCategory" style="margin: 1rem 0;"></div>
+        
+        <p id="pDesc" class="desc"></p>
 
-        <div style="margin-top:12px">
-          <div id="pCategory" class="muted"></div>
-          <div id="pTags" style="margin-top:10px"></div>
-        </div>
+        <div id="pTags" style="margin-top: 1rem;"></div>
       </div>
     </div>
   </div>
 
+  <script src="collections-manager.js"></script>
   <script>
-    // نفس المصدر الحقيقي عندك في products-loader.js
-    const DATA_URL = "/data/products_grouped.json";
-
     const statusEl = document.getElementById("status");
     const viewEl = document.getElementById("view");
+    const imgWrapper = document.getElementById("imgWrapper");
 
-    // /product-page?slug=....
-    const rawSlug = new URLSearchParams(location.search).get("slug");
-    if (!rawSlug) {
-      statusEl.textContent = "الرابط ناقص slug. مثال: /product-page?slug=اسم-المنتج";
-      throw new Error("Missing slug");
+    const urlParams = new URLSearchParams(location.search);
+    const productId = urlParams.get("id");
+    const collectionKey = urlParams.get("collection");
+
+    if (!productId) {
+      statusEl.innerHTML = '<div class="error">❌ معرف المنتج ناقص! استخدم: ?id=المعرف&collection=المجموعة</div>';
+      throw new Error("Missing ID");
     }
 
-    const target = decodeURIComponent(rawSlug).trim();
-
-    // توحيد مقارنة النصوص العربية/الإنجليزية (مع الحفاظ على العربية)
-    function norm(s){
-      return String(s || "")
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, " ")
-        .replace(/[ـ]+/g, "")          // تطبيع الكشيدة
-        .replace(/[“”"]/g, "'");       // تطبيع الاقتباسات
-    }
-
-    function flattenProducts(data){
-      // يدعم: Array / Object فيه Arrays / Object فيه products
-      if (Array.isArray(data)) return data;
-
-      if (data && typeof data === "object") {
-        if (Array.isArray(data.products)) return data.products;
-
-        let out = [];
-        for (const k of Object.keys(data)) {
-          if (Array.isArray(data[k])) out = out.concat(data[k]);
+    async function loadProduct() {
+      try {
+        if (!collectionsManager) {
+          initCollectionsManager();
         }
-        return out;
-      }
-      return [];
-    }
+        
+        await collectionsManager.loadProducts();
+        
+        let product = null;
+        if (collectionKey) {
+          const collection = collectionsManager.getCollectionByKey(collectionKey);
+          if (collection) {
+            product = collection.products.find(p => p.handle === productId || p.id === productId);
+          }
+        }
+        
+        if (!product) {
+          const allCollections = collectionsManager.getAllCollections();
+          for (const col of allCollections) {
+            product = col.products.find(p => p.handle === productId || p.id === productId);
+            if (product) break;
+          }
+        }
 
-    function pickImage(p){
-      if (p.image) return p.image;
-      if (Array.isArray(p.images) && p.images[0]) return p.images[0];
-      if (typeof p.images === "string") return p.images.split(",")[0].trim();
-      return "";
-    }
-
-    function findProduct(list, slug){
-      const t = norm(slug);
-
-      return list.find(p => {
-        // جرّب كل المفاتيح المحتملة عشان يشتغل مع كل منتجاتك (عربي/فانكو)
-        const candidates = [
-          p.id, p.handle, p.slug,
-          p.name, p.title,
-          p.url, p.permalink
-        ].filter(Boolean);
-
-        return candidates.some(c => norm(c) === t);
-      }) || null;
-    }
-
-    fetch(DATA_URL, { cache: "no-store" })
-      .then(r => r.ok ? r.json() : Promise.reject("Failed to load products-loader.js"))
-      .then(data => {
-        const list = flattenProducts(data);
-        const p = findProduct(list, target);
-
-        if (!p) {
-          statusEl.textContent = "المنتج غير موجود: " + target;
+        if (!product) {
+          statusEl.innerHTML = '<div class="error">❌ المنتج غير موجود</div>';
           return;
         }
 
-        // الحقول حسب اللي عندك في loader
-        const name = p.name || p.title || "";
-        const vendor = p.vendor || "";
-        const price = p.price || "";
-        const desc = p.description || "";
-        const img = pickImage(p);
-        const category = p.category || "";
-        const tags = Array.isArray(p.tags) ? p.tags : [];
+        renderProduct(product);
+      } catch (error) {
+        console.error('خطأ:', error);
+        statusEl.innerHTML = '<div class="error">❌ خطأ في تحميل المنتج</div>';
+      }
+    }
 
-        document.title = name ? (name + " | Smart Kids Kuwait") : "صفحة المنتج";
+    function renderProduct(product) {
+      const name = product.title || product.name || '';
+      const vendor = product.vendor || 'Smart Kids Kuwait';
+      const price = extractPrice(product);
+      const desc = extractDescription(product.body_html) || 'وصف المنتج غير متوفر';
+      const image = extractImage(product);
+      const category = product.type || 'عام';
+      const tags = _getProductTags(product) || [];
 
-        document.getElementById("pName").textContent = name;
-        document.getElementById("pVendor").textContent = vendor;
-        document.getElementById("pPrice").textContent = price ? ("السعر: " + price) : "";
-        document.getElementById("pDesc").textContent = desc;
+      document.title = `${name} - Smart Kids Kuwait`;
 
-        const imgEl = document.getElementById("pImg");
-        imgEl.src = img || "";
-        imgEl.alt = name || "Product";
+      document.getElementById("pName").textContent = name;
+      document.getElementById("pVendor").textContent = vendor;
+      document.getElementById("pPrice").textContent = `${price.toFixed(3)} د.ك`;
+      document.getElementById("pDesc").textContent = desc;
+      document.getElementById("crumb").textContent = category;
 
-        document.getElementById("crumb").textContent = category ? ("التصنيف: " + category) : "";
-        document.getElementById("pCategory").textContent = category ? ("التصنيف: " + category) : "";
+      const imgEl = document.getElementById("pImg");
+      if (image) {
+        imgEl.src = image;
+        imgEl.alt = name;
+        imgEl.style.display = 'block';
+        imgWrapper.classList.remove('placeholder');
+        
+        imgEl.onerror = () => {
+          imgEl.style.display = 'none';
+          imgWrapper.classList.add('placeholder');
+          imgWrapper.innerHTML = '🎁';
+        };
+      } else {
+        imgWrapper.classList.add('placeholder');
+        imgWrapper.innerHTML = '📦';
+      }
 
-        const tagsWrap = document.getElementById("pTags");
-        tagsWrap.innerHTML = "";
-        tags.forEach(tg => {
-          const span = document.createElement("span");
-          span.className = "tag";
-          span.textContent = tg;
-          tagsWrap.appendChild(span);
-        });
+      const categoryEl = document.getElementById("pCategory");
+      categoryEl.innerHTML = `<span class="category">📁 ${category}</span>`;
 
-        statusEl.style.display = "none";
-        viewEl.style.display = "grid";
-      })
-      .catch(() => {
-        statusEl.textContent = "خطأ في تحميل بيانات المنتجات.";
+      const tagsEl = document.getElementById("pTags");
+      tagsEl.innerHTML = '';
+      tags.forEach(tag => {
+        const span = document.createElement('span');
+        span.className = 'tag';
+        span.textContent = tag;
+        tagsEl.appendChild(span);
       });
+
+      statusEl.style.display = 'none';
+      viewEl.style.display = 'grid';
+    }
+
+    function extractPrice(product) {
+      if (product.variants && product.variants[0] && product.variants[0].price) {
+        return parseFloat(product.variants[0].price);
+      }
+      const type = (product.type || '').toLowerCase();
+      if (type.includes('كتاب') || type.includes('قصة')) return 15.0;
+      if (type.includes('علبة') || type.includes('مونتيسوري')) return 25.0;
+      if (type.includes('عرض') || type.includes('مجموعة')) return 35.0;
+      return 20.0;
+    }
+
+    function extractImage(product) {
+      if (product.images && product.images.length > 0) {
+        return product.images[0].src || product.images[0];
+      }
+      return null;
+    }
+
+    function extractDescription(bodyHtml) {
+      if (!bodyHtml) return '';
+      const div = document.createElement('div');
+      div.innerHTML = bodyHtml;
+      const text = div.textContent || div.innerText || '';
+      return text.substring(0, 500);
+    }
+
+    function _getProductTags(product) {
+      if (Array.isArray(product.tags)) return product.tags;
+      if (product.tags) return String(product.tags).split(',').map(t => t.trim()).filter(Boolean);
+      return [];
+    }
+
+    document.addEventListener('DOMContentLoaded', loadProduct);
   </script>
 </body>
 </html>
