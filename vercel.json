@@ -5,6 +5,15 @@
   "public": true,
   "cleanUrls": true,
   "trailingSlash": false,
+
+  "redirects": [
+    {
+      "source": "/products/:slug*",
+      "destination": "/product-page?slug=:slug*",
+      "permanent": true
+    }
+  ],
+
   "headers": [
     {
       "source": "/(.*)",
@@ -19,7 +28,7 @@
       "source": "/data/(.*)",
       "headers": [
         {
-          "key": "Cache-Control", 
+          "key": "Cache-Control",
           "value": "public, max-age=3600"
         }
       ]

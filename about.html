@@ -614,23 +614,95 @@
             
             <div class="cta-buttons">
                 <a href="./products-full.html" class="cta-btn">🛍️ تسوق الآن</a>
-                <a href="./collections.html" class="cta-btn">📚 استكشف المجموعات</a>
+                <a href="./collections.html" class="cta-btn">📚 تصفح المجموعات</a>
                 <a href="./contact.html" class="cta-btn">📞 تواصل معنا</a>
             </div>
         </div>
         
-        <div class="story-section">
-            <h2 style="text-align: center; margin-bottom: 2rem;">📱 تابعنا على مواقع التواصل الاجتماعي</h2>
-            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-                <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" style="display: flex; align-items: center; gap: 0.5rem; padding: 12px 20px; background: #1877f2; color: white; text-decoration: none; border-radius: 25px; transition: transform 0.3s; font-weight: bold;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📘 فيسبوك</a>
-                <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" style="display: flex; align-items: center; gap: 0.5rem; padding: 12px 20px; background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color: white; text-decoration: none; border-radius: 25px; transition: transform 0.3s; font-weight: bold;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📷 إنستغرام</a>
-                <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" style="display: flex; align-items: center; gap: 0.5rem; padding: 12px 20px; background: #bd081c; color: white; text-decoration: none; border-radius: 25px; transition: transform 0.3s; font-weight: bold;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📌 بنترست</a>
-                <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" style="display: flex; align-items: center; gap: 0.5rem; padding: 12px 20px; background: #000; color: white; text-decoration: none; border-radius: 25px; transition: transform 0.3s; font-weight: bold;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">🎵 تيك توك</a>
-                <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" style="display: flex; align-items: center; gap: 0.5rem; padding: 12px 20px; background: #fffc00; color: #000; text-decoration: none; border-radius: 25px; transition: transform 0.3s; font-weight: bold;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">👻 سناب شات</a>
-                <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" style="display: flex; align-items: center; gap: 0.5rem; padding: 12px 20px; background: #ff0000; color: white; text-decoration: none; border-radius: 25px; transition: transform 0.3s; font-weight: bold;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📺 يوتيوب</a>
-            </div>
-        </div>
-    </div>
+       <div class="story-section">
+  <h2 style="text-align: center; margin-bottom: 2rem;">📱 تابعنا على مواقع التواصل الاجتماعي</h2>
+
+  <style>
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      background: rgba(255,255,255,0.22);
+      border: 1px solid rgba(255,255,255,0.25);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #222;
+      text-decoration: none;
+      border-radius: 999px;
+      font-weight: 700;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+      box-shadow: 0 8px 24px rgba(31,38,135,.18);
+    }
+    .social-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(31,38,135,.24);
+      background: rgba(255,255,255,0.32);
+    }
+    .social-link img {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+      display: block;
+    }
+  </style>
+
+  <div class="social-links">
+    <a class="social-link" href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener">
+      <img src="/icon-facebook.png" data-hover="/icon-facebook-hover.png" alt="Facebook">
+      فيسبوك
+    </a>
+
+    <a class="social-link" href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener">
+      <img src="/icon-instagram.png" data-hover="/icon-instagram-hover.png" alt="Instagram">
+      إنستغرام
+    </a>
+
+    <a class="social-link" href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener">
+      <img src="/icon-pinterest.png" data-hover="/icon-pinterest-hover.png" alt="Pinterest">
+      بنترست
+    </a>
+
+    <a class="social-link" href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener">
+      <img src="/icon-tiktok.png" data-hover="/icon-tiktok-hover.png" alt="TikTok">
+      تيك توك
+    </a>
+
+    <a class="social-link" href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener">
+      <img src="/icon-snapchat.png" data-hover="/icon-snapchat-hover.png" alt="Snapchat">
+      سناب شات
+    </a>
+
+    <a class="social-link" href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener">
+      <img src="/icon-youtube.png" data-hover="/icon-youtube-hover.png" alt="YouTube">
+      يوتيوب
+    </a>
+  </div>
+
+  <script>
+    // Hover icons (optional) - لو ملفات hover موجودة
+    document.querySelectorAll('.social-link img').forEach((img) => {
+      const hoverSrc = img.getAttribute('data-hover');
+      if (!hoverSrc) return;
+
+      const original = img.getAttribute('src');
+      img.addEventListener('mouseenter', () => img.setAttribute('src', hoverSrc));
+      img.addEventListener('mouseleave', () => img.setAttribute('src', original));
+    });
+  </script>
+</div>
+
 
     <script>
         // تحديث أيقونات تسجيل الدخول

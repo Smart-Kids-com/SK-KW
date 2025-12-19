@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>صفحة المنتج</title>
+
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#fff;color:#111}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px}
+    a{color:inherit}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .card{border:1px solid #eee;border-radius:14px;padding:16px}
+    img{width:100%;height:auto;border-radius:12px;background:#f6f6f6}
+    .muted{color:#666}
+    .price{font-size:20px;font-weight:800;margin:10px 0}
+    .tag{display:inline-block;border:1px solid #ddd;border-radius:999px;padding:6px 10px;margin:4px 6px 0 0;font-size:13px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a href="/products-full#products">← رجوع للمنتجات</a>
+      <span id="crumb" class="muted"></span>
+    </div>
+
+    <div id="status" class="muted">جاري تحميل المنتج…</div>
+
+    <div id="view" class="grid" style="display:none">
+      <div class="card">
+        <img id="pImg" alt="">
+      </div>
+
+      <div class="card">
+        <h1 id="pName" style="margin:0 0 6px"></h1>
+        <div id="pVendor" class="muted"></div>
+        <div id="pPrice" class="price"></div>
+        <p id="pDesc" class="muted" style="line-height:1.9"></p>
+
+        <div style="margin-top:12px">
+          <div id="pCategory" class="muted"></div>
+          <div id="pTags" style="margin-top:10px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // نفس المصدر الحقيقي عندك في products-loader.js
+    const DATA_URL = "/data/products_grouped.json";
+
+    const statusEl = document.getElementById("status");
+    const viewEl = document.getElementById("view");
+
+    // /product-page?slug=....
+    const rawSlug = new URLSearchParams(location.search).get("slug");
+    if (!rawSlug) {
+      statusEl.textContent = "الرابط ناقص slug. مثال: /product-page?slug=اسم-المنتج";
+      throw new Error("Missing slug");
+    }
+
+    const target = decodeURIComponent(rawSlug).trim();
+
+    // توحيد مقارنة النصوص العربية/الإنجليزية (مع الحفاظ على العربية)
+    function norm(s){
+      return String(s || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ")
+        .replace(/[ـ]+/g, "")          // تطبيع الكشيدة
+        .replace(/[“”"]/g, "'");       // تطبيع الاقتباسات
+    }
+
+    function flattenProducts(data){
+      // يدعم: Array / Object فيه Arrays / Object فيه products
+      if (Array.isArray(data)) return data;
+
+      if (data && typeof data === "object") {
+        if (Array.isArray(data.products)) return data.products;
+
+        let out = [];
+        for (const k of Object.keys(data)) {
+          if (Array.isArray(data[k])) out = out.concat(data[k]);
+        }
+        return out;
+      }
+      return [];
+    }
+
+    function pickImage(p){
+      if (p.image) return p.image;
+      if (Array.isArray(p.images) && p.images[0]) return p.images[0];
+      if (typeof p.images === "string") return p.images.split(",")[0].trim();
+      return "";
+    }
+
+    function findProduct(list, slug){
+      const t = norm(slug);
+
+      return list.find(p => {
+        // جرّب كل المفاتيح المحتملة عشان يشتغل مع كل منتجاتك (عربي/فانكو)
+        const candidates = [
+          p.id, p.handle, p.slug,
+          p.name, p.title,
+          p.url, p.permalink
+        ].filter(Boolean);
+
+        return candidates.some(c => norm(c) === t);
+      }) || null;
+    }
+
+    fetch(DATA_URL, { cache: "no-store" })
+      .then(r => r.ok ? r.json() : Promise.reject("Failed to load products_grouped.json"))
+      .then(data => {
+        const list = flattenProducts(data);
+        const p = findProduct(list, target);
+
+        if (!p) {
+          statusEl.textContent = "المنتج غير موجود: " + target;
+          return;
+        }
+
+        // الحقول حسب اللي عندك في loader
+        const name = p.name || p.title || "";
+        const vendor = p.vendor || "";
+        const price = p.price || "";
+        const desc = p.description || "";
+        const img = pickImage(p);
+        const category = p.category || "";
+        const tags = Array.isArray(p.tags) ? p.tags : [];
+
+        document.title = name ? (name + " | Smart Kids Kuwait") : "صفحة المنتج";
+
+        document.getElementById("pName").textContent = name;
+        document.getElementById("pVendor").textContent = vendor;
+        document.getElementById("pPrice").textContent = price ? ("السعر: " + price) : "";
+        document.getElementById("pDesc").textContent = desc;
+
+        const imgEl = document.getElementById("pImg");
+        imgEl.src = img || "";
+        imgEl.alt = name || "Product";
+
+        document.getElementById("crumb").textContent = category ? ("التصنيف: " + category) : "";
+        document.getElementById("pCategory").textContent = category ? ("التصنيف: " + category) : "";
+
+        const tagsWrap = document.getElementById("pTags");
+        tagsWrap.innerHTML = "";
+        tags.forEach(tg => {
+          const span = document.createElement("span");
+          span.className = "tag";
+          span.textContent = tg;
+          tagsWrap.appendChild(span);
+        });
+
+        statusEl.style.display = "none";
+        viewEl.style.display = "grid";
+      })
+      .catch(() => {
+        statusEl.textContent = "خطأ في تحميل بيانات المنتجات.";
+      });
+  </script>
+</body>
+</html>
