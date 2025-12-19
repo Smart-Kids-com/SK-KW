@@ -157,69 +157,13 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
         }
         
-        .stats-section {
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
-            margin: 2rem 0;
-            text-align: center;
-        }
-        
-        .stats-title {
-            font-size: 1.5rem;
-            color: var(--purple-dark);
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        
-        .stat-item {
-            background: rgba(255,255,255,0.3);
-            padding: 1rem;
-            border-radius: 15px;
-            text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--purple-dark);
-        }
-        
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
         .loading {
             text-align: center;
             padding: 3rem;
             color: white;
         }
         
-        @media (max-width: 768px) {
-            .collections-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-            
-            .collection-card {
-                padding: 1.5rem;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-        }
-        
-        /* هيدر مضغوط ومنظم */
+        /* هيدر مضغوط */
         .main-header {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
@@ -289,8 +233,92 @@
             color: white;
             transform: translateY(-2px);
         }
+
+        /* أيقونات تسجيل الدخول والحساب */
+        .user-icons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1001;
+        }
         
+        .user-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(255,255,255,0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6a4c93;
+            text-decoration: none;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(31, 38, 135, 0.2);
+        }
+        
+        .user-icon:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(31, 38, 135, 0.3);
+            background: rgba(255,255,255,0.4);
+        }
+        
+        .user-icon.logged-in {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+
+        /* أيقونة واتساب الثابتة */
+        .whatsapp-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 25px;
+            right: 25px;
+            background: #25D366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(37, 211, 102, 0.6);
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+        }
+
         @media (max-width: 768px) {
+            .collections-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .collection-card {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+
             .header-container {
                 flex-direction: column;
                 text-align: center;
@@ -317,75 +345,60 @@
 <body>
     <!-- أيقونات تسجيل الدخول والحساب -->
     <div class="user-icons">
-        <a href="./login.html" class="user-icon" id="loginIcon" title="تسجيل الدخول">
-            🔐
-        </a>
-        <a href="./profile.html" class="user-icon" id="profileIcon" title="حسابي">
-            👤
-        </a>
+        <a href="./login.html" class="user-icon" id="loginIcon" title="تسجيل الدخول">🔐</a>
+        <a href="./profile.html" class="user-icon" id="profileIcon" title="حسابي">👤</a>
     </div>
 
     <!-- أيقونة واتساب الثابتة -->
-    <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
-        💬
-    </a>
+    <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">💬</a>
 
-    <!-- هيدر مضغوط ومنظم -->
-<header class="main-header">
-  <div class="header-container">
-    <div class="logo-section">
-      <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" class="logo-img">
-      <div class="logo-text">
-        <h1>📚 مجموعات Smart Kids Kuwait</h1>
-        <p>استكشف مجموعاتنا المتنوعة من الألعاب والكتب التعليمية</p>
-      </div>
-    </div>
-    <nav class="main-nav">
-      <a href="./products-full.html" class="nav-btn">🛍️ المتجر</a>
-      <a href="./index.html" class="nav-btn">🏠 الصفحة الرئيسية</a>
-      <a href="./contact.html" class="nav-btn">📞 اتصل بنا</a>
-    </nav>
-  </div>
-</header>
+    <!-- هيدر -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" class="logo-img">
+                <div class="logo-text">
+                    <h1>📚 مجموعات Smart Kids Kuwait</h1>
+                    <p>استكشف مجموعاتنا المتنوعة</p>
+                </div>
+            </div>
+            <nav class="main-nav">
+                <a href="./products-full.html" class="nav-btn">🛍️ المتجر</a>
+                <a href="./index.html" class="nav-btn">🏠 الرئيسية</a>
+                <a href="./contact.html" class="nav-btn">📞 اتصل</a>
+            </nav>
+        </div>
+    </header>
 
-<div class="container">
-  <div class="collections-grid" id="collectionsGrid">
-    <div class="loading">
-      <h3>📦 جاري تحميل المجموعات...</h3>
-      <p>يرجى الانتظار قليلاً</p>
+    <div class="container">
+        <div class="collections-grid" id="collectionsGrid">
+            <div class="loading">
+                <h3>📦 جاري تحميل المجموعات...</h3>
+                <p>يرجى الانتظار</p>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
     <script src="collections-manager.js"></script>
     <script>
         async function loadCollections() {
             try {
                 if (!collectionsManager) {
-                    await new Promise(resolve => setTimeout(resolve, 1000)); // انتظار تحميل المدير
+                    initCollectionsManager();
                 }
-                
                 await collectionsManager.loadProducts();
                 const collections = collectionsManager.getAllCollections();
-                
                 renderCollections(collections);
-                updateStats(collections);
-                
             } catch (error) {
-                console.error('خطأ في تحميل المجموعات:', error);
+                console.error('خطأ:', error);
                 showError();
             }
         }
         
         function renderCollections(collections) {
             const grid = document.getElementById('collectionsGrid');
-            
             if (collections.length === 0) {
-                grid.innerHTML = `
-                    <div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: white;">
-                        <h3>⚠️ لا توجد مجموعات متوفرة</h3>
-                    </div>
-                `;
+                grid.innerHTML = '<div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: white;"><h3>⚠️ لا توجد مجموعات</h3></div>';
                 return;
             }
             
@@ -394,21 +407,10 @@
                     <span class="collection-icon">${collection.icon}</span>
                     <h3 class="collection-title">${collection.name}</h3>
                     <p class="collection-description">${collection.description}</p>
-                    <div class="collection-count">${collection.productCount} منتج</div>
-                    <a href="collection.html?id=${collection.key}" class="browse-btn">
-                        تصفح المجموعة
-                    </a>
+                    <div class="collection-count">${collection.productCount || 0} منتج</div>
+                    <a href="collection.html?id=${collection.key}" class="browse-btn">تصفح المجموعة</a>
                 </div>
             `).join('');
-        }
-        
-        function updateStats(collections) {
-            const totalProducts = collections.reduce((sum, col) => sum + col.productCount, 0);
-            const avgProducts = Math.round(totalProducts / collections.length);
-            
-            document.getElementById('totalProducts').textContent = totalProducts;
-            document.getElementById('totalCollections').textContent = collections.length;
-            document.getElementById('avgProductsPerCollection').textContent = avgProducts;
         }
         
         function openCollection(collectionKey) {
@@ -417,86 +419,9 @@
         
         function showError() {
             const grid = document.getElementById('collectionsGrid');
-            grid.innerHTML = `
-                <div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: #dc3545;">
-                    <h3>⚠️ خطأ في تحميل المجموعات</h3>
-                    <p>حدث خطأ أثناء تحميل البيانات. يرجى تحديث الصفحة.</p>
-                    <button onclick="location.reload()" style="padding: 10px 20px; margin-top: 1rem; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                        تحديث الصفحة
-                    </button>
-                </div>
-            `;
+            grid.innerHTML = '<div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: #dc3545;"><h3>⚠️ خطأ في التحميل</h3></div>';
         }
         
-        // بدء التحميل عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(loadCollections, 500); // تأخير قصير للتأكد من تحميل المدير
-        });
-    </script>
-    <!-- Footer مع السوشال ميديا (أيقونات صور احترافية) -->
-<footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 2rem 1rem; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.3);">
-  <div style="max-width: 900px; margin: 0 auto; text-align: center;">
-    <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">تابعنا على وسائل التواصل الاجتماعي</h4>
-
-    <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem;">
-      
-      <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/facebook-hover.png';"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/facebook.png';">
-        <img src="/facebook.png" alt="Facebook" width="22" height="22" style="display:block">
-        فيسبوك
-      </a>
-
-      <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/instagram-hover.png';"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/instagram.png';">
-        <img src="/instagram.png" alt="Instagram" width="22" height="22" style="display:block">
-        إنستغرام
-      </a>
-
-      <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/pinterest-hover.png';"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/pinterest.png';">
-        <img src="/pinterest.png" alt="Pinterest" width="22" height="22" style="display:block">
-        بنترست
-      </a>
-
-      <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/tiktok-hover.png';"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/tiktok.png';">
-        <img src="/tiktok.png" alt="TikTok" width="22" height="22" style="display:block">
-        تيك توك
-      </a>
-
-      <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/snapchat-hover.png';"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/snapchat.png';">
-        <img src="/snapchat.png" alt="Snapchat" width="22" height="22" style="display:block">
-        سناب شات
-      </a>
-
-      <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/youtube-hover.png';"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/youtube.png';">
-        <img src="/youtube.png" alt="YouTube" width="22" height="22" style="display:block">
-        يوتيوب
-      </a>
-
-    </div>
-
-    <p style="color: #666; font-size: 0.9rem;">&copy; 2024 Smart Kids Kuwait - تابعونا لآخر العروض والمنتجات الجديدة</p>
-  </div>
-</footer>
-
-
-    <script>
-        // تحديث أيقونات تسجيل الدخول
         function updateUserIcons() {
             const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
             const loginIcon = document.getElementById('loginIcon');
@@ -507,7 +432,14 @@
                 loginIcon.title = 'مسجل دخول';
                 loginIcon.classList.add('logged-in');
                 loginIcon.href = '#';
-                loginIcon.onclick = logout;
+                loginIcon.onclick = () => {
+                    if (confirm('هل تريد تسجيل الخروج؟')) {
+                        localStorage.removeItem('userLoggedIn');
+                        localStorage.removeItem('userEmail');
+                        localStorage.removeItem('userName');
+                        updateUserIcons();
+                    }
+                };
                 
                 profileIcon.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
                 profileIcon.style.color = 'white';
@@ -520,19 +452,17 @@
             }
         }
         
-        function logout() {
-            if (confirm('هل تريد تسجيل الخروج؟')) {
-                localStorage.removeItem('userLoggedIn');
-                localStorage.removeItem('userEmail');
-                localStorage.removeItem('userName');
-                updateUserIcons();
-                alert('تم تسجيل الخروج بنجاح');
-            }
-        }
-        
-        // تحديث الأيقونات عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', updateUserIcons);
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUserIcons();
+            loadCollections();
+        });
     </script>
 
+    <!-- Footer -->
+    <footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 2rem 1rem; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.3);">
+        <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+            <p style="color: #666; font-size: 0.9rem;">&copy; 2024 Smart Kids Kuwait - تابعونا لآخر العروض</p>
+        </div>
+    </footer>
 </body>
 </html>

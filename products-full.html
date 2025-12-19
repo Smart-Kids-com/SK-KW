@@ -613,6 +613,56 @@
                 font-size: 0.9rem;
             }
         }
+        
+        /* ...existing styles... */
+        
+        .sidebar {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+        
+        .sidebar .filter-btn {
+            display: block;
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 0.5rem;
+            background: rgba(106, 76, 147, 0.1);
+            color: #333;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: right;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .filter-btn:hover {
+            background: rgba(106, 76, 147, 0.2);
+            border-color: var(--purple-dark);
+        }
+        
+        .sidebar .filter-btn.active {
+            background: linear-gradient(45deg, var(--purple-dark), var(--purple-light));
+            color: white;
+            border-color: var(--purple-dark);
+        }
+        
+        @media (max-width: 900px) {
+            [style*="grid-template-columns: 250px"] {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: relative;
+                top: auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -734,12 +784,30 @@
   </button>
 </div>
 
-        <div class="products" id="products">
-            <div class="loading">
-                <h3>📦 جاري تحميل المنتجات...</h3>
-                <p>يرجى الانتظار قليلاً بينما نحضر لك أفضل المنتجات</p>
-            </div>
-        </div>
+        <div style="display: grid; grid-template-columns: 250px 1fr; gap: 2rem; margin: 2rem 0;">
+  <!-- Sidebar بالأقسام -->
+  <aside class="sidebar" id="categoryFilters">
+    <h3 style="color: var(--purple-dark); margin-bottom: 1rem; font-weight: bold;">📚 الأقسام</h3>
+    <button class="filter-btn active" data-category="الكل" style="width: 100%; text-align: right; padding: 10px; margin-bottom: 0.5rem;">الكل</button>
+  </aside>
+
+  <!-- المنتجات في الوسط -->
+  <div>
+    <div class="search-container">
+      <input type="text" class="search-input" placeholder="🔍 ابحث في المنتجات..." 
+             oninput="productsLoader && productsLoader.searchProducts(this.value)">
+    </div>
+
+    <div class="products" id="products">
+      <div class="loading">📦 جاري تحميل المنتجات...</div>
+    </div>
+
+    <div style="text-align: center; margin: 2rem 0;">
+      <button id="loadMoreBtn" class="filter-btn" style="display: none;">تحميل المزيد</button>
+    </div>
+  </div>
+</div>
+
         
         <!-- نموذج الطلب -->
         <div class="order-form" id="orderForm">

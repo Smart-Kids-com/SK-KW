@@ -522,251 +522,210 @@
     </div>
 
     <script src="collections-manager.js"></script>
-    <script>
-        let currentCollection = null;
-        let allCollectionProducts = [];
-        let filteredProducts = [];
-        let cart = [];
+  <script>
+    let currentCollection = null;
+    let allCollectionProducts = [];
+    let filteredProducts = [];
+    let cart = [];
+    
+    async function loadCollection() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const collectionId = urlParams.get('id');
         
-        async function loadCollection() {
-            try {
-                // الحصول على معرف المجموعة من الرابط
-                const urlParams = new URLSearchParams(window.location.search);
-                const collectionId = urlParams.get('id');
-                
-                if (!collectionId) {
-                    showError('معرف المجموعة غير موجود');
-                    return;
-                }
-                
-                // تحميل البيانات
-                if (!collectionsManager) {
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-                
-                await collectionsManager.loadProducts();
-                currentCollection = collectionsManager.getCollectionByKey(collectionId);
-                
-                if (!currentCollection) {
-                    showError('المجموعة غير موجودة');
-                    return;
-                }
-                
-                allCollectionProducts = currentCollection.products;
-                filteredProducts = [...allCollectionProducts];
-                
-                updateCollectionInfo();
-                renderProducts();
-                
-            } catch (error) {
-                console.error('خطأ في تحميل المجموعة:', error);
-                showError('حدث خطأ في تحميل المجموعة');
-            }
+        if (!collectionId) {
+          showError('معرف المجموعة غير موجود');
+          return;
         }
         
-        function updateCollectionInfo() {
-            if (!currentCollection) return;
-            
-            document.getElementById('collectionIcon').textContent = currentCollection.icon;
-            document.getElementById('collectionTitle').textContent = currentCollection.name;
-            document.getElementById('collectionDescription').textContent = currentCollection.description;
-            document.getElementById('productCount').textContent = `${currentCollection.productCount} منتج`;
-            
-            // تحديث عنوان الصفحة
-            document.getElementById('pageTitle').textContent = `${currentCollection.name} - Smart Kids Kuwait`;
-            document.getElementById('pageDescription').setAttribute('content', currentCollection.description);
-            document.title = `${currentCollection.name} - Smart Kids Kuwait`;
+        if (!collectionsManager) {
+          initCollectionsManager();
+        }
+        await collectionsManager.loadProducts();
+        currentCollection = collectionsManager.getCollectionByKey(collectionId);
+        
+        if (!currentCollection) {
+          showError('المجموعة غير موجودة');
+          return;
         }
         
-        function renderProducts() {
-            const productsContainer = document.getElementById('products');
-            
-            if (filteredProducts.length === 0) {
-                productsContainer.innerHTML = `
-                    <div class="empty-state">
-                        <h3>😔 لا توجد منتجات في هذه المجموعة</h3>
-                        <p>يرجى المحاولة مع مجموعة أخرى أو تحديث البحث</p>
-                        <a href="./collections.html" style="display: inline-block; margin-top: 1rem; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
-                            تصفح المجموعات الأخرى
-                        </a>
-                    </div>
-                `;
-                return;
-            }
-            
-            productsContainer.innerHTML = filteredProducts.map(product => {
-                const price = extractPrice(product);
-                const image = extractImage(product);
-                const description = extractDescription(product.body_html);
-                
-                return `
-                    <div class="product" data-id="${product.handle}">
-                        <div class="product-image">
-                            <img src="${image}" alt="${product.title}" 
-                                 onerror="this.src='https://via.placeholder.com/300x300?text=${encodeURIComponent(product.title)}'">
-                        </div>
-                        <div class="product-info">
-                            <div class="product-title">${product.title}</div>
-                            <div class="product-description">${description}</div>
-                            <div class="product-category">التصنيف: ${product.type || 'عام'}</div>
-                            <div class="product-price">${price.toFixed(3)} د.ك</div>
-                            <button class="add-to-cart" onclick="addToCart('${product.title}', ${price}, '${product.handle}')">
-                                إضافة للسلة
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
+        allCollectionProducts = currentCollection.products || [];
+        filteredProducts = [...allCollectionProducts];
         
-        function searchInCollection(query) {
-            if (!query.trim()) {
-                filteredProducts = [...allCollectionProducts];
-            } else {
-                const searchQuery = query.toLowerCase();
-                filteredProducts = allCollectionProducts.filter(product => 
-                    product.title.toLowerCase().includes(searchQuery) ||
-                    (product.body_html && product.body_html.toLowerCase().includes(searchQuery)) ||
-                    (product.type && product.type.toLowerCase().includes(searchQuery)) ||
-                    (product.tags && product.tags.some(tag => tag.toLowerCase().includes(searchQuery)))
-                );
-            }
-            renderProducts();
-        }
+        updateCollectionInfo();
+        renderProducts();
         
-        function extractPrice(product) {
-            if (product.variants && product.variants.length > 0) {
-                const variant = product.variants[0];
-                if (variant.price && variant.price > 0) {
-                    return parseFloat(variant.price);
-                }
-            }
-            
-            const productType = (product.type || '').toLowerCase();
-            if (productType.includes('كتاب') || productType.includes('قصة')) {
-                return 15.0;
-            } else if (productType.includes('علبة') || productType.includes('مونتيسوري')) {
-                return 25.0;
-            } else if (productType.includes('عرض') || productType.includes('مجموعة')) {
-                return 35.0;
-            }
-            
-            return 20.0;
-        }
-        
-        function extractImage(product) {
-            if (product.images && product.images.length > 0) {
-                return product.images[0].src;
-            }
-            return `https://via.placeholder.com/300x300?text=${encodeURIComponent(product.title || 'منتج')}`;
-        }
-        
-        function extractDescription(bodyHtml) {
-            if (!bodyHtml) return 'وصف المنتج غير متوفر';
-            
-            const div = document.createElement('div');
-            div.innerHTML = bodyHtml;
-            const text = div.textContent || div.innerText || '';
-            
-            return text.length > 150 ? text.substring(0, 150) + '...' : text;
-        }
-        
-        function addToCart(name, price, productId = null) {
-            const existingItem = cart.find(item => item.name === name);
-            
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({ name, price, quantity: 1, id: productId });
-            }
-            
-            updateCartDisplay();
-            
-            // تأثير بصري
-            const button = event.target;
-            const originalText = button.textContent;
-            const originalBg = button.style.background;
-            
-            button.style.background = '#28a745';
-            button.textContent = 'تمت الإضافة ✓';
-            
-            setTimeout(() => {
-                button.style.background = originalBg;
-                button.textContent = originalText;
-            }, 1500);
-        }
+      } catch (error) {
+        console.error('خطأ في تحميل المجموعة:', error);
+        showError('حدث خطأ في تحميل المجموعة');
+      }
+    }
+    
+    function updateCollectionInfo() {
+      if (!currentCollection) return;
+      
+      document.getElementById('collectionIcon').textContent = currentCollection.icon;
+      document.getElementById('collectionTitle').textContent = currentCollection.name;
+      document.getElementById('collectionDescription').textContent = currentCollection.description;
+      document.getElementById('productCount').textContent = `${currentCollection.productCount || 0} منتج`;
+      
+      document.getElementById('pageTitle').textContent = `${currentCollection.name} - Smart Kids Kuwait`;
+      document.title = `${currentCollection.name} - Smart Kids Kuwait`;
+    }
 
-        function updateCartDisplay() {
-            const cartItems = document.getElementById('cartItems');
-            const cartTotal = document.getElementById('cartTotal');
-            
-            if (cart.length === 0) {
-                cartItems.innerHTML = '<p>السلة فارغة</p>';
-                cartTotal.textContent = 'الإجمالي: 0.000 د.ك';
-                return;
-            }
-            
-            let html = '';
-            let total = 0;
-            
-            cart.forEach((item, index) => {
-                const itemTotal = item.price * item.quantity;
-                total += itemTotal;
-                
-                html += `
-                    <div class="cart-item">
-                        <div>
-                            <div style="font-weight: bold; font-size: 0.9rem;">${item.name}</div>
-                            <div style="font-size: 0.8rem; color: #666;">
-                                ${item.quantity} × ${item.price.toFixed(3)} د.ك
-                            </div>
-                        </div>
-                        <button onclick="removeFromCart(${index})" 
-                                style="background: #dc3545; color: white; border: none; border-radius: 50%; 
-                                       width: 25px; height: 25px; cursor: pointer; font-size: 14px;">×</button>
-                    </div>
-                `;
-            });
-            
-            cartItems.innerHTML = html;
-            cartTotal.textContent = `الإجمالي: ${total.toFixed(3)} د.ك`;
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCartDisplay();
-        }
-
-        function showCheckout() {
-            if (cart.length === 0) {
-                alert('السلة فارغة! أضف بعض المنتجات أولاً.');
-                return;
-            }
-            
-            // توجيه للصفحة الرئيسية مع السلة
-            sessionStorage.setItem('cart', JSON.stringify(cart));
-            window.location.href = './products-full.html#checkout';
-        }
+    function renderProducts() {
+      const productsContainer = document.getElementById('products');
+      
+      if (filteredProducts.length === 0) {
+        productsContainer.innerHTML = `
+          <div class="empty-state">
+            <h3>😔 لا توجد منتجات في هذه المجموعة</h3>
+            <p>يرجى المحاولة مع مجموعة أخرى</p>
+          </div>
+        `;
+        return;
+      }
+      
+      productsContainer.innerHTML = filteredProducts.map(product => {
+        const price = extractPrice(product);
+        const image = extractImage(product);
+        const description = extractDescription(product.body_html);
         
-        function showError(message) {
-            const productsContainer = document.getElementById('products');
-            productsContainer.innerHTML = `
-                <div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: #dc3545;">
-                    <h3>⚠️ ${message}</h3>
-                    <p>يرجى المحاولة لاحقاً أو العودة للصفحة الرئيسية</p>
-                    <a href="./collections.html" style="display: inline-block; margin-top: 1rem; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
-                        العودة للمجموعات
-                    </a>
-                </div>
-            `;
-        }
+        return `
+          <div class="product">
+            <div class="product-image">
+              <img src="${image}" alt="${product.title}" 
+                   onerror="this.src='https://via.placeholder.com/300x300?text=${encodeURIComponent(product.title)}'">
+            </div>
+            <div class="product-info">
+              <div class="product-title">${product.title}</div>
+              <div class="product-description">${description}</div>
+              <div class="product-category">التصنيف: ${product.type || 'عام'}</div>
+              <div class="product-price">${price.toFixed(3)} د.ك</div>
+              <button class="add-to-cart" onclick="window.location.href='product-details.html?id=${product.handle}&collection=${collectionKey}'">
+                        عرض التفاصيل
+                    </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function searchInCollection(query) {
+      if (!query.trim()) {
+        filteredProducts = [...allCollectionProducts];
+      } else {
+        const searchQuery = query.toLowerCase();
+        filteredProducts = allCollectionProducts.filter(product => 
+          product.title.toLowerCase().includes(searchQuery) ||
+          (product.body_html && product.body_html.toLowerCase().includes(searchQuery)) ||
+          (product.type && product.type.toLowerCase().includes(searchQuery))
+        );
+      }
+      renderProducts();
+    }
+
+    function extractPrice(product) {
+      if (product.variants && product.variants.length > 0 && product.variants[0].price) {
+        return parseFloat(product.variants[0].price);
+      }
+      const productType = (product.type || '').toLowerCase();
+      if (productType.includes('كتاب') || productType.includes('قصة')) return 15.0;
+      if (productType.includes('علبة') || productType.includes('مونتيسوري')) return 25.0;
+      if (productType.includes('عرض') || productType.includes('مجموعة')) return 35.0;
+      return 20.0;
+    }
+
+    function extractImage(product) {
+      if (product.images && product.images.length > 0) {
+        return product.images[0].src;
+      }
+      return `https://via.placeholder.com/300x300?text=${encodeURIComponent(product.title || 'منتج')}`;
+    }
+
+    function extractDescription(bodyHtml) {
+      if (!bodyHtml) return 'وصف المنتج غير متوفر';
+      const div = document.createElement('div');
+      div.innerHTML = bodyHtml;
+      const text = div.textContent || div.innerText || '';
+      return text.length > 150 ? text.substring(0, 150) + '...' : text;
+    }
+
+    function addToCart(name, price, productId = null) {
+      const existingItem = cart.find(item => item.name === name);
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({ name, price, quantity: 1, id: productId });
+      }
+      updateCartDisplay();
+    }
+
+    function updateCartDisplay() {
+      const cartItems = document.getElementById('cartItems');
+      const cartTotal = document.getElementById('cartTotal');
+      
+      if (cart.length === 0) {
+        cartItems.innerHTML = '<p>السلة فارغة</p>';
+        cartTotal.textContent = 'الإجمالي: 0.000 د.ك';
+        return;
+      }
+      
+      let html = '';
+      let total = 0;
+      
+      cart.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
         
-        // بدء التحميل عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(loadCollection, 500);
-        });
-    </script>
-   <!-- Footer مع السوشال ميديا (أيقونات صور احترافية) -->
+        html += `
+          <div class="cart-item">
+            <div>
+              <div style="font-weight: bold;">${item.name}</div>
+              <div style="font-size: 0.8rem; color: #666;">
+                ${item.quantity} × ${item.price.toFixed(3)} د.ك
+              </div>
+            </div>
+            <button onclick="removeFromCart(${index})" 
+                    style="background: #dc3545; color: white; border: none; border-radius: 50%; 
+                           width: 25px; height: 25px; cursor: pointer;">×</button>
+          </div>
+        `;
+      });
+      
+      cartItems.innerHTML = html;
+      cartTotal.textContent = `الإجمالي: ${total.toFixed(3)} د.ك`;
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCartDisplay();
+    }
+
+    function showCheckout() {
+      if (cart.length === 0) {
+        alert('السلة فارغة!');
+        return;
+      }
+      sessionStorage.setItem('cart', JSON.stringify(cart));
+      window.location.href = './index.html#checkout';
+    }
+
+    function showError(message) {
+      const productsContainer = document.getElementById('products');
+      productsContainer.innerHTML = `
+        <div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: #dc3545;">
+          <h3>⚠️ ${message}</h3>
+          <a href="./collections.html" style="display: inline-block; margin-top: 1rem; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+            العودة للمجموعات
+          </a>
+        </div>
+      `;
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadCollection);
+  </script>
+<!-- Footer مع السوشال ميديا (أيقونات صور احترافية) -->
 <footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 2rem 1rem; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.3);">
   <div style="max-width: 900px; margin: 0 auto; text-align: center;">
     <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">تابعنا على وسائل التواصل الاجتماعي</h4>
