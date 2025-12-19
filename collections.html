@@ -331,60 +331,31 @@
     </a>
 
     <!-- هيدر مضغوط ومنظم -->
-    <header class="main-header">
-        <div class="header-container">
-            <div class="logo-section">
-                <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" class="logo-img">
-                <div class="logo-text">
-                    <h1>📚 مجموعات Smart Kids Kuwait</h1>
-                    <p>استكشف مجموعاتنا المتنوعة من الألعاب والكتب التعليمية</p>
-                </div>
-            </div>
-            <nav class="main-nav">
-                <a href="./products-full.html" class="nav-btn">
-                    🛍️ المتجر الكامل
-                </a>
-                <a href="./index.html" class="nav-btn">
-                    🏠 الرئيسية
-                </a>
-                <a href="./contact.html" class="nav-btn">
-                    📞 اتصل بنا
-                </a>
-            </nav>
-        </div>
-    </header>
-    
-    <div class="container">
-        
-        <div class="stats-section">
-            <div class="stats-title">📊 إحصائيات المجموعات</div>
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-number" id="totalProducts">420</div>
-                    <div class="stat-label">إجمالي المنتجات</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="totalCollections">14</div>
-                    <div class="stat-label">عدد المجموعات</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="avgProductsPerCollection">30</div>
-                    <div class="stat-label">متوسط المنتجات لكل مجموعة</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">🏆</div>
-                    <div class="stat-label">جودة عالية</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="collections-grid" id="collectionsGrid">
-            <div class="loading">
-                <h3>📦 جاري تحميل المجموعات...</h3>
-                <p>يرجى الانتظار قليلاً</p>
-            </div>
-        </div>
+<header class="main-header">
+  <div class="header-container">
+    <div class="logo-section">
+      <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" class="logo-img">
+      <div class="logo-text">
+        <h1>📚 مجموعات Smart Kids Kuwait</h1>
+        <p>استكشف مجموعاتنا المتنوعة من الألعاب والكتب التعليمية</p>
+      </div>
     </div>
+    <nav class="main-nav">
+      <a href="./products-full.html" class="nav-btn">🛍️ المتجر</a>
+      <a href="./index.html" class="nav-btn">🏠 الصفحة الرئيسية</a>
+      <a href="./contact.html" class="nav-btn">📞 اتصل بنا</a>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+  <div class="collections-grid" id="collectionsGrid">
+    <div class="loading">
+      <h3>📦 جاري تحميل المجموعات...</h3>
+      <p>يرجى الانتظار قليلاً</p>
+    </div>
+  </div>
+</div>
 
     <script src="collections-manager.js"></script>
     <script>
@@ -462,21 +433,67 @@
             setTimeout(loadCollections, 500); // تأخير قصير للتأكد من تحميل المدير
         });
     </script>
-    <!-- Footer مع السوشال ميديا -->
-    <footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 2rem 1rem; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.3);">
-        <div style="max-width: 800px; margin: 0 auto; text-align: center;">
-            <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">📱 تابعنا على وسائل التواصل الاجتماعي</h4>
-            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
-                <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" style="padding: 10px 15px; background: #1877f2; color: white; border-radius: 25px; text-decoration: none; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📘 فيسبوك</a>
-                <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" style="padding: 10px 15px; background: linear-gradient(45deg, #f09433, #dc2743); color: white; border-radius: 25px; text-decoration: none; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📷 إنستغرام</a>
-                <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" style="padding: 10px 15px; background: #bd081c; color: white; border-radius: 25px; text-decoration: none; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📌 بنترست</a>
-                <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" style="padding: 10px 15px; background: #000; color: white; border-radius: 25px; text-decoration: none; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">🎵 تيك توك</a>
-                <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" style="padding: 10px 15px; background: #fffc00; color: #000; border-radius: 25px; text-decoration: none; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">👻 سناب شات</a>
-                <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" style="padding: 10px 15px; background: #ff0000; color: white; border-radius: 25px; text-decoration: none; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">📺 يوتيوب</a>
-            </div>
-            <p style="color: #666; font-size: 0.9rem;">&copy; 2024 Smart Kids Kuwait - تابعونا لآخر العروض والمنتجات الجديدة</p>
-        </div>
-    </footer>
+    <!-- Footer مع السوشال ميديا (أيقونات صور احترافية) -->
+<footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 2rem 1rem; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.3);">
+  <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+    <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">تابعنا على وسائل التواصل الاجتماعي</h4>
+
+    <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem;">
+      
+      <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener"
+         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
+         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/facebook-hover.png';"
+         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/facebook.png';">
+        <img src="/facebook.png" alt="Facebook" width="22" height="22" style="display:block">
+        فيسبوك
+      </a>
+
+      <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener"
+         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
+         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/instagram-hover.png';"
+         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/instagram.png';">
+        <img src="/instagram.png" alt="Instagram" width="22" height="22" style="display:block">
+        إنستغرام
+      </a>
+
+      <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener"
+         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
+         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/pinterest-hover.png';"
+         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/pinterest.png';">
+        <img src="/pinterest.png" alt="Pinterest" width="22" height="22" style="display:block">
+        بنترست
+      </a>
+
+      <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener"
+         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
+         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/tiktok-hover.png';"
+         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/tiktok.png';">
+        <img src="/tiktok.png" alt="TikTok" width="22" height="22" style="display:block">
+        تيك توك
+      </a>
+
+      <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener"
+         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
+         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/snapchat-hover.png';"
+         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/snapchat.png';">
+        <img src="/snapchat.png" alt="Snapchat" width="22" height="22" style="display:block">
+        سناب شات
+      </a>
+
+      <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener"
+         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
+         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/youtube-hover.png';"
+         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/youtube.png';">
+        <img src="/youtube.png" alt="YouTube" width="22" height="22" style="display:block">
+        يوتيوب
+      </a>
+
+    </div>
+
+    <p style="color: #666; font-size: 0.9rem;">&copy; 2024 Smart Kids Kuwait - تابعونا لآخر العروض والمنتجات الجديدة</p>
+  </div>
+</footer>
+
 
     <script>
         // تحديث أيقونات تسجيل الدخول

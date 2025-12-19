@@ -128,7 +128,7 @@
 |----------|-----------------|---------|
 | 🎯 مونتيسوري | 20-30 | ألعاب تعليمية |
 | 📚 القصص المصورة | 80-100 | كتب وقصص |
-| ⭐ الأفضل مبيعاً | 15-25 | منتجات شعبية |
+| ⭐ الأفضل مبيعاً | 15-25 | منتجات تُباع سريعاً |
 | 🆕 أحدث الإصدارات | 30-40 | منتجات حديثة |
 | 🎧 القصص الصوتية | 20-30 | محتوى صوتي |
 | 🎁 العروض التفاعلية | 25-35 | عروض خاصة |
@@ -150,10 +150,10 @@
 - **المجموعات الرئيسية:** `/collections.html`
 - **مجموعة محددة:** `/collection.html?id=collection-key`
 - **أمثلة:**
-  - `/collection.html?id=montessori` - مجموعة مونتيسوري
-  - `/collection.html?id=stories-world` - عالم القصص
+  - `/collection.html?id=montessori` -  مونتيسوري
+  - `/collection.html?id=stories-world` -  عالم القصص والحكايات المصورة
   - `/collection.html?id=bestsellers` - الأفضل مبيعاً
-  - `/collection.html?id=all-products` - جميع المنتجات
+  - `/collection.html?id=all-products` -  تسوق جميع منتجاتنا الآن
 
 ---
 
