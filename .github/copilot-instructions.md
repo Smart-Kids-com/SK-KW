@@ -13,7 +13,7 @@ This is an Arabic (RTL) e-commerce order management system for Smart Kids Kuwait
 ## Coding Standards
 
 ### JavaScript
-- Use ES2020+ features as specified in tsconfig.json
+- Use ES2020 features as specified in tsconfig.json (target: ES2020)
 - Prefer `const` and `let` over `var`
 - Use arrow functions for callbacks and functional programming
 - Follow the existing code style in the repository
@@ -36,7 +36,10 @@ This is an Arabic (RTL) e-commerce order management system for Smart Kids Kuwait
   - Success: #10b981
   - Error: #ef4444
   - Warning: #f59e0b
-- Ensure RTL compatibility in all styles
+- Ensure RTL compatibility in all styles:
+  - Use logical CSS properties (`margin-inline-start`, `margin-inline-end`, `padding-inline-start`, `padding-inline-end`)
+  - Consider `flex-direction: row-reverse` for RTL flexbox layouts
+  - Use `float: inline-start` and `float: inline-end` instead of left/right
 - Use flexbox and grid for layouts
 - Mobile-first responsive design
 
@@ -160,8 +163,9 @@ Always use these helpers instead of creating duplicate functionality.
 ### Working with Arabic Text
 - Use UTF-8 encoding
 - Test text rendering in different browsers
-- Ensure proper line breaking for long Arabic words
-- Use appropriate fonts that support Arabic characters
+- Arabic text breaks between words, not within them
+- Use CSS properties like `word-break: keep-all` or `hyphens: none` for proper Arabic typography
+- Use appropriate fonts that support Arabic characters (e.g., 'Noto Sans Arabic', 'Cairo', 'Tajawal')
 - Consider text direction in layouts
 
 ## Deployment
