@@ -49,7 +49,7 @@ This is an Arabic (RTL) e-commerce order management system for Smart Kids Kuwait
 ### Arabic/RTL Considerations
 - All user-facing text must be in Arabic
 - Always set `dir="rtl"` on HTML elements containing Arabic text
-- Use `text-align: right` as default for RTL layouts
+- Use `text-align: start` as default for RTL layouts (automatically adjusts based on text direction)
 - Be mindful of icon and button positioning in RTL context
 - Test all UI changes for RTL compatibility
 
@@ -167,7 +167,8 @@ Always use these helpers instead of creating duplicate functionality.
 - Use UTF-8 encoding
 - Test text rendering in different browsers
 - Arabic text naturally breaks between words, not within them
-- Use default text wrapping behavior or `overflow-wrap: break-word` for proper Arabic typography
+- Rely on default text wrapping behavior for normal Arabic content
+- Use `overflow-wrap: break-word` only for edge cases like very long URLs or unbreakable strings
 - Avoid `word-break: keep-all` (designed for CJK languages, not appropriate for Arabic)
 - Use appropriate fonts that support Arabic characters (e.g., 'Noto Sans Arabic', 'Cairo', 'Tajawal')
 - Consider text direction in layouts
