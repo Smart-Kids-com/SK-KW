@@ -323,7 +323,6 @@
       <aside class="sidebar">
         <h3>📚 الأقسام</h3>
         <div id="categoryFilters">
-          <!-- ProductsLoader سيبني الأزرار هنا -->
           <button class="filter-btn active" data-category="الكل">الكل</button>
         </div>
       </aside>
@@ -380,7 +379,7 @@
     let cart = [];
     let orderCounter = 1000;
 
-    // ✅ إصلاح: دعم زر اللودر (btn) بدل الاعتماد على event.target (غير مضمون)
+    // يدعمه products-loader.js (يمرر btn)
     function addToCart(name, price, productId = null, btn = null) {
       const existingItem = cart.find(item => item.name === name);
 
@@ -389,7 +388,6 @@
 
       updateCartDisplay();
 
-      // تأثير بصري لو الزر متاح
       if (btn && btn instanceof HTMLElement) {
         const originalText = btn.textContent;
         const originalBg = btn.style.background;
@@ -524,21 +522,16 @@
         </head><body>${ordersHtml}</body></html>
       `);
     }
-
-    // ✅ إصلاح: لا تستخدم renderProducts (مش موجود)
-    // لو احتجت فلترة يدوية من خارج اللودر:
-    function filterByCategoryExternal(category) {
-      if (window.productsLoader) window.productsLoader.filterByCategory(category);
-    }
   </script>
 
-  <!-- اختياري: عرّف مسار JSON هنا لو مش /products.json -->
+  <!-- ✅ هنا تحديد الداتا الحقيقية (بدون نقل الملف) -->
   <script>
-    // مثال:
-    // window.DATA_URL_CANDIDATES = [
-    //   "/products.json",
-    //   "https://your-domain.com/products.json"
-    // ];
+    window.DATA_URL_CANDIDATES = [
+      "https://smartkidskw.com/products_grouped.json",
+      "https://smartkidskw.com/products.json",
+      "/products_grouped.json",
+      "/products.json"
+    ];
   </script>
 
   <!-- تحميل اللودر -->
