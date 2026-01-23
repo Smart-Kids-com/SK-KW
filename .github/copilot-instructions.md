@@ -36,10 +36,13 @@ This is an Arabic (RTL) e-commerce order management system for Smart Kids Kuwait
   - Success: #10b981
   - Error: #ef4444
   - Warning: #f59e0b
-- Ensure RTL compatibility in all styles:
-  - Use logical CSS properties (`margin-inline-start`, `margin-inline-end`, `padding-inline-start`, `padding-inline-end`)
-  - Consider `flex-direction: row-reverse` for RTL flexbox layouts
-  - Use `float: inline-start` and `float: inline-end` instead of left/right
+- Ensure RTL compatibility in all styles using logical CSS properties:
+  - Margins and padding: `margin-inline-start`, `margin-inline-end`, `padding-inline-start`, `padding-inline-end`
+  - Borders: `border-inline-start`, `border-inline-end`
+  - Positioning: `inset-inline-start`, `inset-inline-end`
+  - Text alignment: `text-align: start` and `text-align: end` instead of left/right
+  - Float: `float: inline-start` and `float: inline-end` instead of left/right
+  - Flexbox: Consider `flex-direction: row-reverse` for RTL layouts
 - Use flexbox and grid for layouts
 - Mobile-first responsive design
 
@@ -163,8 +166,9 @@ Always use these helpers instead of creating duplicate functionality.
 ### Working with Arabic Text
 - Use UTF-8 encoding
 - Test text rendering in different browsers
-- Arabic text breaks between words, not within them
-- Use CSS properties like `word-break: keep-all` or `hyphens: none` for proper Arabic typography
+- Arabic text naturally breaks between words, not within them
+- Use default text wrapping behavior or `overflow-wrap: break-word` for proper Arabic typography
+- Avoid `word-break: keep-all` (designed for CJK languages, not appropriate for Arabic)
 - Use appropriate fonts that support Arabic characters (e.g., 'Noto Sans Arabic', 'Cairo', 'Tajawal')
 - Consider text direction in layouts
 
