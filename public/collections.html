@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المجموعات - Smart Kids Kuwait</title>
+    <meta name="description" content="تصفح مجموعات Smart Kids Kuwait المتنوعة - مونتيسوري، القصص التفاعلية، الكتب الإسلامية وأكثر">
+    <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --purple-dark: #6a4c93;
+            --purple-light: #9b59b6;
+            --glass-bg: rgba(255,255,255,0.25);
+            --glass-border: rgba(255,255,255,0.18);
+            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a4c93 0%, #9b59b6 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 2rem 1rem;
+            box-shadow: var(--glass-shadow);
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--purple-dark);
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .nav a {
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.9);
+            color: var(--purple-dark);
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .nav a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            background: white;
+        }
+        
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .collection-card {
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            transition: all 0.3s;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .collection-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        
+        .collection-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .collection-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--purple-dark);
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+        
+        .collection-description {
+            color: #555;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .collection-count {
+            background: linear-gradient(45deg, #6a4c93, #9b59b6);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        
+        .browse-btn {
+            width: 100%;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #6a4c93, #9b59b6);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .browse-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: white;
+        }
+        
+        /* هيدر مضغوط */
+        .main-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            padding: 1rem;
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo-img {
+            height: 60px;
+            object-fit: contain;
+        }
+        
+        .logo-text h1 {
+            color: var(--purple-dark);
+            font-size: 1.5rem;
+            margin: 0;
+            line-height: 1.2;
+        }
+        
+        .logo-text p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+            line-height: 1.2;
+        }
+        
+        .main-nav {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .nav-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.9);
+            color: var(--purple-dark);
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .nav-btn:hover {
+            background: var(--purple-dark);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* أيقونات تسجيل الدخول والحساب */
+        .user-icons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1001;
+        }
+        
+        .user-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(255,255,255,0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6a4c93;
+            text-decoration: none;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(31, 38, 135, 0.2);
+        }
+        
+        .user-icon:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(31, 38, 135, 0.3);
+            background: rgba(255,255,255,0.4);
+        }
+        
+        .user-icon.logged-in {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+
+        /* أيقونة واتساب الثابتة */
+        .whatsapp-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 25px;
+            right: 25px;
+            background: #25D366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(37, 211, 102, 0.6);
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+        }
+
+        @media (max-width: 768px) {
+            .collections-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .collection-card {
+                padding: 1.5rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header-container {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .logo-section {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .main-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- أيقونات تسجيل الدخول والحساب -->
+    <div class="user-icons">
+        <a href="./login.html" class="user-icon" id="loginIcon" title="تسجيل الدخول">🔐</a>
+        <a href="./profile.html" class="user-icon" id="profileIcon" title="حسابي">👤</a>
+    </div>
+
+    <!-- أيقونة واتساب الثابتة -->
+    <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">💬</a>
+
+    <!-- هيدر -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" class="logo-img">
+                <div class="logo-text">
+                    <h1>📚 مجموعات Smart Kids Kuwait</h1>
+                    <p>استكشف مجموعاتنا المتنوعة</p>
+                </div>
+            </div>
+            <nav class="main-nav">
+                <a href="./products-full.html" class="nav-btn">🛍️ المتجر</a>
+                <a href="./index.html" class="nav-btn">🏠 الرئيسية</a>
+                <a href="./contact.html" class="nav-btn">📞 اتصل</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="collections-grid" id="collectionsGrid">
+            <div class="loading">
+                <h3>📦 جاري تحميل المجموعات...</h3>
+                <p>يرجى الانتظار</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="collections-manager.js"></script>
+    <script>
+        async function loadCollections() {
+            try {
+                if (!collectionsManager) {
+                    initCollectionsManager();
+                }
+                await collectionsManager.loadProducts();
+                const collections = collectionsManager.getAllCollections();
+                renderCollections(collections);
+            } catch (error) {
+                console.error('خطأ:', error);
+                showError();
+            }
+        }
+        
+        function renderCollections(collections) {
+            const grid = document.getElementById('collectionsGrid');
+            if (collections.length === 0) {
+                grid.innerHTML = '<div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: white;"><h3>⚠️ لا توجد مجموعات</h3></div>';
+                return;
+            }
+            
+            grid.innerHTML = collections.map(collection => `
+                <div class="collection-card" onclick="openCollection('${collection.key}')">
+                    <span class="collection-icon">${collection.icon}</span>
+                    <h3 class="collection-title">${collection.name}</h3>
+                    <p class="collection-description">${collection.description}</p>
+                    <div class="collection-count">${collection.productCount || 0} منتج</div>
+                    <a href="collection.html?id=${collection.key}" class="browse-btn">تصفح المجموعة</a>
+                </div>
+            `).join('');
+        }
+        
+        function openCollection(collectionKey) {
+            window.location.href = `collection.html?id=${collectionKey}`;
+        }
+        
+        function showError() {
+            const grid = document.getElementById('collectionsGrid');
+            grid.innerHTML = '<div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: #dc3545;"><h3>⚠️ خطأ في التحميل</h3></div>';
+        }
+        
+        function updateUserIcons() {
+            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+            const loginIcon = document.getElementById('loginIcon');
+            const profileIcon = document.getElementById('profileIcon');
+            
+            if (isLoggedIn) {
+                loginIcon.innerHTML = '✓';
+                loginIcon.title = 'مسجل دخول';
+                loginIcon.classList.add('logged-in');
+                loginIcon.href = '#';
+                loginIcon.onclick = () => {
+                    if (confirm('هل تريد تسجيل الخروج؟')) {
+                        localStorage.removeItem('userLoggedIn');
+                        localStorage.removeItem('userEmail');
+                        localStorage.removeItem('userName');
+                        updateUserIcons();
+                    }
+                };
+                
+                profileIcon.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
+                profileIcon.style.color = 'white';
+            } else {
+                loginIcon.innerHTML = '🔐';
+                loginIcon.title = 'تسجيل الدخول';
+                loginIcon.classList.remove('logged-in');
+                loginIcon.href = './login.html';
+                loginIcon.onclick = null;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUserIcons();
+            loadCollections();
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 2rem 1rem; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.3);">
+        <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+            <p style="color: #666; font-size: 0.9rem;">&copy; 2024 Smart Kids Kuwait - تابعونا لآخر العروض</p>
+        </div>
+    </footer>
+</body>
+</html>
