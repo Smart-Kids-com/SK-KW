@@ -242,7 +242,10 @@
       box-shadow: 0 10px 30px rgba(106, 76, 147, 0.35);
     }
 
-    .search-container { text-align: center; margin: 1.5rem 0 0.8rem; }
+    .search-container {
+      text-align: center;
+      margin: 1.5rem 0 0.8rem;
+    }
 
     .search-input {
       padding: 12px 20px;
@@ -752,13 +755,13 @@
     <button class="checkout-btn" onclick="showCheckout()">إتمام الطلب</button>
   </aside>
 
-  <button class="menu-btn" id="menuBtn" aria-label="فتح القائمة" aria-controls="sideMenu" aria-expanded="false">☰</button>
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="فتح القائمة" aria-controls="sideMenu" aria-expanded="false">☰</button>
   <div class="menu-backdrop" id="menuBackdrop" hidden></div>
 
   <aside class="side-menu" id="sideMenu" aria-hidden="true">
     <div class="side-menu__head">
       <h3>القائمة</h3>
-      <button class="side-menu__close" id="menuClose" aria-label="إغلاق">×</button>
+      <button class="side-menu__close" id="menuClose" type="button" aria-label="إغلاق">×</button>
     </div>
 
     <nav class="side-menu__nav" id="categoriesMenu">
@@ -1005,7 +1008,7 @@
               </div>
             </div>
             <button onclick="removeFromCart(${index})"
-              style="background:${'var(--danger-color)'};color:#fff;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;font-size:14px;">×</button>
+              style="background:#dc3545;color:#fff;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;font-size:14px;">×</button>
           </div>
         `;
       });
@@ -1112,7 +1115,7 @@
     }
 
     function showAdmin() {
-      alert('صفحة الإدارة غير مفعلة حالياً في هذه النسخة.');
+      window.location.href = './admin.html';
     }
 
     function escapeHtml(str) {
