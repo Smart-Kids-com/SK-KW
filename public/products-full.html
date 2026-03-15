@@ -125,7 +125,6 @@
       font-weight: 800;
     }
 
-    /* سيملأه ProductsLoader بالأزرار */
     #categoryFilters .filter-btn {
       display: block;
       width: 100%;
@@ -305,21 +304,18 @@
       <a href="#orders" onclick="showOrders()">الطلبات</a>
     </div>
 
-    <!-- بحث واحد فقط -->
     <div class="search-container">
       <input type="text" class="search-input"
              placeholder="🔍 ابحث في المنتجات بالاسم أو الوصف أو الفئة..."
              oninput="window.productsLoader && window.productsLoader.searchProducts(this.value)">
     </div>
 
-    <!-- Stats -->
     <div class="products-stats" id="productsStats">
       <div class="stats-info">إجمالي المنتجات: <strong>0</strong></div>
     </div>
 
     <div class="layout-grid">
 
-      <!-- Sidebar: هنا فقط مكان الفلاتر (ID واحد فقط) -->
       <aside class="sidebar">
         <h3>📚 الأقسام</h3>
         <div id="categoryFilters">
@@ -327,7 +323,6 @@
         </div>
       </aside>
 
-      <!-- Products -->
       <main>
         <div class="products" id="products">
           <div class="loading">📦 جاري تحميل المنتجات...</div>
@@ -342,7 +337,6 @@
 
     </div>
 
-    <!-- نموذج الطلب -->
     <div class="order-form" id="orderForm">
       <h2>إتمام الطلب</h2>
       <form onsubmit="submitOrder(event)">
@@ -379,7 +373,6 @@
     let cart = [];
     let orderCounter = 1000;
 
-    // يدعمه products-loader.js (يمرر btn)
     function addToCart(name, price, productId = null, btn = null) {
       const existingItem = cart.find(item => item.name === name);
 
@@ -524,18 +517,15 @@
     }
   </script>
 
-  <!-- ✅ هنا تحديد الداتا الحقيقية (بدون نقل الملف) -->
+  <!-- ✅ خليها LOCAL فقط عشان CORS والملفات الضخمة -->
   <script>
     window.DATA_URL_CANDIDATES = [
-      "https://smartkidskw.com/products_grouped.json",
-      "https://smartkidskw.com/products.json",
-      "/products_grouped.json",
       "/products.json"
     ];
   </script>
 
-  <!-- تحميل اللودر -->
-  <script src="products-loader.js"></script>
+  <!-- ✅ لازم Absolute على Vercel -->
+  <script src="/products-loader.js"></script>
 
 </body>
 </html>

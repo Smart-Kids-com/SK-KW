@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Kids Kuwait - متجر الأطفال المبتكرون | 40,000+ منتج تعليمي</title>
-  <meta name="description" content="متجر Smart Kids Kuwait - أكبر مجموعة من الألعاب التعليمية والكتب التفاعلية للأطفال. أكثر من 40,000 منتج تعليمي عالي الجودة.">
+  <title>Smart Kids Kuwait - وسائل تعليمية،</title>
+  <meta name="description" content="متجر Smart Kids Kuwait - أكبر مجموعة من الألعاب التعليمية والكتب التفاعلية للأطفال. منتجات تعليمية عالية الجودة.">
   <meta name="keywords" content="ألعاب تعليمية، كتب أطفال، مونتيسوري، قصص تفاعلية، العاب ذكية، تعليم الأطفال، Smart Kids Kuwait">
   <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457">
 
@@ -93,6 +93,8 @@
       font-size: 0.9rem;
       transition: all 0.3s;
       white-space: nowrap;
+      border: 0;
+      cursor: pointer;
     }
 
     .nav-btn:hover {
@@ -152,7 +154,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 2rem;
-      margin: 2rem 0 0;
+      margin: 1.2rem 0 0;
     }
 
     .product {
@@ -207,6 +209,11 @@
       margin-bottom: 1rem;
       font-size: 0.95rem;
       line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .product-category {
@@ -217,6 +224,7 @@
       border-radius: 999px;
       display: inline-block;
       margin-bottom: 0.5rem;
+      font-weight: 800;
     }
 
     .product-price {
@@ -248,7 +256,7 @@
     }
 
     /* البحث */
-    .search-container { text-align: center; margin: 1.5rem 0; }
+    .search-container { text-align: center; margin: 1.5rem 0 0.8rem; }
     .search-input {
       padding: 12px 20px;
       border: 2px solid rgba(255,255,255,0.3);
@@ -271,6 +279,69 @@
       grid-column: 1 / -1;
       color: #fff;
       opacity: 0.95;
+      font-weight: 900;
+    }
+
+    /* ✅ Stats */
+    .products-stats{
+      margin: 1rem 0 0;
+      padding: 0.9rem 1rem;
+      background: rgba(255,255,255,0.22);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 16px;
+      text-align: center;
+    }
+    .stats-info{
+      font-weight: 900;
+      color: #1f1f1f;
+    }
+
+    /* ✅ Filters bar for ProductsLoader (Required IDs) */
+    .filters-bar{
+      margin: 0.9rem 0 0;
+      padding: 0.8rem;
+      background: rgba(255,255,255,0.22);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    #categoryFilters{
+      display:flex;
+      gap: 10px;
+      overflow:auto;
+      padding-bottom: 6px;
+      scrollbar-width: thin;
+    }
+    #categoryFilters .filter-btn{
+      flex: 0 0 auto;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255,255,255,0.9);
+      color: var(--purple-dark);
+      font-weight: 900;
+      cursor: pointer;
+      transition: all .2s ease;
+      white-space: nowrap;
+    }
+    #categoryFilters .filter-btn:hover{
+      transform: translateY(-1px);
+      background: #fff;
+    }
+    #categoryFilters .filter-btn.active{
+      background: var(--purple-dark);
+      color: #fff;
+      border-color: var(--purple-dark);
+    }
+
+    /* ✅ Load more */
+    .products-actions{
+      text-align:center;
+      margin: 1.2rem 0 0;
     }
 
     /* نموذج الطلب */
@@ -749,38 +820,36 @@
       <a href="#admin" onclick="showAdmin()">الإدارة</a>
     </div>
 
-    <!-- البحث -->
+    <!-- ✅ البحث (مُصحح لاستدعاء window.productsLoader) -->
     <div class="search-container">
-      <input type="text" class="search-input" placeholder="🔍 ابحث في المنتجات..." oninput="productsLoader && productsLoader.searchProducts(this.value)">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="🔍 ابحث في المنتجات..."
+        oninput="window.productsLoader && window.productsLoader.searchProducts(this.value)"
+      >
     </div>
 
-    <!-- Products (placeholder) -->
+    <!-- ✅ Filters required by products-loader.js -->
+    <div class="filters-bar">
+      <div id="categoryFilters">
+        <button class="filter-btn active" data-category="الكل">الكل</button>
+      </div>
+    </div>
+
+    <!-- ✅ Stats required by products-loader.js -->
+    <div class="products-stats" id="productsStats">
+      <div class="stats-info">إجمالي المنتجات: <strong>0</strong></div>
+    </div>
+
+    <!-- ✅ Products (ONLY placeholder - no fake samples) -->
     <div class="products" id="products">
-      <div class="loading">
-        <h3>📦 جاري التحضير...</h3>
-        <p>إذا كان عندك products-loader.js سيقوم بتحميل المنتجات تلقائياً</p>
-      </div>
+      <div class="loading">📦 جاري تحميل المنتجات...</div>
+    </div>
 
-      <!-- عينات (اختيارية) -->
-      <div class="product">
-        <div class="product-image">🧩</div>
-        <div class="product-info">
-          <div class="product-title">ألعاب الألغاز الذكية</div>
-          <div class="product-description">مجموعة ألغاز تطور التفكير النقدي والإبداع</div>
-          <div class="product-price">18.000 د.ك</div>
-          <button class="add-to-cart" onclick="addToCart('ألعاب الألغاز الذكية', 18)">إضافة للسلة</button>
-        </div>
-      </div>
-
-      <div class="product">
-        <div class="product-image">🤖</div>
-        <div class="product-info">
-          <div class="product-title">روبوت تعليمي</div>
-          <div class="product-description">روبوت ذكي لتعلم البرمجة والتحكم</div>
-          <div class="product-price">45.000 د.ك</div>
-          <button class="add-to-cart" onclick="addToCart('روبوت تعليمي', 45)">إضافة للسلة</button>
-        </div>
-      </div>
+    <!-- ✅ Load more required by products-loader.js -->
+    <div class="products-actions">
+      <button id="loadMoreBtn" class="nav-btn" style="display:none;">تحميل المزيد</button>
     </div>
 
     <!-- Checkout -->
@@ -869,6 +938,14 @@
     });
   </script>
 
+  <!-- ✅ هنا الداتا: خليها محلية على Vercel -->
+  <script>
+    window.DATA_URL_CANDIDATES = ["/products.json"];
+  </script>
+
+  <!-- ✅ Products Loader -->
+  <script src="products-loader.js"></script>
+
   <!-- Footer -->
   <footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 3rem 1rem 1rem; margin-top: 4rem; border-top: 1px solid rgba(255,255,255,0.3);">
     <div style="max-width: 1200px; margin: 0 auto;">
@@ -896,50 +973,51 @@
           </div>
         </div>
 
-       <div class="social-grid">
-  <a class="social-btn facebook" href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener"
-     title="فيسبوك" aria-label="Facebook"
-     onmouseover="this.querySelector('img').src='/facebook-hover.png';"
-     onmouseout="this.querySelector('img').src='/facebook.png';">
-    <img src="/facebook.png" alt="Facebook" width="22" height="22" loading="lazy" decoding="async">
-  </a>
+        <div class="social-grid">
+          <a class="social-btn facebook" href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener"
+             title="فيسبوك" aria-label="Facebook"
+             onmouseover="this.querySelector('img').src='/facebook-hover.png';"
+             onmouseout="this.querySelector('img').src='/facebook.png';">
+            <img src="/facebook.png" alt="Facebook" width="22" height="22" loading="lazy" decoding="async">
+          </a>
 
-  <a class="social-btn instagram" href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener"
-     title="إنستغرام" aria-label="Instagram"
-     onmouseover="this.querySelector('img').src='/instagram-hover.png';"
-     onmouseout="this.querySelector('img').src='/instagram.png';">
-    <img src="/instagram.png" alt="Instagram" width="22" height="22" loading="lazy" decoding="async">
-  </a>
+          <a class="social-btn instagram" href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener"
+             title="إنستغرام" aria-label="Instagram"
+             onmouseover="this.querySelector('img').src='/instagram-hover.png';"
+             onmouseout="this.querySelector('img').src='/instagram.png';">
+            <img src="/instagram.png" alt="Instagram" width="22" height="22" loading="lazy" decoding="async">
+          </a>
 
-  <a class="social-btn pinterest" href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener"
-     title="بنترست" aria-label="Pinterest"
-     onmouseover="this.querySelector('img').src='/pinterest-hover.png';"
-     onmouseout="this.querySelector('img').src='/pinterest.png';">
-    <img src="/pinterest.png" alt="Pinterest" width="22" height="22" loading="lazy" decoding="async">
-  </a>
+          <a class="social-btn pinterest" href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener"
+             title="بنترست" aria-label="Pinterest"
+             onmouseover="this.querySelector('img').src='/pinterest-hover.png';"
+             onmouseout="this.querySelector('img').src='/pinterest.png';">
+            <img src="/pinterest.png" alt="Pinterest" width="22" height="22" loading="lazy" decoding="async">
+          </a>
 
-  <a class="social-btn tiktok" href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener"
-     title="تيك توك" aria-label="TikTok"
-     onmouseover="this.querySelector('img').src='/tiktok-hover.png';"
-     onmouseout="this.querySelector('img').src='/tiktok.png';">
-    <img src="/tiktok.png" alt="TikTok" width="22" height="22" loading="lazy" decoding="async">
-  </a>
+          <a class="social-btn tiktok" href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener"
+             title="تيك توك" aria-label="TikTok"
+             onmouseover="this.querySelector('img').src='/tiktok-hover.png';"
+             onmouseout="this.querySelector('img').src='/tiktok.png';">
+            <img src="/tiktok.png" alt="TikTok" width="22" height="22" loading="lazy" decoding="async">
+          </a>
 
-  <a class="social-btn snapchat" href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener"
-     title="سناب شات" aria-label="Snapchat"
-     onmouseover="this.querySelector('img').src='/snapchat-hover.png';"
-     onmouseout="this.querySelector('img').src='/snapchat.png';">
-    <img src="/snapchat.png" alt="Snapchat" width="22" height="22" loading="lazy" decoding="async">
-  </a>
+          <a class="social-btn snapchat" href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener"
+             title="سناب شات" aria-label="Snapchat"
+             onmouseover="this.querySelector('img').src='/snapchat-hover.png';"
+             onmouseout="this.querySelector('img').src='/snapchat.png';">
+            <img src="/snapchat.png" alt="Snapchat" width="22" height="22" loading="lazy" decoding="async">
+          </a>
 
-  <a class="social-btn youtube" href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener"
-     title="يوتيوب" aria-label="YouTube"
-     onmouseover="this.querySelector('img').src='/youtube-hover.png';"
-     onmouseout="this.querySelector('img').src='/youtube.png';">
-    <img src="/youtube.png" alt="YouTube" width="22" height="22" loading="lazy" decoding="async">
-  </a>
-</div>
+          <a class="social-btn youtube" href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener"
+             title="يوتيوب" aria-label="YouTube"
+             onmouseover="this.querySelector('img').src='/youtube-hover.png';"
+             onmouseout="this.querySelector('img').src='/youtube.png';">
+            <img src="/youtube.png" alt="YouTube" width="22" height="22" loading="lazy" decoding="async">
+          </a>
+        </div>
 
+      </div>
 
       <div style="text-align: center; padding-top: 2rem; border-top: 1px solid rgba(106, 76, 147, 0.2); color: #666;">
         <p>&copy; 2024 Smart Kids Kuwait. جميع الحقوق محفوظة.</p>

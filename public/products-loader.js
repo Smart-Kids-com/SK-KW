@@ -1,21 +1,13 @@
 // products-loader.js
-// يدعم JSON بصيغتين:
-// 1) Array عادي: [ {id,name,price,...}, ... ]
-// 2) Grouped Object: { "Category A": [..], "Category B":[..] } أو داخل groups/collections/categories
-
-let DATA_URL_CANDIDATES = [];
-try {
-  const mod = require("./DATA_URL_CANDIDATES");
-  if (mod && Array.isArray(mod.DATA_URL_CANDIDATES)) DATA_URL_CANDIDATES = mod.DATA_URL_CANDIDATES;
-} catch (_) {}
+// ✅ يدعم Array JSON: [ {id,name,price,image,description,category,inStock}, ... ]
 
 function getCandidates() {
-  // ✅ مهم: اقرأ window.DATA_URL_CANDIDATES وقت الاستخدام (حتى لو اتعرّف بعد تحميل الملف)
+  // لو حبيت تفرض مسار معين من الصفحة قبل تحميل اللودر:
+  // window.DATA_URL_CANDIDATES = ["/products.json"];
   if (typeof window !== "undefined" && Array.isArray(window.DATA_URL_CANDIDATES) && window.DATA_URL_CANDIDATES.length) {
     return window.DATA_URL_CANDIDATES;
   }
-  if (Array.isArray(DATA_URL_CANDIDATES) && DATA_URL_CANDIDATES.length) return DATA_URL_CANDIDATES;
-  return ["/products_grouped.json", "/products.json"];
+  return ["/products.json"]; // ✅ بما إن grouped اتحذف
 }
 
 function safeCssEscape(v) {
@@ -36,60 +28,14 @@ async function fetchJsonWithFallback(urls, timeoutMs = 20000) {
     try {
       const res = await withTimeout(fetch(url, { cache: "no-store" }));
       if (!res.ok) { lastErr = new Error(`HTTP ${res.status} for ${url}`); continue; }
-
-      // ⚠️ ملف ضخم: حاول تقرأ كـ JSON مباشرة (قد يفشل لو كبير جدًا)
       const json = await withTimeout(res.json());
-      return json;
+      return { json, url };
     } catch (e) {
       lastErr = e;
       console.error("Fetch/JSON error for", url, e);
     }
   }
   throw lastErr || new Error("Failed to fetch products JSON");
-}
-
-function flattenGroupedData(data) {
-  // لو Array رجّعه كما هو
-  if (Array.isArray(data)) return data;
-
-  // أحيانًا يكون الملف ملفوف داخل مفتاح
-  if (data && typeof data === "object") {
-    const wrapped =
-      (data.products && (Array.isArray(data.products) || typeof data.products === "object")) ? data.products :
-      (data.data && (Array.isArray(data.data) || typeof data.data === "object")) ? data.data :
-      data;
-
-    if (Array.isArray(wrapped)) return wrapped;
-
-    // احتمالات شائعة
-    const candidate =
-      wrapped.groups && typeof wrapped.groups === "object" ? wrapped.groups :
-      wrapped.collections && typeof wrapped.collections === "object" ? wrapped.collections :
-      wrapped.categories && typeof wrapped.categories === "object" ? wrapped.categories :
-      wrapped;
-
-    const out = [];
-    for (const [groupName, value] of Object.entries(candidate)) {
-      if (Array.isArray(value)) {
-        for (const p of value) {
-          if (p && typeof p === "object") {
-            if (!p.category) p.category = groupName;
-            out.push(p);
-          }
-        }
-      } else if (value && typeof value === "object" && Array.isArray(value.items)) {
-        for (const p of value.items) {
-          if (p && typeof p === "object") {
-            if (!p.category) p.category = groupName;
-            out.push(p);
-          }
-        }
-      }
-    }
-    return out;
-  }
-
-  return [];
 }
 
 class ProductsLoader {
@@ -163,39 +109,31 @@ class ProductsLoader {
   }
 
   async loadProducts() {
-    // ✅ استخدم getCandidates بدل متغير ثابت
-    const data = await fetchJsonWithFallback(getCandidates(), 25000);
+    const { json, url } = await fetchJsonWithFallback(getCandidates(), 25000);
 
-    const rawList = flattenGroupedData(data);
-
-    if (!Array.isArray(rawList) || rawList.length === 0) {
-      throw new Error("الملف تم تحميله لكن لم يتم العثور على منتجات (صيغة غير مدعومة أو تفكيك grouped فشل).");
+    if (!Array.isArray(json) || json.length === 0) {
+      throw new Error(`تم تحميل الملف (${url}) لكن الصيغة ليست Array أو فارغة.`);
     }
 
-    const list = rawList.filter(p => p && typeof p === "object" && p.inStock !== false);
+    // فلترة inStock لو موجودة
+    const list = json.filter(p => p && typeof p === "object" && p.inStock !== false);
 
     this.products = list.map((p, idx) => {
-      const id = p.id ?? p.handle ?? `${idx}-${Math.random().toString(36).slice(2)}`;
+      const id = p.id ?? `${idx}-${Math.random().toString(36).slice(2)}`;
       const name = p.name ?? p.title ?? "منتج بدون اسم";
-      const description = (p.description ?? p.body_html ?? "").toString() || "وصف المنتج غير متوفر";
-      const category = (p.category ?? p.type ?? "عام").toString().trim() || "عام";
+      const description = (p.description ?? "").toString() || "وصف المنتج غير متوفر";
+      const category = (p.category ?? "عام").toString().trim() || "عام";
 
       let price = parseFloat(p.price);
-      if (!Number.isFinite(price)) {
-        if (Array.isArray(p.variants) && p.variants[0]?.price != null) {
-          const v = parseFloat(p.variants[0].price);
-          price = Number.isFinite(v) ? v : 0;
-        } else {
-          price = 0;
-        }
-      }
+      if (!Number.isFinite(price)) price = 0;
 
       let image = p.image;
-      if (!image && Array.isArray(p.images) && p.images[0]?.src) image = p.images[0].src;
       if (!image) image = "https://via.placeholder.com/600x600?text=" + encodeURIComponent(name);
 
       return { id, name, description, price, image, category };
     });
+
+    console.log("✅ Loaded products:", this.products.length, "from", url);
   }
 
   escapeHtml(str) {
@@ -280,7 +218,6 @@ class ProductsLoader {
       this.productsContainer.innerHTML = `
         <div style="text-align:center; grid-column:1/-1; padding:3rem;">
           <h3>لا توجد منتجات مطابقة</h3>
-          <p>جرّب تغيير البحث أو اختيار مجموعة أخرى</p>
         </div>
       `;
       this.updateStats(0);
@@ -356,8 +293,6 @@ class ProductsLoader {
     this.statsElement.innerHTML = `
       <div class="stats-info">
         إجمالي المنتجات: <strong>${count}</strong>
-        ${this.currentCategory !== "الكل" ? `— مجموعة: <strong>${this.escapeHtml(this.currentCategory)}</strong>` : ""}
-        ${this.query.trim() ? `— بحث: <strong>${this.escapeHtml(this.query.trim())}</strong>` : ""}
       </div>
     `;
   }
@@ -370,12 +305,7 @@ class ProductsLoader {
         <p style="color:#333; background:rgba(255,255,255,0.85); display:inline-block; padding:10px 14px; border-radius:12px;">
           ${this.escapeHtml(msg)}
         </p>
-        <p style="margin-top:10px; color:#fff;">
-          إذا كان الملف ضخم جدًا (سطر واحد وحجمه كبير) قد يفشل المتصفح في قراءته.
-        </p>
-        <button onclick="location.reload()" style="padding:10px 20px; margin-top:1rem; background:#007bff; color:white; border:none; border-radius:10px; cursor:pointer;">
-          تحديث الصفحة
-        </button>
+        <p style="margin-top:10px; color:#fff;">تأكد أن الملف موجود داخل public باسم products.json</p>
       </div>
     `;
     this.loadMoreBtn.style.display = "none";
