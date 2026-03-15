@@ -374,7 +374,6 @@
             }
         }
         
-        /* أيقونات تسجيل الدخول والحساب */
         .user-icons {
             position: fixed;
             top: 20px;
@@ -413,7 +412,6 @@
             color: white;
         }
         
-        /* أيقونة واتساب الثابتة */
         .whatsapp-float {
             position: fixed;
             width: 60px;
@@ -440,33 +438,19 @@
         }
         
         @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(37, 211, 102, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
-            }
+            0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
         }
     </style>
 </head>
 <body>
-    <!-- أيقونات تسجيل الدخول والحساب -->
     <div class="user-icons">
-        <a href="./login.html" class="user-icon" id="loginIcon" title="تسجيل الدخول">
-            🔐
-        </a>
-        <a href="./profile.html" class="user-icon" id="profileIcon" title="حسابي">
-            👤
-        </a>
+        <a href="./login.html" class="user-icon" id="loginIcon" title="تسجيل الدخول">🔐</a>
+        <a href="./profile.html" class="user-icon" id="profileIcon" title="حسابي">👤</a>
     </div>
 
-    <!-- أيقونة واتساب الثابتة -->
-    <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
-        💬
-    </a>
+    <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">💬</a>
 
     <div class="header">
         <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
@@ -497,20 +481,16 @@
     <div class="container">
         <div class="nav">
             <a href="./collections.html">🏷️ جميع المجموعات</a>
-            <a href="./products-full.html">🛍️ المتجر </a>
+            <a href="./products-full.html">🛍️ المتجر</a>
             <a href="./index.html">🏠 الصفحة الرئيسية</a>
-
         </div>
         
         <div class="search-container">
-            <input type="text" class="search-input" placeholder="🔍 ابحث في منتجات هذه المجموعة..." 
-                   oninput="searchInCollection(this.value)" id="searchInput">
+            <input type="text" class="search-input" placeholder="🔍 ابحث في منتجات هذه المجموعة..." oninput="searchInCollection(this.value)" id="searchInput">
         </div>
         
         <div class="back-to-collections">
-            <a href="./collections.html" class="back-btn">
-                ← العودة إلى المجموعات
-            </a>
+            <a href="./collections.html" class="back-btn">← العودة إلى المجموعات</a>
         </div>
         
         <div class="products" id="products">
@@ -522,311 +502,324 @@
     </div>
 
     <script src="collections-manager.js"></script>
-  <script>
-    let currentCollection = null;
-    let allCollectionProducts = [];
-    let filteredProducts = [];
-    let cart = [];
-    
-    async function loadCollection() {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const collectionId = urlParams.get('id');
-        
-        if (!collectionId) {
-          showError('معرف المجموعة غير موجود');
+    <script>
+      let currentCollection = null;
+      let allCollectionProducts = [];
+      let filteredProducts = [];
+      let cart = [];
+
+      async function loadCollection() {
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          const collectionId = urlParams.get('id');
+
+          if (!collectionId) {
+            showError('معرف المجموعة غير موجود');
+            return;
+          }
+
+          if (!collectionsManager) {
+            initCollectionsManager();
+          }
+
+          await collectionsManager.loadProducts();
+          currentCollection = collectionsManager.getCollectionByKey(collectionId);
+
+          if (!currentCollection) {
+            showError('المجموعة غير موجودة');
+            return;
+          }
+
+          allCollectionProducts = Array.isArray(currentCollection.products) ? currentCollection.products : [];
+          filteredProducts = [...allCollectionProducts];
+
+          updateCollectionInfo();
+          renderProducts();
+        } catch (error) {
+          console.error('خطأ في تحميل المجموعة:', error);
+          showError('حدث خطأ في تحميل المجموعة');
+        }
+      }
+
+      function updateCollectionInfo() {
+        if (!currentCollection) return;
+
+        document.getElementById('collectionIcon').textContent = currentCollection.icon || '📦';
+        document.getElementById('collectionTitle').textContent = currentCollection.name || 'مجموعة';
+        document.getElementById('collectionDescription').textContent = currentCollection.description || '';
+        document.getElementById('productCount').textContent = `${currentCollection.productCount || 0} منتج`;
+
+        document.getElementById('pageTitle').textContent = `${currentCollection.name || 'مجموعة'} - Smart Kids Kuwait`;
+        document.title = `${currentCollection.name || 'مجموعة'} - Smart Kids Kuwait`;
+      }
+
+      function renderProducts() {
+        const productsContainer = document.getElementById('products');
+
+        if (!filteredProducts.length) {
+          productsContainer.innerHTML = `
+            <div class="empty-state">
+              <h3>😔 لا توجد منتجات في هذه المجموعة</h3>
+              <p>يرجى المحاولة مع مجموعة أخرى</p>
+            </div>
+          `;
           return;
         }
-        
-        if (!collectionsManager) {
-          initCollectionsManager();
-        }
-        await collectionsManager.loadProducts();
-        currentCollection = collectionsManager.getCollectionByKey(collectionId);
-        
-        if (!currentCollection) {
-          showError('المجموعة غير موجودة');
-          return;
-        }
-        
-        allCollectionProducts = currentCollection.products || [];
-        filteredProducts = [...allCollectionProducts];
-        
-        updateCollectionInfo();
-        renderProducts();
-        
-      } catch (error) {
-        console.error('خطأ في تحميل المجموعة:', error);
-        showError('حدث خطأ في تحميل المجموعة');
-      }
-    }
-    
-    function updateCollectionInfo() {
-      if (!currentCollection) return;
-      
-      document.getElementById('collectionIcon').textContent = currentCollection.icon;
-      document.getElementById('collectionTitle').textContent = currentCollection.name;
-      document.getElementById('collectionDescription').textContent = currentCollection.description;
-      document.getElementById('productCount').textContent = `${currentCollection.productCount || 0} منتج`;
-      
-      document.getElementById('pageTitle').textContent = `${currentCollection.name} - Smart Kids Kuwait`;
-      document.title = `${currentCollection.name} - Smart Kids Kuwait`;
-    }
 
-    function renderProducts() {
-      const productsContainer = document.getElementById('products');
-      
-      if (filteredProducts.length === 0) {
-        productsContainer.innerHTML = `
-          <div class="empty-state">
-            <h3>😔 لا توجد منتجات في هذه المجموعة</h3>
-            <p>يرجى المحاولة مع مجموعة أخرى</p>
-          </div>
-        `;
-        return;
-      }
-      
-      productsContainer.innerHTML = filteredProducts.map(product => {
-        const price = extractPrice(product);
-        const image = extractImage(product);
-        const description = extractDescription(product.body_html);
-        
-        return `
-          <div class="product">
-            <div class="product-image">
-              <img src="${image}" alt="${product.title}" 
-                   onerror="this.src='https://via.placeholder.com/300x300?text=${encodeURIComponent(product.title)}'">
-            </div>
-            <div class="product-info">
-              <div class="product-title">${product.title}</div>
-              <div class="product-description">${description}</div>
-              <div class="product-category">التصنيف: ${product.type || 'عام'}</div>
-              <div class="product-price">${price.toFixed(3)} د.ك</div>
-              <button class="add-to-cart" onclick="addToCart('${(product.name || product.title || '').replace(/'/g, "\\'")}', ${price}, '${product.id || product.handle || ''}')">
-  إضافة للسلة
-</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
+        productsContainer.innerHTML = filteredProducts.map(product => {
+          const price = extractPrice(product);
+          const image = extractImage(product);
+          const description = extractDescription(product.description || product.body_html);
+          const title = escapeHtml(product.name || product.title || 'منتج بدون اسم');
+          const category = escapeHtml(product.category || product.type || 'عام');
+          const safeNameForJs = (product.name || product.title || 'منتج بدون اسم').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          const productId = escapeHtml(product.id || product.handle || '');
 
-    function searchInCollection(query) {
-      if (!query.trim()) {
-        filteredProducts = [...allCollectionProducts];
-      } else {
-        const searchQuery = query.toLowerCase();
-        filteredProducts = allCollectionProducts.filter(product => 
-          product.title.toLowerCase().includes(searchQuery) ||
-          (product.body_html && product.body_html.toLowerCase().includes(searchQuery)) ||
-          (product.type && product.type.toLowerCase().includes(searchQuery))
-        );
-      }
-      renderProducts();
-    }
-
-    function extractPrice(product) {
-      if (product.variants && product.variants.length > 0 && product.variants[0].price) {
-        return parseFloat(product.variants[0].price);
-      }
-      const productType = (product.type || '').toLowerCase();
-      if (productType.includes('كتاب') || productType.includes('قصة')) return 15.0;
-      if (productType.includes('علبة') || productType.includes('مونتيسوري')) return 25.0;
-      if (productType.includes('عرض') || productType.includes('مجموعة')) return 35.0;
-      return 20.0;
-    }
-
-    function extractImage(product) {
-      if (product.images && product.images.length > 0) {
-        return product.images[0].src;
-      }
-      return `https://via.placeholder.com/300x300?text=${encodeURIComponent(product.title || 'منتج')}`;
-    }
-
-    function extractDescription(bodyHtml) {
-      if (!bodyHtml) return 'وصف المنتج غير متوفر';
-      const div = document.createElement('div');
-      div.innerHTML = bodyHtml;
-      const text = div.textContent || div.innerText || '';
-      return text.length > 150 ? text.substring(0, 150) + '...' : text;
-    }
-
-    function addToCart(name, price, productId = null) {
-      const existingItem = cart.find(item => item.name === name);
-      if (existingItem) {
-        existingItem.quantity += 1;
-      } else {
-        cart.push({ name, price, quantity: 1, id: productId });
-      }
-      updateCartDisplay();
-    }
-
-    function updateCartDisplay() {
-      const cartItems = document.getElementById('cartItems');
-      const cartTotal = document.getElementById('cartTotal');
-      
-      if (cart.length === 0) {
-        cartItems.innerHTML = '<p>السلة فارغة</p>';
-        cartTotal.textContent = 'الإجمالي: 0.000 د.ك';
-        return;
-      }
-      
-      let html = '';
-      let total = 0;
-      
-      cart.forEach((item, index) => {
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
-        
-        html += `
-          <div class="cart-item">
-            <div>
-              <div style="font-weight: bold;">${item.name}</div>
-              <div style="font-size: 0.8rem; color: #666;">
-                ${item.quantity} × ${item.price.toFixed(3)} د.ك
+          return `
+            <div class="product">
+              <div class="product-image">
+                <img src="${image}" alt="${title}"
+                     onerror="this.src='https://via.placeholder.com/300x300?text=${encodeURIComponent(product.name || product.title || 'منتج')}'">
+              </div>
+              <div class="product-info">
+                <div class="product-title">${title}</div>
+                <div class="product-description">${description}</div>
+                <div class="product-category">التصنيف: ${category}</div>
+                <div class="product-price">${price.toFixed(3)} د.ك</div>
+                <button class="add-to-cart" onclick="addToCart('${safeNameForJs}', ${price}, '${productId}')">
+                  إضافة للسلة
+                </button>
               </div>
             </div>
-            <button onclick="removeFromCart(${index})" 
-                    style="background: #dc3545; color: white; border: none; border-radius: 50%; 
-                           width: 25px; height: 25px; cursor: pointer;">×</button>
+          `;
+        }).join('');
+      }
+
+      function searchInCollection(query) {
+        const q = (query || '').trim().toLowerCase();
+
+        if (!q) {
+          filteredProducts = [...allCollectionProducts];
+        } else {
+          filteredProducts = allCollectionProducts.filter(product => {
+            const hay = `${product.name || product.title || ''} ${product.description || product.body_html || ''} ${product.category || product.type || ''}`.toLowerCase();
+            return hay.includes(q);
+          });
+        }
+
+        renderProducts();
+      }
+
+      function extractPrice(product) {
+        if (product.price != null && !isNaN(parseFloat(product.price))) {
+          return parseFloat(product.price);
+        }
+
+        if (product.variants && product.variants.length > 0 && product.variants[0].price) {
+          return parseFloat(product.variants[0].price);
+        }
+
+        return 0;
+      }
+
+      function extractImage(product) {
+        if (product.image) return product.image;
+
+        if (product.images && product.images.length > 0) {
+          if (typeof product.images[0] === 'string') return product.images[0];
+          if (product.images[0] && product.images[0].src) return product.images[0].src;
+        }
+
+        return `https://via.placeholder.com/300x300?text=${encodeURIComponent(product.name || product.title || 'منتج')}`;
+      }
+
+      function extractDescription(value) {
+        if (!value) return 'وصف المنتج غير متوفر';
+
+        const div = document.createElement('div');
+        div.innerHTML = value;
+        const text = div.textContent || div.innerText || '';
+
+        return text.length > 150 ? text.substring(0, 150) + '...' : text;
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
+
+      function addToCart(name, price, productId = null) {
+        const existingItem = cart.find(item => item.name === name);
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          cart.push({ name, price, quantity: 1, id: productId });
+        }
+        updateCartDisplay();
+      }
+
+      function updateCartDisplay() {
+        const cartItems = document.getElementById('cartItems');
+        const cartTotal = document.getElementById('cartTotal');
+
+        if (cart.length === 0) {
+          cartItems.innerHTML = '<p>السلة فارغة</p>';
+          cartTotal.textContent = 'الإجمالي: 0.000 د.ك';
+          return;
+        }
+
+        let html = '';
+        let total = 0;
+
+        cart.forEach((item, index) => {
+          const itemTotal = item.price * item.quantity;
+          total += itemTotal;
+
+          html += `
+            <div class="cart-item">
+              <div>
+                <div style="font-weight: bold;">${escapeHtml(item.name)}</div>
+                <div style="font-size: 0.8rem; color: #666;">
+                  ${item.quantity} × ${item.price.toFixed(3)} د.ك
+                </div>
+              </div>
+              <button onclick="removeFromCart(${index})" style="background: #dc3545; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
+            </div>
+          `;
+        });
+
+        cartItems.innerHTML = html;
+        cartTotal.textContent = `الإجمالي: ${total.toFixed(3)} د.ك`;
+      }
+
+      function removeFromCart(index) {
+        cart.splice(index, 1);
+        updateCartDisplay();
+      }
+
+      function showCheckout() {
+        if (cart.length === 0) {
+          alert('السلة فارغة!');
+          return;
+        }
+        sessionStorage.setItem('cart', JSON.stringify(cart));
+        window.location.href = './index.html#checkout';
+      }
+
+      function showError(message) {
+        const productsContainer = document.getElementById('products');
+        productsContainer.innerHTML = `
+          <div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: #dc3545;">
+            <h3>⚠️ ${escapeHtml(message)}</h3>
+            <a href="./collections.html" style="display: inline-block; margin-top: 1rem; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+              العودة للمجموعات
+            </a>
           </div>
         `;
-      });
-      
-      cartItems.innerHTML = html;
-      cartTotal.textContent = `الإجمالي: ${total.toFixed(3)} د.ك`;
-    }
-
-    function removeFromCart(index) {
-      cart.splice(index, 1);
-      updateCartDisplay();
-    }
-
-    function showCheckout() {
-      if (cart.length === 0) {
-        alert('السلة فارغة!');
-        return;
       }
-      sessionStorage.setItem('cart', JSON.stringify(cart));
-      window.location.href = './index.html#checkout';
-    }
 
-    function showError(message) {
-      const productsContainer = document.getElementById('products');
-      productsContainer.innerHTML = `
-        <div style="text-align: center; grid-column: 1 / -1; padding: 3rem; color: #dc3545;">
-          <h3>⚠️ ${message}</h3>
-          <a href="./collections.html" style="display: inline-block; margin-top: 1rem; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
-            العودة للمجموعات
-          </a>
-        </div>
-      `;
-    }
-    
-    document.addEventListener('DOMContentLoaded', loadCollection);
-  </script>
-<!-- Footer مع السوشال ميديا (أيقونات صور احترافية) -->
-<footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 2rem 1rem; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.3);">
-  <div style="max-width: 900px; margin: 0 auto; text-align: center;">
-    <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">تابعنا على وسائل التواصل الاجتماعي</h4>
-
-    <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem;">
-      
-      <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/facebook-hover.png';"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/facebook.png';">
-        <img src="/facebook.png" alt="Facebook" width="22" height="22" style="display:block">
-        فيسبوك
-      </a>
-
-      <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/instagram-hover.png';"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/instagram.png';">
-        <img src="/instagram.png" alt="Instagram" width="22" height="22" style="display:block">
-        إنستغرام
-      </a>
-
-      <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/pinterest-hover.png';"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/pinterest.png';">
-        <img src="/pinterest.png" alt="Pinterest" width="22" height="22" style="display:block">
-        بنترست
-      </a>
-
-      <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/tiktok-hover.png';"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/tiktok.png';">
-        <img src="/tiktok.png" alt="TikTok" width="22" height="22" style="display:block">
-        تيك توك
-      </a>
-
-      <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/snapchat-hover.png';"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/snapchat.png';">
-        <img src="/snapchat.png" alt="Snapchat" width="22" height="22" style="display:block">
-        سناب شات
-      </a>
-
-      <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/youtube-hover.png';"
-         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/youtube.png';">
-        <img src="/youtube.png" alt="YouTube" width="22" height="22" style="display:block">
-        يوتيوب
-      </a>
-
-    </div>
-
-    <p style="color: #666; font-size: 0.9rem;">&copy; 2024 Smart Kids Kuwait - تابعونا لآخر العروض والمنتجات الجديدة</p>
-  </div>
-</footer>
-
-
-    <script>
-        // تحديث أيقونات تسجيل الدخول
-        function updateUserIcons() {
-            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
-            const loginIcon = document.getElementById('loginIcon');
-            const profileIcon = document.getElementById('profileIcon');
-            
-            if (isLoggedIn) {
-                loginIcon.innerHTML = '✓';
-                loginIcon.title = 'مسجل دخول';
-                loginIcon.classList.add('logged-in');
-                loginIcon.href = '#';
-                loginIcon.onclick = logout;
-                
-                profileIcon.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
-                profileIcon.style.color = 'white';
-            } else {
-                loginIcon.innerHTML = '🔐';
-                loginIcon.title = 'تسجيل الدخول';
-                loginIcon.classList.remove('logged-in');
-                loginIcon.href = './login.html';
-                loginIcon.onclick = null;
-            }
-        }
-        
-        function logout() {
-            if (confirm('هل تريد تسجيل الخروج؟')) {
-                localStorage.removeItem('userLoggedIn');
-                localStorage.removeItem('userEmail');
-                localStorage.removeItem('userName');
-                updateUserIcons();
-                alert('تم تسجيل الخروج بنجاح');
-            }
-        }
-        
-        // تحديث الأيقونات عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-    updateUserIcons();
-});
+      document.addEventListener('DOMContentLoaded', loadCollection);
     </script>
 
+    <footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 2rem 1rem; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.3);">
+      <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+        <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">تابعنا على وسائل التواصل الاجتماعي</h4>
+
+        <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem;">
+          <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener"
+             style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
+             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/facebook-hover.png';"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/facebook.png';">
+            <img src="/facebook.png" alt="Facebook" width="22" height="22" style="display:block">
+            فيسبوك
+          </a>
+
+          <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener"
+             style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
+             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/instagram-hover.png';"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/instagram.png';">
+            <img src="/instagram.png" alt="Instagram" width="22" height="22" style="display:block">
+            إنستغرام
+          </a>
+
+          <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener"
+             style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
+             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/pinterest-hover.png';"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/pinterest.png';">
+            <img src="/pinterest.png" alt="Pinterest" width="22" height="22" style="display:block">
+            بنترست
+          </a>
+
+          <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener"
+             style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
+             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/tiktok-hover.png';"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/tiktok.png';">
+            <img src="/tiktok.png" alt="TikTok" width="22" height="22" style="display:block">
+            تيك توك
+          </a>
+
+          <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener"
+             style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
+             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/snapchat-hover.png';"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/snapchat.png';">
+            <img src="/snapchat.png" alt="Snapchat" width="22" height="22" style="display:block">
+            سناب شات
+          </a>
+
+          <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener"
+             style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius: 14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
+             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/youtube-hover.png';"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/youtube.png';">
+            <img src="/youtube.png" alt="YouTube" width="22" height="22" style="display:block">
+            يوتيوب
+          </a>
+        </div>
+
+        <p style="color: #666; font-size: 0.9rem;">&copy; 2024 Smart Kids Kuwait - تابعونا لآخر العروض والمنتجات الجديدة</p>
+      </div>
+    </footer>
+
+    <script>
+      function updateUserIcons() {
+        const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+        const loginIcon = document.getElementById('loginIcon');
+        const profileIcon = document.getElementById('profileIcon');
+        
+        if (isLoggedIn) {
+          loginIcon.innerHTML = '✓';
+          loginIcon.title = 'مسجل دخول';
+          loginIcon.classList.add('logged-in');
+          loginIcon.href = '#';
+          loginIcon.onclick = logout;
+          
+          profileIcon.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
+          profileIcon.style.color = 'white';
+        } else {
+          loginIcon.innerHTML = '🔐';
+          loginIcon.title = 'تسجيل الدخول';
+          loginIcon.classList.remove('logged-in');
+          loginIcon.href = './login.html';
+          loginIcon.onclick = null;
+        }
+      }
+      
+      function logout() {
+        if (confirm('هل تريد تسجيل الخروج؟')) {
+          localStorage.removeItem('userLoggedIn');
+          localStorage.removeItem('userEmail');
+          localStorage.removeItem('userName');
+          updateUserIcons();
+          alert('تم تسجيل الخروج بنجاح');
+        }
+      }
+      
+      document.addEventListener('DOMContentLoaded', function() {
+        updateUserIcons();
+      });
+    </script>
 </body>
 </html>
