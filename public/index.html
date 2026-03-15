@@ -771,32 +771,18 @@
     <button class="checkout-btn" onclick="showCheckout()">إتمام الطلب</button>
   </aside>
 
-  <!-- Mobile Menu -->
-  <button class="menu-btn" id="menuBtn" aria-label="فتح القائمة" aria-controls="sideMenu" aria-expanded="false">☰</button>
+<!-- Mobile Menu -->
+<button class="menu-btn" id="menuBtn" aria-label="فتح القائمة" aria-controls="sideMenu" aria-expanded="false">☰</button>
 <div class="menu-backdrop" id="menuBackdrop" hidden></div>
 
 <aside class="side-menu" id="sideMenu" aria-hidden="true">
   <div class="side-menu__head">
-    <h3>📚 المجموعات</h3>
+    <h3>القائمة</h3>
     <button class="side-menu__close" id="menuClose" aria-label="إغلاق">×</button>
   </div>
 
   <nav class="side-menu__nav" id="categoriesMenu">
     <a href="./collections.html">🌟 جميع المجموعات <span class="side-menu__meta"></span></a>
-    <a href="./collection.html?id=interactive-offers">🎁 عروض القصص التفاعلية <span class="side-menu__meta"></span></a>
-    <a href="./collection.html?id=bestsellers">⭐ الأفضل مبيعاً <span class="side-menu__meta"></span></a>
-    <a href="./collection.html?id=latest-releases">🆕 أحدث الإصدارات <span class="side-menu__meta"></span></a>
-    <a href="./collection.html?id=montessori">🎯 مونتيسوري <span class="side-menu__meta"></span></a>
-    <a href="./collection.html?id=smart-pen">🖊️ القلم الناطق <span class="side-menu__meta"></span></a>
-    <a href="./collection.html?id=audio-stories">🎧 القصص الصوتية <span class="side-menu__meta"></span></a>
-    <a href="./collection.html?id=interactive-books">🤸 الكتب التفاعلية <span class="side-menu__meta"></span></a>
-    <a href="./collection.html?id=self-reading">👶 أنا أقرأ بنفسي <span class="side-menu__meta"></span></a>
-    <a href="./collection.html?id=single-stories">📖 القصص المفردة <span class="side-menu__meta"></span></a>
-    <a href="./collection.html?id=stories-world">📚 عالم القصص <span class="side-menu__meta"></span></a>
-    <a href="./collection.html?id=islamic-library">🕌 المكتبة الإسلامية <span class="side-menu__meta"></span></a>
-    <a href="./collection.html?id=history-encyclopedia">🏛️ موسوعات التاريخ <span class="side-menu__meta"></span></a>
-    <a href="./collection.html?id=favorite-books">💝 الكتب المحببة <span class="side-menu__meta"></span></a>
-    <a href="./collection.html?id=all-products">🛍️ كل المنتجات <span class="side-menu__meta"></span></a>
   </nav>
 
   <div class="side-menu__footer">
@@ -807,236 +793,225 @@
   </div>
 </aside>
 
-  <!-- Header -->
-  <header class="main-header">
-    <div class="header-container">
-      <div class="logo-section">
-        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" class="logo-img">
-        <div class="logo-text">
-          <h1>🏪 Smart Kids Kuwait</h1>
-          <p>متجر الألعاب والكتب التعليمية في الكويت</p>
-        </div>
-      </div>
-      <nav class="main-nav">
-        <a href="./products-full.html" class="nav-btn">🛍️ المتجر </a>
-        <a href="./collections.html" class="nav-btn">📚 المجموعات</a>
-        <a href="./contact.html" class="nav-btn">📞 اتصل بنا</a>
-      </nav>
-    </div>
-  </header>
-
-  <div class="container">
-    <div class="nav">
-      <a href="#products">المنتجات</a>
-      <a href="./collections.html">🏷️ المجموعات</a>
-      <a href="#orders" onclick="showOrders()">الطلبات</a>
-      <a href="#admin" onclick="showAdmin()">الإدارة</a>
-    </div>
-
-    <!-- ✅ البحث (مُصحح لاستدعاء window.productsLoader) -->
-    <div class="search-container">
-      <input
-        type="text"
-        class="search-input"
-        placeholder="🔍 ابحث في المنتجات..."
-        oninput="window.productsLoader && window.productsLoader.searchProducts(this.value)"
-      >
-    </div>
-
-    <!-- ✅ Filters required by products-loader.js -->
-    <div class="filters-bar">
-      <div id="categoryFilters">
-        <button class="filter-btn active" data-category="الكل">الكل</button>
+<!-- Header -->
+<header class="main-header">
+  <div class="header-container">
+    <div class="logo-section">
+      <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" class="logo-img">
+      <div class="logo-text">
+        <h1>🏪 Smart Kids Kuwait</h1>
+        <p>متجر الألعاب والكتب التعليمية في الكويت</p>
       </div>
     </div>
+    <nav class="main-nav">
+      <a href="./products-full.html" class="nav-btn">🛍️ المتجر</a>
+      <a href="./collections.html" class="nav-btn">📚 المجموعات</a>
+      <a href="https://wa.me/96566635393" target="_blank" rel="noopener" class="nav-btn">📞 اتصل بنا</a>
+    </nav>
+  </div>
+</header>
 
-    <!-- ✅ Stats required by products-loader.js -->
-    <div class="products-stats" id="productsStats">
-      <div class="stats-info">إجمالي المنتجات: <strong>0</strong></div>
-    </div>
+<div class="container">
+  <div class="nav">
+    <a href="#products">المنتجات</a>
+    <a href="./collections.html">🏷️ المجموعات</a>
+    <a href="#orders" onclick="showOrders()">الطلبات</a>
+    <a href="#admin" onclick="showAdmin()">الإدارة</a>
+  </div>
 
-    <!-- ✅ Products (ONLY placeholder - no fake samples) -->
-    <div class="products" id="products">
-      <div class="loading">📦 جاري تحميل المنتجات...</div>
-    </div>
+  <div class="search-container">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="🔍 ابحث في المنتجات..."
+      oninput="window.productsLoader && window.productsLoader.searchProducts(this.value)"
+    >
+  </div>
 
-    <!-- ✅ Load more required by products-loader.js -->
-    <div class="products-actions">
-      <button id="loadMoreBtn" class="nav-btn" style="display:none;">تحميل المزيد</button>
-    </div>
-
-    <!-- Checkout -->
-    <div class="order-form" id="orderForm">
-      <h2 style="color: var(--purple-dark); margin-bottom: 1rem;">إتمام الطلب</h2>
-      <form onsubmit="submitOrder(event)">
-        <div class="form-group">
-          <label for="customerName">الاسم الكامل:</label>
-          <input type="text" id="customerName" required>
-        </div>
-        <div class="form-group">
-          <label for="customerPhone">رقم الهاتف:</label>
-          <input type="tel" id="customerPhone" required>
-        </div>
-        <div class="form-group">
-          <label for="customerEmail">البريد الإلكتروني:</label>
-          <input type="email" id="customerEmail">
-        </div>
-        <div class="form-group">
-          <label for="customerAddress">العنوان:</label>
-          <input type="text" id="customerAddress" required>
-        </div>
-        <div class="cart-total">الإجمالي: <span id="checkoutTotal">0.000 د.ك</span></div>
-        <button type="submit" class="submit-order">تأكيد الطلب</button>
-      </form>
-      <div class="success-message" id="successMessage">
-        ✅ تم إرسال طلبك بنجاح! رقم الطلب: <span id="orderNumber"></span>
-      </div>
+  <div class="filters-bar">
+    <div id="categoryFilters">
+      <button class="filter-btn active" data-category="الكل">الكل</button>
     </div>
   </div>
 
-  <script src="collections-manager.js"></script>
-  <script>
-    /* =======================
-       Collections Menu Loading (محسّن)
-    ======================= */
-    async function loadCollectionsMenu(){
-      const menu = document.getElementById('categoriesMenu');
-      if (!menu) return;
+  <div class="products-stats" id="productsStats">
+    <div class="stats-info">إجمالي المنتجات: <strong>0</strong></div>
+  </div>
 
-      function renderFallback(){
-        menu.innerHTML = `
-          <a href="./collections.html">🌟 جميع المجموعات <span class="side-menu__meta"></span></a>
-          ${[
-            'montessori', 'stories-world', 'bestsellers', 'latest-releases',
-            'audio-stories', 'interactive-offers', 'single-stories', 'self-reading',
-            'interactive-books', 'islamic-library', 'smart-pen', 'history-encyclopedia',
-            'favorite-books'
-          ].map(key => {
-            const c = COLLECTIONS[key];
-            const url = `./collection.html?id=${encodeURIComponent(key)}`;
-            return `<a href="${url}">${c.icon} ${c.name} <span class="side-menu__meta"></span></a>`;
-          }).join('')}
-        `;
-      }
+  <div class="products" id="products">
+    <div class="loading">📦 جاري تحميل المنتجات...</div>
+  </div>
 
-      try {
-        if (!collectionsManager) {
-          initCollectionsManager();
-        }
-        await collectionsManager.loadProducts();
-        const collections = collectionsManager.getAllCollections();
+  <div class="products-actions">
+    <button id="loadMoreBtn" class="nav-btn" style="display:none;">تحميل المزيد</button>
+  </div>
 
-        const counts = {};
-        for (const col of collections) {
-          counts[col.key] = col.productCount || 0;
-        }
+  <div class="order-form" id="orderForm">
+    <h2 style="color: var(--purple-dark); margin-bottom: 1rem;">إتمام الطلب</h2>
+    <form onsubmit="submitOrder(event)">
+      <div class="form-group">
+        <label for="customerName">الاسم الكامل:</label>
+        <input type="text" id="customerName" required>
+      </div>
+      <div class="form-group">
+        <label for="customerPhone">رقم الهاتف:</label>
+        <input type="tel" id="customerPhone" required>
+      </div>
+      <div class="form-group">
+        <label for="customerEmail">البريد الإلكتروني:</label>
+        <input type="email" id="customerEmail">
+      </div>
+      <div class="form-group">
+        <label for="customerAddress">العنوان:</label>
+        <input type="text" id="customerAddress" required>
+      </div>
+      <div class="cart-total">الإجمالي: <span id="checkoutTotal">0.000 د.ك</span></div>
+      <button type="submit" class="submit-order">تأكيد الطلب</button>
+    </form>
+    <div class="success-message" id="successMessage">
+      ✅ تم إرسال طلبك بنجاح! رقم الطلب: <span id="orderNumber"></span>
+    </div>
+  </div>
+</div>
 
-        menu.innerHTML = `
-          <a href="./collections.html">🌟 جميع المجموعات <span class="side-menu__meta"></span></a>
-          ${collections.map(col => {
-            const url = `./collection.html?id=${encodeURIComponent(col.key)}`;
-            return `<a href="${url}">${col.icon} ${col.name} <span class="side-menu__meta">(${counts[col.key] || 0})</span></a>`;
-          }).join('')}
-        `;
-      } catch (e){
-        console.error('خطأ في تحميل المجموعات:', e);
-        renderFallback();
-      }
+<script src="collections-manager.js"></script>
+<script>
+  async function loadCollectionsMenu() {
+    const menu = document.getElementById('categoriesMenu');
+    if (!menu) return;
+
+    function renderFallback() {
+      menu.innerHTML = `
+        <a href="./collections.html">🌟 جميع المجموعات <span class="side-menu__meta"></span></a>
+        <a href="./collection.html?id=interactive-offers">🎁 عروض القصص التفاعلية <span class="side-menu__meta"></span></a>
+        <a href="./collection.html?id=bestsellers">⭐ الأفضل مبيعاً <span class="side-menu__meta"></span></a>
+        <a href="./collection.html?id=latest-releases">🆕 أحدث الإصدارات <span class="side-menu__meta"></span></a>
+        <a href="./collection.html?id=montessori">🎯 مونتيسوري <span class="side-menu__meta"></span></a>
+        <a href="./collection.html?id=smart-pen">🖊️ القلم الناطق <span class="side-menu__meta"></span></a>
+        <a href="./collection.html?id=audio-stories">🎧 القصص الصوتية <span class="side-menu__meta"></span></a>
+        <a href="./collection.html?id=interactive-books">🤸 الكتب التفاعلية <span class="side-menu__meta"></span></a>
+        <a href="./collection.html?id=self-reading">👶 أنا أقرأ بنفسي <span class="side-menu__meta"></span></a>
+        <a href="./collection.html?id=single-stories">📖 القصص المفردة <span class="side-menu__meta"></span></a>
+        <a href="./collection.html?id=stories-world">📚 عالم القصص <span class="side-menu__meta"></span></a>
+        <a href="./collection.html?id=islamic-library">🕌 المكتبة الإسلامية <span class="side-menu__meta"></span></a>
+        <a href="./collection.html?id=history-encyclopedia">🏛️ موسوعات التاريخ <span class="side-menu__meta"></span></a>
+        <a href="./collection.html?id=favorite-books">💝 الكتب المحببة <span class="side-menu__meta"></span></a>
+        <a href="./collection.html?id=all-products">🛍️ كل المنتجات <span class="side-menu__meta"></span></a>
+      `;
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      setupMenu();
-      updateCartDisplay();
-      loadCollectionsMenu();
-    });
-  </script>
+    try {
+      if (!collectionsManager) {
+        initCollectionsManager();
+      }
 
-  <!-- ✅ هنا الداتا: خليها محلية على Vercel -->
-  <script>
-    window.DATA_URL_CANDIDATES = ["/products.json"];
-  </script>
+      await collectionsManager.loadProducts();
+      const collections = collectionsManager.getAllCollections();
 
-  <!-- ✅ Products Loader -->
-  <script src="products-loader.js"></script>
+      menu.innerHTML = `
+        <a href="./collections.html">🌟 جميع المجموعات <span class="side-menu__meta"></span></a>
+        ${collections.map(col => {
+          const url = `./collection.html?id=${encodeURIComponent(col.key)}`;
+          const count = col.productCount || 0;
+          return `<a href="${url}">${col.icon} ${col.name} <span class="side-menu__meta">(${count})</span></a>`;
+        }).join('')}
+      `;
+    } catch (e) {
+      console.error('خطأ في تحميل المجموعات:', e);
+      renderFallback();
+    }
+  }
 
-  <!-- Footer -->
-  <footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 3rem 1rem 1rem; margin-top: 4rem; border-top: 1px solid rgba(255,255,255,0.3);">
-    <div style="max-width: 1200px; margin: 0 auto;">
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
-        <div>
-          <h3 style="color: var(--purple-dark); margin-bottom: 1rem; font-size: 1.3rem;">🏪 Smart Kids Kuwait</h3>
-          <p style="color: #666; line-height: 1.6;">متجر الألعاب التعليمية الأول في الكويت</p>
-          <p style="color: #666; line-height: 1.6;">نقدم أفضل المنتجات لتنمية قدرات أطفالكم</p>
-        </div>
+  document.addEventListener('DOMContentLoaded', () => {
+    setupMenu();
+    updateCartDisplay();
+    loadCollectionsMenu();
+  });
+</script>
 
-        <div>
-          <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">📞 تواصل معنا</h4>
-          <p style="color: #666; margin-bottom: 0.5rem;">📱 واتساب: +965 66635393</p>
-          <p style="color: #666; margin-bottom: 0.5rem;">📧 البريد: info@smartkidskw.com</p>
-          <p style="color: #666; margin-bottom: 0.5rem;">📍 الكويت، الكويت</p>
-        </div>
+<script>
+  window.DATA_URL_CANDIDATES = ["/products.json"];
+</script>
 
-        <div>
-          <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">🔗 روابط سريعة</h4>
-          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <a href="./about.html" style="color: #666; text-decoration: none;">عن المتجر</a>
-            <a href="./refund-policy.html" style="color: #666; text-decoration: none;">سياسة الإرجاع</a>
-            <a href="./terms-of-service.html" style="color: #666; text-decoration: none;">شروط الخدمة</a>
-            <a href="./contact.html" style="color: #666; text-decoration: none;">اتصل بنا</a>
-          </div>
-        </div>
+<script src="products-loader.js"></script>
 
-        <div class="social-grid">
-          <a class="social-btn facebook" href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener"
-             title="فيسبوك" aria-label="Facebook"
-             onmouseover="this.querySelector('img').src='/facebook-hover.png';"
-             onmouseout="this.querySelector('img').src='/facebook.png';">
-            <img src="/facebook.png" alt="Facebook" width="22" height="22" loading="lazy" decoding="async">
-          </a>
-
-          <a class="social-btn instagram" href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener"
-             title="إنستغرام" aria-label="Instagram"
-             onmouseover="this.querySelector('img').src='/instagram-hover.png';"
-             onmouseout="this.querySelector('img').src='/instagram.png';">
-            <img src="/instagram.png" alt="Instagram" width="22" height="22" loading="lazy" decoding="async">
-          </a>
-
-          <a class="social-btn pinterest" href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener"
-             title="بنترست" aria-label="Pinterest"
-             onmouseover="this.querySelector('img').src='/pinterest-hover.png';"
-             onmouseout="this.querySelector('img').src='/pinterest.png';">
-            <img src="/pinterest.png" alt="Pinterest" width="22" height="22" loading="lazy" decoding="async">
-          </a>
-
-          <a class="social-btn tiktok" href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener"
-             title="تيك توك" aria-label="TikTok"
-             onmouseover="this.querySelector('img').src='/tiktok-hover.png';"
-             onmouseout="this.querySelector('img').src='/tiktok.png';">
-            <img src="/tiktok.png" alt="TikTok" width="22" height="22" loading="lazy" decoding="async">
-          </a>
-
-          <a class="social-btn snapchat" href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener"
-             title="سناب شات" aria-label="Snapchat"
-             onmouseover="this.querySelector('img').src='/snapchat-hover.png';"
-             onmouseout="this.querySelector('img').src='/snapchat.png';">
-            <img src="/snapchat.png" alt="Snapchat" width="22" height="22" loading="lazy" decoding="async">
-          </a>
-
-          <a class="social-btn youtube" href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener"
-             title="يوتيوب" aria-label="YouTube"
-             onmouseover="this.querySelector('img').src='/youtube-hover.png';"
-             onmouseout="this.querySelector('img').src='/youtube.png';">
-            <img src="/youtube.png" alt="YouTube" width="22" height="22" loading="lazy" decoding="async">
-          </a>
-        </div>
-
+<footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 3rem 1rem 1rem; margin-top: 4rem; border-top: 1px solid rgba(255,255,255,0.3);">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 2rem;">
+      <div>
+        <h3 style="color: var(--purple-dark); margin-bottom: 1rem; font-size: 1.3rem;">🏪 Smart Kids Kuwait</h3>
+        <p style="color: #666; line-height: 1.6;">متجر الألعاب التعليمية الأول في الكويت</p>
+        <p style="color: #666; line-height: 1.6;">نقدم أفضل المنتجات لتنمية قدرات أطفالكم</p>
       </div>
 
-      <div style="text-align: center; padding-top: 2rem; border-top: 1px solid rgba(106, 76, 147, 0.2); color: #666;">
-        <p>&copy; 2024 Smart Kids Kuwait. جميع الحقوق محفوظة.</p>
+      <div>
+        <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">📞 تواصل معنا</h4>
+        <p style="color: #666; margin-bottom: 0.5rem;">📱 واتساب: +965 66635393</p>
+        <p style="color: #666; margin-bottom: 0.5rem;">📧 البريد: info@smartkidskw.com</p>
+        <p style="color: #666; margin-bottom: 0.5rem;">📍 الكويت، الكويت</p>
+      </div>
+
+      <div>
+        <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">🔗 روابط سريعة</h4>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <a href="./index.html" style="color: #666; text-decoration: none;">عن المتجر</a>
+          <a href="./refund-policy.html" style="color: #666; text-decoration: none;">سياسة الإرجاع</a>
+          <a href="./terms-of-service.html" style="color: #666; text-decoration: none;">شروط الخدمة</a>
+          <a href="https://wa.me/96566635393" target="_blank" rel="noopener" style="color: #666; text-decoration: none;">اتصل بنا</a>
+        </div>
+      </div>
+
+      <div class="social-grid">
+        <a class="social-btn facebook" href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener"
+           title="فيسبوك" aria-label="Facebook"
+           onmouseover="this.querySelector('img').src='/facebook-hover.png';"
+           onmouseout="this.querySelector('img').src='/facebook.png';">
+          <img src="/facebook.png" alt="Facebook" width="22" height="22" loading="lazy" decoding="async">
+        </a>
+
+        <a class="social-btn instagram" href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener"
+           title="إنستغرام" aria-label="Instagram"
+           onmouseover="this.querySelector('img').src='/instagram-hover.png';"
+           onmouseout="this.querySelector('img').src='/instagram.png';">
+          <img src="/instagram.png" alt="Instagram" width="22" height="22" loading="lazy" decoding="async">
+        </a>
+
+        <a class="social-btn pinterest" href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener"
+           title="بنترست" aria-label="Pinterest"
+           onmouseover="this.querySelector('img').src='/pinterest-hover.png';"
+           onmouseout="this.querySelector('img').src='/pinterest.png';">
+          <img src="/pinterest.png" alt="Pinterest" width="22" height="22" loading="lazy" decoding="async">
+        </a>
+
+        <a class="social-btn tiktok" href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener"
+           title="تيك توك" aria-label="TikTok"
+           onmouseover="this.querySelector('img').src='/tiktok-hover.png';"
+           onmouseout="this.querySelector('img').src='/tiktok.png';">
+          <img src="/tiktok.png" alt="TikTok" width="22" height="22" loading="lazy" decoding="async">
+        </a>
+
+        <a class="social-btn snapchat" href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener"
+           title="سناب شات" aria-label="Snapchat"
+           onmouseover="this.querySelector('img').src='/snapchat-hover.png';"
+           onmouseout="this.querySelector('img').src='/snapchat.png';">
+          <img src="/snapchat.png" alt="Snapchat" width="22" height="22" loading="lazy" decoding="async">
+        </a>
+
+        <a class="social-btn youtube" href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener"
+           title="يوتيوب" aria-label="YouTube"
+           onmouseover="this.querySelector('img').src='/youtube-hover.png';"
+           onmouseout="this.querySelector('img').src='/youtube.png';">
+          <img src="/youtube.png" alt="YouTube" width="22" height="22" loading="lazy" decoding="async">
+        </a>
       </div>
     </div>
-  </footer>
+
+    <div style="text-align: center; padding-top: 2rem; border-top: 1px solid rgba(106, 76, 147, 0.2); color: #666;">
+      <p>&copy; 2024 Smart Kids Kuwait. جميع الحقوق محفوظة.</p>
+    </div>
+  </div>
+</footer>
+
 <script>
 function setupMenu() {
   const menuBtn = document.getElementById('menuBtn');
@@ -1052,7 +1027,7 @@ function setupMenu() {
     menuBackdrop.hidden = false;
     menuBtn.setAttribute('aria-expanded', 'true');
     document.body.style.overflow = 'hidden';
-    document.body.classList.add('menu-open');
+    menuBtn.style.display = 'none';
   }
 
   function closeMenu() {
@@ -1061,7 +1036,7 @@ function setupMenu() {
     menuBackdrop.hidden = true;
     menuBtn.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
-    document.body.classList.remove('menu-open');
+    menuBtn.style.display = '';
   }
 
   menuBtn.addEventListener('click', openMenu);
