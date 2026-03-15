@@ -602,9 +602,9 @@
               <div class="product-description">${description}</div>
               <div class="product-category">التصنيف: ${product.type || 'عام'}</div>
               <div class="product-price">${price.toFixed(3)} د.ك</div>
-              <button class="add-to-cart" onclick="window.location.href='product-details.html?id=${product.handle}&collection=${collectionKey}'">
-                        عرض التفاصيل
-                    </button>
+              <button class="add-to-cart" onclick="addToCart('${(product.name || product.title || '').replace(/'/g, "\\'")}', ${price}, '${product.id || product.handle || ''}')">
+  إضافة للسلة
+</button>
             </div>
           </div>
         `;
