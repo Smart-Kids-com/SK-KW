@@ -127,17 +127,60 @@ function _matchesCollection(rawProduct, collection) {
     }
   }
 
-  const hay = _norm(`${rawProduct.title || ''} ${rawProduct.type || ''} ${rawProduct.body_html || ''}`);
+  const hay = _norm(`${rawProduct.title || rawProduct.name || ''} ${rawProduct.type || rawProduct.category || ''} ${rawProduct.body_html || rawProduct.description || ''}`);
   return colTags.some(ct => ct && hay.includes(ct));
 }
 
 function getCollectionKeyForProduct(rawProduct) {
-  for (const key of COLLECTION_PRIORITY) {
-    const col = COLLECTIONS[key];
-    if (!col) continue;
-    if (_matchesCollection(rawProduct, col)) return key;
-  }
-  return null;
+  const category = _norm(rawProduct.category || rawProduct.type || '');
+  const name = _norm(rawProduct.name || rawProduct.title || '');
+  const desc = _norm(rawProduct.description || rawProduct.body_html || '');
+  const hay = `${category} ${name} ${desc}`;
+
+  if (hay.includes('مونتيسوري')) return 'montessori';
+
+  if (
+    hay.includes('صوتية') ||
+    hay.includes('مسموعة') ||
+    hay.includes('كتب تعليمية صوتية') ||
+    hay.includes('قصص أطفال صوتية') ||
+    hay.includes('قصص تربوية وكتب صوتية')
+  ) return 'audio-stories';
+
+  if (
+    hay.includes('اسلام') ||
+    hay.includes('إسلام') ||
+    hay.includes('عروض كتب إسلامية') ||
+    hay.includes('قصص أطفال اسلامية')
+  ) return 'islamic-library';
+
+  if (
+    hay.includes('ناطقة بالقلم') ||
+    hay.includes('القلم الناطق')
+  ) return 'smart-pen';
+
+  if (hay.includes('القراءة المتدرجة')) return 'self-reading';
+
+  if (
+    hay.includes('تفاعلية') ||
+    hay.includes('تفاغلية') ||
+    hay.includes('تفاعلية متحركة') ||
+    hay.includes('علب تفاعلية')
+  ) return 'interactive-books';
+
+  if (hay.includes('ثلاثية الأبعاد')) return 'stories-world';
+
+  if (
+    hay.includes('قصص الأطفال') ||
+    hay.includes('قصص أطفال')
+  ) return 'single-stories';
+
+  if (
+    hay.includes('مكتبتي عربي') ||
+    hay.includes('كتب تعليمية')
+  ) return 'favorite-books';
+
+  return 'all-products';
 }
 
 function getCategoryLabelForProduct(rawProduct) {
