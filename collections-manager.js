@@ -127,7 +127,7 @@ function _matchesCollection(rawProduct, collection) {
     }
   }
 
-  const hay = _norm(`${rawProduct.title || ''} ${rawProduct.type || ''} ${rawProduct.body_html || ''}`);
+  const hay = _norm(`${rawProduct.title || rawProduct.name || ''} ${rawProduct.type || rawProduct.category || ''} ${rawProduct.body_html || rawProduct.description || ''}`);
   return colTags.some(ct => ct && hay.includes(ct));
 }
 
