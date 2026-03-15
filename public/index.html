@@ -773,26 +773,39 @@
 
   <!-- Mobile Menu -->
   <button class="menu-btn" id="menuBtn" aria-label="فتح القائمة" aria-controls="sideMenu" aria-expanded="false">☰</button>
-  <div class="menu-backdrop" id="menuBackdrop" hidden></div>
+<div class="menu-backdrop" id="menuBackdrop" hidden></div>
 
-  <aside class="side-menu" id="sideMenu" aria-hidden="true">
-    <div class="side-menu__head">
-      <h3>📚 المجموعات</h3>
-      <button class="side-menu__close" id="menuClose" aria-label="إغلاق">×</button>
-    </div>
+<aside class="side-menu" id="sideMenu" aria-hidden="true">
+  <div class="side-menu__head">
+    <h3>📚 المجموعات</h3>
+    <button class="side-menu__close" id="menuClose" aria-label="إغلاق">×</button>
+  </div>
 
-    <nav class="side-menu__nav" id="categoriesMenu">
-      <!-- سيتم تعبئتها من ملف المنتجات باستخدام مجموعاتك الـ 14 -->
-      <a href="./collections.html">🌟 جميع المجموعات <span class="side-menu__meta"></span></a>
-    </nav>
+  <nav class="side-menu__nav" id="categoriesMenu">
+    <a href="./collections.html">🌟 جميع المجموعات <span class="side-menu__meta"></span></a>
+    <a href="./collection.html?id=interactive-offers">🎁 عروض القصص التفاعلية <span class="side-menu__meta"></span></a>
+    <a href="./collection.html?id=bestsellers">⭐ الأفضل مبيعاً <span class="side-menu__meta"></span></a>
+    <a href="./collection.html?id=latest-releases">🆕 أحدث الإصدارات <span class="side-menu__meta"></span></a>
+    <a href="./collection.html?id=montessori">🎯 مونتيسوري <span class="side-menu__meta"></span></a>
+    <a href="./collection.html?id=smart-pen">🖊️ القلم الناطق <span class="side-menu__meta"></span></a>
+    <a href="./collection.html?id=audio-stories">🎧 القصص الصوتية <span class="side-menu__meta"></span></a>
+    <a href="./collection.html?id=interactive-books">🤸 الكتب التفاعلية <span class="side-menu__meta"></span></a>
+    <a href="./collection.html?id=self-reading">👶 أنا أقرأ بنفسي <span class="side-menu__meta"></span></a>
+    <a href="./collection.html?id=single-stories">📖 القصص المفردة <span class="side-menu__meta"></span></a>
+    <a href="./collection.html?id=stories-world">📚 عالم القصص <span class="side-menu__meta"></span></a>
+    <a href="./collection.html?id=islamic-library">🕌 المكتبة الإسلامية <span class="side-menu__meta"></span></a>
+    <a href="./collection.html?id=history-encyclopedia">🏛️ موسوعات التاريخ <span class="side-menu__meta"></span></a>
+    <a href="./collection.html?id=favorite-books">💝 الكتب المحببة <span class="side-menu__meta"></span></a>
+    <a href="./collection.html?id=all-products">🛍️ كل المنتجات <span class="side-menu__meta"></span></a>
+  </nav>
 
-    <div class="side-menu__footer">
-      <a href="./collections.html">🌟 المجموعات</a>
-      <a href="./contact.html">📞 اتصل بنا</a>
-      <a href="./about.html">ℹ️ عن المتجر</a>
-      <a href="./profile.html">👤 حسابي</a>
-    </div>
-  </aside>
+  <div class="side-menu__footer">
+    <a href="./collections.html">🌟 المجموعات</a>
+    <a href="https://wa.me/96566635393" target="_blank" rel="noopener">📞 اتصل بنا</a>
+    <a href="./index.html">ℹ️ عن المتجر</a>
+    <a href="./index.html">👤 حسابي</a>
+  </div>
+</aside>
 
   <!-- Header -->
   <header class="main-header">
@@ -1025,38 +1038,40 @@
     </div>
   </footer>
 <script>
-  function setupMenu() {
-    const menuBtn = document.getElementById('menuBtn');
-    const menuBackdrop = document.getElementById('menuBackdrop');
-    const sideMenu = document.getElementById('sideMenu');
-    const menuClose = document.getElementById('menuClose');
+function setupMenu() {
+  const menuBtn = document.getElementById('menuBtn');
+  const menuBackdrop = document.getElementById('menuBackdrop');
+  const sideMenu = document.getElementById('sideMenu');
+  const menuClose = document.getElementById('menuClose');
 
-    if (!menuBtn || !menuBackdrop || !sideMenu || !menuClose) return;
+  if (!menuBtn || !menuBackdrop || !sideMenu || !menuClose) return;
 
-    function openMenu() {
-      sideMenu.classList.add('is-open');
-      sideMenu.setAttribute('aria-hidden', 'false');
-      menuBackdrop.hidden = false;
-      menuBtn.setAttribute('aria-expanded', 'true');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeMenu() {
-      sideMenu.classList.remove('is-open');
-      sideMenu.setAttribute('aria-hidden', 'true');
-      menuBackdrop.hidden = true;
-      menuBtn.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
-    }
-
-    menuBtn.addEventListener('click', openMenu);
-    menuClose.addEventListener('click', closeMenu);
-    menuBackdrop.addEventListener('click', closeMenu);
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeMenu();
-    });
+  function openMenu() {
+    sideMenu.classList.add('is-open');
+    sideMenu.setAttribute('aria-hidden', 'false');
+    menuBackdrop.hidden = false;
+    menuBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('menu-open');
   }
+
+  function closeMenu() {
+    sideMenu.classList.remove('is-open');
+    sideMenu.setAttribute('aria-hidden', 'true');
+    menuBackdrop.hidden = true;
+    menuBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+    document.body.classList.remove('menu-open');
+  }
+
+  menuBtn.addEventListener('click', openMenu);
+  menuClose.addEventListener('click', closeMenu);
+  menuBackdrop.addEventListener('click', closeMenu);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeMenu();
+  });
+}
 </script>
 </body>
 </html>
