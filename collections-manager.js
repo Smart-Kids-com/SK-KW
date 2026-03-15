@@ -172,49 +172,47 @@ class CollectionsManager {
     }
   }
 
-  async loadProducts() {
-    try {
-      // محاولة تحميل المنتجات من عدة مصادر
-      const urls = [
-        '/data/products_grouped.json',
-        './data/products_grouped.json',
-        '/products_grouped.json',
-        './products_grouped.json',
-        '/data/products.json',
-        './data/products.json',
-        '/products.json',
-        './products.json'
-      ];
+async loadProducts() {
+  try {
+    const urls = [
+      '/data/products_grouped.json',
+      './data/products_grouped.json',
+      '/products_grouped.json',
+      './products_grouped.json',
+      '/data/products.json',
+      './data/products.json',
+      '/products.json',
+      './products.json'
+    ];
 
-      let data = null;
-      for (const url of urls) {
-        try {
-          const res = await fetch(url, { cache: 'no-store' });
-          if (res.ok) {
-            data = await res.json();
-            break;
-          }
-        } catch (e) {
-          continue;
+    let data = null;
+    for (const url of urls) {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (res.ok) {
+          data = await res.json();
+          break;
         }
+      } catch (e) {
+        continue;
       }
-
-      if (!Array.isArray(data)) {
-        console.warn('لم يتم تحميل بيانات المنتجات، استخدام بيانات افتراضية');
-        this._rawProducts = this.getDefaultProducts();
-      } else {
-        this._rawProducts = data.filter(p => p.published && p.status === 'active');
-      }
-
-      // معالجة المنتجات وتوزيعها على المجموعات
-      this.processProducts();
-
-    } catch (error) {
-      console.error('خطأ في تحميل المنتجات:', error);
-      this._rawProducts = this.getDefaultProducts();
-      this.processProducts();
     }
+
+    if (!Array.isArray(data)) {
+      console.warn('لم يتم تحميل بيانات المنتجات، استخدام بيانات افتراضية');
+      this._rawProducts = this.getDefaultProducts();
+    } else {
+      this._rawProducts = data.filter(p => p && typeof p === 'object');
+    }
+
+    this.processProducts();
+
+  } catch (error) {
+    console.error('خطأ في تحميل المنتجات:', error);
+    this._rawProducts = this.getDefaultProducts();
+    this.processProducts();
   }
+}
 
   processProducts() {
     // تنظيف المنتجات في كل مجموعة
