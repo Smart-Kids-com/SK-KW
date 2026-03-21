@@ -758,6 +758,10 @@
         .replaceAll("'", '&#039;');
     }
 
+    function escapeJs(str) {
+      return String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
     async function loadCollection() {
       try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -884,14 +888,8 @@
     }
 
     function extractPrice(product) {
-      if (product.price != null && !isNaN(parseFloat(product.price))) {
-        return parseFloat(product.price);
-      }
-
-      if (product.variants && product.variants.length > 0 && product.variants[0].price) {
-        return parseFloat(product.variants[0].price);
-      }
-
+      if (product.price != null && !isNaN(parseFloat(product.price))) return parseFloat(product.price);
+      if (product.variants && product.variants.length > 0 && product.variants[0].price) return parseFloat(product.variants[0].price);
       return 0;
     }
 
@@ -910,10 +908,6 @@
       div.innerHTML = bodyHtml;
       const text = div.textContent || div.innerText || '';
       return text.length > 150 ? text.substring(0, 150) + '...' : text;
-    }
-
-    function escapeJs(str) {
-      return String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     }
 
     function addToCart(name, price, productId = null, productImage = '') {
