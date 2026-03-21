@@ -13,9 +13,6 @@
     :root {
       --purple-dark: #6a4c93;
       --purple-light: #9b59b6;
-      --glass-bg: rgba(255,255,255,0.25);
-      --glass-border: rgba(255,255,255,0.18);
-      --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
       --header-blue: #3160e0;
       --topbar-bg: #3f0448;
     }
@@ -60,8 +57,6 @@
       gap: 8px;
       padding: 10px 14px;
       border-bottom: 1px solid rgba(0,0,0,0.08);
-      position: relative;
-      z-index: 10;
     }
 
     .site-header-icons {
@@ -196,20 +191,11 @@
       display: inline-block;
     }
 
-    .browse-btn:hover {
-      transform: scale(1.02);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
-    }
-
     .loading {
       text-align: center;
       padding: 3rem;
       color: white;
       grid-column: 1 / -1;
-    }
-
-    .loading h3 {
-      margin-bottom: 0.5rem;
     }
 
     .whatsapp-float {
@@ -226,13 +212,6 @@
       text-decoration: none;
       box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
       z-index: 1000;
-      transition: all 0.3s ease;
-      animation: pulse 2s infinite;
-    }
-
-    .whatsapp-float:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 30px rgba(37, 211, 102, 0.6);
     }
 
     .whatsapp-icon-img {
@@ -240,12 +219,6 @@
       height: 34px;
       object-fit: contain;
       display: block;
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
-      70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
     }
 
     @media (max-width: 768px) {
@@ -302,15 +275,12 @@
 
   <header class="site-header">
     <div class="site-header-icons">
-      <a href="./index.html#orderForm" class="site-icon-btn" aria-label="السلة">🛒</a>
+      <a href="./index.html" class="site-icon-btn" aria-label="الرئيسية">🏠</a>
       <a href="./products-full.html" class="site-icon-btn" aria-label="بحث">🔍</a>
     </div>
 
     <div class="site-header-logo">
-      <img
-        src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543"
-        alt="Smart Kids Kuwait Logo"
-      >
+      <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo">
     </div>
 
     <button class="site-menu-btn" type="button" aria-label="القائمة" onclick="window.location.href='./index.html'">☰</button>
@@ -334,20 +304,13 @@
     </div>
   </div>
 
-  <script src="collections-manager.js"></script>
+  <script src="./collections-manager.js"></script>
   <script>
     async function loadCollections() {
       try {
-        if (!window.collectionsManager && typeof window.initCollectionsManager === 'function') {
-          window.initCollectionsManager();
-        }
-
-        if (!window.collectionsManager) {
-          throw new Error('Collections manager not found');
-        }
-
-        await window.collectionsManager.loadProducts();
-        const collections = window.collectionsManager.getAllCollections();
+        const manager = window.initCollectionsManager();
+        await manager.loadProducts();
+        const collections = manager.getAllCollections();
         renderCollections(collections);
       } catch (error) {
         console.error('خطأ في تحميل المجموعات:', error);
@@ -373,13 +336,13 @@
           <h3 class="collection-title">${collection.name}</h3>
           <p class="collection-description">${collection.description}</p>
           <div class="collection-count">${collection.productCount || 0} منتج</div>
-          <a href="./collection.html?id=${collection.key}" class="browse-btn" onclick="event.stopPropagation()">تصفح المجموعة</a>
+          <a href="./collection.html?id=${encodeURIComponent(collection.key)}" class="browse-btn" onclick="event.stopPropagation()">تصفح المجموعة</a>
         </div>
       `).join('');
     }
 
     function openCollection(collectionKey) {
-      window.location.href = `./collection.html?id=${collectionKey}`;
+      window.location.href = `./collection.html?id=${encodeURIComponent(collectionKey)}`;
     }
 
     function showError() {
@@ -387,7 +350,7 @@
       grid.innerHTML = `
         <div style="text-align:center; grid-column:1 / -1; padding:3rem; color:#fff;">
           <h3>⚠️ خطأ في تحميل المجموعات</h3>
-          <p style="margin-top:0.5rem;">تأكد من وجود ملف collections-manager.js والبيانات</p>
+          <p style="margin-top:.5rem;">تأكد من وجود collections-manager.js وملف المنتجات</p>
         </div>
       `;
     }
