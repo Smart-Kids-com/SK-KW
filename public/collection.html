@@ -13,10 +13,6 @@
     :root {
       --purple-dark: #6a4c93;
       --purple-light: #9b59b6;
-      --glass-bg: rgba(255,255,255,0.25);
-      --glass-border: rgba(255,255,255,0.18);
-      --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-      --success: #28a745;
       --deep-purple: #41064b;
       --blue: #3160e0;
     }
@@ -135,14 +131,10 @@
     .collection-hero {
       background: rgba(255,255,255,0.96);
       backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid rgba(255,255,255,0.22);
       border-radius: 0 0 22px 22px;
       padding: 14px 14px 18px;
       box-shadow: 0 8px 24px rgba(31, 38, 135, 0.18);
       text-align: center;
-      position: relative;
-      z-index: 1;
     }
 
     .collection-header {
@@ -158,10 +150,6 @@
       font-size: 1.8rem;
       line-height: 1;
       flex: 0 0 auto;
-    }
-
-    .collection-info {
-      min-width: 0;
     }
 
     .collection-info h1 {
@@ -220,12 +208,6 @@
       font-size: 0.9rem;
     }
 
-    .nav a:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-      background: white;
-    }
-
     .search-container {
       text-align: center;
       margin: 1.5rem 0;
@@ -243,16 +225,6 @@
       max-width: 460px;
     }
 
-    .search-input::placeholder {
-      color: #666;
-    }
-
-    .search-input:focus {
-      outline: none;
-      border-color: var(--purple-dark);
-      background: rgba(255,255,255,0.4);
-    }
-
     .products {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -263,7 +235,6 @@
     .product {
       background: rgba(255,255,255,0.25);
       backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255,255,255,0.18);
       border-radius: 20px;
       overflow: hidden;
@@ -271,14 +242,8 @@
       transition: all 0.3s;
     }
 
-    .product:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-    }
-
     .product-image {
       height: 280px;
-      position: relative;
       overflow: hidden;
       background: linear-gradient(45deg, #8e44ad, #c39bd3);
     }
@@ -287,12 +252,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.3s;
       display: block;
-    }
-
-    .product:hover .product-image img {
-      transform: scale(1.05);
     }
 
     .product-info {
@@ -337,7 +297,6 @@
       font-weight: bold;
       color: var(--purple-dark);
       margin-bottom: 1rem;
-      text-shadow: 0 0 10px rgba(106, 76, 147, 0.3);
     }
 
     .product-actions {
@@ -365,24 +324,12 @@
     .add-to-cart {
       background: linear-gradient(45deg, #6a4c93, #9b59b6);
       color: white;
-      box-shadow: 0 8px 32px rgba(106, 76, 147, 0.3);
-    }
-
-    .add-to-cart:hover {
-      transform: scale(1.02);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
-      background: linear-gradient(45deg, #7a5ba3, #ab69c6);
     }
 
     .view-details {
       background: rgba(255,255,255,0.85);
       color: var(--purple-dark);
       border: 1px solid rgba(106,76,147,0.18);
-    }
-
-    .view-details:hover {
-      background: white;
-      transform: scale(1.02);
     }
 
     .loading,
@@ -408,13 +355,6 @@
       text-decoration: none;
       border-radius: 25px;
       font-weight: bold;
-      transition: all 0.3s;
-      backdrop-filter: blur(10px);
-    }
-
-    .back-btn:hover {
-      background: rgba(255,255,255,0.3);
-      transform: translateY(-2px);
     }
 
     .cart-toast {
@@ -449,11 +389,6 @@
       padding: 16px 16px 10px;
       color: var(--blue);
       border-bottom: 1px solid rgba(0,0,0,0.06);
-    }
-
-    .cart-toast-head strong {
-      font-size: 1rem;
-      font-weight: 700;
     }
 
     .cart-toast-close {
@@ -530,14 +465,12 @@
       background: #fff;
       color: #6a1b75;
       border: 3px solid #9b4ab1;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.12);
     }
 
     .cart-toast-btn.primary {
       background: var(--deep-purple);
       color: #fff;
       border: 0;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
     }
 
     .cart-toast-continue {
@@ -564,13 +497,6 @@
       text-decoration: none;
       box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
       z-index: 1000;
-      transition: all 0.3s ease;
-      animation: pulse 2s infinite;
-    }
-
-    .whatsapp-float:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 30px rgba(37, 211, 102, 0.6);
     }
 
     .whatsapp-icon-img {
@@ -578,12 +504,6 @@
       height: 34px;
       object-fit: contain;
       display: block;
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7); }
-      70% { box-shadow: 0 0 0 10px rgba(37, 211, 102, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
     }
 
     @media (max-width: 768px) {
@@ -606,29 +526,6 @@
       .collection-hero {
         padding: 12px 12px 16px;
         border-radius: 0 0 18px 18px;
-      }
-
-      .collection-header {
-        gap: 8px;
-        align-items: flex-start;
-      }
-
-      .collection-icon {
-        font-size: 1.5rem;
-        margin-top: 2px;
-      }
-
-      .collection-info h1 {
-        font-size: 1.05rem;
-      }
-
-      .collection-info p {
-        font-size: 0.85rem;
-      }
-
-      .stat-badge {
-        font-size: 0.8rem;
-        padding: 7px 12px;
       }
 
       .products {
@@ -742,7 +639,7 @@
     </div>
   </div>
 
-  <script src="collections-manager.js"></script>
+  <script src="./collections-manager.js"></script>
   <script>
     let currentCollection = null;
     let allCollectionProducts = [];
@@ -772,16 +669,9 @@
           return;
         }
 
-        if (!window.collectionsManager && typeof window.initCollectionsManager === 'function') {
-          window.initCollectionsManager();
-        }
-
-        if (!window.collectionsManager) {
-          throw new Error('Collections manager not found');
-        }
-
-        await window.collectionsManager.loadProducts();
-        currentCollection = window.collectionsManager.getCollectionByKey(collectionId);
+        const manager = window.initCollectionsManager();
+        await manager.loadProducts();
+        currentCollection = manager.getCollectionByKey(collectionId);
 
         if (!currentCollection) {
           showError('المجموعة غير موجودة');
@@ -832,7 +722,6 @@
         const title = product.name || product.title || 'منتج';
         const category = product.category || product.type || 'عام';
         const id = product.id || product.handle || '';
-        const handle = product.handle || product.id || '';
 
         return `
           <div class="product">
@@ -858,12 +747,7 @@
                   أضف للسلة
                 </button>
 
-                <a
-                  class="view-details"
-                  href="./product-details.html?id=${encodeURIComponent(handle)}"
-                >
-                  عرض التفاصيل
-                </a>
+                <a class="view-details" href="./products-full.html">عرض التفاصيل</a>
               </div>
             </div>
           </div>
@@ -981,7 +865,7 @@
       }
 
       sessionStorage.setItem('cart', JSON.stringify(cart));
-      window.location.href = './index.html#checkout';
+      window.location.href = './index.html';
     }
 
     function showError(message) {
@@ -1010,59 +894,7 @@
 
   <footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 2rem 1rem; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.3);">
     <div style="max-width: 900px; margin: 0 auto; text-align: center;">
-      <h4 style="color: var(--purple-dark); margin-bottom: 1rem;">تابعنا على وسائل التواصل الاجتماعي</h4>
-
-      <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem;">
-        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener"
-           style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/facebook-hover.png';"
-           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/facebook.png';">
-          <img src="/facebook.png" alt="Facebook" width="22" height="22" style="display:block">
-          فيسبوك
-        </a>
-
-        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener"
-           style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/instagram-hover.png';"
-           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/instagram.png';">
-          <img src="/instagram.png" alt="Instagram" width="22" height="22" style="display:block">
-          إنستغرام
-        </a>
-
-        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener"
-           style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/pinterest-hover.png';"
-           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/pinterest.png';">
-          <img src="/pinterest.png" alt="Pinterest" width="22" height="22" style="display:block">
-          بنترست
-        </a>
-
-        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener"
-           style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/tiktok-hover.png';"
-           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/tiktok.png';">
-          <img src="/tiktok.png" alt="TikTok" width="22" height="22" style="display:block">
-          تيك توك
-        </a>
-
-        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener"
-           style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/snapchat-hover.png';"
-           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/snapchat.png';">
-          <img src="/snapchat.png" alt="Snapchat" width="22" height="22" style="display:block">
-          سناب شات
-        </a>
-
-        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener"
-           style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:14px; text-decoration:none; font-weight:700; color:#333; background: rgba(255,255,255,0.7); border:1px solid rgba(0,0,0,0.06); transition: transform .2s, box-shadow .2s;"
-           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.12)'; this.querySelector('img').src='/youtube-hover.png';"
-           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.querySelector('img').src='/youtube.png';">
-          <img src="/youtube.png" alt="YouTube" width="22" height="22" style="display:block">
-          يوتيوب
-        </a>
-      </div>
-
-      <p style="color: #666; font-size: 0.9rem;">&copy; 2024 Smart Kids Kuwait - تابعونا لآخر العروض والمنتجات الجديدة</p>
+      <p style="color: #666; font-size: 0.9rem;">&copy; 2024 Smart Kids Kuwait - تابعونا لآخر العروض</p>
     </div>
   </footer>
 </body>

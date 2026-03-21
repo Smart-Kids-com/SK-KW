@@ -16,12 +16,8 @@
       --card:#101014;
       --soft:#f5e9b9;
       --white:#fff;
-      --text:#161616;
-      --muted:#d8cde2;
       --accent:#ffd54a;
-      --line:rgba(255,255,255,.08);
       --shadow:0 12px 30px rgba(0,0,0,.22);
-      --radius:18px;
       --blue:#3160e0;
       --deep-purple:#551566;
     }
@@ -642,10 +638,6 @@
       .logo-wrap img,.drawer-logo img{ width:360px; }
       .card{ flex-basis:60%; }
     }
-
-    @media (max-width:480px){
-      .logo-wrap img,.drawer-logo img{ max-height:52px; }
-    }
   </style>
 </head>
 <body>
@@ -798,6 +790,7 @@
     <img src="/whatsapp-icon.png" alt="WhatsApp" class="whatsapp-icon-img">
   </a>
 
+  <script src="./collections-manager.js"></script>
   <script>
     let allProducts = [];
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -1025,77 +1018,19 @@
     }
 
     function pickGroups(products) {
-      const groups = {
-        islamic: [],
-        audio: [],
-        interactive: [],
-        offers: []
+      const manager = window.initCollectionsManager();
+      return {
+        islamic: manager.getProductsByCollection('islamic-library').slice(0, 10),
+        audio: manager.getProductsByCollection('audio-stories').slice(0, 10),
+        interactive: manager.getProductsByCollection('interactive-books').slice(0, 10),
+        offers: manager.getProductsByCollection('interactive-offers').slice(0, 10)
       };
-
-      products.forEach(product => {
-        const text = normalize(
-          `${getTitle(product)} ${product.category || ''} ${product.type || ''} ${getDescription(product)} ${Array.isArray(product.tags) ? product.tags.join(' ') : (product.tags || '')}`
-        );
-
-        if (
-          text.includes('اسلام') ||
-          text.includes('إسلام') ||
-          text.includes('الأنبياء') ||
-          text.includes('ربي') ||
-          text.includes('آية') ||
-          text.includes('اسلامية') ||
-          text.includes('إسلامية')
-        ) groups.islamic.push(product);
-
-        if (
-          text.includes('صوت') ||
-          text.includes('مسموع') ||
-          text.includes('ناطق') ||
-          text.includes('القلم الناطق') ||
-          text.includes('صوتية')
-        ) groups.audio.push(product);
-
-        if (
-          text.includes('تفاعلي') ||
-          text.includes('تفاعلية') ||
-          text.includes('ثلاثية') ||
-          text.includes('حركي') ||
-          text.includes('متحرك')
-        ) groups.interactive.push(product);
-
-        if (
-          text.includes('عرض') ||
-          text.includes('عروض') ||
-          text.includes('خصم') ||
-          text.includes('مجموعة')
-        ) groups.offers.push(product);
-      });
-
-      if (!groups.islamic.length) groups.islamic = products.slice(0, 6);
-      if (!groups.audio.length) groups.audio = products.slice(2, 8);
-      if (!groups.interactive.length) groups.interactive = products.slice(4, 10);
-      if (!groups.offers.length) groups.offers = products.slice(6, 12);
-
-      return groups;
-    }
-
-    async function loadProducts() {
-      const urls = ['/products.json', './products.json', '/data/products.json', './data/products.json'];
-
-      for (const url of urls) {
-        try {
-          const res = await fetch(url, { cache: 'no-store' });
-          if (!res.ok) continue;
-          const data = await res.json();
-          if (Array.isArray(data)) return data;
-        } catch (_) {}
-      }
-
-      return [];
     }
 
     async function initPage() {
-      allProducts = await loadProducts();
+      const manager = window.initCollectionsManager();
+      await manager.loadProducts();
+      allProducts = manager.products || [];
       updateCartCount();
 
       const groups = pickGroups(allProducts);
@@ -1142,7 +1077,9 @@
       }
     });
 
-    initPage();
+    initPage().catch(err => {
+      console.error(err);
+    });
   </script>
 </body>
 </html>

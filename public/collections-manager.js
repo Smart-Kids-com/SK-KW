@@ -1,6 +1,3 @@
-// Collections Manager - إدارة المجموعات والمنتجات
-// نسخة محسّنة وثابتة مع دعم كامل لـ 14 مجموعة
-
 const COLLECTIONS = {
   montessori: {
     name: 'مونتيسوري',
@@ -15,25 +12,25 @@ const COLLECTIONS = {
     icon: '📚'
   },
   bestsellers: {
-    name: 'Smart Kids Kuwait الأطفال المبتكرون الكويت الأفضل مبيعاً',
+    name: 'الأفضل مبيعاً',
     description: 'أكثر المنتجات مبيعاً والمفضلة عند العملاء',
     tags: ['الأفضل مبيعاً', 'bestseller', 'best seller', 'أكثر مبيعاً'],
     icon: '⭐'
   },
   'latest-releases': {
-    name: 'اكتشف أحدث إصداراتنا للأطفال',
+    name: 'أحدث الإصدارات',
     description: 'أحدث المنتجات والإصدارات الجديدة',
     tags: ['إصدارات جديدة', 'أحدث', 'جديد', 'new'],
     icon: '🆕'
   },
   'audio-stories': {
-    name: 'قصصي الصوتية المسموعة',
+    name: 'القصص الصوتية التعليمية للأطفال',
     description: 'قصص صوتية مسموعة مع صور جميلة',
-    tags: ['قصصي الصوتية المسموعة', 'صوتية', 'مسموعة', 'صوت', 'ناطق'],
+    tags: ['قصصي الصوتية المسموعة', 'صوتية', 'مسموعة', 'صوت', 'ناطق', 'القلم الناطق'],
     icon: '🎧'
   },
   'interactive-offers': {
-    name: 'عروض القصص التفاعلية',
+    name: 'عروض الأطفال المبتكرون',
     description: 'عروض خاصة على القصص والكتب التفاعلية',
     tags: ['عروض القصص التفاعلية', 'عروض', 'عرض', 'offer', 'offers'],
     icon: '🎁'
@@ -51,15 +48,15 @@ const COLLECTIONS = {
     icon: '👶'
   },
   'interactive-books': {
-    name: 'كتبي التفاعلية الحركية',
-    description: 'كتب تفاعلية مع أنشطة حركية',
-    tags: ['كتبي التفاعلية الحركية', 'تفاعلية', 'تفاعلية حركية', 'متحركة', 'علب تفاعلية'],
+    name: 'القصص التعليمية التفاعلية',
+    description: 'كتب وقصص تفاعلية مع أنشطة حركية',
+    tags: ['كتبي التفاعلية الحركية', 'تفاعلية', 'تفاعلية حركية', 'متحركة', 'علب تفاعلية', 'حركية'],
     icon: '🤸'
   },
   'islamic-library': {
-    name: 'عروض مكتبتي الإسلامية',
+    name: 'المجموعات الإسلامية المميزة',
     description: 'كتب وقصص إسلامية تعليمية',
-    tags: ['عروض مكتبتي الإسلامية', 'إسلامية', 'اسلامية', 'مكتبة إسلامية', 'قصص أطفال اسلامية'],
+    tags: ['عروض مكتبتي الإسلامية', 'إسلامية', 'اسلامية', 'مكتبة إسلامية', 'قصص أطفال اسلامية', 'قصص الأنبياء', 'الله وربي', 'نتعلم من آية'],
     icon: '🕌'
   },
   'smart-pen': {
@@ -75,15 +72,15 @@ const COLLECTIONS = {
     icon: '🏛️'
   },
   'favorite-books': {
-    name: 'الكُتب المُحببة للأطفال',
+    name: 'الكتب المحببة للأطفال',
     description: 'الكتب الكلاسيكية والمحبوبة من الأطفال',
-    tags: ['الكُتب المُحببة للأطفال', 'محببة', 'المفضلة', 'مكتبتي عربي', 'كتب تعليمية'],
+    tags: ['الكتب المحببة للأطفال', 'محببة', 'المفضلة', 'مكتبتي عربي', 'كتب تعليمية'],
     icon: '💝'
   },
   'all-products': {
-    name: 'تسوق جميع منتجاتنا الآن',
+    name: 'كل المنتجات',
     description: 'جميع المنتجات والعروض المتاحة',
-    tags: ['تسوق جميع منتجاتنا الآن', 'جميع المنتجات', 'all products'],
+    tags: ['جميع المنتجات', 'all products'],
     icon: '🛍️'
   }
 };
@@ -104,8 +101,6 @@ const COLLECTION_PRIORITY = [
   'favorite-books',
   'all-products'
 ];
-
-// -------------------- Helpers --------------------
 
 function _norm(v) {
   return String(v ?? '')
@@ -131,12 +126,12 @@ function _getProductTags(product) {
   return _splitToArray(product.tags).map(_norm);
 }
 
-function _buildProductHaystack(rawProduct) {
-  const tags = _getProductTags(rawProduct).join(' ');
-  const title = _norm(rawProduct.title || rawProduct.name || '');
-  const type = _norm(rawProduct.type || rawProduct.category || '');
-  const desc = _norm(_stripHtml(rawProduct.description || rawProduct.body_html || ''));
-  const vendor = _norm(rawProduct.vendor || '');
+function _buildProductHaystack(product) {
+  const tags = _getProductTags(product).join(' ');
+  const title = _norm(product.title || product.name || '');
+  const type = _norm(product.type || product.category || '');
+  const desc = _norm(_stripHtml(product.description || product.body_html || ''));
+  const vendor = _norm(product.vendor || '');
   return `${title} ${type} ${desc} ${tags} ${vendor}`;
 }
 
@@ -147,13 +142,13 @@ function _includesAny(haystack, words = []) {
   });
 }
 
-function _matchesCollection(rawProduct, collection) {
-  const hay = _buildProductHaystack(rawProduct);
+function _matchesCollection(product, collection) {
+  const hay = _buildProductHaystack(product);
   const colTags = (collection.tags || []).map(_norm);
 
   if (_includesAny(hay, colTags)) return true;
 
-  const productTags = _getProductTags(rawProduct);
+  const productTags = _getProductTags(product);
   for (const pt of productTags) {
     for (const ct of colTags) {
       if (!pt || !ct) continue;
@@ -164,32 +159,24 @@ function _matchesCollection(rawProduct, collection) {
   return false;
 }
 
-// -------------------- Main Classification --------------------
+function getCollectionKeyForProduct(product) {
+  const hay = _buildProductHaystack(product);
 
-function getCollectionKeyForProduct(rawProduct) {
-  const hay = _buildProductHaystack(rawProduct);
-
-  if (hay.includes('مونتيسوري') || hay.includes('montessori')) {
-    return 'montessori';
-  }
+  if (hay.includes('مونتيسوري') || hay.includes('montessori')) return 'montessori';
 
   if (
     hay.includes('الأفضل مبيعاً') ||
     hay.includes('أفضل مبيع') ||
     hay.includes('bestseller') ||
     hay.includes('best seller')
-  ) {
-    return 'bestsellers';
-  }
+  ) return 'bestsellers';
 
   if (
     hay.includes('جديد') ||
     hay.includes('أحدث') ||
     hay.includes('إصدارات جديدة') ||
     hay.includes('new release')
-  ) {
-    return 'latest-releases';
-  }
+  ) return 'latest-releases';
 
   if (
     hay.includes('صوتية') ||
@@ -199,9 +186,7 @@ function getCollectionKeyForProduct(rawProduct) {
     hay.includes('قصص تربوية وكتب صوتية') ||
     hay.includes('صوت الحيوانات') ||
     hay.includes('ناطق')
-  ) {
-    return 'audio-stories';
-  }
+  ) return 'audio-stories';
 
   if (
     hay.includes('اسلام') ||
@@ -214,25 +199,19 @@ function getCollectionKeyForProduct(rawProduct) {
     hay.includes('الله وربي') ||
     hay.includes('نتعلم من آية') ||
     hay.includes('الصحبة الصالحة')
-  ) {
-    return 'islamic-library';
-  }
+  ) return 'islamic-library';
 
   if (
     hay.includes('ناطقة بالقلم') ||
     hay.includes('القلم الناطق') ||
     hay.includes('قلم ناطق')
-  ) {
-    return 'smart-pen';
-  }
+  ) return 'smart-pen';
 
   if (
     hay.includes('القراءة المتدرجة') ||
     hay.includes('أنا أقرأ بنفسي') ||
     hay.includes('قراءة مستقلة')
-  ) {
-    return 'self-reading';
-  }
+  ) return 'self-reading';
 
   if (
     hay.includes('تفاعلية') ||
@@ -241,55 +220,43 @@ function getCollectionKeyForProduct(rawProduct) {
     hay.includes('علب تفاعلية') ||
     hay.includes('حركية') ||
     hay.includes('متحركة')
-  ) {
-    return 'interactive-books';
-  }
+  ) return 'interactive-books';
 
   if (
     hay.includes('ثلاثية الأبعاد') ||
     hay.includes('قصص مصورة') ||
     hay.includes('حكايات مصورة')
-  ) {
-    return 'stories-world';
-  }
+  ) return 'stories-world';
 
   if (
     hay.includes('قصص الأطفال') ||
     hay.includes('قصص أطفال') ||
     hay.includes('قصص مفردة')
-  ) {
-    return 'single-stories';
-  }
+  ) return 'single-stories';
 
   if (
     hay.includes('عرض') ||
     hay.includes('عروض') ||
     hay.includes('offer') ||
     hay.includes('offers')
-  ) {
-    return 'interactive-offers';
-  }
+  ) return 'interactive-offers';
 
   if (
     hay.includes('موسوعات التاريخ') ||
     hay.includes('تاريخ مصور') ||
     hay.includes('موسوعات')
-  ) {
-    return 'history-encyclopedia';
-  }
+  ) return 'history-encyclopedia';
 
   if (
     hay.includes('مكتبتي عربي') ||
     hay.includes('كتب تعليمية') ||
     hay.includes('محببة') ||
     hay.includes('المفضلة')
-  ) {
-    return 'favorite-books';
-  }
+  ) return 'favorite-books';
 
   for (const key of COLLECTION_PRIORITY) {
     const collection = COLLECTIONS[key];
-    if (collection && _matchesCollection(rawProduct, collection)) {
+    if (collection && _matchesCollection(product, collection)) {
       return key;
     }
   }
@@ -297,19 +264,8 @@ function getCollectionKeyForProduct(rawProduct) {
   return 'all-products';
 }
 
-function getCategoryLabelForProduct(rawProduct) {
-  const key = getCollectionKeyForProduct(rawProduct);
-  if (key && COLLECTIONS[key]) return COLLECTIONS[key].name;
-
-  const fallback = rawProduct.category || rawProduct.type;
-  return String(fallback || 'عام').trim();
-}
-
-// -------------------- Collections Manager --------------------
-
 class CollectionsManager {
-  constructor(options = {}) {
-    this.options = options;
+  constructor() {
     this.products = [];
     this._rawProducts = [];
     this.collections = new Map();
@@ -321,8 +277,6 @@ class CollectionsManager {
 
     for (const key of COLLECTION_PRIORITY) {
       const col = COLLECTIONS[key];
-      if (!col) continue;
-
       this.collections.set(key, {
         key,
         name: col.name,
@@ -336,52 +290,40 @@ class CollectionsManager {
   }
 
   async loadProducts() {
-    try {
-      const urls = [
-        '/data/products_grouped.json',
-        './data/products_grouped.json',
-        '/products_grouped.json',
-        './products_grouped.json',
-        '/data/products.json',
-        './data/products.json',
-        '/products.json',
-        './products.json'
-      ];
+    const urls = [
+      '/products.json',
+      './products.json',
+      '/data/products.json',
+      './data/products.json',
+      '/products_grouped.json',
+      './products_grouped.json',
+      '/data/products_grouped.json',
+      './data/products_grouped.json'
+    ];
 
-      let data = null;
+    let data = null;
 
-      for (const url of urls) {
-        try {
-          const res = await fetch(url, { cache: 'no-store' });
-          if (!res.ok) continue;
-
-          const json = await res.json();
-          if (Array.isArray(json)) {
-            data = json;
-            break;
-          }
-        } catch (_) {
-          // ignore and continue
+    for (const url of urls) {
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) continue;
+        const json = await res.json();
+        if (Array.isArray(json)) {
+          data = json;
+          break;
         }
-      }
-
-      if (!Array.isArray(data)) {
-        console.warn('لم يتم تحميل بيانات المنتجات، سيتم استخدام بيانات افتراضية');
-        this._rawProducts = this.getDefaultProducts();
-      } else {
-        this._rawProducts = data.filter(p => p && typeof p === 'object');
-      }
-
-      this.products = [...this._rawProducts];
-      this.processProducts();
-      return this._rawProducts;
-    } catch (error) {
-      console.error('خطأ في تحميل المنتجات:', error);
-      this._rawProducts = this.getDefaultProducts();
-      this.products = [...this._rawProducts];
-      this.processProducts();
-      return this._rawProducts;
+      } catch (e) {}
     }
+
+    if (!Array.isArray(data)) {
+      console.warn('لم يتم تحميل بيانات المنتجات، سيتم استخدام بيانات افتراضية');
+      data = this.getDefaultProducts();
+    }
+
+    this._rawProducts = data.filter(item => item && typeof item === 'object');
+    this.products = [...this._rawProducts];
+    this.processProducts();
+    return this._rawProducts;
   }
 
   processProducts() {
@@ -390,18 +332,13 @@ class CollectionsManager {
       collection.productCount = 0;
     }
 
-    for (const rawProduct of this._rawProducts) {
-      const collectionKey = getCollectionKeyForProduct(rawProduct);
-      const collection = this.collections.get(collectionKey);
+    for (const product of this._rawProducts) {
+      const key = getCollectionKeyForProduct(product);
+      const selected = this.collections.get(key);
+      const all = this.collections.get('all-products');
 
-      if (collection) {
-        collection.products.push(rawProduct);
-      }
-
-      const allProductsCollection = this.collections.get('all-products');
-      if (allProductsCollection && collectionKey !== 'all-products') {
-        allProductsCollection.products.push(rawProduct);
-      }
+      if (selected) selected.products.push(product);
+      if (all && key !== 'all-products') all.products.push(product);
     }
 
     for (const collection of this.collections.values()) {
@@ -410,9 +347,7 @@ class CollectionsManager {
   }
 
   getAllCollections() {
-    return COLLECTION_PRIORITY
-      .map(key => this.collections.get(key))
-      .filter(Boolean);
+    return COLLECTION_PRIORITY.map(key => this.collections.get(key)).filter(Boolean);
   }
 
   getCollectionByKey(key) {
@@ -420,8 +355,8 @@ class CollectionsManager {
   }
 
   getProductsByCollection(key) {
-    const col = this.getCollectionByKey(key);
-    return col ? col.products : [];
+    const collection = this.getCollectionByKey(key);
+    return collection ? collection.products : [];
   }
 
   getDefaultProducts() {
@@ -450,40 +385,28 @@ class CollectionsManager {
   }
 }
 
-// -------------------- Global Init --------------------
-
 let collectionsManager = null;
 
 function initCollectionsManager() {
   if (!collectionsManager) {
     collectionsManager = new CollectionsManager();
   }
+  if (typeof window !== 'undefined') {
+    window.collectionsManager = collectionsManager;
+  }
   return collectionsManager;
+}
+
+if (typeof window !== 'undefined') {
+  window.CollectionsManager = CollectionsManager;
+  window.COLLECTIONS = COLLECTIONS;
+  window.COLLECTION_PRIORITY = COLLECTION_PRIORITY;
+  window.getCollectionKeyForProduct = getCollectionKeyForProduct;
+  window.initCollectionsManager = initCollectionsManager;
 }
 
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => {
     initCollectionsManager();
   });
-}
-
-if (typeof window !== 'undefined') {
-  window.CollectionsManager = CollectionsManager;
-  window.initCollectionsManager = initCollectionsManager;
-  window.COLLECTIONS = COLLECTIONS;
-  window.COLLECTION_PRIORITY = COLLECTION_PRIORITY;
-  window.getCollectionKeyForProduct = getCollectionKeyForProduct;
-  window.getCategoryLabelForProduct = getCategoryLabelForProduct;
-  window.collectionsManager = collectionsManager;
-}
-
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = {
-    CollectionsManager,
-    initCollectionsManager,
-    COLLECTIONS,
-    COLLECTION_PRIORITY,
-    getCollectionKeyForProduct,
-    getCategoryLabelForProduct
-  };
 }
