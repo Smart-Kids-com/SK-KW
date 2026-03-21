@@ -22,6 +22,8 @@
       --line:rgba(255,255,255,.08);
       --shadow:0 12px 30px rgba(0,0,0,.22);
       --radius:18px;
+      --blue:#3160e0;
+      --deep-purple:#551566;
     }
 
     html { scroll-behavior: smooth; }
@@ -72,7 +74,7 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      color:#2d57da;
+      color:var(--blue);
     }
 
     .menu-btn{
@@ -164,7 +166,7 @@
 
     .drawer-head{
       background:#fff;
-      color:#2d57da;
+      color:var(--blue);
       display:grid;
       grid-template-columns:52px 1fr 90px;
       align-items:center;
@@ -178,7 +180,7 @@
     .drawer-close{
       border:0;
       background:transparent;
-      color:#2d57da;
+      color:var(--blue);
       font-size:2.2rem;
       cursor:pointer;
       width:46px;
@@ -304,7 +306,7 @@
     }
 
     .search-item-price{
-      color:#5b1970;
+      color:var(--deep-purple);
       font-weight:700;
       margin-bottom:8px;
     }
@@ -314,7 +316,7 @@
       border-radius:10px;
       min-height:38px;
       padding:0 14px;
-      background:#5b1970;
+      background:var(--deep-purple);
       color:#fff;
       font-weight:700;
       cursor:pointer;
@@ -326,7 +328,7 @@
       margin-top:10px;
       border:0;
       border-radius:12px;
-      background:#5b1970;
+      background:var(--deep-purple);
       color:#fff;
       font-weight:700;
       cursor:pointer;
@@ -403,7 +405,7 @@
       border:0;
       border-radius:14px;
       background:#f2f2f2;
-      color:#551566;
+      color:var(--deep-purple);
       font-size:1rem;
       font-weight:800;
       cursor:pointer;
@@ -569,7 +571,7 @@
       border:0;
       border-radius:12px;
       background:#f2f2f2;
-      color:#551566;
+      color:var(--deep-purple);
       font-size:.98rem;
       font-weight:800;
       cursor:pointer;
@@ -624,15 +626,25 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:1.9rem;
       box-shadow:0 12px 28px rgba(0,0,0,.25);
       z-index:1400;
+    }
+
+    .whatsapp-icon-img{
+      width:36px;
+      height:36px;
+      object-fit:contain;
+      display:block;
     }
 
     @media (min-width:700px){
       .page{ width:min(100%, 620px); }
       .logo-wrap img,.drawer-logo img{ width:360px; }
       .card{ flex-basis:60%; }
+    }
+
+    @media (max-width:480px){
+      .logo-wrap img,.drawer-logo img{ max-height:52px; }
     }
   </style>
 </head>
@@ -782,7 +794,9 @@
     </footer>
   </main>
 
-  <a class="whatsapp-float" href="https://wa.me/96566635393" target="_blank" rel="noopener" aria-label="واتساب">💬</a>
+  <a class="whatsapp-float" href="https://wa.me/96566635393" target="_blank" rel="noopener" aria-label="واتساب">
+    <img src="/whatsapp-icon.png" alt="WhatsApp" class="whatsapp-icon-img">
+  </a>
 
   <script>
     let allProducts = [];
@@ -898,7 +912,7 @@
         return;
       }
 
-      box.innerHTML = results.map((product, index) => `
+      box.innerHTML = results.map(product => `
         <div class="search-item">
           <div class="search-item-title">${escapeHtml(getTitle(product))}</div>
           <div class="search-item-price">KWD ${getPrice(product).toFixed(3)}</div>
@@ -946,7 +960,10 @@
       const dots = document.getElementById('heroDots');
       const items = products.slice(0, 5);
 
-      if (!items.length) return;
+      if (!items.length) {
+        track.innerHTML = `<div class="empty-box">لا توجد منتجات حالياً</div>`;
+        return;
+      }
 
       track.innerHTML = items.map(heroSlide).join('');
       dots.innerHTML = items.map((_, i) => `<button class="hero-dot ${i === 0 ? 'active' : ''}" data-index="${i}" type="button"></button>`).join('');
