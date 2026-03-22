@@ -1,5 +1,4 @@
 {
-  "framework": "nodejs",
   "cleanUrls": true,
   "trailingSlash": false,
   "public": true,
