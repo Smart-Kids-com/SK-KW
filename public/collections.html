@@ -76,6 +76,7 @@
       font-size: 1.6rem;
       cursor: pointer;
       line-height: 1;
+      position: relative;
     }
 
     .site-header-logo {
@@ -118,15 +119,15 @@
     .side-menu {
       position: fixed;
       top: 0;
-      left: 0;
+      right: 0;
       width: min(92vw, 400px);
       height: 100vh;
       background: rgba(255,255,255,0.98);
       backdrop-filter: blur(18px);
-      border-right: 1px solid rgba(0,0,0,0.08);
-      box-shadow: 12px 0 30px rgba(0,0,0,0.18);
+      border-left: 1px solid rgba(0,0,0,0.08);
+      box-shadow: -12px 0 30px rgba(0,0,0,0.18);
       z-index: 1200;
-      transform: translateX(-105%);
+      transform: translateX(105%);
       transition: transform .25s ease;
       display: flex;
       flex-direction: column;
@@ -219,8 +220,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      font-size: 1rem;
+      overflow: hidden;
+    }
+
+    .side-menu__social img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      display: block;
     }
 
     .container {
@@ -248,73 +255,79 @@
 
     .collections-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
       margin: 0;
     }
 
     .collection-card {
-      background: rgba(255,255,255,0.25);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 20px;
-      padding: 2rem;
-      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+      background: rgba(255,255,255,0.22);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 18px;
+      padding: 1.15rem;
+      box-shadow: 0 8px 24px rgba(31, 38, 135, 0.24);
       transition: all 0.3s;
       text-align: center;
       cursor: pointer;
+      min-height: 250px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     .collection-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      transform: translateY(-6px);
+      box-shadow: 0 14px 34px rgba(0,0,0,0.22);
     }
 
     .collection-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
+      font-size: 2.2rem;
+      margin-bottom: 0.65rem;
       display: block;
     }
 
     .collection-title {
-      font-size: 1.35rem;
-      font-weight: bold;
+      font-size: 1.05rem;
+      font-weight: 800;
       color: var(--purple-dark);
-      margin-bottom: 1rem;
-      line-height: 1.4;
+      margin-bottom: 0.65rem;
+      line-height: 1.45;
     }
 
     .collection-description {
       color: #555;
-      margin-bottom: 1.5rem;
-      font-size: 0.95rem;
-      line-height: 1.6;
-      min-height: 52px;
+      margin-bottom: 1rem;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      min-height: 56px;
     }
 
     .collection-count {
       background: linear-gradient(45deg, #6a4c93, #9b59b6);
       color: white;
-      padding: 8px 16px;
+      padding: 7px 14px;
       border-radius: 20px;
-      font-weight: bold;
+      font-weight: 700;
       display: inline-block;
-      margin-bottom: 1rem;
+      margin-bottom: 0.9rem;
+      font-size: .9rem;
     }
 
     .browse-btn {
       width: 100%;
-      padding: 12px 24px;
+      padding: 11px 18px;
       background: linear-gradient(45deg, #6a4c93, #9b59b6);
       color: white;
       border: none;
-      border-radius: 15px;
+      border-radius: 14px;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.3s;
       text-decoration: none;
       display: inline-block;
+      font-size: .95rem;
     }
 
     .loading {
@@ -375,21 +388,32 @@
       }
 
       .collections-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.9rem;
       }
 
       .collection-card {
-        padding: 1.5rem;
+        padding: 1rem;
+        min-height: 220px;
       }
 
       .collection-title {
-        font-size: 1.15rem;
+        font-size: 0.95rem;
       }
 
       .collection-description {
-        font-size: 0.9rem;
-        min-height: auto;
+        font-size: 0.82rem;
+        min-height: 48px;
+      }
+
+      .browse-btn {
+        font-size: .9rem;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .collections-grid {
+        grid-template-columns: 1fr 1fr;
       }
     }
   </style>
@@ -403,9 +427,9 @@
   <header class="site-header">
     <button class="site-menu-btn" id="menuBtn" type="button" aria-label="القائمة">☰</button>
 
-    <div class="site-header-logo">
+    <a href="./index.html" class="site-header-logo" aria-label="الصفحة الرئيسية">
       <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo">
-    </div>
+    </a>
 
     <div class="site-header-icons">
       <a href="./products-full.html" class="site-icon-btn" aria-label="بحث">🔍</a>
@@ -419,9 +443,9 @@
     <div class="side-menu__head">
       <button class="side-menu__close" id="menuClose" type="button" aria-label="إغلاق">×</button>
 
-      <div class="side-menu__logo">
+      <a href="./index.html" class="side-menu__logo" aria-label="الصفحة الرئيسية">
         <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo">
-      </div>
+      </a>
 
       <div class="side-menu__icons">
         <a href="./products-full.html" class="site-icon-btn" aria-label="بحث">🔍</a>
@@ -444,18 +468,18 @@
 
     <div class="side-menu__footer">
       <div class="side-menu__social">
-        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener">f</a>
-        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener">◎</a>
-        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener">p</a>
-        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener">♪</a>
-        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener">◉</a>
-        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener">▶</a>
+        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.png" alt="Facebook"></a>
+        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.png" alt="Instagram"></a>
+        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.png" alt="Pinterest"></a>
+        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.png" alt="TikTok"></a>
+        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.png" alt="Snapchat"></a>
+        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.png" alt="YouTube"></a>
       </div>
     </div>
   </aside>
 
   <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
-    <img src="/whatsapp-icon.png" alt="WhatsApp" class="whatsapp-icon-img">
+    <img src="/icon-whatsapp.png" alt="WhatsApp" class="whatsapp-icon-img">
   </a>
 
   <div class="container">
