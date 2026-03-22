@@ -140,15 +140,15 @@
     .side-menu{
       position:fixed;
       top:0;
-      left:0;
+      right:0;
       width:min(92vw,400px);
       height:100vh;
       background:rgba(255,255,255,.98);
       backdrop-filter:blur(18px);
-      border-right:1px solid rgba(0,0,0,.08);
-      box-shadow:12px 0 30px rgba(0,0,0,.18);
+      border-left:1px solid rgba(0,0,0,.08);
+      box-shadow:-12px 0 30px rgba(0,0,0,.18);
       z-index:1200;
-      transform:translateX(-105%);
+      transform:translateX(105%);
       transition:transform .25s ease;
       display:flex;
       flex-direction:column;
@@ -241,8 +241,14 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      color:#fff;
-      font-size:1rem;
+      overflow:hidden;
+    }
+
+    .side-menu__social img{
+      width:20px;
+      height:20px;
+      object-fit:contain;
+      display:block;
     }
 
     .search-panel{
@@ -594,9 +600,19 @@
     }
 
     .footer-social a{
-      color:#fff;
-      font-size:2rem;
-      line-height:1;
+      width:40px;
+      height:40px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+
+    .footer-social img{
+      width:28px;
+      height:28px;
+      object-fit:contain;
+      display:block;
     }
 
     .footer-pill{
@@ -685,10 +701,6 @@
         min-height:78px;
         font-size:1.6rem;
       }
-
-      .footer-social a{
-        font-size:1.8rem;
-      }
     }
   </style>
 </head>
@@ -701,9 +713,9 @@
   <header class="site-header">
     <button class="site-menu-btn" id="menuBtn" type="button" aria-label="فتح القائمة">☰</button>
 
-    <div class="site-header-logo">
+    <a href="./index.html" class="site-header-logo" aria-label="الصفحة الرئيسية">
       <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo">
-    </div>
+    </a>
 
     <div class="site-header-icons">
       <button class="site-icon-btn" id="searchBtn" type="button" aria-label="بحث">🔍</button>
@@ -720,9 +732,9 @@
     <div class="side-menu__head">
       <button class="side-menu__close" id="menuClose" type="button" aria-label="إغلاق">×</button>
 
-      <div class="side-menu__logo">
+      <a href="./index.html" class="side-menu__logo" aria-label="الصفحة الرئيسية">
         <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo">
-      </div>
+      </a>
 
       <div class="side-menu__icons">
         <button class="site-icon-btn" type="button" aria-label="بحث" onclick="openSearch()">🔍</button>
@@ -745,12 +757,12 @@
 
     <div class="side-menu__footer">
       <div class="side-menu__social">
-        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener">f</a>
-        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener">◎</a>
-        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener">p</a>
-        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener">♪</a>
-        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener">◉</a>
-        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener">▶</a>
+        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.png" alt="Facebook"></a>
+        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.png" alt="Instagram"></a>
+        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.png" alt="Pinterest"></a>
+        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.png" alt="TikTok"></a>
+        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.png" alt="Snapchat"></a>
+        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.png" alt="YouTube"></a>
       </div>
     </div>
   </aside>
@@ -821,12 +833,12 @@
     </form>
 
     <div class="footer-social">
-      <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener">f</a>
-      <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener">◎</a>
-      <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener">▶</a>
-      <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener">♪</a>
-      <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener">p</a>
-      <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener">◉</a>
+      <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.png" alt="Facebook"></a>
+      <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.png" alt="Instagram"></a>
+      <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.png" alt="YouTube"></a>
+      <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.png" alt="TikTok"></a>
+      <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.png" alt="Pinterest"></a>
+      <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.png" alt="Snapchat"></a>
     </div>
 
     <div class="footer-pill">smart-kids.me</div>
@@ -1050,9 +1062,16 @@
       if (checkoutBtn) {
         checkoutBtn.addEventListener('click', function() {
           localStorage.setItem('cart_note', document.getElementById('cartNote').value || '');
-          window.location.href = './products-full.html#orderForm';
+          window.location.href = './checkout.html';
         });
       }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeMenu();
+          closeSearch();
+        }
+      });
     });
   </script>
 </body>
