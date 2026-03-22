@@ -16,6 +16,10 @@
       --header-blue: #3160e0;
       --topbar-bg: #3f0448;
       --success: #28a745;
+      --toast-bg:#ffffff;
+      --toast-text:#2d2140;
+      --toast-border:#e8dff0;
+      --toast-shadow:0 18px 40px rgba(0,0,0,.18);
     }
 
     body {
@@ -238,14 +242,20 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      font-size: 1rem;
+      overflow: hidden;
+    }
+
+    .side-menu__social img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      display: block;
     }
 
     .container {
       max-width: 1400px;
       margin: 0 auto;
-      padding: 2rem 1rem;
+      padding: 1.5rem 1rem 2rem;
     }
 
     .nav {
@@ -253,7 +263,7 @@
       justify-content: center;
       flex-wrap: wrap;
       gap: 1rem;
-      margin: 1rem 0 2rem;
+      margin: 1rem 0 1.5rem;
     }
 
     .nav a {
@@ -264,12 +274,6 @@
       font-weight: bold;
       transition: all 0.3s;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-
-    .nav a:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-      background: white;
     }
 
     .search-container { text-align: center; margin: 1rem 0; }
@@ -304,7 +308,8 @@
       cursor: pointer;
       transition: all 0.3s;
       font-size: 0.95rem;
-      font-weight: 600;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
     .filter-btn:hover,
@@ -327,61 +332,75 @@
 
     .stats-info { color: #333; font-weight: bold; font-size: 1.05rem; }
 
-    .layout-grid {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 2rem;
-      margin: 1.5rem 0;
-      align-items: start;
-    }
-
-    .sidebar {
+    .category-panel {
       background: rgba(255,255,255,0.95);
       backdrop-filter: blur(20px);
-      border-radius: 15px;
-      padding: 1.5rem;
+      border-radius: 18px;
+      padding: 1rem;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      height: fit-content;
-      position: sticky;
-      top: 100px;
+      margin: 0 0 1.25rem;
     }
 
-    .sidebar h3 {
-      color: var(--purple-dark);
-      margin-bottom: 1rem;
-      font-weight: 800;
-    }
-
-    #categoryFilters .filter-btn {
-      display: block;
-      width: 100%;
-      padding: 10px 12px;
-      margin-bottom: 0.5rem;
-      background: rgba(106, 76, 147, 0.1);
-      color: #333;
-      border: 2px solid transparent;
-      border-radius: 10px;
+    .category-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       cursor: pointer;
-      text-align: right;
-      font-weight: 800;
-      transition: all 0.3s;
+      user-select: none;
     }
 
-    #categoryFilters .filter-btn:hover {
-      background: rgba(106, 76, 147, 0.2);
-      border-color: var(--purple-dark);
+    .category-panel-title {
+      color: var(--purple-dark);
+      font-weight: 900;
+      font-size: 1.1rem;
     }
 
-    #categoryFilters .filter-btn.active {
-      background: linear-gradient(45deg, var(--purple-dark), var(--purple-light));
-      color: white;
-      border-color: var(--purple-dark);
+    .category-toggle {
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(106, 76, 147, 0.12);
+      color: var(--purple-dark);
+      font-size: 1.4rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .2s ease;
     }
+
+    .category-panel.open .category-toggle {
+      transform: rotate(180deg);
+    }
+
+    .category-filters-wrap {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .28s ease;
+    }
+
+    .category-panel.open .category-filters-wrap {
+      max-height: 220px;
+      margin-top: 12px;
+    }
+
+    .category-filters-scroll {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 4px 2px 8px;
+      scrollbar-width: none;
+    }
+
+    .category-filters-scroll::-webkit-scrollbar { display: none; }
 
     .products {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1.35rem;
       margin: 1rem 0;
     }
 
@@ -397,8 +416,8 @@
     }
 
     .product:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      transform: translateY(-8px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.26);
     }
 
     .product-link {
@@ -407,45 +426,51 @@
     }
 
     .product-image {
-      height: 280px;
+      height: 320px;
       overflow: hidden;
-      background: linear-gradient(45deg, #8e44ad, #c39bd3);
+      background: rgba(255,255,255,0.8);
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .product-image img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       transition: transform 0.3s;
       display: block;
     }
 
-    .product:hover .product-image img { transform: scale(1.05); }
+    .product:hover .product-image img { transform: scale(1.03); }
 
     .product-info {
-      padding: 1.5rem;
+      padding: 1.2rem;
       background: rgba(255,255,255,0.1);
       backdrop-filter: blur(10px);
     }
 
     .product-title {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       font-weight: 900;
       margin-bottom: 0.5rem;
       color: #333;
-      line-height: 1.4;
+      line-height: 1.45;
+      min-height: 54px;
     }
 
     .product-description {
       color: #555;
       margin-bottom: 1rem;
-      font-size: 0.95rem;
-      line-height: 1.5;
+      font-size: 0.92rem;
+      line-height: 1.55;
       display: -webkit-box;
       -webkit-line-clamp: 3;
       line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      min-height: 68px;
     }
 
     .product-category {
@@ -460,11 +485,11 @@
     }
 
     .product-price {
-      font-size: 1.7rem;
+      font-size: 1.55rem;
       font-weight: 900;
       color: var(--purple-dark);
       margin-bottom: 1rem;
-      text-shadow: 0 0 10px rgba(106, 76, 147, 0.3);
+      text-shadow: 0 0 10px rgba(106, 76, 147, 0.18);
     }
 
     .product-actions {
@@ -491,8 +516,6 @@
       border: 1px solid rgba(255,255,255,0.2);
       box-shadow: 0 8px 32px rgba(106, 76, 147, 0.3);
     }
-
-    .add-to-cart:hover { transform: scale(1.02); }
 
     .view-product-btn {
       background: rgba(255,255,255,0.88);
@@ -536,9 +559,106 @@
       display: block;
     }
 
-    @media (max-width: 900px) {
-      .layout-grid { grid-template-columns: 1fr; }
-      .sidebar { position: relative; top: auto; }
+    .toast{
+      position:fixed;
+      top:12px;
+      left:50%;
+      transform:translateX(-50%) translateY(-130%);
+      width:min(94vw,620px);
+      background:var(--toast-bg);
+      color:var(--toast-text);
+      border:1px solid var(--toast-border);
+      border-radius:18px;
+      box-shadow:var(--toast-shadow);
+      z-index:2000;
+      transition:transform .3s ease, opacity .3s ease;
+      opacity:0;
+      overflow:hidden;
+    }
+
+    .toast.show{
+      transform:translateX(-50%) translateY(0);
+      opacity:1;
+    }
+
+    .toast-inner{
+      display:grid;
+      grid-template-columns:72px 1fr 44px;
+      gap:12px;
+      align-items:center;
+      padding:12px;
+    }
+
+    .toast-thumb{
+      width:72px;
+      height:72px;
+      border-radius:14px;
+      overflow:hidden;
+      background:#f1f1f1;
+      border:1px solid #eee;
+    }
+
+    .toast-thumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .toast-content{
+      min-width:0;
+    }
+
+    .toast-title{
+      font-size:1rem;
+      font-weight:800;
+      color:#384;
+      margin-bottom:4px;
+    }
+
+    .toast-name{
+      font-size:.96rem;
+      color:#111;
+      line-height:1.5;
+      margin-bottom:8px;
+    }
+
+    .toast-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .toast-actions a{
+      min-height:34px;
+      padding:0 12px;
+      border-radius:10px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:.9rem;
+      font-weight:700;
+    }
+
+    .toast-cart-link{
+      background:#5b1970;
+      color:#fff;
+    }
+
+    .toast-continue{
+      background:#f3eef7;
+      color:#5b1970;
+    }
+
+    .toast-close{
+      width:36px;
+      height:36px;
+      border:0;
+      border-radius:999px;
+      background:#f5f2f8;
+      color:#6f6380;
+      cursor:pointer;
+      font-size:1.2rem;
     }
 
     @media (max-width: 768px) {
@@ -561,8 +681,18 @@
       }
 
       .container { padding: 1.25rem 1rem 2rem; }
-      .products { grid-template-columns: 1fr; gap: 1.5rem; }
+      .products { grid-template-columns: 1fr; gap: 1.2rem; }
       .product-actions { flex-direction: column; }
+      .product-image { height: 290px; }
+
+      .toast-inner{
+        grid-template-columns:60px 1fr 36px;
+      }
+
+      .toast-thumb{
+        width:60px;
+        height:60px;
+      }
     }
   </style>
 </head>
@@ -576,9 +706,9 @@
   <header class="site-header">
     <button class="site-menu-btn" id="menuBtn" type="button" aria-label="فتح القائمة">☰</button>
 
-    <div class="site-header-logo">
+    <a href="./index.html" class="site-header-logo" aria-label="الصفحة الرئيسية">
       <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo">
-    </div>
+    </a>
 
     <div class="site-header-icons">
       <button class="site-icon-btn" id="searchBtn" type="button" aria-label="بحث">🔍</button>
@@ -595,9 +725,9 @@
     <div class="side-menu__head">
       <button class="side-menu__close" id="menuClose" type="button" aria-label="إغلاق">×</button>
 
-      <div class="side-menu__logo">
+      <a href="./index.html" class="side-menu__logo" aria-label="الصفحة الرئيسية">
         <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo">
-      </div>
+      </a>
 
       <div class="side-menu__icons">
         <button class="site-icon-btn" type="button" aria-label="بحث" onclick="focusMainSearch()">🔍</button>
@@ -620,12 +750,12 @@
 
     <div class="side-menu__footer">
       <div class="side-menu__social">
-        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener">f</a>
-        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener">◎</a>
-        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener">p</a>
-        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener">♪</a>
-        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener">◉</a>
-        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener">▶</a>
+        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.png" alt="Facebook"></a>
+        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.png" alt="Instagram"></a>
+        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.png" alt="Pinterest"></a>
+        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.png" alt="TikTok"></a>
+        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.png" alt="Snapchat"></a>
+        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.png" alt="YouTube"></a>
       </div>
     </div>
   </aside>
@@ -633,6 +763,23 @@
   <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
     <img src="/icon-whatsapp.png" alt="WhatsApp" class="whatsapp-icon-img">
   </a>
+
+  <div class="toast" id="cartToast">
+    <div class="toast-inner">
+      <div class="toast-thumb">
+        <img id="toastImage" src="" alt="Product">
+      </div>
+      <div class="toast-content">
+        <div class="toast-title">تمت الإضافة إلى عربة التسوق بنجاح</div>
+        <div class="toast-name" id="toastName"></div>
+        <div class="toast-actions">
+          <a class="toast-cart-link" href="./cart.html">عرض عربة التسوق</a>
+          <a class="toast-continue" href="#" id="toastContinue">متابعة التسوق</a>
+        </div>
+      </div>
+      <button class="toast-close" id="toastClose" type="button">×</button>
+    </div>
+  </div>
 
   <div class="container">
     <div class="nav">
@@ -654,24 +801,28 @@
       <div class="stats-info">إجمالي المنتجات: <strong>0</strong></div>
     </div>
 
-    <div class="layout-grid">
-      <aside class="sidebar">
-        <h3>📚 الأقسام</h3>
-        <div id="categoryFilters">
+    <section class="category-panel open" id="categoryPanel">
+      <div class="category-panel-head" id="categoryPanelHead">
+        <div class="category-panel-title">📚 الأقسام</div>
+        <button class="category-toggle" id="categoryToggle" type="button">⌃</button>
+      </div>
+
+      <div class="category-filters-wrap">
+        <div class="category-filters-scroll" id="categoryFilters">
           <button class="filter-btn active" data-category="الكل">الكل</button>
         </div>
-      </aside>
+      </div>
+    </section>
 
-      <main>
-        <div class="products" id="products">
-          <div class="loading">📦 جاري تحميل المنتجات...</div>
-        </div>
+    <main>
+      <div class="products" id="products">
+        <div class="loading">📦 جاري تحميل المنتجات...</div>
+      </div>
 
-        <div class="products-actions">
-          <button id="loadMoreBtn" class="filter-btn" style="display:none; padding: 12px 22px;">تحميل المزيد</button>
-        </div>
-      </main>
-    </div>
+      <div class="products-actions">
+        <button id="loadMoreBtn" class="filter-btn" style="display:none; padding: 12px 22px;">تحميل المزيد</button>
+      </div>
+    </main>
   </div>
 
   <script src="./collections-manager.js"></script>
@@ -681,6 +832,7 @@
     let filteredProducts = [];
     let visibleCount = 12;
     let activeCategory = 'الكل';
+    let toastTimer = null;
 
     function openMenu() {
       document.body.classList.add('menu-open');
@@ -705,6 +857,28 @@
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
+    }
+
+    function showCartToast(product) {
+      const toast = document.getElementById('cartToast');
+      const toastImage = document.getElementById('toastImage');
+      const toastName = document.getElementById('toastName');
+
+      toastImage.src = extractImage(product);
+      toastName.textContent = product.title || product.name || 'منتج';
+
+      toast.classList.add('show');
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3200);
+    }
+
+    function hideCartToast() {
+      const toast = document.getElementById('cartToast');
+      toast.classList.remove('show');
+      clearTimeout(toastTimer);
     }
 
     function updateCartDisplay() {
@@ -769,7 +943,7 @@
         : `./product-details.html?id=${id}`;
     }
 
-    function addToCart(product, btn = null) {
+    function addToCart(product) {
       const itemId = product.handle || product.id || product.title;
       const existingItem = cart.find(item => item.id === itemId);
 
@@ -787,16 +961,7 @@
 
       localStorage.setItem('cart', JSON.stringify(cart));
       updateCartDisplay();
-
-      if (btn) {
-        const oldText = btn.textContent;
-        btn.textContent = 'تمت الإضافة ✓';
-        btn.style.background = '#28a745';
-        setTimeout(() => {
-          btn.textContent = oldText;
-          btn.style.background = '';
-        }, 1000);
-      }
+      showCartToast(product);
     }
 
     function renderCategoryFilters() {
@@ -852,6 +1017,7 @@
         const description = extractDescription(product.body_html || product.description || '');
         const category = getCategory(product);
         const url = getProductUrl(product);
+        const id = product.handle || product.id || '';
 
         return `
           <article class="product">
@@ -870,7 +1036,7 @@
 
             <div class="product-info" style="padding-top:0;">
               <div class="product-actions">
-                <button class="add-to-cart" type="button">أضف إلى السلة</button>
+                <button class="add-to-cart" type="button" data-product-id="${escapeHtml(String(id))}">أضف إلى السلة</button>
                 <a class="view-product-btn" href="${url}">عرض المنتج</a>
               </div>
             </div>
@@ -878,11 +1044,13 @@
         `;
       }).join('');
 
-      container.querySelectorAll('.add-to-cart').forEach((btn, index) => {
+      container.querySelectorAll('.add-to-cart').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          addToCart(toShow[index], btn);
+          const id = btn.dataset.productId;
+          const product = toShow.find(p => String(p.handle || p.id || '') === String(id));
+          if (product) addToCart(product);
         });
       });
 
@@ -912,6 +1080,8 @@
       const searchBtn = document.getElementById('searchBtn');
       const mainSearchInput = document.getElementById('mainSearchInput');
       const loadMoreBtn = document.getElementById('loadMoreBtn');
+      const categoryPanel = document.getElementById('categoryPanel');
+      const categoryPanelHead = document.getElementById('categoryPanelHead');
 
       if (menuBtn) menuBtn.addEventListener('click', openMenu);
       if (menuClose) menuClose.addEventListener('click', closeMenu);
@@ -931,6 +1101,18 @@
           renderProducts();
         });
       }
+
+      if (categoryPanelHead) {
+        categoryPanelHead.addEventListener('click', () => {
+          categoryPanel.classList.toggle('open');
+        });
+      }
+
+      document.getElementById('toastClose').addEventListener('click', hideCartToast);
+      document.getElementById('toastContinue').addEventListener('click', (e) => {
+        e.preventDefault();
+        hideCartToast();
+      });
 
       initPage().catch(err => {
         console.error(err);
