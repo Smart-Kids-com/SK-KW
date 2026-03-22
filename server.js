@@ -7,8 +7,7 @@ const path = require('path');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-const db = require('./db/init');
-const DatabaseMigration = require('./db/migrate');
+const db = require('./db/turso-manager');
 const ordersRoutes = require('./routes/orders');
 const { SYSTEM_CONFIG } = require('./config/system');
 
@@ -87,24 +86,6 @@ async function startServer() {
   try {
     // فتح الاتصال بقاعدة البيانات
     await db.open();
-
-    // 🔧 تشغيل الـ migration قبل تهيئة الجداول
-    console.log('\n📋 جاري فحص وإصلاح قاعدة البيانات...');
-    const migration = new DatabaseMigration();
-    try {
-      await migration.open();
-      const migrationResult = await migration.migrate();
-      await migration.close();
-      
-      if (migrationResult.success) {
-        console.log('✅ انتهت عملية فحص قاعدة البيانات بنجاح!');
-        if (migrationResult.added > 0) {
-          console.log(`   تمت إضافة ${migrationResult.added} أعمدة جديدة`);
-        }
-      }
-    } catch (migrationError) {
-      console.warn('⚠️ تحذير في الـ migration (سيتم محاولة المتابعة):', migrationError.message);
-    }
 
     // تهيئة الجداول
     await db.initializeTables();
