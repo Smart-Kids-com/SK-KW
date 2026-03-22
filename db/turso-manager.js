@@ -1,7 +1,7 @@
 // db/turso-manager.js - إدارة قاعدة البيانات (Turso في الإنتاج، SQLite محليًا)
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const { createClient } = require('@libsql/client');
+const { createClient } = require('libsql');
 const { SYSTEM_CONFIG } = require('../config/system');
 
 const USE_TURSO = !!process.env.DATABASE_URL;
