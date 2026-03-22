@@ -13,8 +13,8 @@
         :root {
             --purple-dark: #6a4c93;
             --purple-light: #9b59b6;
-            --glass-bg: rgba(255,255,255,0.25);
-            --glass-border: rgba(255,255,255,0.18);
+            --header-blue: #3160e0;
+            --topbar-bg: #3f0448;
             --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
             --success: #27ae60;
         }
@@ -25,76 +25,269 @@
             color: #333;
             line-height: 1.6;
             min-height: 100vh;
+            overflow-x: hidden;
         }
-        
-        .header {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            padding: 1.5rem 1rem;
-            box-shadow: var(--glass-shadow);
+
+        a { text-decoration: none; }
+
+        .topbar {
+            background: var(--topbar-bg);
+            color: #fff;
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px 14px;
             text-align: center;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .topbar-arrow {
+            font-size: 1.2rem;
+            line-height: 1;
+            flex: 0 0 auto;
+        }
+
+        .site-header {
+            background: #fff;
+            min-height: 86px;
+            display: grid;
+            grid-template-columns: 52px 1fr 96px;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
             position: sticky;
             top: 0;
             z-index: 1000;
         }
-        
-        .header-container {
-            max-width: 1200px;
-            margin: 0 auto;
+
+        .site-menu-btn,
+        .site-icon-btn {
+            width: 42px;
+            height: 42px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 2rem;
+            justify-content: center;
+            border: 0;
+            background: transparent;
+            color: var(--header-blue);
+            text-decoration: none;
+            font-size: 1.6rem;
+            cursor: pointer;
+            line-height: 1;
+            position: relative;
         }
-        
-        .logo-section {
+
+        .site-header-logo {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            justify-content: center;
+            min-width: 0;
         }
-        
-        .logo-img {
-            height: 50px;
+
+        .site-header-logo img {
+            width: 320px;
+            max-width: 100%;
+            max-height: 58px;
             object-fit: contain;
+            display: block;
         }
-        
-        .logo-text h1 {
-            color: var(--purple-dark);
-            font-size: 1.3rem;
-            margin: 0;
-            line-height: 1.2;
-        }
-        
-        .logo-text p {
-            color: #666;
-            font-size: 0.8rem;
-            margin: 0;
-        }
-        
-        .nav-links {
+
+        .site-header-icons {
             display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            justify-content: flex-start;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 22px;
+            height: 22px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: #5b1970;
+            color: #fff;
+            font-size: .75rem;
+            font-weight: 800;
+            display: none;
+            align-items: center;
             justify-content: center;
         }
-        
-        .nav-links a {
-            padding: 8px 14px;
-            background: rgba(255,255,255,0.9);
-            color: var(--purple-dark);
-            text-decoration: none;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.85rem;
-            transition: all 0.3s;
-            white-space: nowrap;
+
+        .menu-backdrop,
+        .search-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s ease;
+            z-index: 1190;
         }
-        
-        .nav-links a:hover {
-            background: white;
-            transform: translateY(-2px);
+
+        body.menu-open .menu-backdrop,
+        body.search-open .search-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: min(92vw, 400px);
+            height: 100vh;
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(18px);
+            border-right: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 12px 0 30px rgba(0,0,0,0.18);
+            z-index: 1200;
+            transform: translateX(-105%);
+            transition: transform .25s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.menu-open .side-menu {
+            transform: translateX(0);
+        }
+
+        .side-menu__head {
+            min-height: 82px;
+            display: grid;
+            grid-template-columns: 52px 1fr 96px;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            flex-shrink: 0;
+            background: #fff;
+        }
+
+        .side-menu__close {
+            width: 42px;
+            height: 42px;
+            border: 0;
+            background: transparent;
+            color: var(--header-blue);
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .side-menu__logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        .side-menu__logo img {
+            width: 300px;
+            max-width: 100%;
+            max-height: 56px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .side-menu__icons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: flex-start;
+        }
+
+        .side-menu__body {
+            flex: 1;
+            overflow: auto;
+            padding: 8px 0 0;
+            background: #4a064f;
+            color: #fff;
+        }
+
+        .side-menu__nav a {
+            display: block;
+            padding: 18px 26px;
+            font-size: 1.08rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,.05);
+            color: #fff;
+        }
+
+        .side-menu__footer {
+            padding: 18px 22px 24px;
+            border-top: 1px solid rgba(255,255,255,.08);
+            background: rgba(255,255,255,.03);
+            color: #fff;
+        }
+
+        .side-menu__social {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .side-menu__social a {
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .search-panel {
+            position: fixed;
+            top: 90px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            width: min(92vw, 520px);
+            background: rgba(255,255,255,0.98);
+            border-radius: 18px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+            z-index: 1200;
+            opacity: 0;
+            pointer-events: none;
+            transition: all .25s ease;
+            padding: 16px;
+        }
+
+        body.search-open .search-panel {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .search-panel input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+
+        .search-results {
+            max-height: 50vh;
+            overflow: auto;
+            display: grid;
+            gap: 10px;
+        }
+
+        .search-result-item {
+            padding: 12px;
+            background: #f7f7fb;
+            border-radius: 12px;
+            border: 1px solid #ececf3;
         }
         
         .container {
@@ -109,6 +302,7 @@
             margin: 1rem 0;
             color: white;
             font-size: 0.9rem;
+            flex-wrap: wrap;
         }
         
         .breadcrumb a {
@@ -186,6 +380,7 @@
             gap: 1rem;
             margin-bottom: 1.5rem;
             font-size: 0.95rem;
+            flex-wrap: wrap;
         }
         
         .stars {
@@ -260,6 +455,7 @@
             align-items: center;
             gap: 1rem;
             margin-bottom: 2rem;
+            flex-wrap: wrap;
         }
         
         .quantity-label {
@@ -466,14 +662,13 @@
             font-size: 1.1rem;
         }
         
-        /* أيقونات */
         .user-icons {
             position: fixed;
-            top: 20px;
+            top: 100px;
             left: 20px;
             display: flex;
             gap: 10px;
-            z-index: 1001;
+            z-index: 999;
         }
         
         .user-icon {
@@ -482,7 +677,6 @@
             border-radius: 50%;
             background: rgba(255,255,255,0.25);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border: 2px solid rgba(255,255,255,0.18);
             display: flex;
             align-items: center;
@@ -516,8 +710,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
-            color: white;
             text-decoration: none;
             box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
             z-index: 1000;
@@ -527,6 +719,13 @@
         .whatsapp-float:hover {
             transform: scale(1.1);
             box-shadow: 0 6px 30px rgba(37, 211, 102, 0.6);
+        }
+
+        .whatsapp-icon-img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+            display: block;
         }
         
         .loading {
@@ -544,6 +743,24 @@
         }
         
         @media (max-width: 768px) {
+            .site-header {
+                grid-template-columns: 52px 1fr 96px;
+                min-height: 82px;
+                padding: 10px 12px;
+            }
+
+            .site-header-logo img,
+            .side-menu__logo img {
+                max-height: 54px;
+            }
+
+            .site-menu-btn,
+            .site-icon-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.5rem;
+            }
+
             .product-grid {
                 grid-template-columns: 1fr;
                 gap: 2rem;
@@ -565,58 +782,93 @@
                 min-width: auto;
             }
             
-            .header-container {
-                flex-direction: column;
-                text-align: center;
-                gap: 1rem;
-            }
-            
-            .logo-section {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .nav-links {
-                width: 100%;
-            }
-            
             .product-main-image {
                 height: 300px;
+            }
+
+            .user-icons {
+                top: 94px;
+                left: 14px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- أيقونات -->
+    <div class="topbar">
+        <span class="topbar-arrow">←</span>
+        <span>التوصيل مجاناً للطلبات بقيمة 20 د.ك أو أكثر</span>
+    </div>
+
+    <header class="site-header">
+        <button class="site-menu-btn" id="menuBtn" type="button" aria-label="فتح القائمة">☰</button>
+
+        <div class="site-header-logo">
+            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Logo">
+        </div>
+
+        <div class="site-header-icons">
+            <button class="site-icon-btn" id="searchBtn" type="button" aria-label="بحث">🔍</button>
+            <a href="./cart.html" class="site-icon-btn" aria-label="السلة">
+                🛍️
+                <span class="cart-badge" id="cartBadge">0</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="menu-backdrop" id="menuBackdrop"></div>
+
+    <aside class="side-menu" id="sideMenu">
+        <div class="side-menu__head">
+            <button class="side-menu__close" id="menuClose" type="button" aria-label="إغلاق">×</button>
+
+            <div class="side-menu__logo">
+                <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Logo">
+            </div>
+
+            <div class="side-menu__icons">
+                <button class="site-icon-btn" type="button" aria-label="بحث" onclick="openSearch()">🔍</button>
+                <a href="./cart.html" class="site-icon-btn" aria-label="السلة">🛍️</a>
+            </div>
+        </div>
+
+        <div class="side-menu__body">
+            <nav class="side-menu__nav">
+                <a href="./index.html">الصفحة الرئيسية</a>
+                <a href="./products-full.html">المتجر</a>
+                <a href="./collections.html">جميع المجموعات</a>
+                <a href="./contact.html">اتصل بنا</a>
+                <a href="./cart.html">عربة التسوق</a>
+            </nav>
+        </div>
+
+        <div class="side-menu__footer">
+            <div class="side-menu__social">
+                <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener">f</a>
+                <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener">◎</a>
+                <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener">p</a>
+                <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener">♪</a>
+                <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener">◉</a>
+                <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener">▶</a>
+            </div>
+        </div>
+    </aside>
+
+    <div class="search-overlay" id="searchOverlay"></div>
+    <div class="search-panel" id="searchPanel">
+        <input type="text" id="searchInput" placeholder="ابحث في المنتجات..." />
+        <div class="search-results" id="searchResults"></div>
+    </div>
+
     <div class="user-icons">
         <a href="./login.html" class="user-icon" id="loginIcon" title="تسجيل الدخول">🔐</a>
         <a href="./profile.html" class="user-icon" id="profileIcon" title="حسابي">👤</a>
     </div>
 
-    <!-- واتساب -->
-    <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">💬</a>
-
-    <!-- هيدر -->
-    <header class="header">
-        <div class="header-container">
-            <div class="logo-section">
-                <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Logo" class="logo-img">
-                <div class="logo-text">
-                    <h1>Smart Kids Kuwait</h1>
-                    <p>تفاصيل المنتج</p>
-                </div>
-            </div>
-            <nav class="nav-links">
-                <a href="./index.html">🏠 الرئيسية</a>
-                <a href="./products-full.html">🛍️ المتجر</a>
-                <a href="./collections.html">📚 المجموعات</a>
-                <a href="./contact.html">📞 اتصل</a>
-            </nav>
-        </div>
-    </header>
+    <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
+        <img src="/icon-whatsapp.png" alt="WhatsApp" class="whatsapp-icon-img">
+    </a>
 
     <div class="container">
-        <!-- breadcrumb -->
         <div class="breadcrumb">
             <a href="./index.html">الرئيسية</a> > 
             <a href="./collections.html">المجموعات</a> > 
@@ -624,7 +876,6 @@
             <span id="breadcrumbProduct">المنتج</span>
         </div>
 
-        <!-- product container -->
         <div class="product-container" id="productContainer">
             <div class="loading">
                 <h3>📦 جاري تحميل تفاصيل المنتج...</h3>
@@ -640,6 +891,7 @@
     <script>
         let currentProduct = null;
         let currentCategory = null;
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
         
         async function loadProduct() {
             try {
@@ -658,21 +910,19 @@
                 
                 await collectionsManager.loadProducts();
                 
-                // البحث عن المنتج
                 let product = null;
                 if (collectionKey) {
                     const collection = collectionsManager.getCollectionByKey(collectionKey);
                     if (collection) {
-                        product = collection.products.find(p => p.handle === productId || p.id === productId);
+                        product = collection.products.find(p => String(p.handle) === String(productId) || String(p.id) === String(productId));
                         currentCategory = collection;
                     }
                 }
                 
-                // البحث العام إذا ما تم إيجاده
                 if (!product) {
                     const allCollections = collectionsManager.getAllCollections();
                     for (const col of allCollections) {
-                        product = col.products.find(p => p.handle === productId || p.id === productId);
+                        product = col.products.find(p => String(p.handle) === String(productId) || String(p.id) === String(productId));
                         if (product) {
                             currentCategory = col;
                             break;
@@ -698,7 +948,7 @@
             const container = document.getElementById('productContainer');
             const price = extractPrice(product);
             const image = extractImage(product);
-            const description = extractDescription(product.body_html);
+            const description = extractDescription(product.body_html || product.description);
             const category = getCategoryLabelForProduct(product);
             
             document.getElementById('pageTitle').textContent = `${product.title} - Smart Kids Kuwait`;
@@ -708,7 +958,6 @@
             
             const html = `
                 <div class="product-grid">
-                    <!-- الصورة -->
                     <div class="product-image-section">
                         <div class="product-main-image">
                             <img src="${image}" alt="${product.title}" 
@@ -716,7 +965,6 @@
                         </div>
                     </div>
                     
-                    <!-- المعلومات -->
                     <div class="product-info-section">
                         <div class="product-category">${category}</div>
                         <h1>${product.title}</h1>
@@ -750,7 +998,7 @@
                         </div>
                         
                         <div class="btn-group">
-                            <button class="btn btn-primary" onclick="addToCart()">🛒 أضف للسلة</button>
+                            <button class="btn btn-primary" onclick="addToCart()">🛍️ أضف للسلة</button>
                             <button class="btn btn-secondary" onclick="addToWishlist()">❤️ أضف للمفضلة</button>
                         </div>
                         
@@ -771,12 +1019,11 @@
                     </div>
                 </div>
                 
-                <!-- التبويبات -->
                 <div class="tabs">
                     <div class="tab-buttons">
-                        <button class="tab-btn active" onclick="switchTab('description')">الوصف</button>
-                        <button class="tab-btn" onclick="switchTab('details')">المواصفات</button>
-                        <button class="tab-btn" onclick="switchTab('reviews')">التقييمات</button>
+                        <button class="tab-btn active" data-tab="description">الوصف</button>
+                        <button class="tab-btn" data-tab="details">المواصفات</button>
+                        <button class="tab-btn" data-tab="reviews">التقييمات</button>
                     </div>
                     
                     <div class="tab-content active" id="tab-description">
@@ -798,12 +1045,25 @@
                     </div>
                 </div>
                 
-                <!-- منتجات ذات صلة -->
                 <div class="related-products" id="relatedProducts"></div>
             `;
             
             container.innerHTML = html;
+            bindTabs();
             loadRelatedProducts();
+            updateCartBadge();
+        }
+
+        function bindTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabName = btn.dataset.tab;
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById(`tab-${tabName}`).classList.add('active');
+                });
+            });
         }
         
         function loadRelatedProducts() {
@@ -832,7 +1092,7 @@
                                     <div class="related-name">${product.title}</div>
                                     <div class="related-price">${price.toFixed(3)} د.ك</div>
                                     <button class="btn btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 8px;" 
-                                            onclick="window.location.href='product-details.html?id=${product.handle}&collection=${currentCategory.key}'">
+                                            onclick="window.location.href='product-details.html?id=${product.handle || product.id}&collection=${currentCategory.key}'">
                                         عرض التفاصيل
                                     </button>
                                 </div>
@@ -843,15 +1103,9 @@
             `;
         }
         
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(`tab-${tabName}`).classList.add('active');
-        }
-        
         function addToCart() {
+            if (!currentProduct) return;
+
             const quantity = parseInt(document.getElementById('quantity').value) || 1;
             const cartItem = {
                 id: currentProduct.handle || currentProduct.id,
@@ -861,7 +1115,6 @@
                 image: extractImage(currentProduct)
             };
             
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
             const existing = cart.find(item => item.id === cartItem.id);
             
             if (existing) {
@@ -871,7 +1124,7 @@
             }
             
             localStorage.setItem('cart', JSON.stringify(cart));
-            alert(`تم إضافة ${quantity} من "${currentProduct.title}" للسلة! 🎉`);
+            updateCartBadge();
         }
         
         function addToWishlist() {
@@ -890,8 +1143,24 @@
                 alert('المنتج موجود بالفعل في المفضلة');
             }
         }
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cartBadge');
+            const totalQty = cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+
+            if (totalQty > 0) {
+                badge.style.display = 'flex';
+                badge.textContent = totalQty;
+            } else {
+                badge.style.display = 'none';
+                badge.textContent = '0';
+            }
+        }
         
         function extractPrice(product) {
+            if (product.price != null && !isNaN(parseFloat(product.price))) {
+                return parseFloat(product.price);
+            }
             if (product.variants && product.variants.length > 0 && product.variants[0].price) {
                 return parseFloat(product.variants[0].price);
             }
@@ -903,8 +1172,10 @@
         }
         
         function extractImage(product) {
+            if (product.image) return product.image;
             if (product.images && product.images.length > 0) {
-                return product.images[0].src;
+                if (typeof product.images[0] === 'string') return product.images[0];
+                if (product.images[0] && product.images[0].src) return product.images[0].src;
             }
             return `https://via.placeholder.com/400x400?text=${encodeURIComponent(product.title || 'منتج')}`;
         }
@@ -928,7 +1199,7 @@
                 <div class="error">
                     <h3>❌ ${message}</h3>
                     <p>يرجى المحاولة لاحقاً أو العودة للصفحة الرئيسية</p>
-                    <a href="./index.html" class="btn btn-primary" style="margin-top: 1rem;">العودة للرئيسية</a>
+                    <a href="./index.html" class="btn btn-primary" style="margin-top: 1rem; display:inline-block;">العودة للرئيسية</a>
                 </div>
             `;
         }
@@ -943,10 +1214,96 @@
                 loginIcon.href = '#';
             }
         }
+
+        function openMenu() {
+            document.body.classList.add('menu-open');
+        }
+
+        function closeMenu() {
+            document.body.classList.remove('menu-open');
+        }
+
+        function openSearch() {
+            document.body.classList.add('search-open');
+            setTimeout(() => {
+                const input = document.getElementById('searchInput');
+                if (input) input.focus();
+            }, 50);
+        }
+
+        function closeSearch() {
+            document.body.classList.remove('search-open');
+            const input = document.getElementById('searchInput');
+            const results = document.getElementById('searchResults');
+            if (input) input.value = '';
+            if (results) results.innerHTML = '';
+        }
+
+        async function handleSearch(query) {
+            try {
+                const manager = window.initCollectionsManager();
+                await manager.loadProducts();
+                const all = manager.products || [];
+                const q = String(query || '').trim().toLowerCase();
+
+                if (!q) {
+                    renderSearchResults([]);
+                    return;
+                }
+
+                const results = all.filter(product => {
+                    const hay = `${product.title || product.name || ''} ${product.type || ''} ${product.category || ''} ${extractDescription(product.body_html || product.description || '')}`.toLowerCase();
+                    return hay.includes(q);
+                }).slice(0, 8);
+
+                renderSearchResults(results);
+            } catch (e) {
+                renderSearchResults([]);
+            }
+        }
+
+        function renderSearchResults(products) {
+            const container = document.getElementById('searchResults');
+            if (!container) return;
+
+            if (!products.length) {
+                container.innerHTML = '<div class="search-result-item">لا توجد نتائج</div>';
+                return;
+            }
+
+            container.innerHTML = products.map(product => {
+                const title = product.title || product.name || 'منتج';
+                const price = extractPrice(product);
+                const id = encodeURIComponent(product.handle || product.id || '');
+                return `
+                    <div class="search-result-item">
+                        <div style="font-weight:800; margin-bottom:6px;">${title}</div>
+                        <div style="color:#6a4c93; font-weight:700; margin-bottom:8px;">${price.toFixed(3)} د.ك</div>
+                        <a href="./product-details.html?id=${id}" style="color:#3160e0; font-weight:700;">فتح المنتج</a>
+                    </div>
+                `;
+            }).join('');
+        }
         
         document.addEventListener('DOMContentLoaded', () => {
             updateUserIcons();
+            updateCartBadge();
             loadProduct();
+
+            const menuBtn = document.getElementById('menuBtn');
+            const menuClose = document.getElementById('menuClose');
+            const menuBackdrop = document.getElementById('menuBackdrop');
+            const searchBtn = document.getElementById('searchBtn');
+            const searchOverlay = document.getElementById('searchOverlay');
+            const searchInput = document.getElementById('searchInput');
+
+            if (menuBtn) menuBtn.addEventListener('click', openMenu);
+            if (menuClose) menuClose.addEventListener('click', closeMenu);
+            if (menuBackdrop) menuBackdrop.addEventListener('click', closeMenu);
+
+            if (searchBtn) searchBtn.addEventListener('click', openSearch);
+            if (searchOverlay) searchOverlay.addEventListener('click', closeSearch);
+            if (searchInput) searchInput.addEventListener('input', e => handleSearch(e.target.value));
         });
     </script>
 </body>
