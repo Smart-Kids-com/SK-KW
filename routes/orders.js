@@ -86,18 +86,16 @@ router.post('/', async (req, res) => {
 
       // إدراج عناصر الطلب
       for (const item of items) {
-        const itemSubtotal = item.price * item.quantity;
         await db.run(
           `INSERT INTO ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS}
-          (order_id, product_id, product_name, product_price, quantity, subtotal)
-          VALUES (?, ?, ?, ?, ?, ?)`,
+          (order_id, product_id, product_name, price, quantity)
+          VALUES (?, ?, ?, ?, ?)`,
           [
             orderId,
             item.productId || `product_${Date.now()}`,
             item.name,
             item.price,
-            item.quantity,
-            itemSubtotal
+            item.quantity
           ]
         );
       }
