@@ -1,6 +1,5 @@
 {
   "framework": "nodejs",
-  "nodejs": "18.x",
   "cleanUrls": true,
   "trailingSlash": false,
   "public": true,
