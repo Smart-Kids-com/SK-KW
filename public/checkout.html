@@ -164,36 +164,12 @@
       direction:ltr;
     }
 
-    .coupon-row{
-      display:grid;
-      grid-template-columns:1fr 54px;
-      background:#fff;
-      border:1px solid #dcdcdc;
-      border-radius:16px;
-      overflow:hidden;
-      margin:8px 0 22px;
-    }
-
-    .coupon-row input{
-      border:0;
-      outline:none;
-      background:transparent;
-      padding:18px 20px;
-      font-size:1rem;
-      color:#111;
-    }
-
-    .coupon-row button{
-      border:0;
-      background:transparent;
-      color:#999;
-      font-size:2rem;
-      cursor:pointer;
-    }
-
     .totals{
       display:grid;
       gap:14px;
+      padding-top:8px;
+      border-top:1px solid #ddd2e3;
+      margin-top:8px;
     }
 
     .totals-line{
@@ -397,6 +373,33 @@
       text-decoration:none;
     }
 
+    .coupon-row{
+      display:grid;
+      grid-template-columns:1fr 54px;
+      background:#fff;
+      border:1px solid #dcdcdc;
+      border-radius:16px;
+      overflow:hidden;
+      margin-top:0;
+    }
+
+    .coupon-row input{
+      border:0;
+      outline:none;
+      background:transparent;
+      padding:18px 20px;
+      font-size:1rem;
+      color:#111;
+    }
+
+    .coupon-row button{
+      border:0;
+      background:transparent;
+      color:#999;
+      font-size:2rem;
+      cursor:pointer;
+    }
+
     .complete-wrap{
       padding:26px 18px 28px;
     }
@@ -499,11 +502,6 @@
 
     <div class="summary-panel open" id="summaryPanel">
       <div id="summaryItems"></div>
-
-      <div class="coupon-row">
-        <input type="text" id="couponInput" placeholder="كود الخصم">
-        <button type="button" id="applyCouponBtn">→</button>
-      </div>
 
       <div class="totals">
         <div class="totals-line">
@@ -681,7 +679,7 @@
 
     <section class="section">
       <h2>خصم</h2>
-      <div class="coupon-row" style="margin-top:0;">
+      <div class="coupon-row">
         <input type="text" id="discountField" placeholder="كود الخصم">
         <button type="button" id="discountBtn">→</button>
       </div>
@@ -837,7 +835,7 @@
     }
 
     function applyDiscountCode() {
-      const code = (document.getElementById('discountField').value || document.getElementById('couponInput').value || '').trim().toUpperCase();
+      const code = (document.getElementById('discountField').value || '').trim().toUpperCase();
 
       if (!code) {
         discountAmount = 0;
@@ -987,7 +985,6 @@
       bindRadioCards('payment');
       bindRadioCards('billingAddress', toggleBillingFields);
 
-      document.getElementById('applyCouponBtn').addEventListener('click', applyDiscountCode);
       document.getElementById('discountBtn').addEventListener('click', applyDiscountCode);
       document.getElementById('completeOrderBtn').addEventListener('click', completeOrder);
 
