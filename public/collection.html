@@ -11,10 +11,20 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --purple-dark: #6a4c93;
-      --purple-light: #9b59b6;
-      --deep-purple: #41064b;
+      --purple-dark: #4d0f62;
+      --purple-light: #8f50c8;
+      --deep-purple: #3c0646;
       --blue: #3160e0;
+      --page-bg-1: #5f2b86;
+      --page-bg-2: #7a3fa8;
+      --card-bg: rgba(255,255,255,0.04);
+      --card-border: rgba(255,255,255,0.12);
+      --text-light: #f6eef9;
+      --text-soft: rgba(255,255,255,0.78);
+      --price: #fff3e2;
+      --btn-border: rgba(255,255,255,0.65);
+      --offer-bg: #42104c;
+
       --toast-bg:#ffffff;
       --toast-text:#2d2140;
       --toast-border:#e8dff0;
@@ -23,7 +33,7 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #6a4c93 0%, #9b59b6 100%);
+      background: linear-gradient(180deg, var(--page-bg-1) 0%, var(--page-bg-2) 100%);
       color: #333;
       line-height: 1.6;
       min-height: 100vh;
@@ -135,12 +145,13 @@
     }
 
     .collection-hero {
-      background: rgba(255,255,255,0.96);
-      backdrop-filter: blur(18px);
+      background: rgba(255,255,255,0.10);
+      backdrop-filter: blur(14px);
       border-radius: 0 0 22px 22px;
       padding: 14px 14px 18px;
-      box-shadow: 0 8px 24px rgba(31, 38, 135, 0.18);
+      box-shadow: 0 8px 24px rgba(31, 38, 135, 0.10);
       text-align: center;
+      color: #fff;
     }
 
     .collection-header {
@@ -160,13 +171,14 @@
 
     .collection-info h1 {
       font-size: 1.25rem;
-      color: var(--purple-dark);
+      color: #fff;
       margin-bottom: 0.3rem;
       line-height: 1.35;
+      font-weight: 800;
     }
 
     .collection-info p {
-      color: #666;
+      color: rgba(255,255,255,.84);
       font-size: 0.95rem;
       line-height: 1.45;
     }
@@ -180,77 +192,79 @@
     }
 
     .stat-badge {
-      background: linear-gradient(45deg, #6a4c93, #9b59b6);
+      background: rgba(255,255,255,.16);
       color: white;
       padding: 8px 14px;
       border-radius: 999px;
       font-weight: 700;
       font-size: 0.88rem;
+      border: 1px solid rgba(255,255,255,.18);
     }
 
     .container {
-      max-width: 1400px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 1.5rem 1rem 2rem;
+      padding: 1rem 1rem 2rem;
     }
 
     .nav {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 1rem;
-      margin: 1rem 0 1.5rem;
+      gap: .8rem;
+      margin: 1rem 0 1.2rem;
     }
 
     .nav a {
-      padding: 10px 20px;
-      background: rgba(255,255,255,0.9);
-      color: var(--purple-dark);
-      text-decoration: none;
-      border-radius: 25px;
-      font-weight: bold;
-      transition: all 0.3s;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 10px 18px;
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      border-radius: 999px;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
       font-size: 0.9rem;
+      border: 1px solid rgba(255,255,255,.14);
     }
 
     .search-container {
       text-align: center;
-      margin: 1.5rem 0;
+      margin: 1rem 0 1.4rem;
     }
 
     .search-input {
-      padding: 15px 25px;
-      border: 2px solid rgba(255,255,255,0.3);
+      padding: 14px 20px;
+      border: 1px solid rgba(255,255,255,0.25);
       border-radius: 25px;
-      background: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.14);
       backdrop-filter: blur(10px);
-      color: #333;
-      font-size: 1.05rem;
+      color: #fff;
+      font-size: 1rem;
       width: 100%;
-      max-width: 460px;
+      max-width: 520px;
+      outline: none;
+    }
+
+    .search-input::placeholder {
+      color: rgba(255,255,255,.75);
     }
 
     .products {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2rem;
-      margin: 1rem 0 2rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px 18px;
+      margin: 0 0 2rem;
+      align-items: start;
     }
 
     .product {
-      background: rgba(255,255,255,0.25);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-      transition: all 0.3s;
+      background: transparent;
+      border-radius: 18px;
+      overflow: visible;
+      transition: transform .2s ease;
     }
 
     .product:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 14px 36px rgba(31, 38, 135, 0.32);
+      transform: translateY(-4px);
     }
 
     .product-link {
@@ -258,10 +272,19 @@
       color: inherit;
     }
 
+    .product-media {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
     .product-image {
-      height: 280px;
+      width: 100%;
+      aspect-ratio: 1 / 1;
       overflow: hidden;
-      background: linear-gradient(45deg, #8e44ad, #c39bd3);
+      background: #5f4777;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 10px 28px rgba(0,0,0,.18);
     }
 
     .product-image img {
@@ -271,81 +294,114 @@
       display: block;
     }
 
+    .offer-badge {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: var(--offer-bg);
+      color: #fff;
+      min-height: 42px;
+      padding: 0 18px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      box-shadow: 0 8px 18px rgba(0,0,0,.22);
+      z-index: 2;
+    }
+
     .product-info {
-      padding: 1.5rem;
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(10px);
+      padding: 0 2px;
+      background: transparent;
     }
 
     .product-title {
-      font-size: 1.3rem;
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-      color: #333;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-light);
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 3.2em;
+    }
+
+    .product-vendor {
+      color: var(--text-soft);
+      font-size: 0.92rem;
+      margin-bottom: 8px;
       line-height: 1.4;
     }
 
-    .product-description {
-      color: #555;
-      margin-bottom: 1rem;
-      font-size: 0.95rem;
-      line-height: 1.5;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+    .price-stack {
+      margin-bottom: 14px;
+      min-height: 56px;
     }
 
-    .product-category {
-      font-size: 0.85rem;
-      color: #666;
-      background: rgba(106, 76, 147, 0.15);
-      padding: 4px 10px;
-      border-radius: 12px;
-      display: inline-block;
-      margin-bottom: 1rem;
-      font-weight: 500;
+    .product-compare-price {
+      color: rgba(255,255,255,.65);
+      font-size: 0.92rem;
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+      margin-bottom: 2px;
+      direction: ltr;
+      text-align: right;
     }
 
     .product-price {
-      font-size: 1.8rem;
-      font-weight: bold;
-      color: var(--purple-dark);
-      margin-bottom: 1rem;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--price);
+      direction: ltr;
+      text-align: right;
+      line-height: 1.2;
+      white-space: nowrap;
     }
 
     .product-actions {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr;
       gap: 10px;
-      flex-wrap: wrap;
     }
 
     .add-to-cart,
     .view-details {
-      flex: 1 1 160px;
-      min-height: 48px;
+      width: 100%;
+      min-height: 58px;
       border-radius: 14px;
-      font-size: 1rem;
+      font-size: 0.98rem;
       font-weight: 700;
       cursor: pointer;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.3s;
-      border: 0;
+      transition: all 0.2s ease;
+      padding: 0 14px;
+      text-align: center;
     }
 
     .add-to-cart {
-      background: linear-gradient(45deg, #6a4c93, #9b59b6);
-      color: white;
+      background: transparent;
+      color: #fff;
+      border: 3px solid var(--btn-border);
+      box-shadow: 0 8px 20px rgba(0,0,0,.12);
     }
 
     .view-details {
-      background: rgba(255,255,255,0.85);
-      color: var(--purple-dark);
-      border: 1px solid rgba(106,76,147,0.18);
+      background: rgba(255,255,255,.96);
+      color: #6a4c93;
+      border: 1px solid rgba(106,76,147,0.16);
+    }
+
+    .add-to-cart:hover,
+    .view-details:hover {
+      transform: translateY(-2px);
     }
 
     .loading,
@@ -358,7 +414,7 @@
 
     .back-to-collections {
       text-align: center;
-      margin: 2rem 0 0;
+      margin: 1.5rem 0 0;
     }
 
     .back-btn {
@@ -366,11 +422,11 @@
       align-items: center;
       gap: 0.5rem;
       padding: 12px 24px;
-      background: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.14);
       color: white;
-      text-decoration: none;
       border-radius: 25px;
       font-weight: bold;
+      border: 1px solid rgba(255,255,255,.14);
     }
 
     .whatsapp-float {
@@ -498,6 +554,12 @@
       font-size:1.2rem;
     }
 
+    @media (max-width: 900px) {
+      .container {
+        padding: 1rem .9rem 2rem;
+      }
+    }
+
     @media (max-width: 768px) {
       .header {
         min-height: 82px;
@@ -521,12 +583,35 @@
       }
 
       .products {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px 14px;
       }
 
-      .product-actions {
-        flex-direction: column;
+      .product-title {
+        font-size: .98rem;
+      }
+
+      .product-vendor {
+        font-size: .86rem;
+      }
+
+      .product-price {
+        font-size: .95rem;
+      }
+
+      .add-to-cart,
+      .view-details {
+        min-height: 54px;
+        font-size: .92rem;
+        border-radius: 12px;
+      }
+
+      .offer-badge {
+        min-height: 38px;
+        font-size: .92rem;
+        padding: 0 14px;
+        bottom: 10px;
+        right: 10px;
       }
 
       .toast-inner{
@@ -536,6 +621,25 @@
       .toast-thumb{
         width:60px;
         height:60px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .nav {
+        gap: .6rem;
+      }
+
+      .nav a {
+        padding: 9px 14px;
+        font-size: .82rem;
+      }
+
+      .product-title {
+        min-height: 3em;
+      }
+
+      .price-stack {
+        min-height: 50px;
       }
     }
   </style>
@@ -643,13 +747,37 @@
         .replaceAll("'", '&#039;');
     }
 
+    function getProductTitle(product) {
+      return product.name || product.title || 'منتج';
+    }
+
+    function getProductVendor(product) {
+      return product.vendor || 'الأطفال المبتكرون الكويت';
+    }
+
+    function getComparePrice(product) {
+      if (product.compare_at_price != null && !isNaN(parseFloat(product.compare_at_price))) {
+        return parseFloat(product.compare_at_price);
+      }
+      if (product.variants && product.variants.length > 0 && product.variants[0].compare_at_price && !isNaN(parseFloat(product.variants[0].compare_at_price))) {
+        return parseFloat(product.variants[0].compare_at_price);
+      }
+      return null;
+    }
+
+    function hasDiscount(product) {
+      const price = extractPrice(product);
+      const compare = getComparePrice(product);
+      return compare !== null && compare > price;
+    }
+
     function showCartToast(product) {
       const toast = document.getElementById('cartToast');
       const toastImage = document.getElementById('toastImage');
       const toastName = document.getElementById('toastName');
 
       toastImage.src = extractImage(product);
-      toastName.textContent = product.name || product.title || 'منتج';
+      toastName.textContent = getProductTitle(product);
 
       toast.classList.add('show');
 
@@ -728,42 +856,49 @@
 
       productsContainer.innerHTML = filteredProducts.map(product => {
         const price = extractPrice(product);
+        const comparePrice = getComparePrice(product);
         const image = extractImage(product);
-        const description = extractDescription(product.description || product.body_html);
-        const title = product.name || product.title || 'منتج';
-        const category = product.category || product.type || 'عام';
+        const title = getProductTitle(product);
+        const vendor = getProductVendor(product);
         const url = getProductUrl(product);
         const id = product.id || product.handle || '';
 
         return `
           <article class="product">
             <a class="product-link" href="${url}">
-              <div class="product-image">
-                <img
-                  src="${image}"
-                  alt="${escapeHtml(title)}"
-                  onerror="this.src='https://via.placeholder.com/300x300?text=${encodeURIComponent(title)}'"
-                >
+              <div class="product-media">
+                <div class="product-image">
+                  <img
+                    src="${image}"
+                    alt="${escapeHtml(title)}"
+                    onerror="this.src='https://via.placeholder.com/400x400?text=${encodeURIComponent(title)}'"
+                  >
+                </div>
+                ${hasDiscount(product) ? `<div class="offer-badge">عرض خاص</div>` : ``}
               </div>
+
               <div class="product-info">
                 <div class="product-title">${escapeHtml(title)}</div>
-                <div class="product-description">${escapeHtml(description)}</div>
-                <div class="product-category">التصنيف: ${escapeHtml(category)}</div>
-                <div class="product-price">${price.toFixed(3)} د.ك</div>
+                <div class="product-vendor">${escapeHtml(vendor)}</div>
+
+                <div class="price-stack">
+                  ${comparePrice && comparePrice > price ? `<div class="product-compare-price">${comparePrice.toFixed(3)} KWD</div>` : ``}
+                  <div class="product-price">${price.toFixed(3)} KWD</div>
+                </div>
               </div>
             </a>
 
-            <div class="product-info" style="padding-top:0;">
+            <div class="product-info">
               <div class="product-actions">
                 <button
                   class="add-to-cart"
                   type="button"
                   data-product-id="${escapeHtml(String(id))}"
                 >
-                  أضف للسلة
+                  أضف إلى عربة التسوق
                 </button>
 
-                <a class="view-details" href="${url}">عرض التفاصيل</a>
+                <a class="view-details" href="${url}">عرض المنتج</a>
               </div>
             </div>
           </article>
@@ -792,7 +927,8 @@
           (product.body_html && product.body_html.toLowerCase().includes(searchQuery)) ||
           (product.description && product.description.toLowerCase().includes(searchQuery)) ||
           (product.type && product.type.toLowerCase().includes(searchQuery)) ||
-          (product.category && product.category.toLowerCase().includes(searchQuery))
+          (product.category && product.category.toLowerCase().includes(searchQuery)) ||
+          (product.vendor && product.vendor.toLowerCase().includes(searchQuery))
         );
       }
       renderProducts();
@@ -810,19 +946,11 @@
         if (typeof product.images[0] === 'string') return product.images[0];
         if (product.images[0] && product.images[0].src) return product.images[0].src;
       }
-      return `https://via.placeholder.com/300x300?text=${encodeURIComponent(product.title || product.name || 'منتج')}`;
-    }
-
-    function extractDescription(bodyHtml) {
-      if (!bodyHtml) return 'وصف المنتج غير متوفر';
-      const div = document.createElement('div');
-      div.innerHTML = bodyHtml;
-      const text = div.textContent || div.innerText || '';
-      return text.length > 150 ? text.substring(0, 150) + '...' : text;
+      return `https://via.placeholder.com/400x400?text=${encodeURIComponent(getProductTitle(product))}`;
     }
 
     function addToCart(product) {
-      const title = product.name || product.title || 'منتج';
+      const title = getProductTitle(product);
       const price = extractPrice(product);
       const productId = product.id || product.handle || title;
       const productImage = extractImage(product);
@@ -848,7 +976,7 @@
 
     function updateCartDisplay() {
       const cartBadge = document.getElementById('cartBadge');
-      const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+      const totalQty = cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
 
       if (totalQty > 0) {
         cartBadge.style.display = 'flex';
@@ -862,9 +990,9 @@
     function showError(message) {
       const productsContainer = document.getElementById('products');
       productsContainer.innerHTML = `
-        <div style="text-align:center; grid-column:1 / -1; padding:3rem; color:#dc3545;">
-          <h3>⚠️ ${message}</h3>
-          <a href="./collections.html" style="display:inline-block; margin-top:1rem; padding:10px 20px; background:#007bff; color:white; text-decoration:none; border-radius:5px;">
+        <div style="text-align:center; grid-column:1 / -1; padding:3rem; color:#fff;">
+          <h3>⚠️ ${escapeHtml(message)}</h3>
+          <a href="./collections.html" style="display:inline-block; margin-top:1rem; padding:10px 20px; background:#ffffff; color:#4d0f62; text-decoration:none; border-radius:999px; font-weight:700;">
             العودة للمجموعات
           </a>
         </div>
@@ -883,9 +1011,9 @@
     });
   </script>
 
-  <footer style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); padding: 2rem 1rem; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.3);">
+  <footer style="background: rgba(255,255,255,0.10); backdrop-filter: blur(20px); padding: 2rem 1rem; margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.15);">
     <div style="max-width: 900px; margin: 0 auto; text-align: center;">
-      <p style="color: #666; font-size: 0.9rem;">&copy; 2024 Smart Kids Kuwait - تابعونا لآخر العروض</p>
+      <p style="color: rgba(255,255,255,.85); font-size: 0.9rem;">&copy; 2024 Smart Kids Kuwait - تابعونا لآخر العروض</p>
     </div>
   </footer>
 </body>
