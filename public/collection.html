@@ -26,6 +26,8 @@
       overflow-x: hidden;
     }
 
+    a { text-decoration: none; }
+
     .topbar {
       background: #3f0448;
       color: #fff;
@@ -242,6 +244,16 @@
       transition: all 0.3s;
     }
 
+    .product:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 14px 36px rgba(31, 38, 135, 0.32);
+    }
+
+    .product-link {
+      display: block;
+      color: inherit;
+    }
+
     .product-image {
       height: 280px;
       overflow: hidden;
@@ -436,7 +448,7 @@
   </header>
 
   <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
-    <img src="/whatsapp-icon.png" alt="WhatsApp" class="whatsapp-icon-img">
+    <img src="/icon-whatsapp.png" alt="WhatsApp" class="whatsapp-icon-img">
   </a>
 
   <div class="collection-hero">
@@ -498,10 +510,6 @@
         .replaceAll("'", '&#039;');
     }
 
-    function escapeJs(str) {
-      return String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    }
-
     async function loadCollection() {
       try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -545,6 +553,11 @@
       document.title = `${currentCollection.name} - Smart Kids Kuwait`;
     }
 
+    function getProductUrl(product) {
+      const id = encodeURIComponent(product.handle || product.id || '');
+      return `./product-details.html?id=${id}&collection=${encodeURIComponent(currentCollection.key)}`;
+    }
+
     function renderProducts() {
       const productsContainer = document.getElementById('products');
 
@@ -564,38 +577,54 @@
         const description = extractDescription(product.description || product.body_html);
         const title = product.name || product.title || 'منتج';
         const category = product.category || product.type || 'عام';
+        const url = getProductUrl(product);
         const id = product.id || product.handle || '';
 
         return `
-          <div class="product">
-            <div class="product-image">
-              <img
-                src="${image}"
-                alt="${escapeHtml(title)}"
-                onerror="this.src='https://via.placeholder.com/300x300?text=${encodeURIComponent(title)}'"
-              >
-            </div>
-            <div class="product-info">
-              <div class="product-title">${escapeHtml(title)}</div>
-              <div class="product-description">${escapeHtml(description)}</div>
-              <div class="product-category">التصنيف: ${escapeHtml(category)}</div>
-              <div class="product-price">${price.toFixed(3)} د.ك</div>
+          <article class="product">
+            <a class="product-link" href="${url}">
+              <div class="product-image">
+                <img
+                  src="${image}"
+                  alt="${escapeHtml(title)}"
+                  onerror="this.src='https://via.placeholder.com/300x300?text=${encodeURIComponent(title)}'"
+                >
+              </div>
+              <div class="product-info">
+                <div class="product-title">${escapeHtml(title)}</div>
+                <div class="product-description">${escapeHtml(description)}</div>
+                <div class="product-category">التصنيف: ${escapeHtml(category)}</div>
+                <div class="product-price">${price.toFixed(3)} د.ك</div>
+              </div>
+            </a>
 
+            <div class="product-info" style="padding-top:0;">
               <div class="product-actions">
                 <button
                   class="add-to-cart"
                   type="button"
-                  onclick="addToCart('${escapeJs(title)}', ${price}, '${escapeJs(id)}', '${escapeJs(image)}')"
+                  data-product-id="${escapeHtml(String(id))}"
                 >
                   أضف للسلة
                 </button>
 
-                <a class="view-details" href="./products-full.html">عرض التفاصيل</a>
+                <a class="view-details" href="${url}">عرض التفاصيل</a>
               </div>
             </div>
-          </div>
+          </article>
         `;
       }).join('');
+
+      productsContainer.querySelectorAll('.add-to-cart').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const id = btn.dataset.productId;
+          const product = filteredProducts.find(p => String(p.id || p.handle || '') === String(id));
+          if (product) addToCart(product);
+        });
+      });
     }
 
     function searchInCollection(query) {
@@ -637,18 +666,23 @@
       return text.length > 150 ? text.substring(0, 150) + '...' : text;
     }
 
-    function addToCart(name, price, productId = null, productImage = '') {
-      const existingItem = cart.find(item => item.id === productId || item.name === name);
+    function addToCart(product) {
+      const title = product.name || product.title || 'منتج';
+      const price = extractPrice(product);
+      const productId = product.id || product.handle || title;
+      const productImage = extractImage(product);
+
+      const existingItem = cart.find(item => item.id === productId || item.name === title);
 
       if (existingItem) {
         existingItem.quantity += 1;
       } else {
         cart.push({
-          id: productId || name,
-          name,
+          id: productId,
+          name: title,
           price: Number(price) || 0,
           quantity: 1,
-          image: productImage || 'https://via.placeholder.com/300x300?text=Product'
+          image: productImage
         });
       }
 
