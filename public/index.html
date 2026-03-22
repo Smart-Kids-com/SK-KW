@@ -656,10 +656,10 @@
 
     <div class="header-icons">
       <button class="icon-btn" id="searchBtn" type="button" aria-label="بحث">🔍</button>
-      <button class="icon-btn" id="cartBtn" type="button" aria-label="السلة">
-        🛒
+      <a class="icon-btn" href="./cart.html" aria-label="السلة">
+        🛍️
         <span class="cart-count" id="cartCount">0</span>
-      </button>
+      </a>
     </div>
   </header>
 
@@ -675,7 +675,7 @@
 
       <div class="drawer-icons">
         <button class="icon-btn" id="drawerSearchBtn" type="button" aria-label="بحث">🔍</button>
-        <button class="icon-btn" type="button" aria-label="السلة" onclick="document.getElementById('cartBtn').click()">🛒</button>
+        <a class="icon-btn" href="./cart.html" aria-label="السلة">🛍️</a>
       </div>
     </div>
 
@@ -688,6 +688,7 @@
         <a href="./collection.html?id=interactive-books">القصص التعليمية التفاعلية</a>
         <a href="./collection.html?id=interactive-offers">عروض الأطفال المبتكرون</a>
         <a href="./products-full.html">تسوق جميع المنتجات</a>
+        <a href="./cart.html">عربة التسوق</a>
       </nav>
     </div>
 
@@ -856,13 +857,13 @@
           id,
           name: getTitle(product),
           price: getPrice(product),
-          quantity: 1
+          quantity: 1,
+          image: getImage(product)
         });
       }
 
       localStorage.setItem('cart', JSON.stringify(cart));
       updateCartCount();
-      alert('تمت إضافة المنتج إلى السلة');
     }
 
     function openMenu() {
@@ -1061,14 +1062,6 @@
       if (e.target.id === 'searchPanel') closeSearch();
     });
     document.getElementById('searchInput').addEventListener('input', (e) => renderSearch(e.target.value));
-
-    document.getElementById('cartBtn').addEventListener('click', () => {
-      if (!cart.length) {
-        alert('السلة فارغة حالياً');
-        return;
-      }
-      alert(`عدد المنتجات في السلة: ${cart.reduce((s, i) => s + i.quantity, 0)}`);
-    });
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
