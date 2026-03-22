@@ -20,6 +20,10 @@
       --shadow:0 12px 30px rgba(0,0,0,.22);
       --blue:#3160e0;
       --deep-purple:#551566;
+      --toast-bg:#ffffff;
+      --toast-text:#2d2140;
+      --toast-border:#e8dff0;
+      --toast-shadow:0 18px 40px rgba(0,0,0,.18);
     }
 
     html { scroll-behavior: smooth; }
@@ -239,15 +243,24 @@
       gap:10px;
     }
 
-    .drawer-social a{
-      width:38px;
-      height:38px;
+    .drawer-social a,
+    .footer-social a{
+      width:42px;
+      height:42px;
       border-radius:999px;
       background:rgba(255,255,255,.08);
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:1.1rem;
+      overflow:hidden;
+    }
+
+    .drawer-social img,
+    .footer-social img{
+      width:22px;
+      height:22px;
+      object-fit:contain;
+      display:block;
     }
 
     .search-panel{
@@ -307,7 +320,14 @@
       margin-bottom:8px;
     }
 
-    .search-item button{
+    .search-item-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .search-item button,
+    .search-item a{
       border:0;
       border-radius:10px;
       min-height:38px;
@@ -316,6 +336,13 @@
       color:#fff;
       font-weight:700;
       cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .search-item a{
+      background:#7d49a8;
     }
 
     .search-close{
@@ -348,24 +375,32 @@
 
     .hero-track{
       display:flex;
+      direction:ltr;
       transition:transform .45s ease;
       will-change:transform;
+      width:100%;
     }
 
     .hero-slide{
+      flex:0 0 100%;
+      width:100%;
       min-width:100%;
       padding:4px;
+      direction:rtl;
     }
 
     .hero-card{
+      display:block;
       background:#0d0d11;
       border-radius:18px;
       overflow:hidden;
+      width:100%;
     }
 
     .hero-image{
       aspect-ratio:1/1;
       background:#17171d;
+      overflow:hidden;
     }
 
     .hero-image img{
@@ -523,6 +558,11 @@
       box-shadow:var(--shadow);
     }
 
+    .card-link{
+      display:block;
+      color:inherit;
+    }
+
     .card-inner{
       background:var(--card);
       border-radius:16px;
@@ -599,17 +639,6 @@
       margin-top:14px;
     }
 
-    .footer-social a{
-      width:42px;
-      height:42px;
-      border-radius:999px;
-      background:rgba(255,255,255,.08);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:1.1rem;
-    }
-
     .whatsapp-float{
       position:fixed;
       right:18px;
@@ -633,10 +662,123 @@
       display:block;
     }
 
+    .toast{
+      position:fixed;
+      top:12px;
+      left:50%;
+      transform:translateX(-50%) translateY(-130%);
+      width:min(94vw,620px);
+      background:var(--toast-bg);
+      color:var(--toast-text);
+      border:1px solid var(--toast-border);
+      border-radius:18px;
+      box-shadow:var(--toast-shadow);
+      z-index:2000;
+      transition:transform .3s ease, opacity .3s ease;
+      opacity:0;
+      overflow:hidden;
+    }
+
+    .toast.show{
+      transform:translateX(-50%) translateY(0);
+      opacity:1;
+    }
+
+    .toast-inner{
+      display:grid;
+      grid-template-columns:72px 1fr 44px;
+      gap:12px;
+      align-items:center;
+      padding:12px;
+    }
+
+    .toast-thumb{
+      width:72px;
+      height:72px;
+      border-radius:14px;
+      overflow:hidden;
+      background:#f1f1f1;
+      border:1px solid #eee;
+    }
+
+    .toast-thumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .toast-content{
+      min-width:0;
+    }
+
+    .toast-title{
+      font-size:1rem;
+      font-weight:800;
+      color:#384;
+      margin-bottom:4px;
+    }
+
+    .toast-name{
+      font-size:.96rem;
+      color:#111;
+      line-height:1.5;
+      margin-bottom:8px;
+    }
+
+    .toast-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .toast-actions a{
+      min-height:34px;
+      padding:0 12px;
+      border-radius:10px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:.9rem;
+      font-weight:700;
+    }
+
+    .toast-cart-link{
+      background:#5b1970;
+      color:#fff;
+    }
+
+    .toast-continue{
+      background:#f3eef7;
+      color:#5b1970;
+    }
+
+    .toast-close{
+      width:36px;
+      height:36px;
+      border:0;
+      border-radius:999px;
+      background:#f5f2f8;
+      color:#6f6380;
+      cursor:pointer;
+      font-size:1.2rem;
+    }
+
     @media (min-width:700px){
       .page{ width:min(100%, 620px); }
       .logo-wrap img,.drawer-logo img{ width:360px; }
       .card{ flex-basis:60%; }
+    }
+
+    @media (max-width: 768px){
+      .toast-inner{
+        grid-template-columns:60px 1fr 36px;
+      }
+
+      .toast-thumb{
+        width:60px;
+        height:60px;
+      }
     }
   </style>
 </head>
@@ -699,12 +841,12 @@
       </a>
 
       <div class="drawer-social">
-        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener">f</a>
-        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener">◎</a>
-        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener">p</a>
-        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener">♪</a>
-        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener">◉</a>
-        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener">▶</a>
+        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.png" alt="Facebook"></a>
+        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.png" alt="Instagram"></a>
+        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.png" alt="Pinterest"></a>
+        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.png" alt="TikTok"></a>
+        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.png" alt="Snapchat"></a>
+        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.png" alt="YouTube"></a>
       </div>
     </div>
   </aside>
@@ -714,6 +856,23 @@
       <input type="text" id="searchInput" placeholder="ابحث في المنتجات..." />
       <div class="search-results" id="searchResults"></div>
       <button class="search-close" id="searchClose" type="button">إغلاق</button>
+    </div>
+  </div>
+
+  <div class="toast" id="cartToast">
+    <div class="toast-inner">
+      <div class="toast-thumb">
+        <img id="toastImage" src="" alt="Product">
+      </div>
+      <div class="toast-content">
+        <div class="toast-title">تمت الإضافة إلى عربة التسوق بنجاح</div>
+        <div class="toast-name" id="toastName"></div>
+        <div class="toast-actions">
+          <a class="toast-cart-link" href="./cart.html">عرض عربة التسوق</a>
+          <a class="toast-continue" href="#" id="toastContinue">متابعة التسوق</a>
+        </div>
+      </div>
+      <button class="toast-close" id="toastClose" type="button">×</button>
     </div>
   </div>
 
@@ -777,24 +936,31 @@
     <footer class="footer">
       <div>تابعونا على وسائل التواصل الاجتماعي</div>
       <div class="footer-social">
-        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener">f</a>
-        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener">◎</a>
-        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener">p</a>
-        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener">♪</a>
-        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener">◉</a>
-        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener">▶</a>
+        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.png" alt="Facebook"></a>
+        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.png" alt="Instagram"></a>
+        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.png" alt="Pinterest"></a>
+        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.png" alt="TikTok"></a>
+        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.png" alt="Snapchat"></a>
+        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.png" alt="YouTube"></a>
       </div>
     </footer>
   </main>
 
   <a class="whatsapp-float" href="https://wa.me/96566635393" target="_blank" rel="noopener" aria-label="واتساب">
-    <img src="/whatsapp-icon.png" alt="WhatsApp" class="whatsapp-icon-img">
+    <img src="/icon-whatsapp.png" alt="WhatsApp" class="whatsapp-icon-img">
   </a>
 
   <script src="./collections-manager.js"></script>
   <script>
     let allProducts = [];
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    let toastTimer = null;
+    let heroState = {
+      items: [],
+      current: 0,
+      timer: null,
+      initialized: false
+    };
 
     function normalize(text) {
       return String(text || '').toLowerCase().trim();
@@ -835,6 +1001,26 @@
       return 0;
     }
 
+    function getCollectionKey(product) {
+      const manager = window.collectionsManager || window.initCollectionsManager();
+      const collections = manager.getAllCollections ? manager.getAllCollections() : [];
+      for (const collection of collections) {
+        const found = (collection.products || []).find(p =>
+          String(p.id) === String(product.id) || String(p.handle) === String(product.handle)
+        );
+        if (found) return collection.key;
+      }
+      return '';
+    }
+
+    function getProductUrl(product) {
+      const id = encodeURIComponent(product.handle || product.id || '');
+      const collectionKey = getCollectionKey(product);
+      return collectionKey
+        ? `./product-details.html?id=${id}&collection=${encodeURIComponent(collectionKey)}`
+        : `./product-details.html?id=${id}`;
+    }
+
     function updateCartCount() {
       const el = document.getElementById('cartCount');
       const count = cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
@@ -844,6 +1030,28 @@
       } else {
         el.style.display = 'none';
       }
+    }
+
+    function showCartToast(product) {
+      const toast = document.getElementById('cartToast');
+      const toastImage = document.getElementById('toastImage');
+      const toastName = document.getElementById('toastName');
+
+      toastImage.src = getImage(product);
+      toastName.textContent = getTitle(product);
+
+      toast.classList.add('show');
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3200);
+    }
+
+    function hideCartToast() {
+      const toast = document.getElementById('cartToast');
+      toast.classList.remove('show');
+      clearTimeout(toastTimer);
     }
 
     function addToCart(product) {
@@ -864,6 +1072,7 @@
 
       localStorage.setItem('cart', JSON.stringify(cart));
       updateCartCount();
+      showCartToast(product);
     }
 
     function openMenu() {
@@ -910,96 +1119,147 @@
         <div class="search-item">
           <div class="search-item-title">${escapeHtml(getTitle(product))}</div>
           <div class="search-item-price">KWD ${getPrice(product).toFixed(3)}</div>
-          <button type="button" onclick="addToCart(allProducts[${allProducts.indexOf(product)}])">إضافة للسلة</button>
+          <div class="search-item-actions">
+            <button type="button" data-action="add" data-id="${escapeHtml(product.handle || product.id || '')}">إضافة للسلة</button>
+            <a href="${getProductUrl(product)}">فتح المنتج</a>
+          </div>
         </div>
       `).join('');
+
+      box.querySelectorAll('button[data-action="add"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          const product = allProducts.find(p => String(p.handle || p.id || '') === String(id));
+          if (product) addToCart(product);
+        });
+      });
     }
 
     function heroSlide(product) {
+      const url = getProductUrl(product);
       return `
         <div class="hero-slide">
-          <div class="hero-card">
+          <a class="hero-card" href="${url}">
             <div class="hero-image">
               <img src="${getImage(product)}" alt="${escapeHtml(getTitle(product))}" loading="eager">
             </div>
             <div class="hero-info">
               <div class="hero-title">${escapeHtml(getTitle(product))}</div>
               <div class="hero-price">KWD ${getPrice(product).toFixed(3)}</div>
-              <button class="hero-btn" type="button" onclick="addToCart(allProducts[${allProducts.indexOf(product)}])">أضف للسلة</button>
+              <button class="hero-btn" type="button" data-add-id="${escapeHtml(product.handle || product.id || '')}">أضف للسلة</button>
             </div>
-          </div>
+          </a>
         </div>
       `;
     }
 
     function cardItem(product) {
+      const url = getProductUrl(product);
       return `
         <article class="card">
-          <div class="card-inner">
-            <div class="card-image">
-              <img src="${getImage(product)}" alt="${escapeHtml(getTitle(product))}" loading="lazy">
+          <a class="card-link" href="${url}">
+            <div class="card-inner">
+              <div class="card-image">
+                <img src="${getImage(product)}" alt="${escapeHtml(getTitle(product))}" loading="lazy">
+              </div>
+              <div class="card-info">
+                <div class="card-title">${escapeHtml(getTitle(product))}</div>
+                <div class="card-price">KWD ${getPrice(product).toFixed(3)}</div>
+                <button class="card-btn" type="button" data-add-id="${escapeHtml(product.handle || product.id || '')}">أضف للسلة</button>
+              </div>
             </div>
-            <div class="card-info">
-              <div class="card-title">${escapeHtml(getTitle(product))}</div>
-              <div class="card-price">KWD ${getPrice(product).toFixed(3)}</div>
-              <button class="card-btn" type="button" onclick="addToCart(allProducts[${allProducts.indexOf(product)}])">أضف للسلة</button>
-            </div>
-          </div>
+          </a>
         </article>
       `;
+    }
+
+    function bindAddButtons(scope = document) {
+      scope.querySelectorAll('[data-add-id]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = btn.dataset.addId;
+          const product = allProducts.find(p => String(p.handle || p.id || '') === String(id));
+          if (product) addToCart(product);
+        });
+      });
+    }
+
+    function goHero(index) {
+      const track = document.getElementById('heroTrack');
+      const dots = document.getElementById('heroDots');
+      const count = heroState.items.length;
+      if (!count) return;
+
+      heroState.current = (index + count) % count;
+      track.style.transform = `translateX(-${heroState.current * 100}%)`;
+
+      dots.querySelectorAll('.hero-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === heroState.current);
+      });
+    }
+
+    function nextHero() {
+      goHero(heroState.current + 1);
+    }
+
+    function prevHero() {
+      goHero(heroState.current - 1);
+    }
+
+    function startHero() {
+      stopHero();
+      if (heroState.items.length > 1) {
+        heroState.timer = setInterval(nextHero, 4000);
+      }
+    }
+
+    function stopHero() {
+      if (heroState.timer) {
+        clearInterval(heroState.timer);
+        heroState.timer = null;
+      }
     }
 
     function buildHero(products) {
       const track = document.getElementById('heroTrack');
       const dots = document.getElementById('heroDots');
-      const items = products.slice(0, 5);
+      heroState.items = products.slice(0, 5);
+      heroState.current = 0;
 
-      if (!items.length) {
+      if (!heroState.items.length) {
         track.innerHTML = `<div class="empty-box">لا توجد منتجات حالياً</div>`;
+        dots.innerHTML = '';
         return;
       }
 
-      track.innerHTML = items.map(heroSlide).join('');
-      dots.innerHTML = items.map((_, i) => `<button class="hero-dot ${i === 0 ? 'active' : ''}" data-index="${i}" type="button"></button>`).join('');
+      track.innerHTML = heroState.items.map(heroSlide).join('');
+      dots.innerHTML = heroState.items.map((_, i) => `
+        <button class="hero-dot ${i === 0 ? 'active' : ''}" data-index="${i}" type="button"></button>
+      `).join('');
 
-      let current = 0;
-      let timer = null;
+      bindAddButtons(track);
 
-      function goTo(index) {
-        current = (index + items.length) % items.length;
-        track.style.transform = `translateX(-${current * 100}%)`;
-        dots.querySelectorAll('.hero-dot').forEach((dot, i) => {
-          dot.classList.toggle('active', i === current);
+      if (!heroState.initialized) {
+        document.getElementById('heroPrev').addEventListener('click', prevHero);
+        document.getElementById('heroNext').addEventListener('click', nextHero);
+
+        dots.addEventListener('click', (e) => {
+          const dot = e.target.closest('.hero-dot');
+          if (!dot) return;
+          goHero(Number(dot.dataset.index || 0));
         });
+
+        track.addEventListener('mouseenter', stopHero);
+        track.addEventListener('mouseleave', startHero);
+        track.addEventListener('touchstart', stopHero, { passive: true });
+        track.addEventListener('touchend', startHero, { passive: true });
+
+        heroState.initialized = true;
       }
 
-      function next() { goTo(current + 1); }
-      function prev() { goTo(current - 1); }
-
-      document.getElementById('heroPrev').addEventListener('click', prev);
-      document.getElementById('heroNext').addEventListener('click', next);
-
-      dots.addEventListener('click', (e) => {
-        const dot = e.target.closest('.hero-dot');
-        if (!dot) return;
-        goTo(Number(dot.dataset.index || 0));
-      });
-
-      function start() {
-        stop();
-        timer = setInterval(next, 4000);
-      }
-
-      function stop() {
-        if (timer) clearInterval(timer);
-      }
-
-      track.addEventListener('mouseenter', stop);
-      track.addEventListener('mouseleave', start);
-      track.addEventListener('touchstart', stop, { passive: true });
-      track.addEventListener('touchend', start, { passive: true });
-
-      start();
+      goHero(0);
+      startHero();
     }
 
     function fillTrack(id, products) {
@@ -1009,6 +1269,7 @@
         return;
       }
       el.innerHTML = products.slice(0, 10).map(cardItem).join('');
+      bindAddButtons(el);
     }
 
     function scrollCards(id, dir) {
@@ -1018,7 +1279,7 @@
       el.scrollBy({ left: dir * amount, behavior: 'smooth' });
     }
 
-    function pickGroups(products) {
+    function pickGroups() {
       const manager = window.initCollectionsManager();
       return {
         islamic: manager.getProductsByCollection('islamic-library').slice(0, 10),
@@ -1034,7 +1295,7 @@
       allProducts = manager.products || [];
       updateCartCount();
 
-      const groups = pickGroups(allProducts);
+      const groups = pickGroups();
 
       buildHero(
         groups.audio.length ? groups.audio :
@@ -1062,11 +1323,17 @@
       if (e.target.id === 'searchPanel') closeSearch();
     });
     document.getElementById('searchInput').addEventListener('input', (e) => renderSearch(e.target.value));
+    document.getElementById('toastClose').addEventListener('click', hideCartToast);
+    document.getElementById('toastContinue').addEventListener('click', (e) => {
+      e.preventDefault();
+      hideCartToast();
+    });
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeMenu();
         closeSearch();
+        hideCartToast();
       }
     });
 
