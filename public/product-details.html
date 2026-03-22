@@ -24,6 +24,11 @@
       --btn-dark:#42104c;
       --btn-light:#7d47a8;
       --card-shadow:0 16px 36px rgba(0,0,0,.22);
+
+      --toast-bg:#ffffff;
+      --toast-text:#2d2140;
+      --toast-border:#e8dff0;
+      --toast-shadow:0 18px 40px rgba(0,0,0,.18);
     }
 
     body{
@@ -140,15 +145,15 @@
     .side-menu{
       position:fixed;
       top:0;
-      left:0;
+      right:0;
       width:min(92vw,400px);
       height:100vh;
       background:rgba(255,255,255,.98);
       backdrop-filter:blur(18px);
-      border-right:1px solid rgba(0,0,0,.08);
-      box-shadow:12px 0 30px rgba(0,0,0,.18);
+      border-left:1px solid rgba(0,0,0,.08);
+      box-shadow:-12px 0 30px rgba(0,0,0,.18);
       z-index:1200;
-      transform:translateX(-105%);
+      transform:translateX(105%);
       transition:transform .25s ease;
       display:flex;
       flex-direction:column;
@@ -239,8 +244,14 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      color:#fff;
-      font-size:1rem;
+      overflow:hidden;
+    }
+
+    .side-menu__social img{
+      width:20px;
+      height:20px;
+      object-fit:contain;
+      display:block;
     }
 
     .search-panel{
@@ -414,6 +425,7 @@
       line-height:1.2;
       font-weight:500;
       margin-bottom:22px;
+      display:block;
     }
 
     .product-price{
@@ -609,6 +621,108 @@
       display:block;
     }
 
+    .toast{
+      position:fixed;
+      top:12px;
+      left:50%;
+      transform:translateX(-50%) translateY(-130%);
+      width:min(94vw,620px);
+      background:#fff;
+      color:#2d2140;
+      border:1px solid #e8dff0;
+      border-radius:18px;
+      box-shadow:0 18px 40px rgba(0,0,0,.18);
+      z-index:2000;
+      transition:transform .3s ease, opacity .3s ease;
+      opacity:0;
+      overflow:hidden;
+    }
+
+    .toast.show{
+      transform:translateX(-50%) translateY(0);
+      opacity:1;
+    }
+
+    .toast-inner{
+      display:grid;
+      grid-template-columns:72px 1fr 44px;
+      gap:12px;
+      align-items:center;
+      padding:12px;
+    }
+
+    .toast-thumb{
+      width:72px;
+      height:72px;
+      border-radius:14px;
+      overflow:hidden;
+      background:#f1f1f1;
+      border:1px solid #eee;
+    }
+
+    .toast-thumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .toast-content{
+      min-width:0;
+    }
+
+    .toast-title{
+      font-size:1rem;
+      font-weight:800;
+      color:#384;
+      margin-bottom:4px;
+    }
+
+    .toast-name{
+      font-size:.96rem;
+      color:#111;
+      line-height:1.5;
+      margin-bottom:8px;
+    }
+
+    .toast-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .toast-actions a{
+      min-height:34px;
+      padding:0 12px;
+      border-radius:10px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:.9rem;
+      font-weight:700;
+    }
+
+    .toast-cart-link{
+      background:#5b1970;
+      color:#fff;
+    }
+
+    .toast-continue{
+      background:#f3eef7;
+      color:#5b1970;
+    }
+
+    .toast-close{
+      width:36px;
+      height:36px;
+      border:0;
+      border-radius:999px;
+      background:#f5f2f8;
+      color:#6f6380;
+      cursor:pointer;
+      font-size:1.2rem;
+    }
+
     .loading,
     .error{
       text-align:center;
@@ -678,6 +792,15 @@
         grid-template-columns:1fr 1fr;
         gap:18px;
       }
+
+      .toast-inner{
+        grid-template-columns:60px 1fr 36px;
+      }
+
+      .toast-thumb{
+        width:60px;
+        height:60px;
+      }
     }
   </style>
 </head>
@@ -690,9 +813,9 @@
   <header class="site-header">
     <button class="site-menu-btn" id="menuBtn" type="button" aria-label="فتح القائمة">☰</button>
 
-    <div class="site-header-logo">
+    <a href="./index.html" class="site-header-logo" aria-label="الصفحة الرئيسية">
       <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Logo">
-    </div>
+    </a>
 
     <div class="site-header-icons">
       <button class="site-icon-btn" id="searchBtn" type="button" aria-label="بحث">🔍</button>
@@ -709,9 +832,9 @@
     <div class="side-menu__head">
       <button class="side-menu__close" id="menuClose" type="button" aria-label="إغلاق">×</button>
 
-      <div class="side-menu__logo">
+      <a href="./index.html" class="side-menu__logo" aria-label="الصفحة الرئيسية">
         <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Logo">
-      </div>
+      </a>
 
       <div class="side-menu__icons">
         <button class="site-icon-btn" type="button" aria-label="بحث" onclick="openSearch()">🔍</button>
@@ -731,12 +854,12 @@
 
     <div class="side-menu__footer">
       <div class="side-menu__social">
-        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener">f</a>
-        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener">◎</a>
-        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener">p</a>
-        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener">♪</a>
-        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener">◉</a>
-        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener">▶</a>
+        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.png" alt="Facebook"></a>
+        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.png" alt="Instagram"></a>
+        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.png" alt="Pinterest"></a>
+        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.png" alt="TikTok"></a>
+        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.png" alt="Snapchat"></a>
+        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.png" alt="YouTube"></a>
       </div>
     </div>
   </aside>
@@ -745,6 +868,23 @@
   <div class="search-panel" id="searchPanel">
     <input type="text" id="searchInput" placeholder="ابحث في المنتجات..." />
     <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <div class="toast" id="cartToast">
+    <div class="toast-inner">
+      <div class="toast-thumb">
+        <img id="toastImage" src="" alt="Product">
+      </div>
+      <div class="toast-content">
+        <div class="toast-title">تمت الإضافة إلى عربة التسوق بنجاح</div>
+        <div class="toast-name" id="toastName"></div>
+        <div class="toast-actions">
+          <a class="toast-cart-link" href="./cart.html">عرض عربة التسوق</a>
+          <a class="toast-continue" href="#" id="toastContinue">متابعة التسوق</a>
+        </div>
+      </div>
+      <button class="toast-close" id="toastClose" type="button">×</button>
+    </div>
   </div>
 
   <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
@@ -759,13 +899,18 @@
     </div>
   </main>
 
-  <script src="collections-manager.js"></script>
+  <script src="./collections-manager.js"></script>
   <script>
     let currentProduct = null;
     let currentCategory = null;
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
     let galleryImages = [];
     let activeImageIndex = 0;
+    let toastTimer = null;
+
+    function getProductTitle(product) {
+      return product?.title || product?.name || 'منتج';
+    }
 
     function updateCartBadge() {
       const badge = document.getElementById('cartBadge');
@@ -816,14 +961,14 @@
 
       const uniq = [...new Set(out.filter(Boolean))];
       if (!uniq.length) {
-        uniq.push(`https://via.placeholder.com/1000x1000?text=${encodeURIComponent(product.title || 'Product')}`);
+        uniq.push(`https://via.placeholder.com/1000x1000?text=${encodeURIComponent(getProductTitle(product))}`);
       }
       return uniq;
     }
 
     function getCategoryLabelForProduct(product) {
       if (currentCategory) return currentCategory.name;
-      return product.type || 'عام';
+      return product.type || product.category || 'عام';
     }
 
     function openMenu() {
@@ -850,6 +995,28 @@
       if (results) results.innerHTML = '';
     }
 
+    function showCartToast(product) {
+      const toast = document.getElementById('cartToast');
+      const toastImage = document.getElementById('toastImage');
+      const toastName = document.getElementById('toastName');
+
+      toastImage.src = extractImages(product)[0];
+      toastName.textContent = getProductTitle(product);
+
+      toast.classList.add('show');
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3200);
+    }
+
+    function hideCartToast() {
+      const toast = document.getElementById('cartToast');
+      toast.classList.remove('show');
+      clearTimeout(toastTimer);
+    }
+
     async function handleSearch(query) {
       try {
         const manager = window.initCollectionsManager();
@@ -863,7 +1030,7 @@
         }
 
         const results = all.filter(product => {
-          const hay = `${product.title || product.name || ''} ${product.type || ''} ${product.category || ''} ${extractDescription(product.body_html || product.description || '')}`.toLowerCase();
+          const hay = `${getProductTitle(product)} ${product.type || ''} ${product.category || ''} ${extractDescription(product.body_html || product.description || '')}`.toLowerCase();
           return hay.includes(q);
         }).slice(0, 8);
 
@@ -883,7 +1050,7 @@
       }
 
       container.innerHTML = products.map(product => {
-        const title = product.title || product.name || 'منتج';
+        const title = getProductTitle(product);
         const price = extractPrice(product);
         const id = encodeURIComponent(product.handle || product.id || '');
         const collectionParam = currentCategory ? `&collection=${encodeURIComponent(currentCategory.key)}` : '';
@@ -925,7 +1092,7 @@
       if (!currentProduct) return;
 
       const qty = parseInt(document.getElementById('qtyValue').textContent, 10) || 1;
-      const id = currentProduct.handle || currentProduct.id || currentProduct.title;
+      const id = currentProduct.handle || currentProduct.id || getProductTitle(currentProduct);
       const existing = cart.find(item => item.id === id);
 
       if (existing) {
@@ -933,7 +1100,7 @@
       } else {
         cart.push({
           id,
-          name: currentProduct.title,
+          name: getProductTitle(currentProduct),
           price: extractPrice(currentProduct),
           quantity: qty,
           image: galleryImages[0] || ''
@@ -942,6 +1109,7 @@
 
       localStorage.setItem('cart', JSON.stringify(cart));
       updateCartBadge();
+      showCartToast(currentProduct);
     }
 
     function buyNow() {
@@ -962,7 +1130,7 @@
       if (!currentCategory || !currentCategory.products) return '';
 
       const related = currentCategory.products
-        .filter(p => (p.handle || p.id) !== (currentProduct.handle || currentProduct.id))
+        .filter(p => String(p.handle || p.id) !== String(currentProduct.handle || currentProduct.id))
         .slice(0, 4);
 
       if (!related.length) return '';
@@ -975,14 +1143,15 @@
               const image = extractImages(product)[0];
               const price = extractPrice(product);
               const hasCompare = product.compare_at_price && parseFloat(product.compare_at_price) > price;
+              const title = getProductTitle(product);
               const url = `./product-details.html?id=${encodeURIComponent(product.handle || product.id)}&collection=${encodeURIComponent(currentCategory.key)}`;
 
               return `
                 <a class="related-card" href="${url}">
                   <div class="related-image">
-                    <img src="${image}" alt="${escapeHtml(product.title)}">
+                    <img src="${image}" alt="${escapeHtml(title)}">
                   </div>
-                  <div class="related-name">${escapeHtml(product.title)}</div>
+                  <div class="related-name">${escapeHtml(title)}</div>
                   ${hasCompare ? `<div class="badge-offer">عرض خاص</div>` : ``}
                   <div class="related-price">${price.toFixed(3)} KWD</div>
                 </a>
@@ -994,14 +1163,14 @@
     }
 
     function renderProduct(product) {
+      const title = getProductTitle(product);
       const price = extractPrice(product);
       const description = extractDescription(product.body_html || product.description);
-      const category = getCategoryLabelForProduct(product);
       galleryImages = extractImages(product);
       activeImageIndex = 0;
 
-      document.title = `${product.title} - Smart Kids Kuwait`;
-      document.getElementById('pageTitle').textContent = `${product.title} - Smart Kids Kuwait`;
+      document.title = `${title} - Smart Kids Kuwait`;
+      document.getElementById('pageTitle').textContent = `${title} - Smart Kids Kuwait`;
       document.getElementById('pageDescription').setAttribute('content', description.slice(0, 160));
 
       document.getElementById('productContainer').innerHTML = `
@@ -1013,7 +1182,7 @@
               <button class="gallery-btn next" type="button" onclick="changeImage(1)">›</button>
 
               <div class="gallery-stage">
-                <img id="mainProductImage" src="${galleryImages[0]}" alt="${escapeHtml(product.title)}">
+                <img id="mainProductImage" src="${galleryImages[0]}" alt="${escapeHtml(title)}">
               </div>
             </div>
 
@@ -1028,13 +1197,13 @@
 
           <div class="info-col">
             <div class="brand-line">SMART KIDS KUWAIT - الأطفال المبتكرون الكويت</div>
-            <h1 class="product-title">${escapeHtml(product.title)}</h1>
+            <h1 class="product-title">${escapeHtml(title)}</h1>
 
             <div class="product-price">${price.toFixed(3)} KWD</div>
             <div class="shipping-note">Shipping calculated at checkout.</div>
 
             <div class="qty-wrap">
-              <div class="qty-label">العدد ( 1 في عربة التسوق)</div>
+              <div class="qty-label">العدد</div>
               <div class="qty-box">
                 <button class="qty-btn" type="button" onclick="changeQty(-1)">−</button>
                 <span id="qtyValue">1</span>
@@ -1063,8 +1232,8 @@
       e.preventDefault();
       if (navigator.share && currentProduct) {
         navigator.share({
-          title: currentProduct.title,
-          text: currentProduct.title,
+          title: getProductTitle(currentProduct),
+          text: getProductTitle(currentProduct),
           url: window.location.href
         }).catch(() => {});
       } else {
@@ -1091,7 +1260,7 @@
         if (collectionKey) {
           const collection = manager.getCollectionByKey(collectionKey);
           if (collection) {
-            product = collection.products.find(p => String(p.handle) === String(productId) || String(p.id) === String(productId));
+            product = collection.products.find(p => String(p.handle || p.id) === String(productId));
             currentCategory = collection;
           }
         }
@@ -1099,7 +1268,7 @@
         if (!product) {
           const allCollections = manager.getAllCollections();
           for (const col of allCollections) {
-            product = col.products.find(p => String(p.handle) === String(productId) || String(p.id) === String(productId));
+            product = (col.products || []).find(p => String(p.handle || p.id) === String(productId));
             if (product) {
               currentCategory = col;
               break;
@@ -1131,6 +1300,8 @@
       const searchBtn = document.getElementById('searchBtn');
       const searchOverlay = document.getElementById('searchOverlay');
       const searchInput = document.getElementById('searchInput');
+      const toastClose = document.getElementById('toastClose');
+      const toastContinue = document.getElementById('toastContinue');
 
       if (menuBtn) menuBtn.addEventListener('click', openMenu);
       if (menuClose) menuClose.addEventListener('click', closeMenu);
@@ -1139,6 +1310,22 @@
       if (searchBtn) searchBtn.addEventListener('click', openSearch);
       if (searchOverlay) searchOverlay.addEventListener('click', closeSearch);
       if (searchInput) searchInput.addEventListener('input', e => handleSearch(e.target.value));
+
+      if (toastClose) toastClose.addEventListener('click', hideCartToast);
+      if (toastContinue) {
+        toastContinue.addEventListener('click', (e) => {
+          e.preventDefault();
+          hideCartToast();
+        });
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeMenu();
+          closeSearch();
+          hideCartToast();
+        }
+      });
     });
   </script>
 </body>
