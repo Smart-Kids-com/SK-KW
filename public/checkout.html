@@ -286,6 +286,36 @@
       padding:24px 20px;
       font-size:1rem;
       line-height:1.7;
+      border:2px solid transparent;
+    }
+
+    .shipping-box.free,
+    .shipping-box.paid{
+      background:#fff;
+      border-color:var(--purple);
+      color:#111;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:12px;
+      align-items:center;
+    }
+
+    .shipping-box.free .shipping-message,
+    .shipping-box.paid .shipping-message{
+      font-size:1rem;
+      color:#333;
+      direction:ltr;
+      text-align:left;
+    }
+
+    .shipping-box.free .shipping-price,
+    .shipping-box.paid .shipping-price{
+      font-size:1rem;
+      font-weight:800;
+      color:#111;
+      white-space:nowrap;
+      direction:ltr;
+      text-align:right;
     }
 
     .radio-card{
@@ -514,7 +544,7 @@
             التوصيل
             <span style="font-size:.9rem;">❔</span>
           </span>
-          <span class="muted" id="shippingValue">أضف عنوان الشحن</span>
+          <span class="muted" id="shippingValue">أضف المحافظة</span>
         </div>
 
         <div class="totals-line totals-grand">
@@ -595,10 +625,11 @@
 
     <section class="section">
       <h2>حساب الشحن</h2>
-      <div class="section-sub">التوصيل مجاناً للطلبات الأكثر من 20 د.ك</div>
+      <div class="section-sub">التوصيل مجاناً للطلبات 20 د.ك أو أكثر</div>
 
-      <div class="shipping-box">
-        Enter your shipping address to view available shipping methods.
+      <div class="shipping-box hidden" id="shippingBox">
+        <div class="shipping-message" id="shippingBoxMessage"></div>
+        <div class="shipping-price" id="shippingBoxPrice"></div>
       </div>
     </section>
 
@@ -728,9 +759,13 @@
       }, 0);
     }
 
+    function hasGovernorate() {
+      return String(document.getElementById('governorate')?.value || '').trim() !== '';
+    }
+
     function getShipping() {
       const subtotal = getSubtotal();
-      if (!document.getElementById('address1').value.trim()) return null;
+      if (!hasGovernorate()) return null;
       return subtotal >= 20 ? 0 : 2;
     }
 
@@ -747,6 +782,34 @@
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
+    }
+
+    function renderShippingBox() {
+      const shippingBox = document.getElementById('shippingBox');
+      const shippingBoxMessage = document.getElementById('shippingBoxMessage');
+      const shippingBoxPrice = document.getElementById('shippingBoxPrice');
+      const shipping = getShipping();
+
+      shippingBox.className = 'shipping-box';
+
+      if (shipping === null) {
+        shippingBox.classList.add('hidden');
+        shippingBoxMessage.textContent = '';
+        shippingBoxPrice.textContent = '';
+        return;
+      }
+
+      shippingBox.classList.remove('hidden');
+
+      if (shipping === 0) {
+        shippingBox.classList.add('free');
+        shippingBoxMessage.textContent = 'The order qualifies for free shipping';
+        shippingBoxPrice.textContent = 'مجانا';
+      } else {
+        shippingBox.classList.add('paid');
+        shippingBoxMessage.textContent = 'Delivery fee : 2 KWD';
+        shippingBoxPrice.textContent = 'KWD 2.000';
+      }
     }
 
     function renderSummary() {
@@ -776,7 +839,7 @@
       document.getElementById('grandTotalValue').textContent = formatKWD(getGrandTotal());
 
       if (shipping === null) {
-        document.getElementById('shippingValue').textContent = 'أضف عنوان الشحن';
+        document.getElementById('shippingValue').textContent = 'أضف المحافظة';
       } else if (shipping === 0) {
         document.getElementById('shippingValue').textContent = 'مجاني';
       } else {
@@ -788,6 +851,8 @@
       document.getElementById('finalSummaryQty').textContent = totalQty;
       document.getElementById('finalSummaryItemsText').textContent = `${totalQty} item`;
       document.getElementById('finalSummaryTotal').textContent = formatKWD(getGrandTotal());
+
+      renderShippingBox();
     }
 
     function showError(message) {
@@ -968,8 +1033,8 @@
 
     function bindDynamicRecalc() {
       [
-        'address1','city','governorate','country','phone',
-        'firstName','lastName','contactField'
+        'address1','address2','city','governorate','country','phone',
+        'firstName','lastName','contactField','postalCode'
       ].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
