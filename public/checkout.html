@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إتمام الطلب - Smart Kids Kuwait</title>
+  <meta name="description" content="إتمام الطلب - Smart Kids Kuwait" />
+  <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457" />
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root{
+      --bg:#ece5ef;
+      --panel:#ffffff;
+      --text:#111111;
+      --muted:#777777;
+      --line:#d8cfdd;
+      --purple:#b334e7;
+      --purple-dark:#5a0d73;
+      --input:#ffffff;
+      --radius:18px;
+      --shadow:0 8px 24px rgba(0,0,0,.06);
+    }
+
+    body{
+      font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    button,input,select,textarea{ font-family:inherit; }
+
+    .page{
+      max-width:860px;
+      margin:0 auto;
+      min-height:100vh;
+      background:var(--bg);
+    }
+
+    .checkout-header{
+      position:relative;
+      padding:26px 18px 18px;
+      text-align:center;
+      border-bottom:1px solid #d5cadb;
+    }
+
+    .header-cart{
+      position:absolute;
+      top:34px;
+      right:24px;
+      width:38px;
+      height:38px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--purple);
+      font-size:1.8rem;
+      text-decoration:none;
+    }
+
+    .checkout-logo{
+      display:block;
+      width:min(340px,78%);
+      margin:0 auto;
+      object-fit:contain;
+    }
+
+    .summary-toggle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:22px 18px;
+      border-bottom:1px solid #d5cadb;
+      cursor:pointer;
+      background:rgba(255,255,255,.14);
+    }
+
+    .summary-toggle-left{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:var(--purple);
+      font-size:1rem;
+      font-weight:600;
+    }
+
+    .summary-toggle-right{
+      font-size:1.2rem;
+      font-weight:800;
+      color:#000;
+      direction:ltr;
+    }
+
+    .summary-panel{
+      display:none;
+      padding:18px;
+      border-bottom:1px solid #d5cadb;
+    }
+
+    .summary-panel.open{
+      display:block;
+    }
+
+    .summary-item{
+      display:grid;
+      grid-template-columns:86px 1fr auto;
+      align-items:center;
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .summary-thumb{
+      position:relative;
+      width:86px;
+      height:86px;
+      border-radius:18px;
+      overflow:hidden;
+      background:#fff;
+      border:1px solid #ddd;
+      flex-shrink:0;
+    }
+
+    .summary-thumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .summary-qty{
+      position:absolute;
+      top:4px;
+      left:4px;
+      min-width:30px;
+      height:30px;
+      border-radius:12px;
+      background:#000;
+      color:#fff;
+      font-size:.95rem;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 7px;
+      border:2px solid #fff;
+    }
+
+    .summary-name{
+      font-size:1.02rem;
+      line-height:1.6;
+      color:#111;
+    }
+
+    .summary-price{
+      font-size:1.1rem;
+      font-weight:700;
+      color:#111;
+      white-space:nowrap;
+      direction:ltr;
+    }
+
+    .coupon-row{
+      display:grid;
+      grid-template-columns:1fr 54px;
+      background:#fff;
+      border:1px solid #dcdcdc;
+      border-radius:16px;
+      overflow:hidden;
+      margin:8px 0 22px;
+    }
+
+    .coupon-row input{
+      border:0;
+      outline:none;
+      background:transparent;
+      padding:18px 20px;
+      font-size:1rem;
+      color:#111;
+    }
+
+    .coupon-row button{
+      border:0;
+      background:transparent;
+      color:#999;
+      font-size:2rem;
+      cursor:pointer;
+    }
+
+    .totals{
+      display:grid;
+      gap:14px;
+    }
+
+    .totals-line{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:12px;
+      align-items:center;
+      font-size:1rem;
+      color:#222;
+    }
+
+    .totals-line .muted{
+      color:#8d8493;
+    }
+
+    .totals-line strong{
+      font-size:1rem;
+    }
+
+    .totals-grand{
+      font-size:1.25rem;
+      font-weight:900;
+      color:#000;
+      margin-top:4px;
+    }
+
+    .section{
+      padding:24px 18px 0;
+    }
+
+    .section h2{
+      font-size:1.55rem;
+      margin-bottom:10px;
+      line-height:1.4;
+    }
+
+    .section-sub{
+      color:var(--muted);
+      margin-bottom:16px;
+      font-size:1rem;
+    }
+
+    .field{
+      margin-bottom:18px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea{
+      width:100%;
+      min-height:70px;
+      border:1px solid #d8d8d8;
+      border-radius:18px;
+      background:var(--input);
+      padding:18px 20px;
+      font-size:1rem;
+      color:#111;
+      outline:none;
+    }
+
+    .field textarea{
+      min-height:140px;
+      resize:vertical;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus{
+      border:2px solid var(--purple);
+      padding:17px 19px;
+    }
+
+    .select-wrap{
+      position:relative;
+    }
+
+    .select-wrap::after{
+      content:"⌄";
+      position:absolute;
+      left:18px;
+      top:50%;
+      transform:translateY(-50%);
+      font-size:2rem;
+      line-height:1;
+      color:#777;
+      pointer-events:none;
+    }
+
+    .select-wrap select{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+    }
+
+    .check-row{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin:12px 0 0;
+      font-size:1rem;
+      color:#111;
+    }
+
+    .check-row input{
+      width:20px;
+      height:20px;
+      accent-color:var(--purple);
+    }
+
+    .shipping-box{
+      background:#eadff0;
+      color:#6f6676;
+      border-radius:18px;
+      padding:24px 20px;
+      font-size:1rem;
+      line-height:1.7;
+    }
+
+    .radio-card{
+      background:#fff;
+      border:1px solid #d7d7d7;
+      border-radius:18px;
+      overflow:hidden;
+    }
+
+    .radio-item{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      min-height:98px;
+      padding:0 22px;
+      border-bottom:1px solid #e7e2ea;
+      cursor:pointer;
+      position:relative;
+    }
+
+    .radio-item:last-child{
+      border-bottom:0;
+    }
+
+    .radio-item input{
+      position:absolute;
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .radio-ui{
+      width:36px;
+      height:36px;
+      border-radius:999px;
+      border:2px solid #d2d2d2;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+      background:#fff;
+    }
+
+    .radio-ui::after{
+      content:"";
+      width:14px;
+      height:14px;
+      border-radius:999px;
+      background:transparent;
+      transition:.2s ease;
+    }
+
+    .radio-item.checked{
+      border:2px solid var(--purple);
+      margin:-1px;
+      z-index:1;
+      background:#f7f0fa;
+    }
+
+    .radio-item.checked .radio-ui{
+      border-color:var(--purple);
+      background:var(--purple);
+    }
+
+    .radio-item.checked .radio-ui::after{
+      background:#fff;
+    }
+
+    .radio-label{
+      font-size:1rem;
+      color:#111;
+    }
+
+    .inline-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .login-link{
+      color:var(--purple);
+      font-size:1rem;
+      font-weight:600;
+      text-decoration:none;
+    }
+
+    .complete-wrap{
+      padding:26px 18px 28px;
+    }
+
+    .complete-btn{
+      width:100%;
+      min-height:72px;
+      border:0;
+      border-radius:18px;
+      background:var(--purple-dark);
+      color:#fff;
+      font-size:1.5rem;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+    }
+
+    .complete-btn:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
+    .links-footer{
+      padding:0 18px 34px;
+      border-top:1px solid #d5cadb;
+      padding-top:24px;
+      display:flex;
+      gap:16px 26px;
+      flex-wrap:wrap;
+    }
+
+    .links-footer a{
+      color:var(--purple);
+      text-decoration:underline;
+      font-size:1rem;
+    }
+
+    .success-box,
+    .error-box{
+      margin:18px;
+      border-radius:18px;
+      padding:16px 18px;
+      display:none;
+      font-weight:700;
+    }
+
+    .success-box{
+      background:#d8f3df;
+      color:#156c2f;
+    }
+
+    .error-box{
+      background:#fde0e0;
+      color:#b42318;
+    }
+
+    .hidden{
+      display:none !important;
+    }
+
+    @media (max-width: 640px){
+      .summary-item{
+        grid-template-columns:72px 1fr auto;
+        gap:12px;
+      }
+
+      .summary-thumb{
+        width:72px;
+        height:72px;
+      }
+
+      .section h2{
+        font-size:1.35rem;
+      }
+
+      .complete-btn{
+        font-size:1.3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="checkout-header">
+      <a href="./cart.html" class="header-cart" aria-label="السلة">🛍️</a>
+      <img
+        class="checkout-logo"
+        src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543"
+        alt="Smart Kids Kuwait"
+      />
+    </header>
+
+    <div class="summary-toggle" id="summaryToggle">
+      <div class="summary-toggle-left">
+        <span id="summaryChevron">⌃</span>
+        <span>ملخص الطلب</span>
+      </div>
+      <div class="summary-toggle-right" id="summaryToggleTotal">KWD 0.000</div>
+    </div>
+
+    <div class="summary-panel open" id="summaryPanel">
+      <div id="summaryItems"></div>
+
+      <div class="coupon-row">
+        <input type="text" id="couponInput" placeholder="كود الخصم">
+        <button type="button" id="applyCouponBtn">→</button>
+      </div>
+
+      <div class="totals">
+        <div class="totals-line">
+          <span class="muted" id="subtotalLabel">المجموع الفرعي</span>
+          <strong id="subtotalValue">KWD 0.000</strong>
+        </div>
+
+        <div class="totals-line">
+          <span>
+            التوصيل
+            <span style="font-size:.9rem;">❔</span>
+          </span>
+          <span class="muted" id="shippingValue">أضف عنوان الشحن</span>
+        </div>
+
+        <div class="totals-line totals-grand">
+          <span>إجمالي الطلب</span>
+          <span id="grandTotalValue">KWD 0.000</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="success-box" id="successBox">تم إرسال الطلب بنجاح ✅</div>
+    <div class="error-box" id="errorBox">يرجى تعبئة الحقول المطلوبة</div>
+
+    <section class="section">
+      <div class="inline-title">
+        <h2>( البريد الإلكتروني أو رقم الهاتف )</h2>
+        <a href="./login.html" class="login-link">تسجيل الدخول</a>
+      </div>
+
+      <div class="field">
+        <input type="text" id="contactField" placeholder="يرجى إدخال البريد الإلكتروني أو رقم الهاتف">
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>عنوان الشحن</h2>
+
+      <div class="field select-wrap">
+        <select id="country">
+          <option value="Kuwait" selected>Kuwait</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <input type="text" id="firstName" placeholder="الاسم الأول">
+      </div>
+
+      <div class="field">
+        <input type="text" id="lastName" placeholder="اسم العائلة">
+      </div>
+
+      <div class="field">
+        <input type="text" id="address1" placeholder="العنوان">
+      </div>
+
+      <div class="field">
+        <input type="text" id="address2" placeholder="قطعة - رقم المنزل - اسم الشارع - جادة رقم">
+      </div>
+
+      <div class="field">
+        <input type="text" id="postalCode" placeholder="Postal code (optional)">
+      </div>
+
+      <div class="field">
+        <input type="text" id="city" placeholder="المدينة">
+      </div>
+
+      <div class="field select-wrap">
+        <select id="governorate">
+          <option value="">المحافظة</option>
+          <option>العاصمة</option>
+          <option>حولي</option>
+          <option>الفروانية</option>
+          <option>الأحمدي</option>
+          <option>مبارك الكبير</option>
+          <option>الجهراء</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <input type="tel" id="phone" placeholder="رقم الهاتف">
+      </div>
+
+      <label class="check-row">
+        <input type="checkbox" id="saveInfo">
+        <span>احفظ بياناتك للشراء في المرة القادمة</span>
+      </label>
+    </section>
+
+    <section class="section">
+      <h2>حساب الشحن</h2>
+      <div class="section-sub">التوصيل مجاناً للطلبات الأكثر من 20 د.ك</div>
+
+      <div class="shipping-box">
+        Enter your shipping address to view available shipping methods.
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>طُرُق الدفع</h2>
+      <div class="section-sub">جميع المعاملات آمنة ومشفرة</div>
+
+      <div class="radio-card" id="paymentMethods">
+        <label class="radio-item" data-name="payment">
+          <input type="radio" name="payment" value="cash">
+          <span class="radio-ui"></span>
+          <span class="radio-label">Cash / نقداً</span>
+        </label>
+
+        <label class="radio-item checked" data-name="payment">
+          <input type="radio" name="payment" value="link" checked>
+          <span class="radio-ui"></span>
+          <span class="radio-label">link / رابط</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>العنوان</h2>
+
+      <div class="radio-card" id="billingAddressMethods">
+        <label class="radio-item checked" data-name="billingAddress">
+          <input type="radio" name="billingAddress" value="same" checked>
+          <span class="radio-ui"></span>
+          <span class="radio-label">استخدم نفس عنوان التوصيل</span>
+        </label>
+
+        <label class="radio-item" data-name="billingAddress">
+          <input type="radio" name="billingAddress" value="different">
+          <span class="radio-ui"></span>
+          <span class="radio-label">استخدم عنواناً آخر</span>
+        </label>
+      </div>
+
+      <div id="billingAddressFields" class="hidden" style="margin-top:18px;">
+        <div class="field">
+          <input type="text" id="billingFirstName" placeholder="الاسم الأول">
+        </div>
+
+        <div class="field">
+          <input type="text" id="billingLastName" placeholder="اسم العائلة">
+        </div>
+
+        <div class="field">
+          <input type="text" id="billingAddress1" placeholder="العنوان">
+        </div>
+
+        <div class="field">
+          <input type="text" id="billingAddress2" placeholder="قطعة - رقم المنزل - اسم الشارع - جادة رقم">
+        </div>
+
+        <div class="field">
+          <input type="text" id="billingCity" placeholder="المدينة">
+        </div>
+
+        <div class="field select-wrap">
+          <select id="billingGovernorate">
+            <option value="">المحافظة</option>
+            <option>العاصمة</option>
+            <option>حولي</option>
+            <option>الفروانية</option>
+            <option>الأحمدي</option>
+            <option>مبارك الكبير</option>
+            <option>الجهراء</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <input type="tel" id="billingPhone" placeholder="رقم الهاتف">
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>خصم</h2>
+      <div class="coupon-row" style="margin-top:0;">
+        <input type="text" id="discountField" placeholder="كود الخصم">
+        <button type="button" id="discountBtn">→</button>
+      </div>
+
+      <div class="summary-item" style="margin-top:22px; margin-bottom:0;">
+        <div class="summary-thumb" id="finalSummaryThumb">
+          <img id="finalSummaryImage" src="" alt="Product">
+          <span class="summary-qty" id="finalSummaryQty">1</span>
+        </div>
+
+        <div>
+          <div style="font-size:1.6rem; font-weight:800; line-height:1.5;">إجمالي الطلب</div>
+          <div style="font-size:1rem; color:#666;" id="finalSummaryItemsText">0 item</div>
+        </div>
+
+        <div style="font-size:1.3rem; font-weight:900; direction:ltr;" id="finalSummaryTotal">
+          KWD 0.000
+        </div>
+      </div>
+    </section>
+
+    <div class="complete-wrap">
+      <button class="complete-btn" id="completeOrderBtn" type="button">إكمال الطلب</button>
+    </div>
+
+    <footer class="links-footer">
+      <a href="./refund-policy.html">Refund policy</a>
+      <a href="./shipping-policy.html">Shipping</a>
+      <a href="./privacy-policy.html">Privacy policy</a>
+      <a href="./terms-of-service.html">Terms of service</a>
+      <a href="./contact.html">Contact information</a>
+    </footer>
+  </div>
+
+  <script>
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    let discountAmount = 0;
+
+    function formatKWD(value) {
+      return `KWD ${Number(value || 0).toFixed(3)}`;
+    }
+
+    function getSubtotal() {
+      return cart.reduce((sum, item) => {
+        return sum + (Number(item.price || 0) * Number(item.quantity || 0));
+      }, 0);
+    }
+
+    function getShipping() {
+      const subtotal = getSubtotal();
+      if (!document.getElementById('address1').value.trim()) return null;
+      return subtotal >= 20 ? 0 : 2;
+    }
+
+    function getGrandTotal() {
+      const subtotal = getSubtotal();
+      const shipping = getShipping();
+      return subtotal - discountAmount + (shipping === null ? 0 : shipping);
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function renderSummary() {
+      if (!cart.length) {
+        window.location.href = './cart.html';
+        return;
+      }
+
+      const summaryItems = document.getElementById('summaryItems');
+      const subtotal = getSubtotal();
+      const shipping = getShipping();
+      const totalQty = cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+
+      summaryItems.innerHTML = cart.map(item => `
+        <div class="summary-item">
+          <div class="summary-thumb">
+            <img src="${escapeHtml(item.image || 'https://via.placeholder.com/120x120?text=Product')}" alt="${escapeHtml(item.name || 'منتج')}">
+            <span class="summary-qty">${Number(item.quantity || 0)}</span>
+          </div>
+          <div class="summary-name">${escapeHtml(item.name || 'منتج')}</div>
+          <div class="summary-price">${formatKWD(Number(item.price || 0) * Number(item.quantity || 0))}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('subtotalValue').textContent = formatKWD(subtotal);
+      document.getElementById('summaryToggleTotal').textContent = formatKWD(getGrandTotal());
+      document.getElementById('grandTotalValue').textContent = formatKWD(getGrandTotal());
+
+      if (shipping === null) {
+        document.getElementById('shippingValue').textContent = 'أضف عنوان الشحن';
+      } else if (shipping === 0) {
+        document.getElementById('shippingValue').textContent = 'مجاني';
+      } else {
+        document.getElementById('shippingValue').textContent = formatKWD(shipping);
+      }
+
+      const firstItem = cart[0];
+      document.getElementById('finalSummaryImage').src = firstItem.image || 'https://via.placeholder.com/120x120?text=Product';
+      document.getElementById('finalSummaryQty').textContent = totalQty;
+      document.getElementById('finalSummaryItemsText').textContent = `${totalQty} item`;
+      document.getElementById('finalSummaryTotal').textContent = formatKWD(getGrandTotal());
+    }
+
+    function showError(message) {
+      const box = document.getElementById('errorBox');
+      box.textContent = message;
+      box.style.display = 'block';
+      document.getElementById('successBox').style.display = 'none';
+      window.scrollTo({ top: box.offsetTop - 20, behavior: 'smooth' });
+    }
+
+    function showSuccess(message) {
+      const box = document.getElementById('successBox');
+      box.textContent = message;
+      box.style.display = 'block';
+      document.getElementById('errorBox').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function bindRadioCards(groupName, callback) {
+      const items = document.querySelectorAll(`.radio-item[data-name="${groupName}"]`);
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          items.forEach(el => {
+            el.classList.remove('checked');
+            const input = el.querySelector('input');
+            if (input) input.checked = false;
+          });
+
+          item.classList.add('checked');
+          const input = item.querySelector('input');
+          if (input) input.checked = true;
+
+          if (callback) callback(input ? input.value : '');
+        });
+      });
+    }
+
+    function toggleBillingFields(value) {
+      const box = document.getElementById('billingAddressFields');
+      if (value === 'different') {
+        box.classList.remove('hidden');
+      } else {
+        box.classList.add('hidden');
+      }
+    }
+
+    function applyDiscountCode() {
+      const code = (document.getElementById('discountField').value || document.getElementById('couponInput').value || '').trim().toUpperCase();
+
+      if (!code) {
+        discountAmount = 0;
+        renderSummary();
+        return;
+      }
+
+      if (code === 'SMART10') {
+        discountAmount = 1;
+      } else if (code === 'KIDS5') {
+        discountAmount = 0.5;
+      } else {
+        discountAmount = 0;
+        showError('كود الخصم غير صحيح');
+        renderSummary();
+        return;
+      }
+
+      renderSummary();
+      showSuccess(`تم تطبيق كود الخصم: ${code}`);
+    }
+
+    function validateCheckout() {
+      const requiredIds = [
+        'contactField',
+        'firstName',
+        'lastName',
+        'address1',
+        'city',
+        'governorate',
+        'phone'
+      ];
+
+      for (const id of requiredIds) {
+        const el = document.getElementById(id);
+        if (!el || !String(el.value || '').trim()) {
+          el?.focus();
+          showError('يرجى تعبئة جميع الحقول المطلوبة');
+          return false;
+        }
+      }
+
+      const billingValue = document.querySelector('input[name="billingAddress"]:checked')?.value || 'same';
+
+      if (billingValue === 'different') {
+        const billingRequired = [
+          'billingFirstName',
+          'billingLastName',
+          'billingAddress1',
+          'billingCity',
+          'billingGovernorate',
+          'billingPhone'
+        ];
+
+        for (const id of billingRequired) {
+          const el = document.getElementById(id);
+          if (!el || !String(el.value || '').trim()) {
+            el?.focus();
+            showError('يرجى تعبئة عنوان الفاتورة بالكامل');
+            return false;
+          }
+        }
+      }
+
+      return true;
+    }
+
+    function completeOrder() {
+      if (!cart.length) {
+        showError('السلة فارغة');
+        return;
+      }
+
+      if (!validateCheckout()) return;
+
+      const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || 'link';
+      const billingMode = document.querySelector('input[name="billingAddress"]:checked')?.value || 'same';
+      const subtotal = getSubtotal();
+      const shipping = getShipping() === null ? 0 : getShipping();
+      const total = getGrandTotal();
+
+      const orderData = {
+        orderNumber: `SK-${Date.now()}`,
+        customerName: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`.trim(),
+        customerPhone: document.getElementById('phone').value.trim(),
+        customerEmail: document.getElementById('contactField').value.trim(),
+        customerAddress: [
+          document.getElementById('address1').value.trim(),
+          document.getElementById('address2').value.trim(),
+          document.getElementById('city').value.trim(),
+          document.getElementById('governorate').value.trim(),
+          document.getElementById('country').value.trim()
+        ].filter(Boolean).join(' - '),
+        items: cart,
+        subtotal,
+        shipping,
+        discount: discountAmount,
+        total,
+        paymentMethod,
+        billingMode,
+        note: '',
+        date: new Date().toLocaleString('ar-EG'),
+        status: 'new'
+      };
+
+      const existingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+      existingOrders.push(orderData);
+      localStorage.setItem('orders', JSON.stringify(existingOrders));
+
+      localStorage.setItem('last_order', JSON.stringify(orderData));
+      localStorage.removeItem('cart');
+
+      showSuccess(`تم إرسال الطلب بنجاح ✅ رقم الطلب: ${orderData.orderNumber}`);
+
+      setTimeout(() => {
+        window.location.href = './index.html';
+      }, 1800);
+    }
+
+    function initSummaryToggle() {
+      const toggle = document.getElementById('summaryToggle');
+      const panel = document.getElementById('summaryPanel');
+      const chevron = document.getElementById('summaryChevron');
+
+      toggle.addEventListener('click', () => {
+        panel.classList.toggle('open');
+        chevron.textContent = panel.classList.contains('open') ? '⌃' : '⌄';
+      });
+    }
+
+    function bindDynamicRecalc() {
+      [
+        'address1','city','governorate','country','phone',
+        'firstName','lastName','contactField'
+      ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', renderSummary);
+          el.addEventListener('change', renderSummary);
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initSummaryToggle();
+
+      bindRadioCards('payment');
+      bindRadioCards('billingAddress', toggleBillingFields);
+
+      document.getElementById('applyCouponBtn').addEventListener('click', applyDiscountCode);
+      document.getElementById('discountBtn').addEventListener('click', applyDiscountCode);
+      document.getElementById('completeOrderBtn').addEventListener('click', completeOrder);
+
+      bindDynamicRecalc();
+      renderSummary();
+    });
+  </script>
+</body>
+</html>
