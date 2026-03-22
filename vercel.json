@@ -1,9 +1,17 @@
 {
-  "buildCommand": "echo 'Static site - no build needed'",
-  "outputDirectory": "public",
-  "framework": null,
+  "framework": "nodejs",
+  "nodejs": "18.x",
   "cleanUrls": true,
   "trailingSlash": false,
+  "public": true,
+  
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    }
+  ],
+  
   "redirects": [
     {
       "source": "/products/:slug*",
@@ -11,9 +19,23 @@
       "permanent": true
     }
   ],
+
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "source": "/(.*\\.html)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -27,6 +49,15 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }
