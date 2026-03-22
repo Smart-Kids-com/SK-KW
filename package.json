@@ -1,7 +1,33 @@
 {
   "name": "smartkids-store",
   "version": "1.0.0",
+  "description": "نظام إدارة الطلبات المتقدم لـ Smart Kids Kuwait",
+  "main": "server.js",
   "scripts": {
-    "build": "echo 'No build needed'"
+    "start": "node server.js",
+    "dev": "node simple-server.js",
+    "build": "echo 'No build needed'",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": [
+    "ecommerce",
+    "orders",
+    "sqlite",
+    "arabic"
+  ],
+  "author": "Smart Kids Kuwait",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }
