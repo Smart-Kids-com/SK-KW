@@ -1027,7 +1027,11 @@
           body: JSON.stringify(orderPayload)
         });
 
+        console.log('📡 Response Status:', response.status);
+        console.log('📡 Response OK:', response.ok);
+
         const result = await response.json().catch(() => null);
+        console.log('📡 Response JSON:', result);
 
         // إذا كان الطلب ناجح (statusOK و success جاهز)
         if (response.ok && result && result.success === true) {
