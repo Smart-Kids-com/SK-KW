@@ -59,9 +59,8 @@ router.post('/', async (req, res) => {
     const orderNumber = HELPERS.generateOrderNumber();
 
     // مرحلة الحفظ - منفصلة عن جلب البيانات
-    let orderId = null;
     try {
-      orderId = await db.transaction(async () => {
+      await db.transaction(async () => {
         // إدراج الطلب الرئيسي
         const result = await db.run(
           `INSERT INTO ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS} 
@@ -113,50 +112,25 @@ router.post('/', async (req, res) => {
       });
     }
 
-    console.log('🔍 DEBUG: orderId =', orderId, 'orderNumber =', orderNumber);
-
-    // تحقق من أن orderId موجود
-    if (!orderId) {
-      console.error('❌ خطأ: orderId = null بعد الحفظ');
-      return res.status(500).json({
-        success: false,
-        error: 'فشل في استخراج معرف الطلب'
-      });
-    }
-
     // إذا وصلنا هنا، الطلب تم حفظه بنجاح!
-    let responseData = {
-      order_number: orderNumber,
-      id: orderId
-    };
-
-    // جلب البيانات الكاملة - اختياري (لا نفشل إذا فشل)
-    try {
-      const newOrder = await db.get(
-        `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS} WHERE order_number = ?`,
-        [orderNumber]
-      );
-
-      const orderItems = await db.all(
-        `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS} WHERE order_id = ?`,
-        [newOrder?.id || orderId]
-      );
-
-      if (newOrder) {
-        responseData = {
-          ...newOrder,
-          items: orderItems || []
-        };
-      }
-    } catch (selectError) {
-      // تحذير فقط - الطلب موجود حتى لو فشل الجلب
-      console.warn('⚠️ حذر: الطلب تم حفظه لكن فشل جلب البيانات الكاملة:', selectError);
-    }
-
+    // أرجع البيانات مباشرة بدون جلب من الدب
     res.status(201).json({
       success: true,
       message: 'تم إنشاء الطلب بنجاح',
-      data: responseData
+      data: {
+        order_number: orderNumber,
+        customer_name: customerName,
+        customer_email: customerEmail,
+        customer_phone: customerPhone,
+        customer_address: customerAddress,
+        customer_city: customerCity || 'الكويت',
+        customer_district: customerDistrict || '',
+        subtotal,
+        shipping_cost: shippingCost,
+        total,
+        status: SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING,
+        notes: notes || ''
+      }
     });
 
   } catch (error) {
