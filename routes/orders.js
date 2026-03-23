@@ -113,6 +113,17 @@ router.post('/', async (req, res) => {
       });
     }
 
+    console.log('🔍 DEBUG: orderId =', orderId, 'orderNumber =', orderNumber);
+
+    // تحقق من أن orderId موجود
+    if (!orderId) {
+      console.error('❌ خطأ: orderId = null بعد الحفظ');
+      return res.status(500).json({
+        success: false,
+        error: 'فشل في استخراج معرف الطلب'
+      });
+    }
+
     // إذا وصلنا هنا، الطلب تم حفظه بنجاح!
     let responseData = {
       order_number: orderNumber,
