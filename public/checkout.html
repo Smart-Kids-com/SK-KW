@@ -1029,7 +1029,7 @@
 
         const result = await response.json().catch(() => null);
 
-        // إذا كان response.ok و result.success = true فهو ناجح
+        // إذا كان الطلب ناجح (statusOK و success جاهز)
         if (response.ok && result && result.success === true) {
           // احفظ last_order وامسح السلة
           localStorage.setItem('last_order', JSON.stringify(result.data));
@@ -1046,8 +1046,15 @@
               window.location.href = './track.html';
             }
           }, 1500);
+        } else if (!response.ok) {
+          // Server error
+          throw new Error(result?.error || `خطأ أثناء الطلب (${response.status})`);
+        } else if (!result) {
+          // JSON parse failed
+          throw new Error('فشل الاتصال مع السيرفر');
         } else {
-          throw new Error(result?.error || 'فشل في إرسال الطلب');
+          // API returned error
+          throw new Error(result?.error || 'فشل في إنشاء الطلب');
         }
 
       } catch (error) {
