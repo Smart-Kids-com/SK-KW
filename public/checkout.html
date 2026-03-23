@@ -1029,23 +1029,26 @@
 
         const result = await response.json().catch(() => null);
 
-        if (!response.ok || !result || !result.success) {
+        // إذا كان response.ok و result.success = true فهو ناجح
+        if (response.ok && result && result.success === true) {
+          // احفظ last_order وامسح السلة
+          localStorage.setItem('last_order', JSON.stringify(result.data));
+          localStorage.removeItem('cart');
+
+          // استخرج رقم الطلب
+          const orderNumber = result.data?.order_number || '';
+          showSuccess(`تم إرسال الطلب بنجاح ✅ رقم الطلب: ${orderNumber}`);
+
+          setTimeout(() => {
+            if (orderNumber) {
+              window.location.href = `./track.html?order=${encodeURIComponent(orderNumber)}`;
+            } else {
+              window.location.href = './track.html';
+            }
+          }, 1500);
+        } else {
           throw new Error(result?.error || 'فشل في إرسال الطلب');
         }
-
-        localStorage.setItem('last_order', JSON.stringify(result.data));
-        localStorage.removeItem('cart');
-
-        const orderNumber = result.data.order_number || result.data.orderNumber || '';
-        showSuccess(`تم إرسال الطلب بنجاح ✅ رقم الطلب: ${orderNumber}`);
-
-        setTimeout(() => {
-          if (orderNumber) {
-            window.location.href = `./track.html?order=${encodeURIComponent(orderNumber)}`;
-          } else {
-            window.location.href = './track.html';
-          }
-        }, 1500);
 
       } catch (error) {
         console.error('Order submit error:', error);
