@@ -58,72 +58,98 @@ router.post('/', async (req, res) => {
     const total = subtotal + shippingCost;
     const orderNumber = HELPERS.generateOrderNumber();
 
-    // إنشاء الطلب داخل transaction
-    await db.transaction(async () => {
-      // إدراج الطلب الرئيسي
-      const result = await db.run(
-        `INSERT INTO ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS} 
-        (order_number, customer_name, customer_email, customer_phone, customer_address, 
-         customer_city, customer_district, subtotal, shipping_cost, total, status, notes) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          orderNumber,
-          customerName,
-          customerEmail,
-          customerPhone,
-          customerAddress,
-          customerCity || 'الكويت',
-          customerDistrict || '',
-          subtotal,
-          shippingCost,
-          total,
-          SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING,
-          notes || ''
-        ]
-      );
-
-      const orderId = result.id;
-
-      // إدراج عناصر الطلب
-      for (const item of items) {
-        await db.run(
-          `INSERT INTO ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS}
-          (order_id, product_id, product_name, price, quantity)
-          VALUES (?, ?, ?, ?, ?)`,
+    // مرحلة الحفظ - منفصلة عن جلب البيانات
+    let orderId = null;
+    try {
+      orderId = await db.transaction(async () => {
+        // إدراج الطلب الرئيسي
+        const result = await db.run(
+          `INSERT INTO ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS} 
+          (order_number, customer_name, customer_email, customer_phone, customer_address, 
+           customer_city, customer_district, subtotal, shipping_cost, total, status, notes) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
-            orderId,
-            item.productId || `product_${Date.now()}`,
-            item.name,
-            item.price,
-            item.quantity
+            orderNumber,
+            customerName,
+            customerEmail,
+            customerPhone,
+            customerAddress,
+            customerCity || 'الكويت',
+            customerDistrict || '',
+            subtotal,
+            shippingCost,
+            total,
+            SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING,
+            notes || ''
           ]
         );
+
+        const insertedId = result.id;
+
+        // إدراج عناصر الطلب
+        for (const item of items) {
+          await db.run(
+            `INSERT INTO ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS}
+            (order_id, product_id, product_name, price, quantity)
+            VALUES (?, ?, ?, ?, ?)`,
+            [
+              insertedId,
+              item.productId || `product_${Date.now()}`,
+              item.name,
+              item.price,
+              item.quantity
+            ]
+          );
+        }
+
+        return insertedId;
+      });
+    } catch (transactionError) {
+      // فشل في الحفظ - هذا فشل حقيقي
+      console.error('❌ خطأ في حفظ الطلب:', transactionError);
+      return res.status(500).json({
+        success: false,
+        error: 'فشل في إنشاء الطلب'
+      });
+    }
+
+    // إذا وصلنا هنا، الطلب تم حفظه بنجاح!
+    let responseData = {
+      order_number: orderNumber,
+      id: orderId
+    };
+
+    // جلب البيانات الكاملة - اختياري (لا نفشل إذا فشل)
+    try {
+      const newOrder = await db.get(
+        `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS} WHERE order_number = ?`,
+        [orderNumber]
+      );
+
+      const orderItems = await db.all(
+        `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS} WHERE order_id = ?`,
+        [newOrder?.id || orderId]
+      );
+
+      if (newOrder) {
+        responseData = {
+          ...newOrder,
+          items: orderItems || []
+        };
       }
-
-      return orderId;
-    });
-
-    // جلب الطلب الجديد مع عناصره
-    const newOrder = await db.get(
-      `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS} WHERE order_number = ?`,
-      [orderNumber]
-    );
-
-    const orderItems = await db.all(
-      `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS} WHERE order_id = ?`,
-      [newOrder.id]
-    );
+    } catch (selectError) {
+      // تحذير فقط - الطلب موجود حتى لو فشل الجلب
+      console.warn('⚠️ حذر: الطلب تم حفظه لكن فشل جلب البيانات الكاملة:', selectError);
+    }
 
     res.status(201).json({
       success: true,
       message: 'تم إنشاء الطلب بنجاح',
-      data: {
-        ...newOrder,
-        items: orderItems
-      }
+      data: responseData
     });
+
   } catch (error) {
-    console.error('❌ خطأ في إنشاء الطلب:', error);
+    console.error('❌ خطأ عام:', error);
     res.status(500).json({
       success: false,
       error: 'فشل في إنشاء الطلب'
