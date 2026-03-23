@@ -51,18 +51,20 @@ router.post('/', async (req, res) => {
     // حساب الإجمالي
     let subtotal = 0;
     items.forEach(item => {
-      subtotal += item.price * item.quantity;
+      subtotal += Number(item.price || 0) * Number(item.quantity || 0);
     });
 
     const shippingCost = HELPERS.calculateShipping(subtotal);
     const total = subtotal + shippingCost;
     const orderNumber = HELPERS.generateOrderNumber();
 
-    // مرحلة الحفظ - منفصلة عن جلب البيانات
+    let savedOrderId = null;
+
+    // مرحلة الحفظ فقط
     try {
       await db.transaction(async () => {
         // إدراج الطلب الرئيسي
-        const result = await db.run(
+        await db.run(
           `INSERT INTO ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS} 
           (order_number, customer_name, customer_email, customer_phone, customer_address, 
            customer_city, customer_district, subtotal, shipping_cost, total, status, notes) 
@@ -83,7 +85,20 @@ router.post('/', async (req, res) => {
           ]
         );
 
-        const insertedId = result.id;
+        // لا تعتمد على lastInsertRowid مع Turso
+        const savedOrder = await db.get(
+          `SELECT id FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}
+           WHERE order_number = ?
+           ORDER BY id DESC
+           LIMIT 1`,
+          [orderNumber]
+        );
+
+        if (!savedOrder || !savedOrder.id) {
+          throw new Error('ORDER_ID_LOOKUP_FAILED');
+        }
+
+        savedOrderId = savedOrder.id;
 
         // إدراج عناصر الطلب
         for (const item of items) {
@@ -92,19 +107,16 @@ router.post('/', async (req, res) => {
             (order_id, product_id, product_name, price, quantity)
             VALUES (?, ?, ?, ?, ?)`,
             [
-              insertedId,
+              savedOrderId,
               item.productId || `product_${Date.now()}`,
-              item.name,
-              item.price,
-              item.quantity
+              item.name || 'منتج',
+              Number(item.price || 0),
+              Number(item.quantity || 0)
             ]
           );
         }
-
-        return insertedId;
       });
     } catch (transactionError) {
-      // فشل في الحفظ - هذا فشل حقيقي
       console.error('❌ خطأ في حفظ الطلب:', transactionError);
       return res.status(500).json({
         success: false,
@@ -112,12 +124,12 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // إذا وصلنا هنا، الطلب تم حفظه بنجاح!
-    // أرجع البيانات مباشرة بدون جلب من الدب
-    res.status(201).json({
+    // إذا وصلنا هنا، الطلب تم حفظه بنجاح
+    return res.status(201).json({
       success: true,
       message: 'تم إنشاء الطلب بنجاح',
       data: {
+        id: savedOrderId,
         order_number: orderNumber,
         customer_name: customerName,
         customer_email: customerEmail,
@@ -135,7 +147,7 @@ router.post('/', async (req, res) => {
 
   } catch (error) {
     console.error('❌ خطأ عام:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: 'فشل في إنشاء الطلب'
     });
@@ -457,12 +469,12 @@ router.get('/', async (req, res) => {
     // ترتيب النتائج
     const validSortColumns = ['created_at', 'updated_at', 'total', 'order_number', 'status'];
     const sortColumn = validSortColumns.includes(sort) ? sort : 'created_at';
-    const sortOrder = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
     sql += ` ORDER BY ${sortColumn} ${sortOrder}`;
 
     // تطبيق الحد والإزاحة (pagination)
     sql += ` LIMIT ? OFFSET ?`;
-    params.push(parseInt(limit), parseInt(offset));
+    params.push(parseInt(limit, 10), parseInt(offset, 10));
 
     const orders = await db.all(sql, params);
 
@@ -480,9 +492,9 @@ router.get('/', async (req, res) => {
       data: orders,
       pagination: {
         total: countResult.total,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        totalPages: Math.ceil(countResult.total / parseInt(limit))
+        limit: parseInt(limit, 10),
+        offset: parseInt(offset, 10),
+        totalPages: Math.ceil(countResult.total / parseInt(limit, 10))
       }
     });
   } catch (error) {
