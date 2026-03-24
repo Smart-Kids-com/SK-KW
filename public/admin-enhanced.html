@@ -71,7 +71,7 @@
       flex-wrap: wrap;
     }
 
-    .logout-btn, .refresh-btn, .export-btn, .settings-btn {
+    .logout-btn, .refresh-btn, .export-btn {
       padding: 0.7rem 1.2rem;
       border: none;
       border-radius: 8px;
@@ -851,6 +851,38 @@
 
   <script>
     const API_BASE = '/api/orders';
+
+    const HELPERS_FALLBACK = {
+      formatCurrency(value) {
+        const num = Number(value || 0);
+        return `KWD ${num.toFixed(3)}`;
+      },
+      formatDate(value) {
+        if (!value) return '-';
+        const d = new Date(value);
+        if (isNaN(d)) return value;
+        return d.toLocaleDateString('ar-KW');
+      },
+      formatDateTime(value) {
+        if (!value) return '-';
+        const d = new Date(value);
+        if (isNaN(d)) return value;
+        return d.toLocaleString('ar-KW');
+      },
+      getStatusLabel(status) {
+        const labels = {
+          pending: 'في الانتظار',
+          processing: 'قيد التجهيز',
+          shipped: 'تم الشحن',
+          completed: 'مكتمل',
+          cancelled: 'ملغي'
+        };
+        return labels[status] || status || '-';
+      }
+    };
+
+    const H = (typeof HELPERS !== 'undefined' && HELPERS) ? HELPERS : HELPERS_FALLBACK;
+
     let allOrders = [];
     let currentPage = 1;
     let itemCount = 0;
@@ -883,7 +915,7 @@
             document.getElementById('pendingOrders').textContent = statsData.data.ordersByStatus?.pending || 0;
             document.getElementById('processingOrders').textContent = statsData.data.ordersByStatus?.processing || 0;
             document.getElementById('completedOrders').textContent = statsData.data.ordersByStatus?.completed || 0;
-            document.getElementById('totalRevenue').textContent = HELPERS.formatCurrency(statsData.data.totalRevenue || 0);
+            document.getElementById('totalRevenue').textContent = H.formatCurrency(statsData.data.totalRevenue || 0);
           } else {
             fillStatsFromOrders();
           }
@@ -906,7 +938,7 @@
       document.getElementById('pendingOrders').textContent = allOrders.filter(o => o.status === 'pending').length;
       document.getElementById('processingOrders').textContent = allOrders.filter(o => o.status === 'processing').length;
       document.getElementById('completedOrders').textContent = allOrders.filter(o => o.status === 'completed').length;
-      document.getElementById('totalRevenue').textContent = HELPERS.formatCurrency(
+      document.getElementById('totalRevenue').textContent = H.formatCurrency(
         allOrders.reduce((sum, o) => sum + Number(o.total || 0), 0)
       );
     }
@@ -934,13 +966,13 @@
             <div>${order.customer_email || '-'}</div>
             <div style="font-size:0.8rem;color:#666;margin-top:4px;">${order.customer_phone || ''}</div>
           </td>
-          <td>${HELPERS.formatCurrency(order.total || 0)}</td>
+          <td>${H.formatCurrency(order.total || 0)}</td>
           <td>
             <span class="status-badge ${order.status}">
-              ${HELPERS.getStatusLabel(order.status)}
+              ${H.getStatusLabel(order.status)}
             </span>
           </td>
-          <td>${order.created_at ? HELPERS.formatDate(order.created_at) : '-'}</td>
+          <td>${order.created_at ? H.formatDate(order.created_at) : '-'}</td>
           <td>
             <div class="order-actions">
               <button class="btn-sm btn-view" onclick="viewOrder(${order.id})">👁️ عرض</button>
@@ -974,7 +1006,7 @@
                 <div style="border: 1px solid var(--border); padding: 0.75rem; border-radius: 6px; margin-bottom: 0.5rem;">
                   <div><strong>${item.product_name || item.name || 'منتج'}</strong></div>
                   <div style="color: #666; font-size: 0.9rem;">
-                    الكمية: ${qty} × ${HELPERS.formatCurrency(unitPrice)} = ${HELPERS.formatCurrency(itemSubtotal)}
+                    الكمية: ${qty} × ${H.formatCurrency(unitPrice)} = ${H.formatCurrency(itemSubtotal)}
                   </div>
                 </div>
               `;
@@ -997,26 +1029,26 @@
             <div class="order-summary-grid">
               <div class="summary-box">
                 <strong>الإجمالي الجزئي:</strong><br>
-                ${HELPERS.formatCurrency(order.subtotal || 0)}
+                ${H.formatCurrency(order.subtotal || 0)}
               </div>
               <div class="summary-box">
                 <strong>الشحن:</strong><br>
-                ${HELPERS.formatCurrency(order.shipping_cost || 0)}
+                ${H.formatCurrency(order.shipping_cost || 0)}
               </div>
               <div class="summary-box">
                 <strong>الإجمالي الكلي:</strong><br>
-                ${HELPERS.formatCurrency(order.total || 0)}
+                ${H.formatCurrency(order.total || 0)}
               </div>
               <div class="summary-box">
                 <strong>الحالة:</strong><br>
-                <span class="status-badge ${order.status}">${HELPERS.getStatusLabel(order.status)}</span>
+                <span class="status-badge ${order.status}">${H.getStatusLabel(order.status)}</span>
               </div>
             </div>
 
             <h3 style="color: var(--primary); margin-top: 1.5rem; margin-bottom: 1rem;">معلومات الطلب</h3>
             <p><strong>رقم الطلب:</strong> ${order.order_number || '-'}</p>
-            <p><strong>التاريخ:</strong> ${order.created_at ? HELPERS.formatDateTime(order.created_at) : '-'}</p>
-            <p><strong>آخر تحديث:</strong> ${order.updated_at ? HELPERS.formatDateTime(order.updated_at) : '-'}</p>
+            <p><strong>التاريخ:</strong> ${order.created_at ? H.formatDateTime(order.created_at) : '-'}</p>
+            <p><strong>آخر تحديث:</strong> ${order.updated_at ? H.formatDateTime(order.updated_at) : '-'}</p>
             ${order.notes ? `<p><strong>الملاحظات:</strong> ${order.notes}</p>` : ''}
           </div>
         `;
@@ -1121,6 +1153,7 @@
       openModal('newOrderModal');
     }
 
+    let itemCount = 0;
     function addOrderItem() {
       itemCount++;
       const itemsList = document.getElementById('itemsList');
@@ -1252,8 +1285,8 @@
         order.customer_email || '',
         order.customer_phone || '',
         order.total || 0,
-        HELPERS.getStatusLabel(order.status),
-        order.created_at ? HELPERS.formatDateTime(order.created_at) : ''
+        H.getStatusLabel(order.status),
+        order.created_at ? H.formatDateTime(order.created_at) : ''
       ]);
 
       let csv = headers.join(',') + '\n';
