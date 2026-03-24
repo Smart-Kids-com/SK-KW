@@ -1,1163 +1,1856 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Kids Kuwait - Orders Dashboard</title>
+  <title>Smart Kids Kuwait Admin</title>
   <script src="/config/system.js"></script>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-
-    :root{
-      --bg:#f3f3f3;
-      --card:#ffffff;
-      --text:#1d1d1f;
-      --muted:#7a7a7d;
-      --line:#e7e7ea;
-      --black:#000000;
-      --green:#7bed57;
-      --chip-yellow:#efe17a;
-      --chip-yellow-text:#5b4d00;
-      --chip-beige:#eacb98;
-      --chip-beige-text:#5c4520;
-      --danger:#db5b5b;
-      --blue:#5aa0ef;
-      --radius-xl:38px;
-      --radius-lg:24px;
-      --radius-md:18px;
-      --radius-sm:14px;
-      --shadow:0 10px 30px rgba(0,0,0,.06);
-    }
-
-    body{
-      font-family:"Segoe UI",Tahoma,Arial,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
-
-    button,input,select,textarea{
-      font-family:inherit;
-    }
-
-    a{color:inherit;text-decoration:none}
-
-    .app-header{
-      background:#000;
-      color:#fff;
-      padding:20px 18px 26px;
-    }
-
-    .app-header-inner{
-      max-width:1280px;
-      margin:0 auto;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:16px;
-      min-width:0;
-    }
-
-    .brand-icon{
-      width:62px;
-      height:62px;
-      border-radius:18px;
-      background:var(--green);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#173c12;
-      font-size:1.7rem;
-      flex:0 0 auto;
-    }
-
-    .brand-title{
-      font-size:1.95rem;
-      font-weight:900;
-      line-height:1.08;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .brand-sub{
-      font-size:.9rem;
-      color:#d0d0d0;
-      margin-top:4px;
-    }
-
-    .header-actions{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      flex:0 0 auto;
-    }
-
-    .circle-icon{
-      width:60px;
-      height:60px;
-      border-radius:50%;
-      border:none;
-      background:transparent;
-      color:#fff;
-      font-size:1.6rem;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .logo-avatar{
-      width:60px;
-      height:60px;
-      border-radius:50%;
-      overflow:hidden;
-      background:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex:0 0 auto;
-    }
-
-    .logo-avatar img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
-
-    .page{
-      max-width:1280px;
-      margin:-8px auto 0;
-      padding:0 16px 24px;
-    }
-
-    .dashboard-shell{
-      background:#fff;
-      border-radius:42px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      border:1px solid #ededed;
-    }
-
-    .dashboard-top{
-      padding:24px 20px 12px;
-    }
-
-    .dashboard-controls{
-      display:grid;
-      grid-template-columns:340px 260px 1fr;
-      gap:14px;
-      margin-bottom:22px;
-      align-items:center;
-    }
-
-    .pill{
-      min-height:66px;
-      border:none;
-      border-radius:20px;
-      background:#f1f1f1;
-      color:#2d2d2f;
-      padding:0 22px;
-      display:flex;
-      align-items:center;
-      gap:12px;
-      font-size:1.05rem;
-      font-weight:700;
-    }
-
-    .pill select{
-      width:100%;
-      border:none;
-      background:transparent;
-      font-size:1.05rem;
-      color:#2d2d2f;
-      outline:none;
-      appearance:none;
-      font-weight:700;
-      cursor:pointer;
-    }
-
-    .pill .dot{
-      width:14px;
-      height:14px;
-      border-radius:50%;
-      background:#63d98a;
-      flex:0 0 auto;
-    }
-
-    .report-btn{
-      justify-self:end;
-      min-height:66px;
-      padding:0 24px;
-      border-radius:20px;
-      border:1px solid #dcdcdc;
-      background:#fff;
-      font-size:1rem;
-      font-weight:700;
-      color:#2d2d2f;
-      cursor:pointer;
-    }
-
-    .stats-grid{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:32px;
-      margin-bottom:18px;
-      align-items:start;
-    }
-
-    .stat{
-      min-width:0;
-      text-align:left;
-      direction:ltr;
-    }
-
-    .stat-label{
-      color:#8a8a8e;
-      font-size:1rem;
-      margin-bottom:8px;
-      font-weight:600;
-    }
-
-    .stat-value{
-      font-size:2.15rem;
-      line-height:1.02;
-      font-weight:800;
-      color:#252525;
-      letter-spacing:-.4px;
-      word-break:break-word;
-    }
-
-    .stat-change{
-      margin-top:6px;
-      color:#7cab87;
-      font-size:1rem;
-      font-weight:700;
-      line-height:1.15;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f6f6f7;
+      --panel: #ffffff;
+      --panel-2: #f1f1f2;
+      --line: #e3e3e6;
+      --text: #303030;
+      --muted: #6d7175;
+      --topbar: #111213;
+      --green: #008060;
+      --green-soft: #e3f1df;
+      --blue: #0ea5e9;
+      --badge-payment-bg: #f8dca8;
+      --badge-payment-text: #8a6116;
+      --badge-fulfill-bg: #e8e8e8;
+      --badge-fulfill-text: #616161;
+      --danger: #d82c0d;
+      --shadow: 0 1px 0 rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.04);
+      --radius-xl: 18px;
+      --radius-lg: 14px;
+      --radius-md: 12px;
+      --radius-sm: 10px;
+      --sidebar-w: 292px;
+      --topbar-h: 72px;
+      --mobile-black: #000;
+      --mobile-green: #97ea67;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, "Segoe UI", Tahoma, Arial, sans-serif;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .app {
+      min-height: 100vh;
+    }
+
+    /* DESKTOP STRUCTURE */
+    .desktop-shell {
+      display: none;
+    }
+
+    .desktop-topbar {
+      height: var(--topbar-h);
+      background: var(--topbar);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .desktop-topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .shopify-mark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .desktop-search {
+      width: min(810px, 52vw);
+      position: relative;
+    }
+
+    .desktop-search input {
+      width: 100%;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid #3a3a3d;
+      background: #2a2a2c;
+      color: #fff;
+      padding: 0 92px 0 42px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .desktop-search input::placeholder {
+      color: #c9c9cb;
+    }
+
+    .desktop-search .icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #d0d0d2;
+      font-size: 16px;
+      pointer-events: none;
     }
 
-    .chart-wrap{
-      padding:4px 0 0;
-    }
-
-    .chart-card{
-      height:355px;
-      position:relative;
-      border-radius:24px;
-      overflow:hidden;
-    }
+    .desktop-search .kbd {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #d5d5d7;
+    }
+
+    .desktop-search .kbd span {
+      padding: 3px 6px;
+      border-radius: 6px;
+      background: #444447;
+      border: 1px solid #515154;
+      font-weight: 700;
+    }
+
+    .desktop-topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      white-space: nowrap;
+    }
+
+    .desktop-topbar-right .icon-btn {
+      width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .account-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .account-chip img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #fff;
+    }
+
+    .desktop-body {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+      min-height: calc(100vh - var(--topbar-h));
+    }
+
+    .desktop-sidebar {
+      border-right: 1px solid var(--line);
+      background: #efefef;
+      padding: 14px 12px 18px;
+      position: sticky;
+      top: var(--topbar-h);
+      height: calc(100vh - var(--topbar-h));
+      overflow: auto;
+    }
+
+    .side-group {
+      margin-bottom: 14px;
+    }
+
+    .side-link {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 12px;
+      border-radius: 12px;
+      color: #303030;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .side-link:hover {
+      background: #e9e9ea;
+    }
+
+    .side-link.active {
+      background: #fff;
+      box-shadow: inset 0 0 0 1px #e1e1e3;
+    }
+
+    .side-link-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .side-link small {
+      color: #6f7377;
+      font-weight: 700;
+      background: #e4e4e5;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    .side-label {
+      font-size: 13px;
+      color: #6d7175;
+      padding: 10px 10px 6px;
+      font-weight: 700;
+    }
+
+    .desktop-main {
+      padding: 20px 18px 28px;
+      overflow: auto;
+    }
+
+    .desktop-content-wrap {
+      max-width: 1420px;
+    }
+
+    /* MOBILE HEADER */
+    .mobile-shell {
+      display: block;
+    }
+
+    .mobile-header {
+      background: var(--mobile-black);
+      color: #fff;
+      padding: 16px 14px 24px;
+    }
+
+    .mobile-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .mobile-header-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .mobile-avatar,
+    .mobile-store {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      flex: 0 0 auto;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mobile-avatar {
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    .mobile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .mobile-store {
+      background: var(--mobile-green);
+      color: #24420c;
+      font-size: 28px;
+    }
+
+    .mobile-brand-text h1 {
+      font-size: 20px;
+      line-height: 1.15;
+      font-weight: 900;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mobile-brand-text p {
+      font-size: 12px;
+      color: #d7d7d9;
+    }
+
+    .mobile-bell {
+      font-size: 32px;
+      line-height: 1;
+    }
+
+    .mobile-main {
+      margin-top: -8px;
+      padding: 0 10px 20px;
+    }
+
+    .mobile-surface {
+      background: #fff;
+      border-radius: 34px;
+      box-shadow: var(--shadow);
+      border: 1px solid #ececee;
+      overflow: hidden;
+    }
+
+    /* COMMON PANELS */
+    .card-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .alert {
+      display: none;
+      margin-bottom: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .alert.active { display: block; }
+    .alert.success {
+      background: #e3f1df;
+      color: #0b6b42;
+      border: 1px solid #bfdcb9;
+    }
+    .alert.error {
+      background: #ffe9e5;
+      color: #9d240d;
+      border: 1px solid #f1c7bf;
+    }
+
+    /* DASHBOARD */
+    .dashboard-section {
+      margin-bottom: 16px;
+    }
+
+    .dashboard-toolbar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      direction: ltr;
+    }
+
+    .filter-pill,
+    .report-pill {
+      min-height: 36px;
+      padding: 0 14px;
+      border: 1px solid #d4d4d6;
+      background: #fff;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #303030;
+      font-weight: 600;
+    }
+
+    .filter-pill select {
+      border: none;
+      background: transparent;
+      font-size: 14px;
+      outline: none;
+      color: #303030;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .metric-strip {
+      border: 1px solid #d9d9db;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric-strip-inner {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .metric-box {
+      padding: 16px 18px;
+      border-right: 1px solid #e3e3e5;
+      min-width: 0;
+    }
+
+    .metric-box:last-child {
+      border-right: none;
+    }
+
+    .metric-title {
+      font-size: 13px;
+      color: #4c4f52;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .metric-main {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .metric-value-wrap {
+      min-width: 0;
+    }
+
+    .metric-value {
+      font-size: 14px;
+      font-weight: 800;
+      color: #1f1f20;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .metric-change {
+      font-size: 12px;
+      color: var(--green);
+      font-weight: 800;
+      margin-top: 4px;
+      white-space: nowrap;
+    }
+
+    .spark {
+      width: 94px;
+      height: 28px;
+      flex: 0 0 auto;
+    }
+
+    .quick-actions-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+      direction: ltr;
+    }
+
+    .quick-action-pill {
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid #d8d8da;
+      background: #fff;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      color: #303030;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .marketing-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .marketing-card {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 20px;
+      background: #fff;
+      border: 1px solid #dcdcdf;
+      border-radius: 16px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .marketing-card h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+      font-weight: 800;
+      color: #303030;
+    }
+
+    .marketing-card p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #4c4f52;
+      margin-bottom: 14px;
+    }
+
+    .marketing-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .ghost-btn {
+      min-height: 34px;
+      padding: 0 14px;
+      border-radius: 10px;
+      border: 1px solid #d4d4d7;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      color: #303030;
+    }
+
+    .text-link {
+      color: #005bd3;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .marketing-visual {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f5f8f1, #eef7ee);
+      border-radius: 14px;
+      min-height: 156px;
+      color: #4a8f62;
+      font-size: 44px;
+    }
+
+    /* ORDERS PAGE */
+    .orders-section {
+      margin-top: 18px;
+    }
+
+    .orders-page-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      direction: ltr;
+    }
+
+    .orders-page-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #303030;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .orders-page-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      direction: ltr;
+    }
+
+    .primary-btn {
+      min-height: 38px;
+      padding: 0 16px;
+      border-radius: 12px;
+      border: 1px solid #2a2a2c;
+      background: #2a2a2c;
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .stats-mini-strip {
+      border: 1px solid #d9d9db;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .stats-mini-grid {
+      display: grid;
+      grid-template-columns: 156px repeat(5, minmax(0, 1fr));
+    }
+
+    .stats-mini-cell {
+      padding: 16px 18px;
+      border-right: 1px solid #e4e4e6;
+      min-width: 0;
+    }
+
+    .stats-mini-cell:last-child {
+      border-right: none;
+    }
+
+    .stats-mini-label {
+      font-size: 13px;
+      color: #4c4f52;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .stats-mini-value {
+      font-size: 14px;
+      font-weight: 800;
+      color: #1f1f20;
+    }
 
-    .chart-svg{
-      width:100%;
-      height:100%;
-      display:block;
+    .stats-mini-change {
+      margin-top: 4px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--green);
     }
 
-    .chart-empty{
-      height:355px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#9a9a9a;
-      font-size:1rem;
-      background:linear-gradient(180deg,#fafafa,#f4f4f4);
-      border-radius:24px;
+    .stats-mini-left {
+      font-size: 14px;
+      font-weight: 700;
+      color: #303030;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      direction: ltr;
     }
 
-    .quick-links{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:18px;
-      padding:18px 20px 26px;
-    }
+    .orders-card {
+      background: #fff;
+      border: 1px solid #dcdcdf;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .orders-tabs-toolbar {
+      padding: 10px 14px 8px;
+      border-bottom: 1px solid #e5e5e7;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      direction: ltr;
+    }
+
+    .orders-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      overflow: auto;
+    }
+
+    .tab-btn {
+      min-height: 34px;
+      padding: 0 14px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      color: #44484c;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background: #ececed;
+      color: #303030;
+    }
+
+    .orders-tools {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex: 0 0 auto;
+    }
+
+    .tiny-icon-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid #d9d9dc;
+      background: #fff;
+      cursor: pointer;
+      color: #4a4e52;
+      font-size: 16px;
+    }
+
+    .orders-search-row {
+      padding: 10px 14px;
+      border-bottom: 1px solid #ececee;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      direction: ltr;
+    }
+
+    .orders-search {
+      position: relative;
+      width: 320px;
+      max-width: 100%;
+    }
+
+    .orders-search input {
+      width: 100%;
+      height: 38px;
+      border-radius: 12px;
+      border: 1px solid #d6d6d9;
+      background: #fff;
+      padding: 0 14px 0 38px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .orders-search .icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #7b7e82;
+      font-size: 15px;
+    }
+
+    .desktop-orders-table {
+      width: 100%;
+      border-collapse: collapse;
+      direction: ltr;
+    }
+
+    .desktop-orders-table th,
+    .desktop-orders-table td {
+      border-bottom: 1px solid #e8e8ea;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 14px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .desktop-orders-table th {
+      font-size: 13px;
+      color: #4c4f52;
+      background: #fafafb;
+      font-weight: 700;
+    }
+
+    .desktop-orders-table tbody tr {
+      cursor: pointer;
+      background: #fff;
+    }
+
+    .desktop-orders-table tbody tr:hover {
+      background: #f9f9fa;
+    }
+
+    .check-col {
+      width: 34px;
+    }
+
+    .checkbox {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 1px solid #b8b8bc;
+      background: #fff;
+      display: inline-block;
+    }
+
+    .status-badge {
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-badge.payment {
+      background: var(--badge-payment-bg);
+      color: var(--badge-payment-text);
+    }
+
+    .status-badge.fulfillment {
+      background: var(--badge-fulfill-bg);
+      color: var(--badge-fulfill-text);
+    }
+
+    .status-badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: .75;
+    }
+
+    .table-note {
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pagination-bar {
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      direction: ltr;
+      color: #4c4f52;
+      font-size: 14px;
+    }
+
+    .pager-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid #d6d6d9;
+      background: #f7f7f8;
+      color: #777a7e;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    /* MOBILE ORDERS */
+    .mobile-dashboard {
+      padding: 14px;
+    }
+
+    .mobile-top-pills {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+      direction: ltr;
+    }
+
+    .mobile-pill {
+      min-height: 72px;
+      background: #f1f1f2;
+      border-radius: 22px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 800;
+      color: #303030;
+    }
+
+    .mobile-pill .dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #78d28a;
+      flex: 0 0 auto;
+    }
+
+    .mobile-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+      direction: ltr;
+    }
+
+    .mobile-stat {
+      min-width: 0;
+      text-align: left;
+    }
+
+    .mobile-stat .label {
+      color: #8a8a8e;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .mobile-stat .value {
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 900;
+      color: #222;
+      word-break: break-word;
+    }
+
+    .mobile-stat .change {
+      color: #89a88b;
+      font-size: 13px;
+      line-height: 1.25;
+      font-weight: 800;
+      margin-top: 6px;
+    }
+
+    .mobile-chart-wrap {
+      margin-bottom: 16px;
+    }
+
+    .mobile-chart-card {
+      height: 300px;
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .mobile-quick-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      direction: ltr;
+    }
+
+    .mobile-quick-card {
+      min-height: 150px;
+      border: 1px solid #e6e6e8;
+      background: #f8f8f9;
+      border-radius: 22px;
+      padding: 16px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .mobile-quick-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+
+    .mobile-quick-value {
+      font-size: 30px;
+      font-weight: 900;
+      line-height: 1;
+      color: #222;
+    }
+
+    .mobile-quick-icon {
+      font-size: 34px;
+    }
+
+    .mobile-quick-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #2f2f2f;
+      line-height: 1.35;
+      margin-bottom: 4px;
+    }
+
+    .mobile-quick-sub {
+      font-size: 12px;
+      color: #707377;
+      line-height: 1.35;
+    }
+
+    .mobile-orders-section {
+      margin-top: 16px;
+      background: #fff;
+      border-radius: 28px;
+      border: 1px solid #ececee;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .mobile-orders-head {
+      padding: 16px 14px 10px;
+      border-bottom: 1px solid #ececee;
+    }
+
+    .mobile-orders-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      direction: ltr;
+    }
+
+    .mobile-orders-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: #303030;
+    }
+
+    .mobile-orders-actions {
+      display: flex;
+      gap: 8px;
+      direction: ltr;
+    }
+
+    .mobile-actions-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+      direction: ltr;
+    }
+
+    .mobile-search-box {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .mobile-search-box input {
+      width: 100%;
+      height: 42px;
+      border: 1px solid #d7d7da;
+      border-radius: 14px;
+      background: #fff;
+      padding: 0 14px 0 38px;
+      outline: none;
+    }
+
+    .mobile-search-box .icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #7b7e82;
+      font-size: 15px;
+    }
+
+    .mobile-tabs {
+      display: flex;
+      gap: 8px;
+      overflow: auto;
+      scrollbar-width: none;
+      direction: ltr;
+    }
+
+    .mobile-tabs::-webkit-scrollbar { display: none; }
+
+    .mobile-list-day {
+      padding: 10px 14px;
+      background: #f3f3f4;
+      color: #707377;
+      font-size: 14px;
+      font-weight: 700;
+      direction: ltr;
+    }
+
+    .mobile-order-row {
+      padding: 16px 14px;
+      border-top: 1px solid #ececee;
+      direction: ltr;
+      cursor: pointer;
+      background: #fff;
+    }
+
+    .mobile-order-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .mobile-order-number {
+      font-size: 16px;
+      font-weight: 900;
+      color: #232324;
+      margin-bottom: 6px;
+    }
+
+    .mobile-order-meta {
+      font-size: 14px;
+      color: #313438;
+      line-height: 1.55;
+      margin-bottom: 8px;
+    }
+
+    .mobile-order-note {
+      font-size: 14px;
+      color: #313438;
+      line-height: 1.45;
+    }
+
+    .mobile-order-price {
+      font-size: 15px;
+      font-weight: 700;
+      white-space: nowrap;
+      padding-top: 2px;
+    }
+
+    .mobile-order-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    /* MODALS */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, .48);
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 760px;
+      max-height: 90vh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      direction: ltr;
+    }
+
+    .modal-header h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #303030;
+    }
+
+    .close-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: none;
+      background: #f1f1f2;
+      cursor: pointer;
+      font-size: 22px;
+      color: #44484c;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+      direction: ltr;
+    }
 
-    .quick-card{
-      background:#f7f7f7;
-      border:1px solid #ececec;
-      border-radius:22px;
-      padding:20px 20px 18px;
-      min-height:152px;
-      cursor:pointer;
-      transition:.15s ease;
-      text-align:left;
-      direction:ltr;
-    }
-
-    .quick-card:hover{
-      background:#f2f2f2;
-    }
-
-    .quick-top{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:14px;
-    }
-
-    .quick-icon{
-      font-size:1.8rem;
-      color:#555;
-    }
-
-    .quick-value{
-      font-size:2.05rem;
-      font-weight:900;
-      line-height:1;
-      color:#222;
-    }
-
-    .quick-title{
-      font-size:1rem;
-      font-weight:500;
-      color:#2f2f2f;
-      line-height:1.35;
-    }
-
-    .quick-sub{
-      font-size:.9rem;
-      color:#6d6d72;
-      margin-top:4px;
-      line-height:1.35;
-    }
-
-    .alert{
-      display:none;
-      margin:14px 0;
-      padding:14px 16px;
-      border-radius:16px;
-      font-weight:700;
-    }
-
-    .alert.active{display:block}
-    .alert.success{background:#eaf9ef;color:#17784a;border:1px solid #bfe6cd}
-    .alert.error{background:#fff1f1;color:#9a2d2d;border:1px solid #efc2c2}
-
-    .orders-shell{
-      margin-top:16px;
-      background:#fff;
-      border-radius:34px;
-      box-shadow:var(--shadow);
-      border:1px solid #ededed;
-      overflow:hidden;
-    }
-
-    .orders-head{
-      padding:20px 16px 12px;
-      border-bottom:1px solid #efefef;
-    }
-
-    .orders-title-row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:14px;
-    }
-
-    .orders-title{
-      font-size:2rem;
-      font-weight:900;
-      line-height:1.1;
-      direction:ltr;
-      text-align:left;
-    }
-
-    .orders-head-tools{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      direction:ltr;
-    }
-
-    .tool-circle{
-      width:60px;
-      height:60px;
-      border:none;
-      border-radius:50%;
-      background:#f1f1f1;
-      color:#333;
-      font-size:1.5rem;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .tool-pill{
-      min-height:60px;
-      padding:0 24px;
-      border:none;
-      border-radius:999px;
-      background:#f1f1f1;
-      color:#2a2a2a;
-      font-size:1rem;
-      font-weight:700;
-      cursor:pointer;
-    }
-
-    .search-row{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) 76px 76px;
-      gap:12px;
-      margin-bottom:12px;
-      direction:ltr;
-    }
-
-    .search-box{
-      position:relative;
-    }
-
-    .search-box input{
-      width:100%;
-      height:66px;
-      border:none;
-      border-radius:22px;
-      background:#f1f1f1;
-      padding:0 20px 0 58px;
-      font-size:1.05rem;
-      color:#222;
-      outline:none;
-    }
-
-    .search-box input::placeholder{color:#a5a5a8}
-
-    .search-icon{
-      position:absolute;
-      left:18px;
-      top:50%;
-      transform:translateY(-50%);
-      font-size:1.55rem;
-      color:#8f8f94;
-      pointer-events:none;
-    }
-
-    .tabs-row{
-      display:flex;
-      gap:12px;
-      overflow:auto;
-      padding-bottom:4px;
-      scrollbar-width:none;
-      direction:ltr;
-      justify-content:flex-start;
-    }
-
-    .tabs-row::-webkit-scrollbar{display:none}
-
-    .tab{
-      border:none;
-      background:transparent;
-      font-size:1rem;
-      font-weight:700;
-      color:#2e2e2e;
-      padding:12px 18px;
-      border-radius:999px;
-      cursor:pointer;
-      white-space:nowrap;
-    }
-
-    .tab.active{background:#efefef}
-
-    .list-day{
-      padding:12px 16px;
-      background:#f2f2f2;
-      color:#707070;
-      font-size:.95rem;
-      font-weight:700;
-      border-top:1px solid #efefef;
-      border-bottom:1px solid #efefef;
-      direction:ltr;
-      text-align:left;
-    }
-
-    .loading{
-      display:none;
-      padding:36px 16px;
-      text-align:center;
-      color:#666;
-      font-size:1rem;
-      background:#fff;
-    }
-
-    .loading.active{display:block}
-
-    .orders-list{
-      background:#fff;
-    }
-
-    .order-row{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:14px;
-      padding:18px 16px;
-      border-bottom:1px solid #ececec;
-      cursor:pointer;
-      transition:.15s ease;
-      background:#fff;
-      direction:ltr;
-    }
-
-    .order-row:hover{background:#fafafa}
-
-    .order-number{
-      font-size:1.18rem;
-      font-weight:900;
-      margin-bottom:8px;
-      line-height:1.2;
-      text-align:left;
-    }
-
-    .order-meta{
-      color:#313131;
-      font-size:.98rem;
-      line-height:1.6;
-      margin-bottom:8px;
-      text-align:left;
-    }
-
-    .order-badges{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-bottom:8px;
-      justify-content:flex-start;
-    }
-
-    .chip{
-      min-height:34px;
-      padding:0 14px;
-      border-radius:999px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      font-size:.9rem;
-      font-weight:700;
-      cursor:pointer;
-      border:none;
-      white-space:nowrap;
-    }
-
-    .chip.fulfillment{
-      background:var(--chip-yellow);
-      color:var(--chip-yellow-text);
-    }
-
-    .chip.payment{
-      background:var(--chip-beige);
-      color:var(--chip-beige-text);
-    }
-
-    .order-note{
-      color:#313131;
-      font-size:.96rem;
-      line-height:1.55;
-      text-align:left;
-    }
-
-    .order-amount{
-      font-size:1.08rem;
-      font-weight:500;
-      white-space:nowrap;
-      align-self:start;
-      padding-top:4px;
-      text-align:right;
-    }
-
-    .desktop-table-wrap{
-      display:none;
-      background:#fff;
-      border-top:1px solid #efefef;
-    }
-
-    .desktop-table{
-      width:100%;
-      border-collapse:collapse;
-    }
-
-    .desktop-table th,
-    .desktop-table td{
-      padding:16px;
-      border-bottom:1px solid #ececec;
-      text-align:left;
-      vertical-align:top;
-      direction:ltr;
-    }
-
-    .desktop-table th{
-      background:#fafafa;
-      font-size:.9rem;
-      color:#6c6c6c;
-      font-weight:800;
-    }
-
-    .desktop-table tbody tr{cursor:pointer}
-    .desktop-table tbody tr:hover{background:#fafafa}
-
-    .row-actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-
-    .small-btn{
-      min-height:36px;
-      padding:0 12px;
-      border:none;
-      border-radius:10px;
-      font-weight:700;
-      cursor:pointer;
-      white-space:nowrap;
-    }
-
-    .small-btn.view{background:#e8f0ff;color:#275dd8}
-    .small-btn.edit{background:#fff0cf;color:#986800}
-    .small-btn.delete{background:#ffe0e0;color:#b33434}
-
-    .empty-state{
-      padding:42px 16px;
-      text-align:center;
-      color:#888;
-      background:#fff;
-    }
-
-    .modal{
-      display:none;
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.45);
-      z-index:50;
-      align-items:center;
-      justify-content:center;
-      padding:16px;
-    }
-
-    .modal.active{display:flex}
-
-    .modal-content{
-      width:100%;
-      max-width:760px;
-      max-height:90vh;
-      overflow:auto;
-      background:#fff;
-      border-radius:24px;
-      padding:18px;
-    }
-
-    .modal-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      margin-bottom:14px;
-      direction:ltr;
-    }
-
-    .modal-header h2{
-      font-size:1.3rem;
-      font-weight:800;
-    }
-
-    .close-btn{
-      width:42px;
-      height:42px;
-      border:none;
-      border-radius:12px;
-      cursor:pointer;
-      background:#f3f3f3;
-      font-size:1.5rem;
-    }
-
-    .form-group{margin-bottom:14px}
-    .form-group label{
-      display:block;
-      margin-bottom:7px;
-      font-weight:700;
-      direction:ltr;
-      text-align:left;
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #303030;
     }
 
     .form-group input,
     .form-group select,
-    .form-group textarea{
-      width:100%;
-      min-height:50px;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px 14px;
-      font-size:1rem;
-      background:#fff;
-      direction:ltr;
-      text-align:left;
+    .form-group textarea {
+      width: 100%;
+      min-height: 42px;
+      border-radius: 12px;
+      border: 1px solid #d6d6d9;
+      background: #fff;
+      padding: 10px 12px;
+      outline: none;
+      font-size: 14px;
+      color: #303030;
     }
 
-    .form-group textarea{
-      min-height:110px;
-      resize:vertical;
+    .form-group textarea {
+      min-height: 104px;
+      resize: vertical;
     }
 
-    .modal-footer{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      margin-top:18px;
-      direction:ltr;
+    .items-list-box > div {
+      border: 1px solid #e3e3e6;
+      background: #fafafb;
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 10px;
     }
 
-    .modal-footer button{
-      min-height:46px;
-      padding:0 18px;
-      border:none;
-      border-radius:12px;
-      font-weight:700;
-      cursor:pointer;
+    .inline-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 8px;
+      direction: ltr;
     }
 
-    .btn-primary{background:#111;color:#fff}
-    .btn-secondary{background:#f3f3f3;color:#222}
-
-    .items-list-box > div{
-      border:1px solid var(--line);
-      padding:12px;
-      border-radius:14px;
-      margin-bottom:10px;
-      background:#fafafa;
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+      direction: ltr;
+      flex-wrap: wrap;
     }
 
-    .inline-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr auto;
-      gap:8px;
-      direction:ltr;
+    /* RESPONSIVE SWITCH */
+    @media (min-width: 1100px) {
+      .desktop-shell { display: block; }
+      .mobile-shell { display: none; }
     }
 
-    @media (min-width: 1024px){
-      .orders-list{display:none}
-      .desktop-table-wrap{display:block}
+    @media (max-width: 1099px) {
+      .desktop-shell { display: none; }
+      .mobile-shell { display: block; }
     }
 
-    @media (max-width: 1023px){
-      .dashboard-controls{
-        grid-template-columns:1fr 1fr;
-        gap:12px;
+    @media (max-width: 640px) {
+      .mobile-brand-text h1 {
+        font-size: 18px;
       }
 
-      .report-btn{
-        display:none;
-      }
-    }
-
-    @media (max-width: 560px){
-      .app-header{
-        padding:18px 14px 22px;
+      .mobile-bell {
+        font-size: 28px;
       }
 
-      .brand-title{
-        font-size:1.55rem;
+      .mobile-avatar, .mobile-store {
+        width: 54px;
+        height: 54px;
       }
 
-      .brand-icon,
-      .logo-avatar,
-      .circle-icon{
-        width:56px;
-        height:56px;
+      .mobile-top-pills {
+        grid-template-columns: 1fr 1fr;
       }
 
-      .page{
-        padding:0 10px 18px;
+      .mobile-pill {
+        min-height: 66px;
+        font-size: 16px;
       }
 
-      .dashboard-shell{
-        border-radius:34px;
+      .mobile-stats-grid {
+        gap: 12px;
       }
 
-      .dashboard-top{
-        padding:16px 14px 8px;
+      .mobile-stat .label {
+        font-size: 13px;
       }
 
-      .dashboard-controls{
-        grid-template-columns:1fr 1fr;
-        gap:12px;
-        margin-bottom:18px;
+      .mobile-stat .value {
+        font-size: 16px;
       }
 
-      .pill{
-        min-height:62px;
-        font-size:.98rem;
-        padding:0 18px;
+      .mobile-stat .change {
+        font-size: 12px;
       }
 
-      .pill select{
-        font-size:.98rem;
+      .mobile-chart-card {
+        height: 270px;
       }
 
-      .stats-grid{
-        grid-template-columns:repeat(3,minmax(0,1fr));
-        gap:18px;
-        margin-bottom:12px;
+      .mobile-quick-card {
+        min-height: 138px;
+        padding: 14px;
       }
 
-      .stat-label{
-        font-size:.92rem;
-        margin-bottom:6px;
+      .mobile-quick-value {
+        font-size: 26px;
       }
 
-      .stat-value{
-        font-size:1.45rem;
-      }
-
-      .stat-change{
-        font-size:.82rem;
-        line-height:1.2;
-      }
-
-      .chart-card,
-      .chart-empty{
-        height:280px;
-      }
-
-      .quick-links{
-        grid-template-columns:1fr 1fr;
-        gap:14px;
-        padding:14px 14px 20px;
-      }
-
-      .quick-card{
-        min-height:138px;
-        padding:16px 16px 14px;
-        border-radius:20px;
-      }
-
-      .quick-value{
-        font-size:1.75rem;
-      }
-
-      .quick-title{
-        font-size:.96rem;
-      }
-
-      .quick-sub{
-        font-size:.82rem;
-      }
-
-      .orders-title{
-        font-size:1.7rem;
-      }
-
-      .orders-title-row{
-        flex-wrap:wrap;
-      }
-
-      .orders-head-tools{
-        width:100%;
-        justify-content:space-between;
-      }
-
-      .search-row{
-        grid-template-columns:minmax(0,1fr) 66px 66px;
-      }
-
-      .tool-circle{
-        width:52px;
-        height:52px;
-      }
-
-      .tool-pill{
-        min-height:52px;
-        padding:0 18px;
-      }
-
-      .inline-grid{
-        grid-template-columns:1fr;
-      }
-    }
-
-    @media (max-width: 420px){
-      .stats-grid{
-        grid-template-columns:1fr;
-      }
-
-      .quick-links{
-        grid-template-columns:1fr 1fr;
+      .inline-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
-  <header class="app-header">
-    <div class="app-header-inner">
-      <div class="brand">
-        <div class="brand-icon">🏬</div>
-        <div>
-          <div class="brand-title">الأطفال المبتكرون الكويت</div>
-          <div class="brand-sub">Smart Kids Kuwait Admin</div>
-        </div>
-      </div>
+  <div class="app">
 
-      <div class="header-actions">
-        <button class="circle-icon" type="button" onclick="showAlert('Notifications view not connected yet','success')">🔔</button>
-        <div class="logo-avatar">
-          <img src="https://smartkidskw.com/logo-sk-smart-kids.png" alt="Smart Kids Kuwait">
+    <!-- DESKTOP -->
+    <div class="desktop-shell">
+      <header class="desktop-topbar">
+        <div class="desktop-topbar-left">
+          <div class="shopify-mark">
+            <span style="font-size:28px;">🛍️</span>
+            <span>shopify</span>
+          </div>
+
+          <div class="desktop-search">
+            <span class="icon">⌕</span>
+            <input type="text" placeholder="Search" />
+            <div class="kbd"><span>CTRL</span><span>K</span></div>
+          </div>
         </div>
+
+        <div class="desktop-topbar-right">
+          <button class="icon-btn">🎭</button>
+          <button class="icon-btn">🔔</button>
+          <div class="account-chip">
+            <img src="https://smartkidskw.com/logo-sk-smart-kids.png" alt="Smart Kids Kuwait">
+            <span>الأطفال المبتكرون الكويت</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="desktop-body">
+        <aside class="desktop-sidebar">
+          <div class="side-group">
+            <div class="side-link active">
+              <div class="side-link-left">
+                <span>⌂</span>
+                <span>Home</span>
+              </div>
+            </div>
+
+            <div class="side-link active" onclick="scrollToOrdersDesktop()">
+              <div class="side-link-left">
+                <span>🧾</span>
+                <span>Orders</span>
+              </div>
+              <small id="desktopOrdersCountBadge">0</small>
+            </div>
+
+            <div class="side-link">
+              <div class="side-link-left"><span>🏷️</span><span>Products</span></div>
+            </div>
+            <div class="side-link">
+              <div class="side-link-left"><span>👤</span><span>Customers</span></div>
+            </div>
+            <div class="side-link">
+              <div class="side-link-left"><span>📣</span><span>Marketing</span></div>
+            </div>
+            <div class="side-link">
+              <div class="side-link-left"><span>⚙️</span><span>Discounts</span></div>
+            </div>
+            <div class="side-link">
+              <div class="side-link-left"><span>🖼️</span><span>Content</span></div>
+            </div>
+            <div class="side-link">
+              <div class="side-link-left"><span>🌍</span><span>Markets</span></div>
+            </div>
+            <div class="side-link">
+              <div class="side-link-left"><span>📊</span><span>Analytics</span></div>
+            </div>
+          </div>
+
+          <div class="side-label">Sales channels</div>
+          <div class="side-group">
+            <div class="side-link"><div class="side-link-left"><span>∞</span><span>Facebook & Instagram</span></div></div>
+            <div class="side-link"><div class="side-link-left"><span>💳</span><span>Point of Sale</span></div></div>
+            <div class="side-link"><div class="side-link-left"><span>🛒</span><span>Online Store</span></div></div>
+            <div class="side-link"><div class="side-link-left"><span>▶</span><span>Google & YouTube</span></div></div>
+            <div class="side-link"><div class="side-link-left"><span>✉</span><span>Inbox</span></div></div>
+            <div class="side-link"><div class="side-link-left"><span>⬢</span><span>Headless</span></div></div>
+          </div>
+
+          <div class="side-label">Apps</div>
+          <div class="side-group">
+            <div class="side-link"><div class="side-link-left"><span>✉</span><span>Messaging</span></div></div>
+            <div class="side-link"><div class="side-link-left"><span>🖨</span><span>Order Printer Pro</span></div></div>
+          </div>
+
+          <div class="side-link">
+            <div class="side-link-left"><span>⚙</span><span>Settings</span></div>
+          </div>
+        </aside>
+
+        <main class="desktop-main">
+          <div class="desktop-content-wrap">
+            <div id="desktopAlert" class="alert"></div>
+
+            <section class="dashboard-section">
+              <div class="dashboard-toolbar">
+                <div class="filter-pill">
+                  <span>🗓</span>
+                  <select id="desktopRangeSelect" onchange="changeRange(this.value)">
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90" selected>Last 90 days</option>
+                    <option value="365">Last 365 days</option>
+                  </select>
+                </div>
+
+                <div class="filter-pill">
+                  <span>▾</span>
+                  <span>All channels</span>
+                </div>
+              </div>
+
+              <div class="metric-strip">
+                <div class="metric-strip-inner">
+                  <div class="metric-box">
+                    <div class="metric-title">Sessions</div>
+                    <div class="metric-main">
+                      <div class="metric-value-wrap">
+                        <div class="metric-value">—</div>
+                        <div class="metric-change">Analytics source not connected</div>
+                      </div>
+                      <svg class="spark" viewBox="0 0 100 28">
+                        <polyline fill="none" stroke="#2ab0ea" stroke-width="2" points="0,15 10,14 20,17 30,12 40,16 50,10 60,18 70,15 80,19 90,18 100,20"></polyline>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div class="metric-box">
+                    <div class="metric-title">Total sales</div>
+                    <div class="metric-main">
+                      <div class="metric-value-wrap">
+                        <div class="metric-value" id="desktopTotalSalesValue">KWD 0.000</div>
+                        <div class="metric-change" id="desktopSalesHint">Based on range</div>
+                      </div>
+                      <svg class="spark" viewBox="0 0 100 28">
+                        <polyline fill="none" stroke="#2ab0ea" stroke-width="2" points="0,21 10,20 20,19 30,17 40,15 50,16 60,13 70,11 80,12 90,10 100,8"></polyline>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div class="metric-box">
+                    <div class="metric-title">Orders</div>
+                    <div class="metric-main">
+                      <div class="metric-value-wrap">
+                        <div class="metric-value" id="desktopOrdersValue">0</div>
+                        <div class="metric-change" id="desktopOrdersHint">In selected range</div>
+                      </div>
+                      <svg class="spark" viewBox="0 0 100 28">
+                        <polyline fill="none" stroke="#2ab0ea" stroke-width="2" points="0,18 10,16 20,14 30,12 40,16 50,14 60,12 70,11 80,10 90,12 100,9"></polyline>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div class="metric-box">
+                    <div class="metric-title">Conversion rate</div>
+                    <div class="metric-main">
+                      <div class="metric-value-wrap">
+                        <div class="metric-value">—</div>
+                        <div class="metric-change">Analytics source not connected</div>
+                      </div>
+                      <svg class="spark" viewBox="0 0 100 28">
+                        <polyline fill="none" stroke="#2ab0ea" stroke-width="2" points="0,20 10,19 20,18 30,18 40,17 50,16 60,17 70,15 80,16 90,14 100,15"></polyline>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="quick-actions-row">
+                <button class="quick-action-pill" onclick="setView('orders'); setDashboardFilter('pending')">📦 <span id="desktopFulfillQuick">0 orders to fulfill</span></button>
+                <button class="quick-action-pill" onclick="setView('orders'); setDashboardFilter('payment_pending')">💬 <span id="desktopPaymentsQuick">0 payments to capture</span></button>
+              </div>
+
+              <div class="marketing-stack">
+                <div class="marketing-card">
+                  <div>
+                    <h3>Give your customer accounts a major upgrade</h3>
+                    <p>Legacy customer accounts no longer receive feature updates and technical support. Upgrade to the latest version for a frictionless sign-in experience.</p>
+                    <div class="marketing-actions">
+                      <button class="ghost-btn">Upgrade now</button>
+                      <span class="text-link">Learn more</span>
+                    </div>
+                  </div>
+                  <div class="marketing-visual">👤📱</div>
+                </div>
+
+                <div class="marketing-card">
+                  <div>
+                    <h3>Sign in with Shop is now active on your store</h3>
+                    <p>Customers can now sign in with a trusted Shop account—no new password needed. Upgrade to new customer accounts for the full experience.</p>
+                    <div class="marketing-actions">
+                      <button class="ghost-btn">View settings</button>
+                      <span class="text-link">Upgrade to new customer accounts</span>
+                    </div>
+                  </div>
+                  <div class="marketing-visual">🛍️</div>
+                </div>
+              </div>
+            </section>
+
+            <section id="desktopOrdersSection" class="orders-section">
+              <div class="orders-page-title-row">
+                <div class="orders-page-title">🧾 Orders</div>
+                <div class="orders-page-actions">
+                  <button class="ghost-btn" onclick="exportToCSV()">Export</button>
+                  <button class="ghost-btn">More actions ▾</button>
+                  <button class="primary-btn" onclick="openNewOrderModal()">Create order</button>
+                </div>
+              </div>
+
+              <div class="stats-mini-strip">
+                <div class="stats-mini-grid">
+                  <div class="stats-mini-cell">
+                    <div class="stats-mini-left">🗓 Today</div>
+                  </div>
+                  <div class="stats-mini-cell">
+                    <div class="stats-mini-label">Orders</div>
+                    <div class="stats-mini-value" id="todayOrdersMini">0</div>
+                    <div class="stats-mini-change">Today</div>
+                  </div>
+                  <div class="stats-mini-cell">
+                    <div class="stats-mini-label">Items ordered</div>
+                    <div class="stats-mini-value" id="itemsOrderedMini">0</div>
+                    <div class="stats-mini-change">Today</div>
+                  </div>
+                  <div class="stats-mini-cell">
+                    <div class="stats-mini-label">Returns</div>
+                    <div class="stats-mini-value">KWD 0</div>
+                    <div class="stats-mini-change">—</div>
+                  </div>
+                  <div class="stats-mini-cell">
+                    <div class="stats-mini-label">Orders fulfilled</div>
+                    <div class="stats-mini-value" id="fulfilledMini">0</div>
+                    <div class="stats-mini-change">From orders</div>
+                  </div>
+                  <div class="stats-mini-cell">
+                    <div class="stats-mini-label">Orders delivered</div>
+                    <div class="stats-mini-value" id="deliveredMini">0</div>
+                    <div class="stats-mini-change">From orders</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="orders-card">
+                <div class="orders-tabs-toolbar">
+                  <div class="orders-tabs">
+                    <button class="tab-btn active" data-tab="all" onclick="setTab('all', this)">All</button>
+                    <button class="tab-btn" data-tab="pending" onclick="setTab('pending', this)">Unfulfilled</button>
+                    <button class="tab-btn" data-tab="payment_pending" onclick="setTab('payment_pending', this)">Unpaid</button>
+                    <button class="tab-btn" data-tab="open" onclick="setTab('open', this)">Open</button>
+                    <button class="tab-btn" data-tab="cancelled" onclick="setTab('cancelled', this)">Archived</button>
+                    <button class="tab-btn" data-tab="today" onclick="setTab('today', this)">Today</button>
+                  </div>
+
+                  <div class="orders-tools">
+                    <button class="tiny-icon-btn" onclick="focusDesktopSearch()">⌕</button>
+                    <button class="tiny-icon-btn" onclick="toggleSortDirection()">⇅</button>
+                    <button class="tiny-icon-btn" onclick="clearFilters()">☰</button>
+                  </div>
+                </div>
+
+                <div class="orders-search-row">
+                  <div class="orders-search">
+                    <span class="icon">⌕</span>
+                    <input id="desktopSearchInput" type="text" placeholder="Filter orders" oninput="syncSearchFromDesktop()" />
+                  </div>
+                </div>
+
+                <div style="overflow:auto;">
+                  <table class="desktop-orders-table">
+                    <thead>
+                      <tr>
+                        <th class="check-col"><span class="checkbox"></span></th>
+                        <th>Order</th>
+                        <th>Date ↓</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Payment status</th>
+                        <th>Fulfillment status</th>
+                        <th>Items</th>
+                        <th>Delivery method</th>
+                      </tr>
+                    </thead>
+                    <tbody id="desktopOrdersTableBody"></tbody>
+                  </table>
+                </div>
+
+                <div class="pagination-bar">
+                  <button class="pager-btn">‹</button>
+                  <button class="pager-btn">›</button>
+                  <span id="desktopPaginationText">1-0</span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </main>
       </div>
     </div>
-  </header>
 
-  <main class="page">
-    <div id="alert" class="alert"></div>
+    <!-- MOBILE -->
+    <div class="mobile-shell">
+      <header class="mobile-header">
+        <div class="mobile-header-row">
+          <div class="mobile-header-brand">
+            <div class="mobile-avatar">
+              <img src="https://smartkidskw.com/logo-sk-smart-kids.png" alt="Smart Kids Kuwait">
+            </div>
 
-    <section class="dashboard-shell">
-      <div class="dashboard-top">
-        <div class="dashboard-controls" dir="ltr">
-          <div class="pill">
-            <select id="rangeSelect" onchange="changeRange()">
-              <option value="7">Last 7 days</option>
-              <option value="30">Last 30 days</option>
-              <option value="90" selected>Last 90 days</option>
-              <option value="365">Last 365 days</option>
+            <div class="mobile-bell">🔔</div>
+
+            <div class="mobile-brand-text">
+              <h1>الأطفال المبتكرون الكويت</h1>
+              <p>Smart Kids Kuwait Admin</p>
+            </div>
+          </div>
+
+          <div class="mobile-store">🏬</div>
+        </div>
+      </header>
+
+      <main class="mobile-main">
+        <div id="mobileAlert" class="alert"></div>
+
+        <div class="mobile-surface">
+          <section class="mobile-dashboard">
+            <div class="mobile-top-pills">
+              <div class="mobile-pill">
+                <select id="mobileRangeSelect" onchange="changeRange(this.value)" style="border:none;background:transparent;font-size:inherit;font-weight:inherit;outline:none;">
+                  <option value="7">Last 7 days</option>
+                  <option value="30">Last 30 days</option>
+                  <option value="90" selected>Last 90 days</option>
+                  <option value="365">Last 365 days</option>
+                </select>
+              </div>
+
+              <div class="mobile-pill">
+                <span class="dot"></span>
+                <span id="mobileOrdersPill">0 orders</span>
+              </div>
+            </div>
+
+            <div class="mobile-stats-grid">
+              <div class="mobile-stat">
+                <div class="label">Orders</div>
+                <div class="value" id="mobileOrdersValue">0</div>
+                <div class="change">In selected range</div>
+              </div>
+
+              <div class="mobile-stat">
+                <div class="label">Total sales</div>
+                <div class="value" id="mobileSalesValue">KWD 0.000</div>
+                <div class="change" id="mobileSalesHint">Based on range</div>
+              </div>
+
+              <div class="mobile-stat">
+                <div class="label">Sessions</div>
+                <div class="value">—</div>
+                <div class="change">Analytics source not connected</div>
+              </div>
+            </div>
+
+            <div class="mobile-chart-wrap">
+              <div id="mobileChartContainer"></div>
+            </div>
+
+            <div class="mobile-quick-grid">
+              <button class="mobile-quick-card" onclick="setDashboardFilter('payment_pending')">
+                <div class="mobile-quick-head">
+                  <div class="mobile-quick-value" id="mobilePaymentsQuick">0</div>
+                  <div class="mobile-quick-icon">💬</div>
+                </div>
+                <div class="mobile-quick-title">Payments to capture</div>
+                <div class="mobile-quick-sub">طلبات غير مدفوعة</div>
+              </button>
+
+              <button class="mobile-quick-card" onclick="setDashboardFilter('pending')">
+                <div class="mobile-quick-head">
+                  <div class="mobile-quick-value" id="mobileFulfillQuick">0</div>
+                  <div class="mobile-quick-icon">📦</div>
+                </div>
+                <div class="mobile-quick-title">Orders to fulfill</div>
+                <div class="mobile-quick-sub">طلبات غير منفذة</div>
+              </button>
+
+              <button class="mobile-quick-card" onclick="setDashboardFilter('today')">
+                <div class="mobile-quick-head">
+                  <div class="mobile-quick-value" id="mobileTodayQuick">0</div>
+                  <div class="mobile-quick-icon">📅</div>
+                </div>
+                <div class="mobile-quick-title">Today orders</div>
+                <div class="mobile-quick-sub">طلبات اليوم</div>
+              </button>
+
+              <button class="mobile-quick-card" onclick="setDashboardFilter('all')">
+                <div class="mobile-quick-head">
+                  <div class="mobile-quick-value" id="mobileAllQuick">0</div>
+                  <div class="mobile-quick-icon">🧾</div>
+                </div>
+                <div class="mobile-quick-title">All orders</div>
+                <div class="mobile-quick-sub">كل الطلبات</div>
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <section class="mobile-orders-section">
+          <div class="mobile-orders-head">
+            <div class="mobile-orders-title-row">
+              <div class="mobile-orders-title">Orders</div>
+              <div class="mobile-orders-actions">
+                <button class="tiny-icon-btn" onclick="toggleSortDirection()">⇅</button>
+                <button class="tiny-icon-btn" onclick="openNewOrderModal()">＋</button>
+              </div>
+            </div>
+
+            <div class="mobile-actions-row">
+              <div class="mobile-search-box">
+                <span class="icon">⌕</span>
+                <input id="mobileSearchInput" type="text" placeholder="Filter orders" oninput="syncSearchFromMobile()">
+              </div>
+              <button class="tiny-icon-btn" onclick="clearFilters()">☰</button>
+            </div>
+
+            <div class="mobile-tabs">
+              <button class="tab-btn active" data-tab="all" onclick="setTab('all', this)">All</button>
+              <button class="tab-btn" data-tab="pending" onclick="setTab('pending', this)">Unfulfilled</button>
+              <button class="tab-btn" data-tab="payment_pending" onclick="setTab('payment_pending', this)">Unpaid</button>
+              <button class="tab-btn" data-tab="open" onclick="setTab('open', this)">Open</button>
+              <button class="tab-btn" data-tab="cancelled" onclick="setTab('cancelled', this)">Archived</button>
+              <button class="tab-btn" data-tab="today" onclick="setTab('today', this)">Today</button>
+            </div>
+          </div>
+
+          <div class="mobile-list-day" id="mobileListDay">Orders</div>
+          <div id="mobileOrdersList"></div>
+        </section>
+      </main>
+    </div>
+
+    <!-- MODALS -->
+    <div class="modal" id="editOrderModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit order</h2>
+          <button class="close-btn" onclick="closeModal('editOrderModal')">&times;</button>
+        </div>
+
+        <form id="editOrderForm" onsubmit="saveOrderChanges(event)">
+          <input type="hidden" id="editOrderId">
+
+          <div class="form-group">
+            <label for="editOrderStatus">Status</label>
+            <select id="editOrderStatus" required>
+              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
+              <option value="shipped">Shipped</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </div>
 
-          <div class="pill">
-            <span class="dot"></span>
-            <span id="visitorsLabel">Live View</span>
+          <div class="form-group">
+            <label for="editOrderNotes">Notes</label>
+            <textarea id="editOrderNotes"></textarea>
           </div>
 
-          <button class="report-btn" type="button" onclick="showAlert('Report is not connected yet','success')">Report</button>
-        </div>
-
-        <div class="stats-grid">
-          <div class="stat">
-            <div class="stat-label">Sessions</div>
-            <div class="stat-value" id="sessionsValue">—</div>
-            <div class="stat-change">Analytics source not connected</div>
+          <div class="form-group">
+            <label for="editOrderPhone">Phone</label>
+            <input type="tel" id="editOrderPhone">
           </div>
 
-          <div class="stat">
-            <div class="stat-label">Total sales</div>
-            <div class="stat-value" id="totalSalesValue">KWD 0.000</div>
-            <div class="stat-change" id="salesChangeValue">Based on last 90 days</div>
+          <div class="form-group">
+            <label for="editOrderEmail">Email</label>
+            <input type="email" id="editOrderEmail">
           </div>
 
-          <div class="stat">
-            <div class="stat-label">Orders</div>
-            <div class="stat-value" id="ordersCountValue">0</div>
-            <div class="stat-change" id="ordersChangeValue">In selected range</div>
+          <div class="form-group">
+            <label for="editOrderAddress">Address</label>
+            <textarea id="editOrderAddress"></textarea>
           </div>
-        </div>
 
-        <div class="chart-wrap">
-          <div id="chartContainer"></div>
-        </div>
+          <div class="modal-footer">
+            <button type="button" class="ghost-btn" onclick="closeModal('editOrderModal')">Cancel</button>
+            <button type="submit" class="primary-btn">Save</button>
+          </div>
+        </form>
       </div>
-
-      <div class="quick-links">
-        <button class="quick-card" type="button" onclick="setDashboardFilter('pending')">
-          <div class="quick-top">
-            <div class="quick-value" id="pendingQuickValue">0</div>
-            <div class="quick-icon">📦</div>
-          </div>
-          <div class="quick-title">Orders to fulfill</div>
-          <div class="quick-sub">طلبات غير منفذة</div>
-        </button>
-
-        <button class="quick-card" type="button" onclick="setDashboardFilter('payment_pending')">
-          <div class="quick-top">
-            <div class="quick-value" id="paymentQuickValue">0</div>
-            <div class="quick-icon">💬</div>
-          </div>
-          <div class="quick-title">Payments to capture</div>
-          <div class="quick-sub">طلبات غير مدفوعة</div>
-        </button>
-
-        <button class="quick-card" type="button" onclick="setDashboardFilter('today')">
-          <div class="quick-top">
-            <div class="quick-value" id="todayQuickValue">0</div>
-            <div class="quick-icon">📅</div>
-          </div>
-          <div class="quick-title">Today orders</div>
-          <div class="quick-sub">طلبات اليوم</div>
-        </button>
-
-        <button class="quick-card" type="button" onclick="setDashboardFilter('all')">
-          <div class="quick-top">
-            <div class="quick-value" id="allQuickValue">0</div>
-            <div class="quick-icon">🧾</div>
-          </div>
-          <div class="quick-title">All orders</div>
-          <div class="quick-sub">كل الطلبات</div>
-        </button>
-      </div>
-    </section>
-
-    <section class="orders-shell">
-      <div class="orders-head">
-        <div class="orders-title-row">
-          <div class="orders-title">Orders</div>
-          <div class="orders-head-tools">
-            <button class="tool-circle" type="button" onclick="toggleSortDirection()">⇅</button>
-            <button class="tool-circle" type="button" onclick="focusSearch()">⌕</button>
-            <button class="tool-pill" type="button" onclick="openNewOrderModal()">Add order</button>
-          </div>
-        </div>
-
-        <div class="search-row">
-          <div class="search-box">
-            <span class="search-icon">⌕</span>
-            <input id="searchInput" type="text" placeholder="Filter orders" oninput="applyFilters()">
-          </div>
-          <button class="tool-circle" type="button" onclick="toggleSortDirection()">⇅</button>
-          <button class="tool-circle" type="button" onclick="clearFilters()">≡</button>
-        </div>
-
-        <div class="tabs-row">
-          <button class="tab active" data-tab="all" onclick="setTab('all', this)">All</button>
-          <button class="tab" data-tab="pending" onclick="setTab('pending', this)">Unfulfilled</button>
-          <button class="tab" data-tab="payment_pending" onclick="setTab('payment_pending', this)">Unpaid</button>
-          <button class="tab" data-tab="open" onclick="setTab('open', this)">Open</button>
-          <button class="tab" data-tab="processing" onclick="setTab('processing', this)">Processing</button>
-          <button class="tab" data-tab="completed" onclick="setTab('completed', this)">Completed</button>
-          <button class="tab" data-tab="cancelled" onclick="setTab('cancelled', this)">Cancelled</button>
-          <button class="tab" data-tab="today" onclick="setTab('today', this)">Today</button>
-        </div>
-      </div>
-
-      <div class="list-day" id="dayLabel">Orders</div>
-
-      <div id="loading" class="loading active">Loading orders...</div>
-
-      <div class="orders-list" id="mobileOrdersList"></div>
-
-      <div class="desktop-table-wrap">
-        <table class="desktop-table">
-          <thead>
-            <tr>
-              <th>Order</th>
-              <th>Customer</th>
-              <th>Status</th>
-              <th>Amount</th>
-              <th>Note</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="ordersTableBody"></tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-
-  <div class="modal" id="editOrderModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Edit order</h2>
-        <button class="close-btn" onclick="closeModal('editOrderModal')">&times;</button>
-      </div>
-
-      <form id="editOrderForm" onsubmit="saveOrderChanges(event)">
-        <input type="hidden" id="editOrderId">
-
-        <div class="form-group">
-          <label for="editOrderStatus">Status</label>
-          <select id="editOrderStatus" required>
-            <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="editOrderNotes">Notes</label>
-          <textarea id="editOrderNotes"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="editOrderPhone">Phone</label>
-          <input type="tel" id="editOrderPhone">
-        </div>
-
-        <div class="form-group">
-          <label for="editOrderEmail">Email</label>
-          <input type="email" id="editOrderEmail">
-        </div>
-
-        <div class="form-group">
-          <label for="editOrderAddress">Address</label>
-          <textarea id="editOrderAddress"></textarea>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn-secondary" onclick="closeModal('editOrderModal')">Cancel</button>
-          <button type="submit" class="btn-primary">Save</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <div class="modal" id="newOrderModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Add order</h2>
-        <button class="close-btn" onclick="closeModal('newOrderModal')">&times;</button>
+    <div class="modal" id="newOrderModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Create order</h2>
+          <button class="close-btn" onclick="closeModal('newOrderModal')">&times;</button>
+        </div>
+
+        <form id="newOrderForm" onsubmit="createNewOrder(event)">
+          <div class="form-group">
+            <label for="newOrderName">Customer name *</label>
+            <input type="text" id="newOrderName" required>
+          </div>
+
+          <div class="form-group">
+            <label for="newOrderEmail">Email *</label>
+            <input type="email" id="newOrderEmail" required>
+          </div>
+
+          <div class="form-group">
+            <label for="newOrderPhone">Phone *</label>
+            <input type="tel" id="newOrderPhone" required>
+          </div>
+
+          <div class="form-group">
+            <label for="newOrderAddress">Address *</label>
+            <textarea id="newOrderAddress" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="newOrderCity">City</label>
+            <input type="text" id="newOrderCity" placeholder="Kuwait">
+          </div>
+
+          <div class="form-group">
+            <label for="newOrderDistrict">District</label>
+            <input type="text" id="newOrderDistrict">
+          </div>
+
+          <div class="form-group">
+            <label>Items *</label>
+            <div id="itemsList" class="items-list-box"></div>
+            <button type="button" class="ghost-btn" style="margin-top:8px;" onclick="addOrderItem()">Add item</button>
+          </div>
+
+          <div class="form-group">
+            <label for="newOrderNotes">Notes</label>
+            <textarea id="newOrderNotes"></textarea>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="ghost-btn" onclick="closeModal('newOrderModal')">Cancel</button>
+            <button type="submit" class="primary-btn">Create</button>
+          </div>
+        </form>
       </div>
-
-      <form id="newOrderForm" onsubmit="createNewOrder(event)">
-        <div class="form-group">
-          <label for="newOrderName">Customer name *</label>
-          <input type="text" id="newOrderName" required>
-        </div>
-
-        <div class="form-group">
-          <label for="newOrderEmail">Email *</label>
-          <input type="email" id="newOrderEmail" required>
-        </div>
-
-        <div class="form-group">
-          <label for="newOrderPhone">Phone *</label>
-          <input type="tel" id="newOrderPhone" required>
-        </div>
-
-        <div class="form-group">
-          <label for="newOrderAddress">Address *</label>
-          <textarea id="newOrderAddress" required></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="newOrderCity">City</label>
-          <input type="text" id="newOrderCity" placeholder="Kuwait">
-        </div>
-
-        <div class="form-group">
-          <label for="newOrderDistrict">District</label>
-          <input type="text" id="newOrderDistrict">
-        </div>
-
-        <div class="form-group">
-          <label>Items *</label>
-          <div id="itemsList" class="items-list-box"></div>
-          <button type="button" class="tool-pill" style="margin-top:10px;" onclick="addOrderItem()">Add item</button>
-        </div>
-
-        <div class="form-group">
-          <label for="newOrderNotes">Notes</label>
-          <textarea id="newOrderNotes"></textarea>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn-secondary" onclick="closeModal('newOrderModal')">Cancel</button>
-          <button type="submit" class="btn-primary">Create</button>
-        </div>
-      </form>
     </div>
+
   </div>
 
   <script>
@@ -1179,9 +1872,9 @@
         const d = new Date(value);
         if (isNaN(d)) return value;
         return d.toLocaleString('en-US', {
+          weekday: 'short',
           month: 'short',
           day: 'numeric',
-          year: 'numeric',
           hour: 'numeric',
           minute: '2-digit'
         });
@@ -1190,9 +1883,9 @@
         const labels = {
           pending: 'Unfulfilled',
           processing: 'Processing',
-          shipped: 'Shipped',
-          completed: 'Completed',
-          cancelled: 'Cancelled'
+          shipped: 'Fulfilled',
+          completed: 'Fulfilled',
+          cancelled: 'Archived'
         };
         return labels[status] || status || '-';
       }
@@ -1204,8 +1897,9 @@
     let filteredOrders = [];
     let currentTab = 'all';
     let currentSortDirection = 'DESC';
-    let itemCount = 0;
     let currentRangeDays = 90;
+    let currentView = 'home';
+    let itemCount = 0;
 
     document.addEventListener('DOMContentLoaded', () => {
       loadAllData();
@@ -1213,9 +1907,8 @@
     });
 
     async function loadAllData() {
-      showLoading(true);
       try {
-        const response = await fetch(`${API_BASE}?limit=200&offset=0&sort=created_at&order=DESC`);
+        const response = await fetch(`${API_BASE}?limit=300&offset=0&sort=created_at&order=DESC`);
         const data = await response.json();
 
         if (!response.ok || !data.success) {
@@ -1226,10 +1919,7 @@
         updateDashboard();
         applyFilters();
       } catch (error) {
-        console.error(error);
         showAlert(error.message || 'Failed to load orders', 'error');
-      } finally {
-        showLoading(false);
       }
     }
 
@@ -1252,7 +1942,7 @@
     function getRangeOrders(days) {
       const now = new Date();
       const start = new Date();
-      start.setHours(0,0,0,0);
+      start.setHours(0, 0, 0, 0);
       start.setDate(now.getDate() - (days - 1));
 
       return allOrders.filter(order => {
@@ -1265,129 +1955,185 @@
       const d = new Date(order.created_at || 0);
       if (isNaN(d)) return false;
       const now = new Date();
-      return d.getFullYear() === now.getFullYear() &&
-        d.getMonth() === now.getMonth() &&
-        d.getDate() === now.getDate();
+      return d.getFullYear() === now.getFullYear()
+        && d.getMonth() === now.getMonth()
+        && d.getDate() === now.getDate();
     }
 
     function updateDashboard() {
       const rangeOrders = getRangeOrders(currentRangeDays);
-
       const totalSales = rangeOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
       const ordersCount = rangeOrders.length;
       const pendingCount = rangeOrders.filter(o => o.status === 'pending').length;
       const unpaidCount = rangeOrders.filter(o => Number(o.balance || 0) > 0).length;
       const todayCount = allOrders.filter(isToday).length;
+      const itemsToday = allOrders.filter(isToday).reduce((sum, o) => sum + getItemsCount(o), 0);
+      const fulfilledCount = allOrders.filter(o => ['shipped', 'completed'].includes(o.status)).length;
+      const deliveredCount = allOrders.filter(o => o.status === 'completed').length;
 
-      document.getElementById('totalSalesValue').textContent = H.formatCurrency(totalSales);
-      document.getElementById('ordersCountValue').textContent = String(ordersCount);
-      document.getElementById('pendingQuickValue').textContent = pendingCount > 50 ? '50+' : String(pendingCount);
-      document.getElementById('paymentQuickValue').textContent = unpaidCount > 50 ? '50+' : String(unpaidCount);
-      document.getElementById('allQuickValue').textContent = String(allOrders.length);
-      document.getElementById('todayQuickValue').textContent = String(todayCount);
-      document.getElementById('visitorsLabel').textContent = `${ordersCount} orders`;
-      document.getElementById('salesChangeValue').textContent = `Based on last ${currentRangeDays} days`;
-      document.getElementById('ordersChangeValue').textContent = `In selected range`;
+      // Desktop
+      setText('desktopTotalSalesValue', H.formatCurrency(totalSales));
+      setText('desktopOrdersValue', String(ordersCount));
+      setText('desktopSalesHint', `Based on last ${currentRangeDays} days`);
+      setText('desktopOrdersHint', 'In selected range');
+      setText('desktopFulfillQuick', `${pendingCount > 50 ? '50+' : pendingCount} orders to fulfill`);
+      setText('desktopPaymentsQuick', `${unpaidCount > 50 ? '50+' : unpaidCount} payments to capture`);
+      setText('desktopOrdersCountBadge', String(allOrders.length));
+      setText('todayOrdersMini', String(todayCount));
+      setText('itemsOrderedMini', String(itemsToday));
+      setText('fulfilledMini', String(fulfilledCount));
+      setText('deliveredMini', String(deliveredCount));
 
-      renderChart(rangeOrders);
+      // Mobile
+      setText('mobileOrdersPill', `${ordersCount} orders`);
+      setText('mobileOrdersValue', String(ordersCount));
+      setText('mobileSalesValue', H.formatCurrency(totalSales));
+      setText('mobileSalesHint', `Based on last ${currentRangeDays} days`);
+      setText('mobilePaymentsQuick', String(unpaidCount));
+      setText('mobileFulfillQuick', String(pendingCount));
+      setText('mobileTodayQuick', String(todayCount));
+      setText('mobileAllQuick', String(allOrders.length));
+
+      renderMobileChart(rangeOrders);
     }
 
-    function renderChart(orders) {
-      const container = document.getElementById('chartContainer');
+    function renderMobileChart(orders) {
+      const target = document.getElementById('mobileChartContainer');
+      if (!target) return;
 
       if (!orders.length) {
-        container.innerHTML = `<div class="chart-empty">No chart data</div>`;
+        target.innerHTML = `<div class="chart-empty mobile-chart-card">No chart data</div>`;
         return;
       }
 
-      const byDay = new Map();
+      const grouped = groupOrdersByDay(orders);
+      const svg = buildAreaChart(grouped, 760, 300, '#6aa0ea');
+      target.innerHTML = `<div class="mobile-chart-card">${svg}</div>`;
+    }
+
+    function groupOrdersByDay(orders) {
+      const map = new Map();
       orders.forEach(order => {
         const d = new Date(order.created_at || 0);
         if (isNaN(d)) return;
         const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        byDay.set(key, (byDay.get(key) || 0) + Number(order.total || 0));
+        map.set(key, (map.get(key) || 0) + Number(order.total || 0));
       });
 
-      const keys = Array.from(byDay.keys()).sort();
-      const values = keys.map(k => byDay.get(k));
+      return Array.from(map.entries())
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([key, value]) => ({ key, value }));
+    }
+
+    function buildAreaChart(pointsData, width, height, strokeColor) {
+      const padX = 26;
+      const padY = 16;
+      const innerW = width - padX * 2;
+      const innerH = height - padY * 2 - 24;
+      const values = pointsData.map(p => p.value);
       const max = Math.max(...values, 1);
 
-      const width = 900;
-      const height = 355;
-      const padX = 40;
-      const padY = 24;
-      const innerW = width - (padX * 2);
-      const innerH = height - (padY * 2);
-
-      const points = values.map((v, i) => {
-        const x = padX + (values.length === 1 ? innerW / 2 : (i * (innerW / Math.max(values.length - 1, 1))));
-        const y = padY + innerH - ((v / max) * innerH);
+      const points = pointsData.map((p, i) => {
+        const x = padX + (pointsData.length === 1 ? innerW / 2 : (i * (innerW / Math.max(pointsData.length - 1, 1))));
+        const y = padY + innerH - ((p.value / max) * innerH);
         return [x, y];
       });
 
       const path = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
-      const areaPath = `${path} L ${points[points.length - 1][0]} ${height - padY} L ${points[0][0]} ${height - padY} Z`;
+      const area = `${path} L ${points[points.length - 1][0]} ${padY + innerH} L ${points[0][0]} ${padY + innerH} Z`;
 
       const labels = [];
-      const desired = Math.min(4, keys.length);
-      for (let i = 0; i < desired; i++) {
-        const idx = Math.round((i * (keys.length - 1)) / Math.max(desired - 1, 1));
-        const key = keys[idx];
-        const dt = new Date(key);
+      const count = Math.min(3, pointsData.length);
+      for (let i = 0; i < count; i++) {
+        const idx = Math.round((i * (pointsData.length - 1)) / Math.max(count - 1, 1));
+        const d = new Date(pointsData[idx].key);
         labels.push({
           x: points[idx][0],
-          text: dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          text: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
         });
       }
 
-      container.innerHTML = `
-        <div class="chart-card">
-          <svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="fillBlue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#4aa3ff" stop-opacity="0.22"/>
-                <stop offset="100%" stop-color="#4aa3ff" stop-opacity="0.02"/>
-              </linearGradient>
-            </defs>
-
-            <line x1="${padX}" y1="${padY + innerH}" x2="${width - padX}" y2="${padY + innerH}" stroke="#d7d7d7" stroke-width="2"/>
-            <line x1="${padX}" y1="${padY + (innerH/2)}" x2="${width - padX}" y2="${padY + (innerH/2)}" stroke="#e7e7e7" stroke-width="2"/>
-
-            <path d="${areaPath}" fill="url(#fillBlue)"></path>
-            <path d="${path}" fill="none" stroke="#5aa0ef" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
-
-            ${labels.map(l => `
-              <text x="${l.x}" y="${height - 6}" text-anchor="middle" font-size="22" fill="#7d7d83">${l.text}</text>
-            `).join('')}
-          </svg>
-        </div>
+      return `
+        <svg viewBox="0 0 ${width} ${height}" width="100%" height="100%" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="fillBlueMobile" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${strokeColor}" stop-opacity=".22"></stop>
+              <stop offset="100%" stop-color="${strokeColor}" stop-opacity=".03"></stop>
+            </linearGradient>
+          </defs>
+          <line x1="${padX}" y1="${padY + innerH}" x2="${width - padX}" y2="${padY + innerH}" stroke="#d7d7da" stroke-width="2"></line>
+          <line x1="${padX}" y1="${padY + innerH/2}" x2="${width - padX}" y2="${padY + innerH/2}" stroke="#e7e7ea" stroke-width="2"></line>
+          <path d="${area}" fill="url(#fillBlueMobile)"></path>
+          <path d="${path}" fill="none" stroke="${strokeColor}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+          ${labels.map(l => `<text x="${l.x}" y="${height - 6}" text-anchor="middle" font-size="16" fill="#7a7d81">${l.text}</text>`).join('')}
+        </svg>
       `;
     }
 
-    function changeRange() {
-      currentRangeDays = Number(document.getElementById('rangeSelect').value || 90);
+    function setView(view) {
+      currentView = view;
+    }
+
+    function scrollToOrdersDesktop() {
+      document.getElementById('desktopOrdersSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function focusDesktopSearch() {
+      document.getElementById('desktopSearchInput')?.focus();
+    }
+
+    function changeRange(value) {
+      currentRangeDays = Number(value || 90);
+
+      const desktop = document.getElementById('desktopRangeSelect');
+      const mobile = document.getElementById('mobileRangeSelect');
+      if (desktop) desktop.value = String(currentRangeDays);
+      if (mobile) mobile.value = String(currentRangeDays);
+
       updateDashboard();
       applyFilters();
     }
 
     function setDashboardFilter(type) {
       currentTab = type;
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      const target = document.querySelector(`.tab[data-tab="${type}"]`);
-      if (target) target.classList.add('active');
+      updateTabButtons();
       applyFilters();
-      document.querySelector('.orders-shell').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setView('orders');
+      scrollToOrdersDesktop();
+      document.querySelector('.mobile-orders-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function setTab(tab, element) {
+    function setTab(tab, el) {
       currentTab = tab;
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      if (element) element.classList.add('active');
+      updateTabButtons(el);
       applyFilters();
     }
 
-    function focusSearch() {
-      document.getElementById('searchInput').focus();
+    function updateTabButtons(clickedEl) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === currentTab);
+      });
+    }
+
+    function syncSearchFromDesktop() {
+      const v = document.getElementById('desktopSearchInput').value;
+      document.getElementById('mobileSearchInput').value = v;
+      applyFilters();
+    }
+
+    function syncSearchFromMobile() {
+      const v = document.getElementById('mobileSearchInput').value;
+      document.getElementById('desktopSearchInput').value = v;
+      applyFilters();
+    }
+
+    function clearFilters() {
+      currentTab = 'all';
+      updateTabButtons();
+      document.getElementById('desktopSearchInput').value = '';
+      document.getElementById('mobileSearchInput').value = '';
+      currentSortDirection = 'DESC';
+      applyFilters();
     }
 
     function toggleSortDirection() {
@@ -1395,24 +2141,9 @@
       applyFilters();
     }
 
-    function clearFilters() {
-      document.getElementById('searchInput').value = '';
-      currentTab = 'all';
-      currentSortDirection = 'DESC';
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      const first = document.querySelector('.tab[data-tab="all"]');
-      if (first) first.classList.add('active');
-      applyFilters();
-    }
-
     function applyFilters() {
-      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const search = (document.getElementById('desktopSearchInput')?.value || '').toLowerCase().trim();
       let result = [...allOrders];
-
-      result = result.filter(order => {
-        const d = new Date(order.created_at || 0);
-        return !isNaN(d);
-      });
 
       if (search) {
         result = result.filter(order =>
@@ -1425,70 +2156,158 @@
 
       if (currentTab === 'pending') {
         result = result.filter(o => o.status === 'pending');
-      } else if (currentTab === 'processing') {
-        result = result.filter(o => o.status === 'processing');
-      } else if (currentTab === 'completed') {
-        result = result.filter(o => o.status === 'completed');
-      } else if (currentTab === 'cancelled') {
-        result = result.filter(o => o.status === 'cancelled');
       } else if (currentTab === 'payment_pending') {
         result = result.filter(o => Number(o.balance || 0) > 0);
       } else if (currentTab === 'open') {
-        result = result.filter(o => ['pending','processing','shipped'].includes(o.status));
+        result = result.filter(o => ['pending', 'processing', 'shipped'].includes(o.status));
+      } else if (currentTab === 'cancelled') {
+        result = result.filter(o => o.status === 'cancelled');
       } else if (currentTab === 'today') {
         result = result.filter(isToday);
       }
 
       result.sort((a, b) => {
-        const aTime = new Date(a.created_at || 0).getTime();
-        const bTime = new Date(b.created_at || 0).getTime();
-        return currentSortDirection === 'DESC' ? bTime - aTime : aTime - bTime;
+        const at = new Date(a.created_at || 0).getTime();
+        const bt = new Date(b.created_at || 0).getTime();
+        return currentSortDirection === 'DESC' ? bt - at : at - bt;
       });
 
       filteredOrders = result;
-      renderOrders(result);
-      renderDayLabel(result);
+      renderDesktopOrders(result);
+      renderMobileOrders(result);
     }
 
-    function renderDayLabel(orders) {
-      const label = document.getElementById('dayLabel');
+    function renderDesktopOrders(orders) {
+      const tbody = document.getElementById('desktopOrdersTableBody');
+      if (!tbody) return;
+
       if (!orders.length) {
-        label.textContent = 'No orders';
+        tbody.innerHTML = `<tr><td colspan="9" style="padding:30px;text-align:center;color:#777;">No orders found</td></tr>`;
+        setText('desktopPaginationText', '1-0');
         return;
       }
-      if (currentTab === 'today') {
-        label.textContent = 'Today';
+
+      tbody.innerHTML = orders.map(order => `
+        <tr onclick="openOrderDetails('${escapeJs(orderDetailsUrl(order))}')">
+          <td class="check-col"><span class="checkbox"></span></td>
+          <td style="font-weight:800;">${escapeHtml(order.order_number || '-')}</td>
+          <td>${escapeHtml(formatDesktopDate(order.created_at))}</td>
+          <td>${escapeHtml(order.customer_name || '-')}</td>
+          <td>${escapeHtml(H.formatCurrency(order.total || 0))}</td>
+          <td>
+            <span class="status-badge payment">
+              <span class="dot"></span>
+              ${escapeHtml(getPaymentLabel(order))}
+            </span>
+          </td>
+          <td>
+            <span class="status-badge fulfillment">
+              <span class="dot"></span>
+              ${escapeHtml(getFulfillmentLabel(order))}
+            </span>
+          </td>
+          <td>${escapeHtml(getItemsLabel(order))}</td>
+          <td class="table-note">${escapeHtml(getOrderNote(order))}</td>
+        </tr>
+      `).join('');
+
+      setText('desktopPaginationText', `1-${orders.length}`);
+    }
+
+    function renderMobileOrders(orders) {
+      const wrap = document.getElementById('mobileOrdersList');
+      if (!wrap) return;
+
+      setText('mobileListDay', currentTab === 'today' ? 'Today' : 'Orders');
+
+      if (!orders.length) {
+        wrap.innerHTML = `<div class="mobile-order-row" style="text-align:center;color:#777;">No orders found</div>`;
         return;
       }
-      label.textContent = 'Orders';
+
+      wrap.innerHTML = orders.map(order => `
+        <div class="mobile-order-row" onclick="openOrderDetails('${escapeJs(orderDetailsUrl(order))}')">
+          <div class="mobile-order-top">
+            <div>
+              <div class="mobile-order-number">${escapeHtml(order.order_number || '-')}</div>
+              <div class="mobile-order-meta">${escapeHtml(formatMobileMeta(order))}</div>
+            </div>
+            <div class="mobile-order-price">${escapeHtml(H.formatCurrency(order.total || 0))}</div>
+          </div>
+
+          <div class="mobile-order-badges">
+            <span class="status-badge payment">
+              <span class="dot"></span>
+              ${escapeHtml(getPaymentLabel(order))}
+            </span>
+            <span class="status-badge fulfillment">
+              <span class="dot"></span>
+              ${escapeHtml(getFulfillmentLabel(order))}
+            </span>
+          </div>
+
+          <div class="mobile-order-note">${escapeHtml(getOrderNote(order))}</div>
+        </div>
+      `).join('');
+    }
+
+    function formatDesktopDate(value) {
+      if (!value) return '-';
+      const d = new Date(value);
+      if (isNaN(d)) return '-';
+
+      const now = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(now.getDate() - 1);
+
+      const sameDay = (a, b) =>
+        a.getFullYear() === b.getFullYear() &&
+        a.getMonth() === b.getMonth() &&
+        a.getDate() === b.getDate();
+
+      const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).toLowerCase();
+
+      if (sameDay(d, now)) return `Today at ${time}`;
+      if (sameDay(d, yesterday)) return `Yesterday at ${time}`;
+
+      return `${d.toLocaleDateString('en-US', { weekday: 'long' })} at ${time}`;
+    }
+
+    function formatMobileMeta(order) {
+      const customer = order.customer_name || '-';
+      const items = getItemsCount(order);
+      const d = new Date(order.created_at || 0);
+      const time = isNaN(d) ? '-' : d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      return `${customer} • ${items} item${items > 1 ? 's' : ''} • ${time}`;
     }
 
     function getItemsCount(order) {
       if (Array.isArray(order.items) && order.items.length) {
-        const sum = order.items.reduce((acc, item) => acc + Number(item.quantity || 0), 0);
-        return sum || order.items.length;
+        const total = order.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+        return total || order.items.length;
       }
       return 1;
+    }
+
+    function getItemsLabel(order) {
+      const count = getItemsCount(order);
+      return `${count} item${count > 1 ? 's' : ''}`;
     }
 
     function getPaymentLabel(order) {
       return Number(order.balance || 0) > 0 ? 'Payment pending' : 'Paid';
     }
 
+    function getFulfillmentLabel(order) {
+      if (order.status === 'completed' || order.status === 'shipped') return 'Fulfilled';
+      if (order.status === 'processing') return 'Processing';
+      if (order.status === 'cancelled') return 'Archived';
+      return 'Unfulfilled';
+    }
+
     function getOrderNote(order) {
       if (Number(order.shipping_cost || 0) === 0) return 'The order qualifies for free shipping';
       return `Delivery fee : ${Number(order.shipping_cost || 0)} KWD`;
-    }
-
-    function formatShortMeta(order) {
-      const customer = order.customer_name || '-';
-      const itemsCount = getItemsCount(order);
-      const date = order.created_at ? new Date(order.created_at) : null;
-      let time = '-';
-      if (date && !isNaN(date)) {
-        time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-      }
-      return `${customer} • ${itemsCount} item${itemsCount > 1 ? 's' : ''} • ${time}`;
     }
 
     function orderDetailsUrl(order) {
@@ -1500,88 +2319,6 @@
     function openOrderDetails(url) {
       if (!url || url === '#') return;
       window.location.href = url;
-    }
-
-    function quickFilterStatus(status) {
-      currentTab = status;
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      const target = document.querySelector(`.tab[data-tab="${status}"]`);
-      if (target) target.classList.add('active');
-      applyFilters();
-    }
-
-    function quickFilterPayment() {
-      currentTab = 'payment_pending';
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      const target = document.querySelector('.tab[data-tab="payment_pending"]');
-      if (target) target.classList.add('active');
-      applyFilters();
-    }
-
-    function renderOrders(orders) {
-      const mobileList = document.getElementById('mobileOrdersList');
-      const tbody = document.getElementById('ordersTableBody');
-
-      if (!orders.length) {
-        mobileList.innerHTML = `<div class="empty-state">No orders found</div>`;
-        tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No orders found</td></tr>`;
-        return;
-      }
-
-      mobileList.innerHTML = orders.map(order => `
-        <div class="order-row" onclick="openOrderDetails('${escapeJs(orderDetailsUrl(order))}')">
-          <div>
-            <div class="order-number">${escapeHtml(order.order_number || '-')}</div>
-            <div class="order-meta">${escapeHtml(formatShortMeta(order))}</div>
-
-            <div class="order-badges">
-              <button class="chip fulfillment" type="button" onclick="event.stopPropagation(); quickFilterStatus('pending')">
-                ${escapeHtml(H.getStatusLabel(order.status))}
-              </button>
-              <button class="chip payment" type="button" onclick="event.stopPropagation(); quickFilterPayment()">
-                ${escapeHtml(getPaymentLabel(order))}
-              </button>
-            </div>
-
-            <div class="order-note">${escapeHtml(getOrderNote(order))}</div>
-          </div>
-
-          <div class="order-amount">${escapeHtml(H.formatCurrency(order.total || 0))}</div>
-        </div>
-      `).join('');
-
-      tbody.innerHTML = orders.map(order => `
-        <tr onclick="openOrderDetails('${escapeJs(orderDetailsUrl(order))}')">
-          <td>
-            <div style="font-weight:800;font-size:1.1rem;">${escapeHtml(order.order_number || '-')}</div>
-            <div style="color:#666;font-size:.92rem;margin-top:6px;">${escapeHtml(H.formatDate(order.created_at))}</div>
-          </td>
-          <td>
-            <div style="font-weight:700;">${escapeHtml(order.customer_name || '-')}</div>
-            <div style="color:#666;margin-top:6px;">${escapeHtml(order.customer_email || '')}</div>
-            <div style="color:#666;">${escapeHtml(order.customer_phone || '')}</div>
-          </td>
-          <td>
-            <div class="order-badges">
-              <button class="chip fulfillment" type="button" onclick="event.stopPropagation(); quickFilterStatus('pending')">
-                ${escapeHtml(H.getStatusLabel(order.status))}
-              </button>
-              <button class="chip payment" type="button" onclick="event.stopPropagation(); quickFilterPayment()">
-                ${escapeHtml(getPaymentLabel(order))}
-              </button>
-            </div>
-          </td>
-          <td style="font-weight:700;">${escapeHtml(H.formatCurrency(order.total || 0))}</td>
-          <td>${escapeHtml(getOrderNote(order))}</td>
-          <td>
-            <div class="row-actions" onclick="event.stopPropagation()">
-              <button class="small-btn view" type="button" onclick="openOrderDetails('${escapeJs(orderDetailsUrl(order))}')">Open</button>
-              <button class="small-btn edit" type="button" onclick="editOrder(${Number(order.id)})">Edit</button>
-              <button class="small-btn delete" type="button" onclick="deleteOrder(${Number(order.id)})">Delete</button>
-            </div>
-          </td>
-        </tr>
-      `).join('');
     }
 
     async function editOrder(orderId) {
@@ -1609,6 +2346,7 @@
 
     async function saveOrderChanges(event) {
       event.preventDefault();
+
       try {
         const orderId = document.getElementById('editOrderId').value;
         const updateData = {
@@ -1637,51 +2375,6 @@
       } catch {
         showAlert('Failed to update order', 'error');
       }
-    }
-
-    async function deleteOrder(orderId) {
-      if (!confirm('Delete this order?')) return;
-      try {
-        const response = await fetch(`${API_BASE}/${orderId}`, { method: 'DELETE' });
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-          showAlert('Order deleted', 'success');
-          loadAllData();
-        } else {
-          showAlert(data.error || 'Failed to delete order', 'error');
-        }
-      } catch {
-        showAlert('Failed to delete order', 'error');
-      }
-    }
-
-    function openNewOrderModal() {
-      document.getElementById('newOrderForm').reset();
-      document.getElementById('itemsList').innerHTML = '';
-      itemCount = 0;
-      addOrderItem();
-      openModal('newOrderModal');
-    }
-
-    function addOrderItem() {
-      itemCount++;
-      const itemsList = document.getElementById('itemsList');
-      itemsList.insertAdjacentHTML('beforeend', `
-        <div id="item-${itemCount}">
-          <div class="inline-grid">
-            <input type="text" placeholder="Product name" class="order-item-name" required>
-            <input type="number" step="0.001" placeholder="Price" class="order-item-price" required>
-            <input type="number" placeholder="Qty" class="order-item-qty" value="1" min="1" required>
-            <button type="button" class="small-btn delete" onclick="removeOrderItem(${itemCount})">Delete</button>
-          </div>
-        </div>
-      `);
-    }
-
-    function removeOrderItem(itemId) {
-      const el = document.getElementById(`item-${itemId}`);
-      if (el) el.remove();
     }
 
     async function createNewOrder(event) {
@@ -1740,17 +2433,55 @@
       }
     }
 
-    function showLoading(show) {
-      document.getElementById('loading').classList.toggle('active', show);
+    function openNewOrderModal() {
+      document.getElementById('newOrderForm').reset();
+      document.getElementById('itemsList').innerHTML = '';
+      itemCount = 0;
+      addOrderItem();
+      openModal('newOrderModal');
     }
 
-    function showAlert(message, type = 'success', duration = 3000) {
-      const alert = document.getElementById('alert');
-      alert.textContent = message;
-      alert.className = `alert active ${type}`;
-      if (duration) {
-        setTimeout(() => alert.classList.remove('active'), duration);
-      }
+    function addOrderItem() {
+      itemCount++;
+      document.getElementById('itemsList').insertAdjacentHTML('beforeend', `
+        <div id="item-${itemCount}">
+          <div class="inline-grid">
+            <input type="text" placeholder="Product name" class="order-item-name" required>
+            <input type="number" step="0.001" placeholder="Price" class="order-item-price" required>
+            <input type="number" min="1" value="1" placeholder="Qty" class="order-item-qty" required>
+            <button type="button" class="ghost-btn" onclick="removeOrderItem(${itemCount})">Delete</button>
+          </div>
+        </div>
+      `);
+    }
+
+    function removeOrderItem(id) {
+      const el = document.getElementById(`item-${id}`);
+      if (el) el.remove();
+    }
+
+    function exportToCSV() {
+      const rows = filteredOrders.map(order => [
+        order.order_number || '',
+        order.customer_name || '',
+        order.customer_email || '',
+        order.customer_phone || '',
+        order.total || 0,
+        getPaymentLabel(order),
+        getFulfillmentLabel(order),
+        order.created_at || ''
+      ]);
+
+      let csv = ['Order,Customer,Email,Phone,Total,Payment Status,Fulfillment Status,Date'];
+      rows.forEach(row => {
+        csv.push(row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','));
+      });
+
+      const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `orders_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
     }
 
     function openModal(id) {
@@ -1761,11 +2492,28 @@
       document.getElementById(id).classList.remove('active');
     }
 
-    window.onclick = function(event) {
-      if (event.target.classList.contains('modal')) {
-        event.target.classList.remove('active');
+    window.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal')) {
+        e.target.classList.remove('active');
       }
-    };
+    });
+
+    function showAlert(message, type = 'success', duration = 3000) {
+      ['desktopAlert', 'mobileAlert'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = message;
+        el.className = `alert active ${type}`;
+        setTimeout(() => {
+          el.classList.remove('active');
+        }, duration);
+      });
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    }
 
     function escapeHtml(value) {
       return String(value ?? '')
@@ -1777,7 +2525,9 @@
     }
 
     function escapeJs(value) {
-      return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      return String(value ?? '')
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'");
     }
   </script>
 </body>
