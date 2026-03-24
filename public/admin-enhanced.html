@@ -3,169 +3,334 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Orders Admin - Smart Kids Kuwait</title>
+  <title>Smart Kids Kuwait - Orders Dashboard</title>
   <script src="/config/system.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    *{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --purple:#6c63ff;
-      --purple-dark:#5c52f0;
-      --bg:#ffffff;
-      --soft:#f3f3f3;
-      --soft-2:#f7f7f7;
-      --border:#e7e7e7;
-      --text:#1f1f1f;
-      --muted:#6c6c6c;
+      --bg:#f3f3f3;
+      --card:#ffffff;
+      --text:#1d1d1f;
+      --muted:#7a7a7d;
+      --line:#e7e7ea;
+      --black:#000000;
+      --green:#7bed57;
       --chip-yellow:#efe17a;
       --chip-yellow-text:#5b4d00;
       --chip-beige:#eacb98;
       --chip-beige-text:#5c4520;
-      --danger:#df5a5a;
-      --success:#111111;
-      --blue:#3f7df0;
-      --shadow:0 10px 28px rgba(0,0,0,.06);
-      --radius-xl:28px;
-      --radius-lg:22px;
-      --radius-md:16px;
-      --radius-sm:12px;
+      --danger:#db5b5b;
+      --blue:#2f80ed;
+      --radius-xl:34px;
+      --radius-lg:24px;
+      --radius-md:18px;
+      --radius-sm:14px;
+      --shadow:0 10px 30px rgba(0,0,0,.06);
     }
 
     body{
-      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
     }
 
-    a{ color: inherit; text-decoration: none; }
+    button,input,select,textarea{
+      font-family:inherit;
+    }
 
-    .topbar{
-      background: linear-gradient(135deg, #6b3fa0 0%, #6c63ff 100%);
+    a{color:inherit;text-decoration:none}
+
+    .app-header{
+      background:#000;
       color:#fff;
-      padding:18px 16px 20px;
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      box-shadow: 0 8px 24px rgba(108,99,255,.18);
+      padding:16px 16px 22px;
     }
 
-    .topbar-inner{
-      max-width: 1180px;
-      margin: 0 auto;
+    .app-header-inner{
+      max-width:1280px;
+      margin:0 auto;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
+      gap:14px;
     }
 
-    .topbar-title{
+    .brand{
       display:flex;
       align-items:center;
-      gap:12px;
+      gap:14px;
       min-width:0;
     }
 
-    .logo-box{
-      width:48px;
-      height:48px;
-      border-radius:14px;
-      background: rgba(255,255,255,.18);
+    .brand-icon{
+      width:58px;
+      height:58px;
+      border-radius:18px;
+      background:var(--green);
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:22px;
+      color:#173c12;
+      font-size:1.65rem;
       flex:0 0 auto;
     }
 
-    .topbar-text h1{
-      font-size:1.2rem;
-      line-height:1.2;
+    .brand-title{
+      font-size:1.7rem;
       font-weight:800;
-      margin-bottom:3px;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
-    .topbar-text p{
-      font-size:.82rem;
-      opacity:.9;
+    .brand-sub{
+      font-size:.9rem;
+      color:#d0d0d0;
+      margin-top:4px;
     }
 
-    .topbar-actions{
+    .header-actions{
       display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
+      align-items:center;
+      gap:12px;
+      flex:0 0 auto;
     }
 
-    .top-btn{
-      min-height:40px;
-      padding:0 14px;
+    .circle-icon{
+      width:58px;
+      height:58px;
+      border-radius:50%;
       border:none;
-      border-radius:999px;
-      font-weight:700;
-      cursor:pointer;
-      background: rgba(255,255,255,.16);
+      background:transparent;
       color:#fff;
-      backdrop-filter: blur(8px);
+      font-size:1.6rem;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
 
-    .top-btn.primary{ background:#fff; color:var(--purple-dark); }
+    .logo-avatar{
+      width:58px;
+      height:58px;
+      border-radius:50%;
+      overflow:hidden;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 auto;
+    }
+
+    .logo-avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
 
     .page{
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 16px;
+      max-width:1280px;
+      margin:-8px auto 0;
+      padding:0 16px 22px;
+    }
+
+    .dashboard-shell{
+      background:#fff;
+      border-radius:38px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      border:1px solid #ededed;
+    }
+
+    .dashboard-top{
+      padding:18px 16px 8px;
+    }
+
+    .dashboard-controls{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .pill{
+      min-height:64px;
+      border:none;
+      border-radius:20px;
+      background:#f1f1f1;
+      color:#2d2d2f;
+      padding:0 18px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-size:1rem;
+      font-weight:700;
+    }
+
+    .pill select{
+      width:100%;
+      border:none;
+      background:transparent;
+      font-size:1rem;
+      color:#2d2d2f;
+      outline:none;
+      appearance:none;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .pill .dot{
+      width:14px;
+      height:14px;
+      border-radius:50%;
+      background:#63d98a;
+      flex:0 0 auto;
+    }
+
+    .stats-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:16px;
+      margin-bottom:16px;
+    }
+
+    .stat{
+      min-width:0;
+    }
+
+    .stat-label{
+      color:#8a8a8e;
+      font-size:1rem;
+      margin-bottom:6px;
+      font-weight:600;
+    }
+
+    .stat-value{
+      font-size:2.2rem;
+      line-height:1.05;
+      font-weight:800;
+      color:#252525;
+      letter-spacing:-.5px;
+      word-break:break-word;
+    }
+
+    .stat-change{
+      margin-top:6px;
+      color:#6fa67a;
+      font-size:1rem;
+      font-weight:700;
+    }
+
+    .chart-wrap{
+      padding:8px 6px 0;
+    }
+
+    .chart-card{
+      height:320px;
+      position:relative;
+      border-radius:24px;
+      overflow:hidden;
+    }
+
+    .chart-svg{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    .chart-empty{
+      height:320px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#9a9a9a;
+      font-size:1rem;
+      background:linear-gradient(180deg,#fafafa,#f4f4f4);
+      border-radius:24px;
+    }
+
+    .quick-links{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:14px;
+      padding:18px 16px 24px;
+    }
+
+    .quick-card{
+      background:#f7f7f7;
+      border:1px solid #ececec;
+      border-radius:22px;
+      padding:18px 18px 16px;
+      min-height:132px;
+      cursor:pointer;
+      transition:.15s ease;
+      text-align:right;
+    }
+
+    .quick-card:hover{
+      background:#f2f2f2;
+    }
+
+    .quick-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .quick-icon{
+      font-size:1.8rem;
+      color:#4c4c4c;
+    }
+
+    .quick-value{
+      font-size:2rem;
+      font-weight:900;
+      line-height:1;
+      color:#262626;
+    }
+
+    .quick-title{
+      font-size:1rem;
+      font-weight:800;
+      color:#2f2f2f;
+      line-height:1.4;
+    }
+
+    .quick-sub{
+      font-size:.95rem;
+      color:#6d6d72;
+      margin-top:4px;
+      line-height:1.45;
     }
 
     .alert{
       display:none;
-      margin-bottom:12px;
+      margin:14px 0;
       padding:14px 16px;
       border-radius:16px;
       font-weight:700;
     }
 
-    .alert.active{ display:block; }
-    .alert.success{ background:#eaf9ef; color:#1c7b44; border:1px solid #bce7c8; }
-    .alert.error{ background:#fff1f1; color:#9e2f2f; border:1px solid #efc0c0; }
-
-    .summary-strip{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:12px;
-      margin-bottom:16px;
-    }
-
-    .summary-card{
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:22px;
-      padding:16px;
-      box-shadow: var(--shadow);
-    }
-
-    .summary-card .k{
-      color:var(--muted);
-      font-size:.88rem;
-      margin-bottom:8px;
-    }
-
-    .summary-card .v{
-      font-size:1.55rem;
-      font-weight:800;
-      line-height:1.2;
-    }
+    .alert.active{display:block}
+    .alert.success{background:#eaf9ef;color:#17784a;border:1px solid #bfe6cd}
+    .alert.error{background:#fff1f1;color:#9a2d2d;border:1px solid #efc2c2}
 
     .orders-shell{
+      margin-top:16px;
       background:#fff;
-      border:1px solid var(--border);
       border-radius:34px;
+      box-shadow:var(--shadow);
+      border:1px solid #ededed;
       overflow:hidden;
-      box-shadow: var(--shadow);
     }
 
     .orders-head{
-      padding:18px 16px 10px;
-      border-bottom:1px solid #f0f0f0;
+      padding:20px 16px 12px;
+      border-bottom:1px solid #efefef;
     }
 
     .orders-title-row{
@@ -177,47 +342,48 @@
     }
 
     .orders-title{
-      font-size:1.9rem;
-      font-weight:800;
-      line-height:1.2;
+      font-size:2rem;
+      font-weight:900;
+      line-height:1.1;
     }
 
-    .orders-tools{
+    .orders-head-tools{
       display:flex;
       gap:10px;
       align-items:center;
+      flex-wrap:wrap;
     }
 
-    .circle-btn,
-    .pill-btn{
+    .tool-circle{
+      width:60px;
+      height:60px;
       border:none;
-      background:#f3f3f3;
-      color:#222;
-      cursor:pointer;
-    }
-
-    .circle-btn{
-      width:54px;
-      height:54px;
       border-radius:50%;
-      font-size:1.35rem;
+      background:#f1f1f1;
+      color:#333;
+      font-size:1.5rem;
+      cursor:pointer;
       display:flex;
       align-items:center;
       justify-content:center;
     }
 
-    .pill-btn{
-      min-height:54px;
-      padding:0 22px;
+    .tool-pill{
+      min-height:60px;
+      padding:0 24px;
+      border:none;
       border-radius:999px;
-      font-weight:700;
+      background:#f1f1f1;
+      color:#2a2a2a;
       font-size:1rem;
+      font-weight:700;
+      cursor:pointer;
     }
 
     .search-row{
       display:grid;
-      grid-template-columns:minmax(0,1fr) 74px 74px;
-      gap:10px;
+      grid-template-columns:minmax(0,1fr) 76px 76px;
+      gap:12px;
       margin-bottom:12px;
     }
 
@@ -229,27 +395,23 @@
       width:100%;
       height:66px;
       border:none;
-      background:#f3f3f3;
       border-radius:22px;
-      padding:0 20px 0 20px;
+      background:#f1f1f1;
+      padding:0 20px 0 58px;
       font-size:1.05rem;
       color:#222;
+      outline:none;
     }
 
-    .search-box input::placeholder{ color:#b0b0b0; }
-
-    .search-box .search-icon{
+    .search-box input::placeholder{color:#a5a5a8}
+    .search-icon{
       position:absolute;
       left:18px;
       top:50%;
       transform:translateY(-50%);
-      font-size:1.6rem;
-      color:#8f8f8f;
+      font-size:1.55rem;
+      color:#8f8f94;
       pointer-events:none;
-    }
-
-    .search-box input[dir="ltr"]{
-      padding-left:54px;
     }
 
     .tabs-row{
@@ -259,8 +421,7 @@
       padding-bottom:4px;
       scrollbar-width:none;
     }
-
-    .tabs-row::-webkit-scrollbar{ display:none; }
+    .tabs-row::-webkit-scrollbar{display:none}
 
     .tab{
       border:none;
@@ -273,20 +434,27 @@
       cursor:pointer;
       white-space:nowrap;
     }
+    .tab.active{background:#efefef}
 
-    .tab.active{
-      background:#efefef;
-    }
-
-    .day-label{
-      background:#f2f2f2;
-      color:#6e6e6e;
+    .list-day{
       padding:12px 16px;
+      background:#f2f2f2;
+      color:#707070;
       font-size:.95rem;
       font-weight:700;
       border-top:1px solid #efefef;
       border-bottom:1px solid #efefef;
     }
+
+    .loading{
+      display:none;
+      padding:36px 16px;
+      text-align:center;
+      color:#666;
+      font-size:1rem;
+      background:#fff;
+    }
+    .loading.active{display:block}
 
     .orders-list{
       background:#fff;
@@ -300,19 +468,14 @@
       border-bottom:1px solid #ececec;
       cursor:pointer;
       transition:.15s ease;
+      background:#fff;
     }
 
-    .order-row:hover{
-      background:#fafafa;
-    }
-
-    .order-main{
-      min-width:0;
-    }
+    .order-row:hover{background:#fafafa}
 
     .order-number{
-      font-size:1.2rem;
-      font-weight:800;
+      font-size:1.18rem;
+      font-weight:900;
       margin-bottom:8px;
       line-height:1.2;
     }
@@ -342,6 +505,7 @@
       font-weight:700;
       cursor:pointer;
       border:none;
+      white-space:nowrap;
     }
 
     .chip.fulfillment{
@@ -361,15 +525,16 @@
     }
 
     .order-amount{
-      font-size:1.1rem;
-      font-weight:400;
+      font-size:1.08rem;
+      font-weight:500;
       white-space:nowrap;
       align-self:start;
-      padding-top:2px;
+      padding-top:4px;
     }
 
     .desktop-table-wrap{
       display:none;
+      background:#fff;
       border-top:1px solid #efefef;
     }
 
@@ -396,7 +561,6 @@
     .desktop-table tbody tr{
       cursor:pointer;
     }
-
     .desktop-table tbody tr:hover{
       background:#fafafa;
     }
@@ -415,25 +579,18 @@
       border-radius:10px;
       font-weight:700;
       cursor:pointer;
+      white-space:nowrap;
     }
 
-    .small-btn.view{ background:#e8f0ff; color:#275dd8; }
-    .small-btn.edit{ background:#fff0cf; color:#986800; }
-    .small-btn.delete{ background:#ffe0e0; color:#b33434; }
-
-    .loading{
-      display:none;
-      padding:32px 16px;
-      text-align:center;
-      color:#666;
-    }
-
-    .loading.active{ display:block; }
+    .small-btn.view{background:#e8f0ff;color:#275dd8}
+    .small-btn.edit{background:#fff0cf;color:#986800}
+    .small-btn.delete{background:#ffe0e0;color:#b33434}
 
     .empty-state{
-      padding:40px 16px;
+      padding:42px 16px;
       text-align:center;
       color:#888;
+      background:#fff;
     }
 
     .modal{
@@ -446,8 +603,7 @@
       justify-content:center;
       padding:16px;
     }
-
-    .modal.active{ display:flex; }
+    .modal.active{display:flex}
 
     .modal-content{
       width:100%;
@@ -482,7 +638,7 @@
       font-size:1.5rem;
     }
 
-    .form-group{ margin-bottom:14px; }
+    .form-group{margin-bottom:14px}
     .form-group label{
       display:block;
       margin-bottom:7px;
@@ -494,10 +650,9 @@
     .form-group textarea{
       width:100%;
       min-height:50px;
-      border:1px solid var(--border);
+      border:1px solid var(--line);
       border-radius:14px;
       padding:12px 14px;
-      font-family:inherit;
       font-size:1rem;
       background:#fff;
     }
@@ -524,11 +679,11 @@
       cursor:pointer;
     }
 
-    .btn-primary{ background:#111; color:#fff; }
-    .btn-secondary{ background:#f3f3f3; color:#222; }
+    .btn-primary{background:#111;color:#fff}
+    .btn-secondary{background:#f3f3f3;color:#222}
 
     .items-list-box > div{
-      border:1px solid var(--border);
+      border:1px solid var(--line);
       padding:12px;
       border-radius:14px;
       margin-bottom:10px;
@@ -541,110 +696,82 @@
       gap:8px;
     }
 
-    @media (min-width: 992px){
-      .summary-strip{
+    @media (min-width: 1024px){
+      .dashboard-controls{
+        grid-template-columns:340px 250px;
+      }
+
+      .quick-links{
         grid-template-columns:repeat(4,minmax(0,1fr));
       }
 
-      .orders-head{
-        padding:22px 22px 14px;
+      .orders-list{display:none}
+      .desktop-table-wrap{display:block}
+    }
+
+    @media (max-width: 1023px){
+      .stats-grid{
+        grid-template-columns:1fr 1fr 1fr;
       }
 
-      .orders-list{ display:none; }
-      .desktop-table-wrap{ display:block; }
-
-      .search-row{
-        grid-template-columns:minmax(0,1fr) 74px 74px auto auto;
-      }
-
-      .page{
-        padding: 22px;
-      }
-
-      .topbar{
-        padding:20px 22px;
+      .quick-links{
+        grid-template-columns:1fr 1fr;
       }
     }
 
     @media (max-width: 768px){
-      .topbar-inner{
-        flex-direction:column;
-        align-items:stretch;
-      }
-
-      .topbar-actions{
-        justify-content:stretch;
-      }
-
-      .top-btn{
-        flex:1 1 auto;
-      }
-
-      .summary-strip{
-        grid-template-columns:1fr 1fr;
-      }
-
-      .orders-title{
-        font-size:1.65rem;
-      }
-
-      .pill-btn{
-        padding:0 18px;
-      }
+      .brand-title{font-size:1.35rem}
+      .page{padding:0 12px 18px}
+      .dashboard-shell,
+      .orders-shell{border-radius:30px}
+      .stats-grid{grid-template-columns:1fr 1fr}
+      .quick-links{grid-template-columns:1fr 1fr}
+      .chart-card,.chart-empty{height:260px}
     }
 
-    @media (max-width: 520px){
-      .page{
-        padding:12px;
-      }
+    @media (max-width: 560px){
+      .app-header-inner{align-items:center}
+      .brand-sub{display:none}
+      .header-actions{gap:8px}
+      .circle-icon,.logo-avatar{width:52px;height:52px}
+      .brand-icon{width:52px;height:52px;border-radius:16px}
+      .dashboard-controls{grid-template-columns:1fr 1fr}
+      .stats-grid{grid-template-columns:1fr 1fr 1fr}
+      .stat-value{font-size:1.55rem}
+      .quick-links{grid-template-columns:1fr 1fr}
+      .quick-card{min-height:120px;padding:16px 14px}
+      .orders-title{font-size:1.7rem}
+      .orders-title-row{flex-wrap:wrap}
+      .orders-head-tools{width:100%;justify-content:space-between}
+      .search-row{grid-template-columns:minmax(0,1fr) 66px 66px}
+      .tool-circle{width:52px;height:52px}
+      .tool-pill{min-height:52px;padding:0 18px}
+      .inline-grid{grid-template-columns:1fr}
+    }
 
-      .summary-strip{
-        grid-template-columns:1fr;
-      }
-
-      .orders-shell{
-        border-radius:28px;
-      }
-
-      .orders-title-row{
-        flex-wrap:wrap;
-      }
-
-      .orders-tools{
-        width:100%;
-        justify-content:space-between;
-      }
-
-      .search-row{
-        grid-template-columns:minmax(0,1fr) 66px 66px;
-      }
-
-      .order-meta,
-      .order-note{
-        font-size:.92rem;
-      }
-
-      .inline-grid{
-        grid-template-columns:1fr;
-      }
+    @media (max-width: 420px){
+      .stats-grid{grid-template-columns:1fr}
+      .quick-links{grid-template-columns:1fr 1fr}
+      .quick-value{font-size:1.7rem}
     }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <div class="topbar-title">
-        <div class="logo-box">🛍️</div>
-        <div class="topbar-text">
-          <h1>Orders</h1>
-          <p>Smart Kids Kuwait Admin</p>
+  <header class="app-header">
+    <div class="app-header-inner">
+      <div class="brand">
+        <div class="brand-icon">🏬</div>
+        <div>
+          <div class="brand-title">الأطفال المبتكرون الكويت</div>
+          <div class="brand-sub">Smart Kids Kuwait Admin</div>
         </div>
       </div>
 
-      <div class="topbar-actions">
-        <button class="top-btn" onclick="loadAllData()">Refresh</button>
-        <button class="top-btn primary" onclick="openNewOrderModal()">Add order</button>
-        <button class="top-btn" onclick="exportToCSV()">Export CSV</button>
+      <div class="header-actions">
+        <button class="circle-icon" type="button">🔔</button>
+        <div class="logo-avatar">
+          <img src="https://smartkidskw.com/logo-sk-smart-kids.png" alt="Smart Kids Kuwait">
+        </div>
       </div>
     </div>
   </header>
@@ -652,22 +779,85 @@
   <main class="page">
     <div id="alert" class="alert"></div>
 
-    <section class="summary-strip">
-      <div class="summary-card">
-        <div class="k">Total orders</div>
-        <div class="v" id="totalOrders">0</div>
+    <section class="dashboard-shell">
+      <div class="dashboard-top">
+        <div class="dashboard-controls">
+          <div class="pill">
+            <select id="rangeSelect" onchange="changeRange()">
+              <option value="7">Last 7 days</option>
+              <option value="30">Last 30 days</option>
+              <option value="90" selected>Last 90 days</option>
+              <option value="365">Last 365 days</option>
+            </select>
+          </div>
+
+          <div class="pill">
+            <span class="dot"></span>
+            <span id="visitorsLabel">Orders dashboard</span>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat">
+            <div class="stat-label">Sessions</div>
+            <div class="stat-value" id="sessionsValue">—</div>
+            <div class="stat-change">Analytics source not connected</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Total sales</div>
+            <div class="stat-value" id="totalSalesValue">KWD 0.000</div>
+            <div class="stat-change" id="salesChangeValue">Based on real orders</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">Orders</div>
+            <div class="stat-value" id="ordersCountValue">0</div>
+            <div class="stat-change" id="ordersChangeValue">In selected range</div>
+          </div>
+        </div>
+
+        <div class="chart-wrap">
+          <div id="chartContainer"></div>
+        </div>
       </div>
-      <div class="summary-card">
-        <div class="k">Unfulfilled</div>
-        <div class="v" id="pendingOrders">0</div>
-      </div>
-      <div class="summary-card">
-        <div class="k">Processing</div>
-        <div class="v" id="processingOrders">0</div>
-      </div>
-      <div class="summary-card">
-        <div class="k">Total sales</div>
-        <div class="v" id="totalRevenue">KWD 0.000</div>
+
+      <div class="quick-links">
+        <button class="quick-card" type="button" onclick="setDashboardFilter('pending')">
+          <div class="quick-top">
+            <div class="quick-value" id="pendingQuickValue">0</div>
+            <div class="quick-icon">📦</div>
+          </div>
+          <div class="quick-title">Orders to fulfill</div>
+          <div class="quick-sub">طلبات غير منفذة</div>
+        </button>
+
+        <button class="quick-card" type="button" onclick="setDashboardFilter('payment_pending')">
+          <div class="quick-top">
+            <div class="quick-value" id="paymentQuickValue">0</div>
+            <div class="quick-icon">💬</div>
+          </div>
+          <div class="quick-title">Payments to capture</div>
+          <div class="quick-sub">طلبات غير مدفوعة</div>
+        </button>
+
+        <button class="quick-card" type="button" onclick="setDashboardFilter('all')">
+          <div class="quick-top">
+            <div class="quick-value" id="allQuickValue">0</div>
+            <div class="quick-icon">🧾</div>
+          </div>
+          <div class="quick-title">All orders</div>
+          <div class="quick-sub">كل الطلبات</div>
+        </button>
+
+        <button class="quick-card" type="button" onclick="setDashboardFilter('today')">
+          <div class="quick-top">
+            <div class="quick-value" id="todayQuickValue">0</div>
+            <div class="quick-icon">📅</div>
+          </div>
+          <div class="quick-title">Today orders</div>
+          <div class="quick-sub">طلبات اليوم</div>
+        </button>
       </div>
     </section>
 
@@ -675,34 +865,35 @@
       <div class="orders-head">
         <div class="orders-title-row">
           <div class="orders-title">Orders</div>
-          <div class="orders-tools">
-            <button class="circle-btn" onclick="toggleSortDirection()" title="Sort">⇅</button>
-            <button class="circle-btn" onclick="focusSearch()" title="Search">⌕</button>
-            <button class="pill-btn" onclick="openNewOrderModal()">Add</button>
+          <div class="orders-head-tools">
+            <button class="tool-circle" type="button" onclick="toggleSortDirection()">⇅</button>
+            <button class="tool-circle" type="button" onclick="focusSearch()">⌕</button>
+            <button class="tool-pill" type="button" onclick="openNewOrderModal()">Add order</button>
           </div>
         </div>
 
         <div class="search-row">
           <div class="search-box">
             <span class="search-icon">⌕</span>
-            <input id="searchInput" dir="ltr" type="text" placeholder="Filter orders" />
+            <input id="searchInput" type="text" placeholder="Filter orders" oninput="applyFilters()">
           </div>
-          <button class="circle-btn" onclick="toggleSortDirection()" title="Sort">⇅</button>
-          <button class="circle-btn" onclick="clearFilters()" title="Clear">≡</button>
+          <button class="tool-circle" type="button" onclick="toggleSortDirection()">⇅</button>
+          <button class="tool-circle" type="button" onclick="clearFilters()">≡</button>
         </div>
 
         <div class="tabs-row">
-          <button class="tab active" data-tab="all">All</button>
-          <button class="tab" data-tab="pending">Unfulfilled</button>
-          <button class="tab" data-tab="payment_pending">Unpaid</button>
-          <button class="tab" data-tab="open">Open</button>
-          <button class="tab" data-tab="archived">Archived</button>
-          <button class="tab" data-tab="processing">Processing</button>
-          <button class="tab" data-tab="completed">Completed</button>
+          <button class="tab active" data-tab="all" onclick="setTab('all', this)">All</button>
+          <button class="tab" data-tab="pending" onclick="setTab('pending', this)">Unfulfilled</button>
+          <button class="tab" data-tab="payment_pending" onclick="setTab('payment_pending', this)">Unpaid</button>
+          <button class="tab" data-tab="open" onclick="setTab('open', this)">Open</button>
+          <button class="tab" data-tab="processing" onclick="setTab('processing', this)">Processing</button>
+          <button class="tab" data-tab="completed" onclick="setTab('completed', this)">Completed</button>
+          <button class="tab" data-tab="cancelled" onclick="setTab('cancelled', this)">Cancelled</button>
+          <button class="tab" data-tab="today" onclick="setTab('today', this)">Today</button>
         </div>
       </div>
 
-      <div class="day-label" id="dayLabel">Orders</div>
+      <div class="list-day" id="dayLabel">Orders</div>
 
       <div id="loading" class="loading active">Loading orders...</div>
 
@@ -816,7 +1007,7 @@
         <div class="form-group">
           <label>Items *</label>
           <div id="itemsList" class="items-list-box"></div>
-          <button type="button" class="pill-btn" style="margin-top:10px;" onclick="addOrderItem()">Add item</button>
+          <button type="button" class="tool-pill" style="margin-top:10px;" onclick="addOrderItem()">Add item</button>
         </div>
 
         <div class="form-group">
@@ -874,26 +1065,189 @@
 
     let allOrders = [];
     let filteredOrders = [];
-    let itemCount = 0;
     let currentTab = 'all';
     let currentSortDirection = 'DESC';
+    let itemCount = 0;
+    let currentRangeDays = 90;
 
     document.addEventListener('DOMContentLoaded', () => {
-      setupTabs();
-      document.getElementById('searchInput').addEventListener('input', applyFilters);
       loadAllData();
       setInterval(loadAllData, 30000);
     });
 
-    function setupTabs() {
-      document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          currentTab = tab.dataset.tab;
-          applyFilters();
-        });
+    async function loadAllData() {
+      showLoading(true);
+      try {
+        const response = await fetch(`${API_BASE}?limit=200&offset=0&sort=created_at&order=DESC`);
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Failed to load orders');
+        }
+
+        allOrders = (data.data || []).map(normalizeOrder);
+        updateDashboard();
+        applyFilters();
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to load orders', 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function normalizeOrder(order) {
+      const total = Number(order.total || 0);
+      const shipping = Number(order.shipping_cost || 0);
+      const subtotal = Number(order.subtotal || Math.max(total - shipping, 0));
+      const paid = order.status === 'completed' ? total : 0;
+      const balance = Math.max(total - paid, 0);
+      return {
+        ...order,
+        total,
+        shipping_cost: shipping,
+        subtotal,
+        paid,
+        balance
+      };
+    }
+
+    function getRangeOrders(days) {
+      const now = new Date();
+      const start = new Date();
+      start.setHours(0,0,0,0);
+      start.setDate(now.getDate() - (days - 1));
+
+      return allOrders.filter(order => {
+        const d = new Date(order.created_at || 0);
+        return !isNaN(d) && d >= start && d <= now;
       });
+    }
+
+    function isToday(order) {
+      const d = new Date(order.created_at || 0);
+      if (isNaN(d)) return false;
+      const now = new Date();
+      return d.getFullYear() === now.getFullYear() &&
+        d.getMonth() === now.getMonth() &&
+        d.getDate() === now.getDate();
+    }
+
+    function updateDashboard() {
+      const rangeOrders = getRangeOrders(currentRangeDays);
+
+      const totalSales = rangeOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
+      const ordersCount = rangeOrders.length;
+      const pendingCount = rangeOrders.filter(o => o.status === 'pending').length;
+      const unpaidCount = rangeOrders.filter(o => Number(o.balance || 0) > 0).length;
+      const todayCount = allOrders.filter(isToday).length;
+
+      document.getElementById('totalSalesValue').textContent = H.formatCurrency(totalSales);
+      document.getElementById('ordersCountValue').textContent = String(ordersCount);
+      document.getElementById('pendingQuickValue').textContent = pendingCount > 50 ? '50+' : String(pendingCount);
+      document.getElementById('paymentQuickValue').textContent = unpaidCount > 50 ? '50+' : String(unpaidCount);
+      document.getElementById('allQuickValue').textContent = String(allOrders.length);
+      document.getElementById('todayQuickValue').textContent = String(todayCount);
+      document.getElementById('visitorsLabel').textContent = `${ordersCount} orders`;
+      document.getElementById('salesChangeValue').textContent = `Based on last ${currentRangeDays} days`;
+      document.getElementById('ordersChangeValue').textContent = `In selected range`;
+
+      renderChart(rangeOrders);
+    }
+
+    function renderChart(orders) {
+      const container = document.getElementById('chartContainer');
+
+      if (!orders.length) {
+        container.innerHTML = `<div class="chart-empty">No chart data</div>`;
+        return;
+      }
+
+      const byDay = new Map();
+      orders.forEach(order => {
+        const d = new Date(order.created_at || 0);
+        if (isNaN(d)) return;
+        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        byDay.set(key, (byDay.get(key) || 0) + Number(order.total || 0));
+      });
+
+      const keys = Array.from(byDay.keys()).sort();
+      const values = keys.map(k => byDay.get(k));
+      const max = Math.max(...values, 1);
+      const min = 0;
+
+      const width = 900;
+      const height = 320;
+      const padX = 40;
+      const padY = 24;
+      const innerW = width - (padX * 2);
+      const innerH = height - (padY * 2);
+
+      const points = values.map((v, i) => {
+        const x = padX + (values.length === 1 ? innerW / 2 : (i * (innerW / (values.length - 1))));
+        const y = padY + innerH - (((v - min) / (max - min || 1)) * innerH);
+        return [x, y];
+      });
+
+      const path = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
+      const areaPath = `${path} L ${points[points.length - 1][0]} ${height - padY} L ${points[0][0]} ${height - padY} Z`;
+
+      const labels = [];
+      const desired = Math.min(4, keys.length);
+      for (let i = 0; i < desired; i++) {
+        const idx = Math.round((i * (keys.length - 1)) / Math.max(desired - 1, 1));
+        const key = keys[idx];
+        const dt = new Date(key);
+        labels.push({
+          x: points[idx][0],
+          text: dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        });
+      }
+
+      container.innerHTML = `
+        <div class="chart-card">
+          <svg class="chart-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="fillBlue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#4aa3ff" stop-opacity="0.22"/>
+                <stop offset="100%" stop-color="#4aa3ff" stop-opacity="0.02"/>
+              </linearGradient>
+            </defs>
+
+            <line x1="${padX}" y1="${padY + innerH}" x2="${width - padX}" y2="${padY + innerH}" stroke="#d7d7d7" stroke-width="2"/>
+            <line x1="${padX}" y1="${padY + (innerH/2)}" x2="${width - padX}" y2="${padY + (innerH/2)}" stroke="#e7e7e7" stroke-width="2"/>
+
+            <path d="${areaPath}" fill="url(#fillBlue)"></path>
+            <path d="${path}" fill="none" stroke="#4aa3ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+
+            ${labels.map(l => `
+              <text x="${l.x}" y="${height - 6}" text-anchor="middle" font-size="22" fill="#7d7d83">${l.text}</text>
+            `).join('')}
+          </svg>
+        </div>
+      `;
+    }
+
+    function changeRange() {
+      currentRangeDays = Number(document.getElementById('rangeSelect').value || 90);
+      updateDashboard();
+      applyFilters();
+    }
+
+    function setDashboardFilter(type) {
+      currentTab = type;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      const target = document.querySelector(`.tab[data-tab="${type}"]`);
+      if (target) target.classList.add('active');
+      applyFilters();
+      document.querySelector('.orders-shell').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function setTab(tab, element) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      if (element) element.classList.add('active');
+      applyFilters();
     }
 
     function focusSearch() {
@@ -908,59 +1262,70 @@
     function clearFilters() {
       document.getElementById('searchInput').value = '';
       currentTab = 'all';
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      const firstTab = document.querySelector('.tab[data-tab="all"]');
-      if (firstTab) firstTab.classList.add('active');
       currentSortDirection = 'DESC';
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      const first = document.querySelector('.tab[data-tab="all"]');
+      if (first) first.classList.add('active');
       applyFilters();
     }
 
-    async function loadAllData() {
-      showLoading(true);
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      let result = [...allOrders];
 
-      try {
-        const response = await fetch(`${API_BASE}?limit=100&offset=0&sort=created_at&order=DESC`);
-        const data = await response.json();
+      result = result.filter(order => {
+        const d = new Date(order.created_at || 0);
+        if (isNaN(d)) return false;
+        return true;
+      });
 
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || 'Failed to load orders');
-        }
-
-        allOrders = data.data || [];
-        filteredOrders = [...allOrders];
-        applyFilters();
-
-        try {
-          const statsResponse = await fetch(`${API_BASE}/stats/summary`);
-          const statsData = await statsResponse.json();
-
-          if (statsResponse.ok && statsData.success) {
-            document.getElementById('totalOrders').textContent = Number(statsData.data.totalOrders || 0);
-            document.getElementById('pendingOrders').textContent = Number(statsData.data.ordersByStatus?.pending || 0);
-            document.getElementById('processingOrders').textContent = Number(statsData.data.ordersByStatus?.processing || 0);
-            document.getElementById('totalRevenue').textContent = H.formatCurrency(statsData.data.totalRevenue || 0);
-          } else {
-            fillStatsFromOrders();
-          }
-        } catch {
-          fillStatsFromOrders();
-        }
-
-      } catch (error) {
-        console.error(error);
-        showAlert(error.message || 'Failed to load orders', 'error');
-      } finally {
-        showLoading(false);
+      if (search) {
+        result = result.filter(order =>
+          String(order.order_number || '').toLowerCase().includes(search) ||
+          String(order.customer_name || '').toLowerCase().includes(search) ||
+          String(order.customer_email || '').toLowerCase().includes(search) ||
+          String(order.customer_phone || '').toLowerCase().includes(search)
+        );
       }
+
+      if (currentTab === 'pending') {
+        result = result.filter(o => o.status === 'pending');
+      } else if (currentTab === 'processing') {
+        result = result.filter(o => o.status === 'processing');
+      } else if (currentTab === 'completed') {
+        result = result.filter(o => o.status === 'completed');
+      } else if (currentTab === 'cancelled') {
+        result = result.filter(o => o.status === 'cancelled');
+      } else if (currentTab === 'payment_pending') {
+        result = result.filter(o => Number(o.balance || 0) > 0);
+      } else if (currentTab === 'open') {
+        result = result.filter(o => ['pending','processing','shipped'].includes(o.status));
+      } else if (currentTab === 'today') {
+        result = result.filter(isToday);
+      }
+
+      result.sort((a, b) => {
+        const aTime = new Date(a.created_at || 0).getTime();
+        const bTime = new Date(b.created_at || 0).getTime();
+        return currentSortDirection === 'DESC' ? bTime - aTime : aTime - bTime;
+      });
+
+      filteredOrders = result;
+      renderOrders(result);
+      renderDayLabel(result);
     }
 
-    function fillStatsFromOrders() {
-      document.getElementById('totalOrders').textContent = allOrders.length;
-      document.getElementById('pendingOrders').textContent = allOrders.filter(o => o.status === 'pending').length;
-      document.getElementById('processingOrders').textContent = allOrders.filter(o => o.status === 'processing').length;
-      document.getElementById('totalRevenue').textContent = H.formatCurrency(
-        allOrders.reduce((sum, o) => sum + Number(o.total || 0), 0)
-      );
+    function renderDayLabel(orders) {
+      const label = document.getElementById('dayLabel');
+      if (!orders.length) {
+        label.textContent = 'No orders';
+        return;
+      }
+      if (currentTab === 'today') {
+        label.textContent = 'Today';
+        return;
+      }
+      label.textContent = 'Orders';
     }
 
     function getItemsCount(order) {
@@ -972,8 +1337,7 @@
     }
 
     function getPaymentLabel(order) {
-      if (Number(order.total || 0) > 0 && order.status !== 'completed') return 'Payment pending';
-      return 'Paid';
+      return Number(order.balance || 0) > 0 ? 'Payment pending' : 'Paid';
     }
 
     function getOrderNote(order) {
@@ -998,51 +1362,25 @@
       return '#';
     }
 
-    function applyFilters() {
-      const search = document.getElementById('searchInput').value.toLowerCase().trim();
-      let result = [...allOrders];
-
-      if (search) {
-        result = result.filter(order =>
-          String(order.order_number || '').toLowerCase().includes(search) ||
-          String(order.customer_name || '').toLowerCase().includes(search) ||
-          String(order.customer_email || '').toLowerCase().includes(search) ||
-          String(order.customer_phone || '').toLowerCase().includes(search)
-        );
-      }
-
-      if (currentTab === 'pending') {
-        result = result.filter(order => order.status === 'pending');
-      } else if (currentTab === 'processing') {
-        result = result.filter(order => order.status === 'processing');
-      } else if (currentTab === 'completed') {
-        result = result.filter(order => order.status === 'completed');
-      } else if (currentTab === 'payment_pending') {
-        result = result.filter(order => Number(order.total || 0) > 0 && order.status !== 'completed');
-      } else if (currentTab === 'open') {
-        result = result.filter(order => ['pending','processing','shipped'].includes(order.status));
-      } else if (currentTab === 'archived') {
-        result = result.filter(order => order.status === 'cancelled');
-      }
-
-      result.sort((a, b) => {
-        const aTime = new Date(a.created_at || 0).getTime();
-        const bTime = new Date(b.created_at || 0).getTime();
-        return currentSortDirection === 'DESC' ? bTime - aTime : aTime - bTime;
-      });
-
-      filteredOrders = result;
-      renderOrders(result);
-      renderDayLabel(result);
+    function openOrderDetails(url) {
+      if (!url || url === '#') return;
+      window.location.href = url;
     }
 
-    function renderDayLabel(orders) {
-      const label = document.getElementById('dayLabel');
-      if (!orders.length) {
-        label.textContent = 'No orders';
-        return;
-      }
-      label.textContent = 'Orders';
+    function quickFilterStatus(status) {
+      currentTab = status;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      const target = document.querySelector(`.tab[data-tab="${status}"]`);
+      if (target) target.classList.add('active');
+      applyFilters();
+    }
+
+    function quickFilterPayment() {
+      currentTab = 'payment_pending';
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      const target = document.querySelector('.tab[data-tab="payment_pending"]');
+      if (target) target.classList.add('active');
+      applyFilters();
     }
 
     function renderOrders(orders) {
@@ -1057,7 +1395,7 @@
 
       mobileList.innerHTML = orders.map(order => `
         <div class="order-row" onclick="openOrderDetails('${escapeJs(orderDetailsUrl(order))}')">
-          <div class="order-main">
+          <div>
             <div class="order-number">${escapeHtml(order.order_number || '-')}</div>
             <div class="order-meta">${escapeHtml(formatShortMeta(order))}</div>
 
@@ -1080,12 +1418,12 @@
       tbody.innerHTML = orders.map(order => `
         <tr onclick="openOrderDetails('${escapeJs(orderDetailsUrl(order))}')">
           <td>
-            <div style="font-weight:800; font-size:1.1rem;">${escapeHtml(order.order_number || '-')}</div>
-            <div style="color:#666; font-size:.92rem; margin-top:6px;">${escapeHtml(H.formatDate(order.created_at))}</div>
+            <div style="font-weight:800;font-size:1.1rem;">${escapeHtml(order.order_number || '-')}</div>
+            <div style="color:#666;font-size:.92rem;margin-top:6px;">${escapeHtml(H.formatDate(order.created_at))}</div>
           </td>
           <td>
             <div style="font-weight:700;">${escapeHtml(order.customer_name || '-')}</div>
-            <div style="color:#666; margin-top:6px;">${escapeHtml(order.customer_email || '')}</div>
+            <div style="color:#666;margin-top:6px;">${escapeHtml(order.customer_email || '')}</div>
             <div style="color:#666;">${escapeHtml(order.customer_phone || '')}</div>
           </td>
           <td>
@@ -1109,27 +1447,6 @@
           </td>
         </tr>
       `).join('');
-    }
-
-    function quickFilterStatus(status) {
-      currentTab = status;
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      const target = document.querySelector(`.tab[data-tab="${status}"]`);
-      if (target) target.classList.add('active');
-      applyFilters();
-    }
-
-    function quickFilterPayment() {
-      currentTab = 'payment_pending';
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      const target = document.querySelector(`.tab[data-tab="payment_pending"]`);
-      if (target) target.classList.add('active');
-      applyFilters();
-    }
-
-    function openOrderDetails(url) {
-      if (!url || url === '#') return;
-      window.location.href = url;
     }
 
     async function editOrder(orderId) {
@@ -1157,7 +1474,6 @@
 
     async function saveOrderChanges(event) {
       event.preventDefault();
-
       try {
         const orderId = document.getElementById('editOrderId').value;
         const updateData = {
@@ -1183,14 +1499,13 @@
         } else {
           showAlert(data.error || 'Failed to update order', 'error');
         }
-      } catch (error) {
+      } catch {
         showAlert('Failed to update order', 'error');
       }
     }
 
     async function deleteOrder(orderId) {
       if (!confirm('Delete this order?')) return;
-
       try {
         const response = await fetch(`${API_BASE}/${orderId}`, { method: 'DELETE' });
         const data = await response.json();
@@ -1324,7 +1639,6 @@
       const alert = document.getElementById('alert');
       alert.textContent = message;
       alert.className = `alert active ${type}`;
-
       if (duration) {
         setTimeout(() => alert.classList.remove('active'), duration);
       }
