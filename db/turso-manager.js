@@ -164,7 +164,6 @@ class DatabaseManager {
    */
   async transaction(callback) {
     if (this.useTurso) {
-      // Turso transactions
       try {
         await client.execute('BEGIN TRANSACTION');
         try {
@@ -187,7 +186,7 @@ class DatabaseManager {
               reject(err);
               return;
             }
-            
+
             callback().then(result => {
               this.db.run('COMMIT', (err) => {
                 if (err) {
@@ -244,24 +243,42 @@ class DatabaseManager {
         FOREIGN KEY (order_id) REFERENCES ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}(id) ON DELETE CASCADE
       )`,
 
+      `CREATE TABLE IF NOT EXISTS products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_name TEXT NOT NULL,
+        slug TEXT UNIQUE,
+        sku TEXT UNIQUE,
+        description TEXT DEFAULT '',
+        price REAL NOT NULL DEFAULT 0,
+        sale_price REAL DEFAULT 0,
+        image_url TEXT DEFAULT '',
+        stock INTEGER NOT NULL DEFAULT 0,
+        status TEXT NOT NULL DEFAULT 'active',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )`,
+
       `CREATE INDEX IF NOT EXISTS idx_order_number ON ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}(order_number)`,
       `CREATE INDEX IF NOT EXISTS idx_order_status ON ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}(status)`,
       `CREATE INDEX IF NOT EXISTS idx_order_created_at ON ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}(created_at)`,
-      `CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS}(order_id)`
+      `CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS}(order_id)`,
+
+      `CREATE INDEX IF NOT EXISTS idx_products_status ON products(status)`,
+      `CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug)`,
+      `CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku)`
     ];
 
     for (const sql of sqlCommands) {
       try {
         await this.run(sql);
-        console.log('✅ تم تنفيذ أمر إنشاء جدول');
+        console.log('✅ تم تنفيذ أمر إنشاء جدول/فهرس');
       } catch (err) {
-        // Ignore "already exists" errors
-        if (!err.message.includes('already')) {
+        if (!String(err.message || '').includes('already')) {
           console.warn('⚠️ تحذير:', err.message);
         }
       }
     }
-    
+
     console.log('✅ تم تهيئة الجداول بنجاح');
   }
 }
