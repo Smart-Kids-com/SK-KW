@@ -7,6 +7,7 @@
   <script src="/config/system.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
+
     :root{
       --bg:#f3f3f3;
       --card:#ffffff;
@@ -20,8 +21,8 @@
       --chip-beige:#eacb98;
       --chip-beige-text:#5c4520;
       --danger:#db5b5b;
-      --blue:#2f80ed;
-      --radius-xl:34px;
+      --blue:#5aa0ef;
+      --radius-xl:38px;
       --radius-lg:24px;
       --radius-md:18px;
       --radius-sm:14px;
@@ -43,7 +44,7 @@
     .app-header{
       background:#000;
       color:#fff;
-      padding:16px 16px 22px;
+      padding:20px 18px 26px;
     }
 
     .app-header-inner{
@@ -52,33 +53,33 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:14px;
+      gap:16px;
     }
 
     .brand{
       display:flex;
       align-items:center;
-      gap:14px;
+      gap:16px;
       min-width:0;
     }
 
     .brand-icon{
-      width:58px;
-      height:58px;
+      width:62px;
+      height:62px;
       border-radius:18px;
       background:var(--green);
       display:flex;
       align-items:center;
       justify-content:center;
       color:#173c12;
-      font-size:1.65rem;
+      font-size:1.7rem;
       flex:0 0 auto;
     }
 
     .brand-title{
-      font-size:1.7rem;
-      font-weight:800;
-      line-height:1.15;
+      font-size:1.95rem;
+      font-weight:900;
+      line-height:1.08;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -98,8 +99,8 @@
     }
 
     .circle-icon{
-      width:58px;
-      height:58px;
+      width:60px;
+      height:60px;
       border-radius:50%;
       border:none;
       background:transparent;
@@ -112,8 +113,8 @@
     }
 
     .logo-avatar{
-      width:58px;
-      height:58px;
+      width:60px;
+      height:60px;
       border-radius:50%;
       overflow:hidden;
       background:#fff;
@@ -133,39 +134,40 @@
     .page{
       max-width:1280px;
       margin:-8px auto 0;
-      padding:0 16px 22px;
+      padding:0 16px 24px;
     }
 
     .dashboard-shell{
       background:#fff;
-      border-radius:38px;
+      border-radius:42px;
       box-shadow:var(--shadow);
       overflow:hidden;
       border:1px solid #ededed;
     }
 
     .dashboard-top{
-      padding:18px 16px 8px;
+      padding:24px 20px 12px;
     }
 
     .dashboard-controls{
       display:grid;
-      grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-      gap:12px;
-      margin-bottom:18px;
+      grid-template-columns:340px 260px 1fr;
+      gap:14px;
+      margin-bottom:22px;
+      align-items:center;
     }
 
     .pill{
-      min-height:64px;
+      min-height:66px;
       border:none;
       border-radius:20px;
       background:#f1f1f1;
       color:#2d2d2f;
-      padding:0 18px;
+      padding:0 22px;
       display:flex;
       align-items:center;
       gap:12px;
-      font-size:1rem;
+      font-size:1.05rem;
       font-weight:700;
     }
 
@@ -173,7 +175,7 @@
       width:100%;
       border:none;
       background:transparent;
-      font-size:1rem;
+      font-size:1.05rem;
       color:#2d2d2f;
       outline:none;
       appearance:none;
@@ -189,46 +191,63 @@
       flex:0 0 auto;
     }
 
+    .report-btn{
+      justify-self:end;
+      min-height:66px;
+      padding:0 24px;
+      border-radius:20px;
+      border:1px solid #dcdcdc;
+      background:#fff;
+      font-size:1rem;
+      font-weight:700;
+      color:#2d2d2f;
+      cursor:pointer;
+    }
+
     .stats-grid{
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:16px;
-      margin-bottom:16px;
+      gap:32px;
+      margin-bottom:18px;
+      align-items:start;
     }
 
     .stat{
       min-width:0;
+      text-align:left;
+      direction:ltr;
     }
 
     .stat-label{
       color:#8a8a8e;
       font-size:1rem;
-      margin-bottom:6px;
+      margin-bottom:8px;
       font-weight:600;
     }
 
     .stat-value{
-      font-size:2.2rem;
-      line-height:1.05;
+      font-size:2.15rem;
+      line-height:1.02;
       font-weight:800;
       color:#252525;
-      letter-spacing:-.5px;
+      letter-spacing:-.4px;
       word-break:break-word;
     }
 
     .stat-change{
       margin-top:6px;
-      color:#6fa67a;
+      color:#7cab87;
       font-size:1rem;
       font-weight:700;
+      line-height:1.15;
     }
 
     .chart-wrap{
-      padding:8px 6px 0;
+      padding:4px 0 0;
     }
 
     .chart-card{
-      height:320px;
+      height:355px;
       position:relative;
       border-radius:24px;
       overflow:hidden;
@@ -241,7 +260,7 @@
     }
 
     .chart-empty{
-      height:320px;
+      height:355px;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -253,20 +272,21 @@
 
     .quick-links{
       display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:14px;
-      padding:18px 16px 24px;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+      padding:18px 20px 26px;
     }
 
     .quick-card{
       background:#f7f7f7;
       border:1px solid #ececec;
       border-radius:22px;
-      padding:18px 18px 16px;
-      min-height:132px;
+      padding:20px 20px 18px;
+      min-height:152px;
       cursor:pointer;
       transition:.15s ease;
-      text-align:right;
+      text-align:left;
+      direction:ltr;
     }
 
     .quick-card:hover{
@@ -278,33 +298,33 @@
       align-items:flex-start;
       justify-content:space-between;
       gap:10px;
-      margin-bottom:12px;
+      margin-bottom:14px;
     }
 
     .quick-icon{
       font-size:1.8rem;
-      color:#4c4c4c;
+      color:#555;
     }
 
     .quick-value{
-      font-size:2rem;
+      font-size:2.05rem;
       font-weight:900;
       line-height:1;
-      color:#262626;
+      color:#222;
     }
 
     .quick-title{
       font-size:1rem;
-      font-weight:800;
+      font-weight:500;
       color:#2f2f2f;
-      line-height:1.4;
+      line-height:1.35;
     }
 
     .quick-sub{
-      font-size:.95rem;
+      font-size:.9rem;
       color:#6d6d72;
       margin-top:4px;
-      line-height:1.45;
+      line-height:1.35;
     }
 
     .alert{
@@ -345,6 +365,8 @@
       font-size:2rem;
       font-weight:900;
       line-height:1.1;
+      direction:ltr;
+      text-align:left;
     }
 
     .orders-head-tools{
@@ -352,6 +374,7 @@
       gap:10px;
       align-items:center;
       flex-wrap:wrap;
+      direction:ltr;
     }
 
     .tool-circle{
@@ -385,6 +408,7 @@
       grid-template-columns:minmax(0,1fr) 76px 76px;
       gap:12px;
       margin-bottom:12px;
+      direction:ltr;
     }
 
     .search-box{
@@ -404,6 +428,7 @@
     }
 
     .search-box input::placeholder{color:#a5a5a8}
+
     .search-icon{
       position:absolute;
       left:18px;
@@ -420,7 +445,10 @@
       overflow:auto;
       padding-bottom:4px;
       scrollbar-width:none;
+      direction:ltr;
+      justify-content:flex-start;
     }
+
     .tabs-row::-webkit-scrollbar{display:none}
 
     .tab{
@@ -434,6 +462,7 @@
       cursor:pointer;
       white-space:nowrap;
     }
+
     .tab.active{background:#efefef}
 
     .list-day{
@@ -444,6 +473,8 @@
       font-weight:700;
       border-top:1px solid #efefef;
       border-bottom:1px solid #efefef;
+      direction:ltr;
+      text-align:left;
     }
 
     .loading{
@@ -454,6 +485,7 @@
       font-size:1rem;
       background:#fff;
     }
+
     .loading.active{display:block}
 
     .orders-list{
@@ -469,6 +501,7 @@
       cursor:pointer;
       transition:.15s ease;
       background:#fff;
+      direction:ltr;
     }
 
     .order-row:hover{background:#fafafa}
@@ -478,6 +511,7 @@
       font-weight:900;
       margin-bottom:8px;
       line-height:1.2;
+      text-align:left;
     }
 
     .order-meta{
@@ -485,6 +519,7 @@
       font-size:.98rem;
       line-height:1.6;
       margin-bottom:8px;
+      text-align:left;
     }
 
     .order-badges{
@@ -492,6 +527,7 @@
       flex-wrap:wrap;
       gap:8px;
       margin-bottom:8px;
+      justify-content:flex-start;
     }
 
     .chip{
@@ -522,6 +558,7 @@
       color:#313131;
       font-size:.96rem;
       line-height:1.55;
+      text-align:left;
     }
 
     .order-amount{
@@ -530,6 +567,7 @@
       white-space:nowrap;
       align-self:start;
       padding-top:4px;
+      text-align:right;
     }
 
     .desktop-table-wrap{
@@ -547,8 +585,9 @@
     .desktop-table td{
       padding:16px;
       border-bottom:1px solid #ececec;
-      text-align:right;
+      text-align:left;
       vertical-align:top;
+      direction:ltr;
     }
 
     .desktop-table th{
@@ -558,12 +597,8 @@
       font-weight:800;
     }
 
-    .desktop-table tbody tr{
-      cursor:pointer;
-    }
-    .desktop-table tbody tr:hover{
-      background:#fafafa;
-    }
+    .desktop-table tbody tr{cursor:pointer}
+    .desktop-table tbody tr:hover{background:#fafafa}
 
     .row-actions{
       display:flex;
@@ -603,6 +638,7 @@
       justify-content:center;
       padding:16px;
     }
+
     .modal.active{display:flex}
 
     .modal-content{
@@ -621,6 +657,7 @@
       align-items:center;
       gap:12px;
       margin-bottom:14px;
+      direction:ltr;
     }
 
     .modal-header h2{
@@ -643,6 +680,8 @@
       display:block;
       margin-bottom:7px;
       font-weight:700;
+      direction:ltr;
+      text-align:left;
     }
 
     .form-group input,
@@ -655,6 +694,8 @@
       padding:12px 14px;
       font-size:1rem;
       background:#fff;
+      direction:ltr;
+      text-align:left;
     }
 
     .form-group textarea{
@@ -668,6 +709,7 @@
       flex-wrap:wrap;
       justify-content:flex-end;
       margin-top:18px;
+      direction:ltr;
     }
 
     .modal-footer button{
@@ -694,65 +736,158 @@
       display:grid;
       grid-template-columns:1fr 1fr 1fr auto;
       gap:8px;
+      direction:ltr;
     }
 
     @media (min-width: 1024px){
-      .dashboard-controls{
-        grid-template-columns:340px 250px;
-      }
-
-      .quick-links{
-        grid-template-columns:repeat(4,minmax(0,1fr));
-      }
-
       .orders-list{display:none}
       .desktop-table-wrap{display:block}
     }
 
     @media (max-width: 1023px){
+      .dashboard-controls{
+        grid-template-columns:1fr 1fr;
+        gap:12px;
+      }
+
+      .report-btn{
+        display:none;
+      }
+    }
+
+    @media (max-width: 560px){
+      .app-header{
+        padding:18px 14px 22px;
+      }
+
+      .brand-title{
+        font-size:1.55rem;
+      }
+
+      .brand-icon,
+      .logo-avatar,
+      .circle-icon{
+        width:56px;
+        height:56px;
+      }
+
+      .page{
+        padding:0 10px 18px;
+      }
+
+      .dashboard-shell{
+        border-radius:34px;
+      }
+
+      .dashboard-top{
+        padding:16px 14px 8px;
+      }
+
+      .dashboard-controls{
+        grid-template-columns:1fr 1fr;
+        gap:12px;
+        margin-bottom:18px;
+      }
+
+      .pill{
+        min-height:62px;
+        font-size:.98rem;
+        padding:0 18px;
+      }
+
+      .pill select{
+        font-size:.98rem;
+      }
+
       .stats-grid{
-        grid-template-columns:1fr 1fr 1fr;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        gap:18px;
+        margin-bottom:12px;
+      }
+
+      .stat-label{
+        font-size:.92rem;
+        margin-bottom:6px;
+      }
+
+      .stat-value{
+        font-size:1.45rem;
+      }
+
+      .stat-change{
+        font-size:.82rem;
+        line-height:1.2;
+      }
+
+      .chart-card,
+      .chart-empty{
+        height:280px;
+      }
+
+      .quick-links{
+        grid-template-columns:1fr 1fr;
+        gap:14px;
+        padding:14px 14px 20px;
+      }
+
+      .quick-card{
+        min-height:138px;
+        padding:16px 16px 14px;
+        border-radius:20px;
+      }
+
+      .quick-value{
+        font-size:1.75rem;
+      }
+
+      .quick-title{
+        font-size:.96rem;
+      }
+
+      .quick-sub{
+        font-size:.82rem;
+      }
+
+      .orders-title{
+        font-size:1.7rem;
+      }
+
+      .orders-title-row{
+        flex-wrap:wrap;
+      }
+
+      .orders-head-tools{
+        width:100%;
+        justify-content:space-between;
+      }
+
+      .search-row{
+        grid-template-columns:minmax(0,1fr) 66px 66px;
+      }
+
+      .tool-circle{
+        width:52px;
+        height:52px;
+      }
+
+      .tool-pill{
+        min-height:52px;
+        padding:0 18px;
+      }
+
+      .inline-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 420px){
+      .stats-grid{
+        grid-template-columns:1fr;
       }
 
       .quick-links{
         grid-template-columns:1fr 1fr;
       }
-    }
-
-    @media (max-width: 768px){
-      .brand-title{font-size:1.35rem}
-      .page{padding:0 12px 18px}
-      .dashboard-shell,
-      .orders-shell{border-radius:30px}
-      .stats-grid{grid-template-columns:1fr 1fr}
-      .quick-links{grid-template-columns:1fr 1fr}
-      .chart-card,.chart-empty{height:260px}
-    }
-
-    @media (max-width: 560px){
-      .app-header-inner{align-items:center}
-      .brand-sub{display:none}
-      .header-actions{gap:8px}
-      .circle-icon,.logo-avatar{width:52px;height:52px}
-      .brand-icon{width:52px;height:52px;border-radius:16px}
-      .dashboard-controls{grid-template-columns:1fr 1fr}
-      .stats-grid{grid-template-columns:1fr 1fr 1fr}
-      .stat-value{font-size:1.55rem}
-      .quick-links{grid-template-columns:1fr 1fr}
-      .quick-card{min-height:120px;padding:16px 14px}
-      .orders-title{font-size:1.7rem}
-      .orders-title-row{flex-wrap:wrap}
-      .orders-head-tools{width:100%;justify-content:space-between}
-      .search-row{grid-template-columns:minmax(0,1fr) 66px 66px}
-      .tool-circle{width:52px;height:52px}
-      .tool-pill{min-height:52px;padding:0 18px}
-      .inline-grid{grid-template-columns:1fr}
-    }
-
-    @media (max-width: 420px){
-      .stats-grid{grid-template-columns:1fr}
-      .quick-links{grid-template-columns:1fr 1fr}
-      .quick-value{font-size:1.7rem}
     }
   </style>
 </head>
@@ -768,7 +903,7 @@
       </div>
 
       <div class="header-actions">
-        <button class="circle-icon" type="button">🔔</button>
+        <button class="circle-icon" type="button" onclick="showAlert('Notifications view not connected yet','success')">🔔</button>
         <div class="logo-avatar">
           <img src="https://smartkidskw.com/logo-sk-smart-kids.png" alt="Smart Kids Kuwait">
         </div>
@@ -781,7 +916,7 @@
 
     <section class="dashboard-shell">
       <div class="dashboard-top">
-        <div class="dashboard-controls">
+        <div class="dashboard-controls" dir="ltr">
           <div class="pill">
             <select id="rangeSelect" onchange="changeRange()">
               <option value="7">Last 7 days</option>
@@ -793,8 +928,10 @@
 
           <div class="pill">
             <span class="dot"></span>
-            <span id="visitorsLabel">Orders dashboard</span>
+            <span id="visitorsLabel">Live View</span>
           </div>
+
+          <button class="report-btn" type="button" onclick="showAlert('Report is not connected yet','success')">Report</button>
         </div>
 
         <div class="stats-grid">
@@ -807,7 +944,7 @@
           <div class="stat">
             <div class="stat-label">Total sales</div>
             <div class="stat-value" id="totalSalesValue">KWD 0.000</div>
-            <div class="stat-change" id="salesChangeValue">Based on real orders</div>
+            <div class="stat-change" id="salesChangeValue">Based on last 90 days</div>
           </div>
 
           <div class="stat">
@@ -841,15 +978,6 @@
           <div class="quick-sub">طلبات غير مدفوعة</div>
         </button>
 
-        <button class="quick-card" type="button" onclick="setDashboardFilter('all')">
-          <div class="quick-top">
-            <div class="quick-value" id="allQuickValue">0</div>
-            <div class="quick-icon">🧾</div>
-          </div>
-          <div class="quick-title">All orders</div>
-          <div class="quick-sub">كل الطلبات</div>
-        </button>
-
         <button class="quick-card" type="button" onclick="setDashboardFilter('today')">
           <div class="quick-top">
             <div class="quick-value" id="todayQuickValue">0</div>
@@ -857,6 +985,15 @@
           </div>
           <div class="quick-title">Today orders</div>
           <div class="quick-sub">طلبات اليوم</div>
+        </button>
+
+        <button class="quick-card" type="button" onclick="setDashboardFilter('all')">
+          <div class="quick-top">
+            <div class="quick-value" id="allQuickValue">0</div>
+            <div class="quick-icon">🧾</div>
+          </div>
+          <div class="quick-title">All orders</div>
+          <div class="quick-sub">كل الطلبات</div>
         </button>
       </div>
     </section>
@@ -1174,18 +1311,17 @@
       const keys = Array.from(byDay.keys()).sort();
       const values = keys.map(k => byDay.get(k));
       const max = Math.max(...values, 1);
-      const min = 0;
 
       const width = 900;
-      const height = 320;
+      const height = 355;
       const padX = 40;
       const padY = 24;
       const innerW = width - (padX * 2);
       const innerH = height - (padY * 2);
 
       const points = values.map((v, i) => {
-        const x = padX + (values.length === 1 ? innerW / 2 : (i * (innerW / (values.length - 1))));
-        const y = padY + innerH - (((v - min) / (max - min || 1)) * innerH);
+        const x = padX + (values.length === 1 ? innerW / 2 : (i * (innerW / Math.max(values.length - 1, 1))));
+        const y = padY + innerH - ((v / max) * innerH);
         return [x, y];
       });
 
@@ -1218,7 +1354,7 @@
             <line x1="${padX}" y1="${padY + (innerH/2)}" x2="${width - padX}" y2="${padY + (innerH/2)}" stroke="#e7e7e7" stroke-width="2"/>
 
             <path d="${areaPath}" fill="url(#fillBlue)"></path>
-            <path d="${path}" fill="none" stroke="#4aa3ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="${path}" fill="none" stroke="#5aa0ef" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
 
             ${labels.map(l => `
               <text x="${l.x}" y="${height - 6}" text-anchor="middle" font-size="22" fill="#7d7d83">${l.text}</text>
@@ -1275,8 +1411,7 @@
 
       result = result.filter(order => {
         const d = new Date(order.created_at || 0);
-        if (isNaN(d)) return false;
-        return true;
+        return !isNaN(d);
       });
 
       if (search) {
@@ -1603,32 +1738,6 @@
       } catch {
         showAlert('Failed to create order', 'error');
       }
-    }
-
-    function exportToCSV() {
-      const headers = ['Order', 'Customer', 'Email', 'Phone', 'Amount', 'Status', 'Date'];
-      const rows = filteredOrders.map(order => [
-        order.order_number || '',
-        order.customer_name || '',
-        order.customer_email || '',
-        order.customer_phone || '',
-        order.total || 0,
-        H.getStatusLabel(order.status),
-        order.created_at ? H.formatDateTime(order.created_at) : ''
-      ]);
-
-      let csv = headers.join(',') + '\n';
-      rows.forEach(row => {
-        csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n';
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `orders_${new Date().toISOString().split('T')[0]}.csv`;
-      link.click();
-
-      showAlert('CSV exported', 'success');
     }
 
     function showLoading(show) {
