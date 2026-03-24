@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 
 const db = require('./db/turso-manager');
 const ordersRoutes = require('./routes/orders');
+const productsRoutes = require('./routes/products');
 const { SYSTEM_CONFIG } = require('./config/system');
 
 const PORT = process.env.PORT || 3000;
@@ -34,6 +35,7 @@ app.use((req, res, next) => {
 
 // Routes للـ API
 app.use('/api/orders', ordersRoutes);
+app.use('/api/products', productsRoutes);
 
 // Route للـ Health Check
 app.get('/api/health', (req, res) => {
@@ -55,6 +57,10 @@ app.get('/admin', (req, res) => {
 
 app.get('/admin-enhanced', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin-enhanced.html'));
+});
+
+app.get('/products-admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'products-admin.html'));
 });
 
 app.get('/track', (req, res) => {
@@ -112,6 +118,14 @@ async function startServer() {
       console.log(`║ POST   http://${HOST}:${PORT}/api/orders`);
       console.log(`║ PUT    http://${HOST}:${PORT}/api/orders/:id`);
       console.log(`║ DELETE http://${HOST}:${PORT}/api/orders/:id`);
+      console.log('║');
+      console.log(`║ GET    http://${HOST}:${PORT}/api/products`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/products/:id`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/products/slug/:slug`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/products/stats/summary`);
+      console.log(`║ POST   http://${HOST}:${PORT}/api/products`);
+      console.log(`║ PUT    http://${HOST}:${PORT}/api/products/:id`);
+      console.log(`║ DELETE http://${HOST}:${PORT}/api/products/:id`);
       console.log('╚════════════════════════════════════════════════════════╝\n');
     });
 
