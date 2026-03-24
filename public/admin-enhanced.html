@@ -33,7 +33,6 @@
       overflow-x: hidden;
     }
 
-    /* Header */
     .admin-header {
       background: rgba(255, 255, 255, 0.97);
       padding: 1.5rem;
@@ -69,6 +68,7 @@
       display: flex;
       gap: 1rem;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .logout-btn, .refresh-btn, .export-btn, .settings-btn {
@@ -113,14 +113,12 @@
       background: #059669;
     }
 
-    /* Main Container */
     .container {
       max-width: 1400px;
       margin: 0 auto;
       padding: 2rem 1rem;
     }
 
-    /* Stats Section */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -151,6 +149,7 @@
       font-weight: bold;
       color: var(--primary);
       margin-bottom: 0.25rem;
+      word-break: break-word;
     }
 
     .stat-label {
@@ -164,7 +163,6 @@
       color: var(--success);
     }
 
-    /* Controls Section */
     .controls-section {
       background: white;
       border-radius: 12px;
@@ -223,7 +221,6 @@
       background: var(--primary-light);
     }
 
-    /* Orders Table Section */
     .orders-section {
       background: white;
       border-radius: 12px;
@@ -239,6 +236,8 @@
       margin-bottom: 1.5rem;
       padding-bottom: 1rem;
       border-bottom: 2px solid var(--light);
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
     .section-header h2 {
@@ -265,18 +264,19 @@
       border-bottom: 2px solid var(--border);
       position: sticky;
       top: 0;
+      white-space: nowrap;
     }
 
     .orders-table td {
       padding: 1rem;
       border-bottom: 1px solid var(--border);
+      vertical-align: top;
     }
 
     .orders-table tr:hover {
       background: #fafafa;
     }
 
-    /* Status Badge */
     .status-badge {
       display: inline-block;
       padding: 0.4rem 0.8rem;
@@ -312,7 +312,6 @@
       color: #991b1b;
     }
 
-    /* Action Buttons */
     .order-actions {
       display: flex;
       gap: 0.5rem;
@@ -327,6 +326,7 @@
       font-size: 0.8rem;
       font-weight: 600;
       transition: all 0.3s ease;
+      white-space: nowrap;
     }
 
     .btn-view {
@@ -356,14 +356,10 @@
       background: #dc2626;
     }
 
-    /* Modal */
     .modal {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
       background: rgba(0, 0, 0, 0.6);
       z-index: 1000;
       align-items: center;
@@ -378,7 +374,7 @@
     .modal-content {
       background: white;
       border-radius: 12px;
-      max-width: 600px;
+      max-width: 700px;
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
@@ -393,6 +389,7 @@
       margin-bottom: 1.5rem;
       padding-bottom: 1rem;
       border-bottom: 2px solid var(--light);
+      gap: 1rem;
     }
 
     .modal-header h2 {
@@ -451,6 +448,7 @@
       gap: 1rem;
       margin-top: 2rem;
       justify-content: flex-end;
+      flex-wrap: wrap;
     }
 
     .modal-footer button {
@@ -480,7 +478,6 @@
       background: #e5e7eb;
     }
 
-    /* Loading State */
     .loading {
       display: none;
       text-align: center;
@@ -507,7 +504,6 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Alert Messages */
     .alert {
       padding: 1rem;
       border-radius: 8px;
@@ -537,7 +533,6 @@
       border: 1px solid #fcd34d;
     }
 
-    /* Empty State */
     .empty-state {
       text-align: center;
       padding: 3rem 1rem;
@@ -549,7 +544,20 @@
       margin-bottom: 1rem;
     }
 
-    /* Responsive */
+    .order-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .summary-box {
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+
     @media (max-width: 768px) {
       .header-content {
         flex-direction: column;
@@ -576,6 +584,10 @@
       .modal-content {
         padding: 1.5rem;
       }
+
+      .order-summary-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 480px) {
@@ -586,7 +598,6 @@
       .section-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 1rem;
       }
 
       .order-actions {
@@ -600,7 +611,6 @@
   </style>
 </head>
 <body>
-  <!-- Header -->
   <header class="admin-header">
     <div class="header-content">
       <div class="header-left">
@@ -608,27 +618,18 @@
         <p>نظام إدارة الطلبات - Smart Kids Kuwait</p>
       </div>
       <div class="header-right">
-        <button class="refresh-btn" onclick="loadAllData()">
-          🔄 تحديث
-        </button>
-        <button class="export-btn" onclick="exportToCSV()">
-          📥 تصدير CSV
-        </button>
-        <button class="logout-btn" onclick="logout()">
-          🚪 خروج
-        </button>
+        <button class="refresh-btn" onclick="loadAllData()">🔄 تحديث</button>
+        <button class="export-btn" onclick="exportToCSV()">📥 تصدير CSV</button>
+        <button class="logout-btn" onclick="logout()">🚪 خروج</button>
       </div>
     </div>
   </header>
 
-  <!-- Alert Messages -->
   <div class="container">
     <div id="alert" class="alert"></div>
   </div>
 
-  <!-- Main Content -->
   <div class="container">
-    <!-- Stats Section -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon">📊</div>
@@ -662,7 +663,6 @@
       </div>
     </div>
 
-    <!-- Controls Section -->
     <div class="controls-section">
       <h2 style="margin-bottom: 1rem; color: var(--dark);">🔍 البحث والتصفية</h2>
       <div class="controls-grid">
@@ -694,7 +694,6 @@
       <button class="search-button" onclick="filterOrders()">🔎 بحث</button>
     </div>
 
-    <!-- Orders Table Section -->
     <div class="orders-section">
       <div class="section-header">
         <h2>📋 الطلبات</h2>
@@ -714,7 +713,7 @@
             <tr>
               <th>رقم الطلب</th>
               <th>اسم العميل</th>
-              <th>البريد الإلكتروني</th>
+              <th>بيانات التواصل</th>
               <th>المبلغ</th>
               <th>الحالة</th>
               <th>التاريخ</th>
@@ -734,21 +733,16 @@
     </div>
   </div>
 
-  <!-- Modals -->
-  <!-- View Order Modal -->
   <div class="modal" id="viewOrderModal">
     <div class="modal-content">
       <div class="modal-header">
         <h2>تفاصيل الطلب</h2>
         <button class="close-btn" onclick="closeModal('viewOrderModal')">&times;</button>
       </div>
-      <div id="viewOrderContent">
-        <!-- سيتم ملؤها بواسطة JavaScript -->
-      </div>
+      <div id="viewOrderContent"></div>
     </div>
   </div>
 
-  <!-- Edit Order Modal -->
   <div class="modal" id="editOrderModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -797,7 +791,6 @@
     </div>
   </div>
 
-  <!-- New Order Modal -->
   <div class="modal" id="newOrderModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -857,62 +850,71 @@
   </div>
 
   <script>
-    // الموارد العامة
     const API_BASE = '/api/orders';
     let allOrders = [];
     let currentPage = 1;
+    let itemCount = 0;
 
-    // تحميل جميع البيانات عند فتح الصفحة
     document.addEventListener('DOMContentLoaded', () => {
       loadAllData();
-      // تحديث كل 30 ثانية
       setInterval(loadAllData, 30000);
     });
 
-    /**
-     * تحميل جميع البيانات
-     */
     async function loadAllData() {
+      showLoading(true);
+
       try {
-        showLoading(true);
-
-        // جلب الإحصائيات
-        const statsResponse = await fetch(`${API_BASE}/stats/summary`);
-        const statsData = await statsResponse.json();
-
-        if (statsData.success) {
-          document.getElementById('totalOrders').textContent = statsData.data.totalOrders;
-          document.getElementById('pendingOrders').textContent = statsData.data.ordersByStatus.pending || 0;
-          document.getElementById('processingOrders').textContent = statsData.data.ordersByStatus.processing || 0;
-          document.getElementById('completedOrders').textContent = statsData.data.ordersByStatus.completed || 0;
-          document.getElementById('totalRevenue').textContent = HELPERS.formatCurrency(statsData.data.totalRevenue);
-        }
-
-        // جلب الطلبات
         const ordersResponse = await fetch(`${API_BASE}?limit=50&offset=0&sort=created_at&order=DESC`);
         const ordersData = await ordersResponse.json();
 
-        if (ordersData.success) {
-          allOrders = ordersData.data;
-          displayOrders(allOrders);
-          showAlert('تم تحديث البيانات بنجاح', 'success', 2000);
+        if (!ordersResponse.ok || !ordersData.success) {
+          throw new Error(ordersData.error || 'فشل في تحميل الطلبات');
         }
 
-        showLoading(false);
+        allOrders = ordersData.data || [];
+        displayOrders(allOrders);
+
+        try {
+          const statsResponse = await fetch(`${API_BASE}/stats/summary`);
+          const statsData = await statsResponse.json();
+
+          if (statsResponse.ok && statsData.success) {
+            document.getElementById('totalOrders').textContent = statsData.data.totalOrders || 0;
+            document.getElementById('pendingOrders').textContent = statsData.data.ordersByStatus?.pending || 0;
+            document.getElementById('processingOrders').textContent = statsData.data.ordersByStatus?.processing || 0;
+            document.getElementById('completedOrders').textContent = statsData.data.ordersByStatus?.completed || 0;
+            document.getElementById('totalRevenue').textContent = HELPERS.formatCurrency(statsData.data.totalRevenue || 0);
+          } else {
+            fillStatsFromOrders();
+          }
+        } catch (statsError) {
+          console.warn('⚠️ تعذر تحميل الإحصائيات، سيتم استخدام الطلبات الحالية:', statsError);
+          fillStatsFromOrders();
+        }
+
+        showAlert('تم تحديث البيانات بنجاح', 'success', 2000);
       } catch (error) {
         console.error('❌ خطأ:', error);
-        showAlert('فشل في تحميل البيانات', 'error');
+        showAlert(error.message || 'فشل في تحميل البيانات', 'error');
+      } finally {
         showLoading(false);
       }
     }
 
-    /**
-     * عرض الطلبات في الجدول
-     */
+    function fillStatsFromOrders() {
+      document.getElementById('totalOrders').textContent = allOrders.length || 0;
+      document.getElementById('pendingOrders').textContent = allOrders.filter(o => o.status === 'pending').length;
+      document.getElementById('processingOrders').textContent = allOrders.filter(o => o.status === 'processing').length;
+      document.getElementById('completedOrders').textContent = allOrders.filter(o => o.status === 'completed').length;
+      document.getElementById('totalRevenue').textContent = HELPERS.formatCurrency(
+        allOrders.reduce((sum, o) => sum + Number(o.total || 0), 0)
+      );
+    }
+
     function displayOrders(orders) {
       const tbody = document.getElementById('ordersTableBody');
 
-      if (orders.length === 0) {
+      if (!orders || orders.length === 0) {
         tbody.innerHTML = `
           <tr>
             <td colspan="7" class="empty-state">
@@ -926,16 +928,19 @@
 
       tbody.innerHTML = orders.map(order => `
         <tr>
-          <td><strong>${order.order_number}</strong></td>
-          <td>${order.customer_name}</td>
-          <td>${order.customer_email}</td>
-          <td>${HELPERS.formatCurrency(order.total)}</td>
+          <td><strong>${order.order_number || '-'}</strong></td>
+          <td>${order.customer_name || '-'}</td>
+          <td>
+            <div>${order.customer_email || '-'}</div>
+            <div style="font-size:0.8rem;color:#666;margin-top:4px;">${order.customer_phone || ''}</div>
+          </td>
+          <td>${HELPERS.formatCurrency(order.total || 0)}</td>
           <td>
             <span class="status-badge ${order.status}">
               ${HELPERS.getStatusLabel(order.status)}
             </span>
           </td>
-          <td>${HELPERS.formatDate(order.created_at)}</td>
+          <td>${order.created_at ? HELPERS.formatDate(order.created_at) : '-'}</td>
           <td>
             <div class="order-actions">
               <button class="btn-sm btn-view" onclick="viewOrder(${order.id})">👁️ عرض</button>
@@ -947,88 +952,107 @@
       `).join('');
     }
 
-    /**
-     * عرض تفاصيل الطلب
-     */
     async function viewOrder(orderId) {
       try {
         const response = await fetch(`${API_BASE}/${orderId}`);
         const data = await response.json();
 
-        if (data.success) {
-          const order = data.data;
-          const itemsHtml = order.items.map(item => `
-            <div style="border: 1px solid var(--border); padding: 0.75rem; border-radius: 6px; margin-bottom: 0.5rem;">
-              <div><strong>${item.product_name}</strong></div>
-              <div style="color: #666; font-size: 0.9rem;">
-                الكمية: ${item.quantity} × ${HELPERS.formatCurrency(item.product_price)} = ${HELPERS.formatCurrency(item.subtotal)}
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'فشل في تحميل تفاصيل الطلب');
+        }
+
+        const order = data.data;
+        const items = order.items || [];
+
+        const itemsHtml = items.length
+          ? items.map(item => {
+              const unitPrice = Number(item.product_price ?? item.price ?? 0);
+              const qty = Number(item.quantity ?? 0);
+              const itemSubtotal = Number(item.subtotal ?? (unitPrice * qty));
+
+              return `
+                <div style="border: 1px solid var(--border); padding: 0.75rem; border-radius: 6px; margin-bottom: 0.5rem;">
+                  <div><strong>${item.product_name || item.name || 'منتج'}</strong></div>
+                  <div style="color: #666; font-size: 0.9rem;">
+                    الكمية: ${qty} × ${HELPERS.formatCurrency(unitPrice)} = ${HELPERS.formatCurrency(itemSubtotal)}
+                  </div>
+                </div>
+              `;
+            }).join('')
+          : `<p style="color:#666;">لا توجد عناصر مرتبطة بهذا الطلب</p>`;
+
+        const html = `
+          <div style="line-height: 1.8;">
+            <h3 style="color: var(--primary); margin-bottom: 1rem;">معلومات العميل</h3>
+            <p><strong>الاسم:</strong> ${order.customer_name || '-'}</p>
+            <p><strong>البريد:</strong> ${order.customer_email || '-'}</p>
+            <p><strong>الهاتف:</strong> ${order.customer_phone || '-'}</p>
+            <p><strong>العنوان:</strong> ${order.customer_address || '-'}</p>
+            <p><strong>المحافظة:</strong> ${order.customer_city || '-'}</p>
+            <p><strong>المنطقة:</strong> ${order.customer_district || '-'}</p>
+
+            <h3 style="color: var(--primary); margin-top: 1.5rem; margin-bottom: 1rem;">المنتجات</h3>
+            ${itemsHtml}
+
+            <div class="order-summary-grid">
+              <div class="summary-box">
+                <strong>الإجمالي الجزئي:</strong><br>
+                ${HELPERS.formatCurrency(order.subtotal || 0)}
+              </div>
+              <div class="summary-box">
+                <strong>الشحن:</strong><br>
+                ${HELPERS.formatCurrency(order.shipping_cost || 0)}
+              </div>
+              <div class="summary-box">
+                <strong>الإجمالي الكلي:</strong><br>
+                ${HELPERS.formatCurrency(order.total || 0)}
+              </div>
+              <div class="summary-box">
+                <strong>الحالة:</strong><br>
+                <span class="status-badge ${order.status}">${HELPERS.getStatusLabel(order.status)}</span>
               </div>
             </div>
-          `).join('');
 
-          const html = `
-            <div style="line-height: 1.8;">
-              <h3 style="color: var(--primary); margin-bottom: 1rem;">معلومات العميل</h3>
-              <p><strong>الاسم:</strong> ${order.customer_name}</p>
-              <p><strong>البريد:</strong> ${order.customer_email}</p>
-              <p><strong>الهاتف:</strong> ${order.customer_phone}</p>
-              <p><strong>العنوان:</strong> ${order.customer_address}</p>
-              <p><strong>المحافظة:</strong> ${order.customer_city}</p>
-              <p><strong>المنطقة:</strong> ${order.customer_district}</p>
+            <h3 style="color: var(--primary); margin-top: 1.5rem; margin-bottom: 1rem;">معلومات الطلب</h3>
+            <p><strong>رقم الطلب:</strong> ${order.order_number || '-'}</p>
+            <p><strong>التاريخ:</strong> ${order.created_at ? HELPERS.formatDateTime(order.created_at) : '-'}</p>
+            <p><strong>آخر تحديث:</strong> ${order.updated_at ? HELPERS.formatDateTime(order.updated_at) : '-'}</p>
+            ${order.notes ? `<p><strong>الملاحظات:</strong> ${order.notes}</p>` : ''}
+          </div>
+        `;
 
-              <h3 style="color: var(--primary); margin-top: 1.5rem; margin-bottom: 1rem;">المنتجات</h3>
-              ${itemsHtml}
-
-              <h3 style="color: var(--primary); margin-top: 1.5rem; margin-bottom: 1rem;">ملخص الطلب</h3>
-              <p><strong>الإجمالي الجزئي:</strong> ${HELPERS.formatCurrency(order.subtotal)}</p>
-              <p><strong>الشحن:</strong> ${HELPERS.formatCurrency(order.shipping_cost)}</p>
-              <p style="font-size: 1.2rem; color: var(--primary);"><strong>الإجمالي الكلي:</strong> ${HELPERS.formatCurrency(order.total)}</p>
-
-              <h3 style="color: var(--primary); margin-top: 1.5rem; margin-bottom: 1rem;">معلومات الطلب</h3>
-              <p><strong>الحالة:</strong> <span class="status-badge ${order.status}">${HELPERS.getStatusLabel(order.status)}</span></p>
-              <p><strong>التاريخ:</strong> ${HELPERS.formatDateTime(order.created_at)}</p>
-              <p><strong>آخر تحديث:</strong> ${HELPERS.formatDateTime(order.updated_at)}</p>
-              ${order.notes ? `<p><strong>الملاحظات:</strong> ${order.notes}</p>` : ''}
-            </div>
-          `;
-
-          document.getElementById('viewOrderContent').innerHTML = html;
-          openModal('viewOrderModal');
-        }
+        document.getElementById('viewOrderContent').innerHTML = html;
+        openModal('viewOrderModal');
       } catch (error) {
         console.error('❌ خطأ:', error);
-        showAlert('فشل في تحميل تفاصيل الطلب', 'error');
+        showAlert(error.message || 'فشل في تحميل تفاصيل الطلب', 'error');
       }
     }
 
-    /**
-     * فتح نافذة تعديل الطلب
-     */
     async function editOrder(orderId) {
       try {
         const response = await fetch(`${API_BASE}/${orderId}`);
         const data = await response.json();
 
-        if (data.success) {
-          const order = data.data;
-          document.getElementById('editOrderId').value = order.id;
-          document.getElementById('editOrderStatus').value = order.status;
-          document.getElementById('editOrderNotes').value = order.notes || '';
-          document.getElementById('editOrderPhone').value = order.customer_phone;
-          document.getElementById('editOrderEmail').value = order.customer_email;
-          document.getElementById('editOrderAddress').value = order.customer_address;
-
-          openModal('editOrderModal');
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'فشل في تحميل بيانات الطلب');
         }
+
+        const order = data.data;
+        document.getElementById('editOrderId').value = order.id;
+        document.getElementById('editOrderStatus').value = order.status;
+        document.getElementById('editOrderNotes').value = order.notes || '';
+        document.getElementById('editOrderPhone').value = order.customer_phone || '';
+        document.getElementById('editOrderEmail').value = order.customer_email || '';
+        document.getElementById('editOrderAddress').value = order.customer_address || '';
+
+        openModal('editOrderModal');
       } catch (error) {
         console.error('❌ خطأ:', error);
-        showAlert('فشل في تحميل بيانات الطلب', 'error');
+        showAlert(error.message || 'فشل في تحميل بيانات الطلب', 'error');
       }
     }
 
-    /**
-     * حفظ التغييرات على الطلب
-     */
     async function saveOrderChanges(event) {
       event.preventDefault();
 
@@ -1052,12 +1076,12 @@
 
         const data = await response.json();
 
-        if (data.success) {
+        if (response.ok && data.success) {
           showAlert('تم تحديث الطلب بنجاح', 'success');
           closeModal('editOrderModal');
           loadAllData();
         } else {
-          showAlert(data.error, 'error');
+          showAlert(data.error || 'فشل في تحديث الطلب', 'error');
         }
       } catch (error) {
         console.error('❌ خطأ:', error);
@@ -1065,9 +1089,6 @@
       }
     }
 
-    /**
-     * حذف طلب
-     */
     async function deleteOrder(orderId) {
       if (!confirm('هل أنت متأكد من حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.')) {
         return;
@@ -1080,11 +1101,11 @@
 
         const data = await response.json();
 
-        if (data.success) {
+        if (response.ok && data.success) {
           showAlert('تم حذف الطلب بنجاح', 'success');
           loadAllData();
         } else {
-          showAlert(data.error, 'error');
+          showAlert(data.error || 'فشل في حذف الطلب', 'error');
         }
       } catch (error) {
         console.error('❌ خطأ:', error);
@@ -1092,20 +1113,14 @@
       }
     }
 
-    /**
-     * فتح نافذة إنشاء طلب جديد
-     */
     function openNewOrderModal() {
       document.getElementById('newOrderForm').reset();
       document.getElementById('itemsList').innerHTML = '';
+      itemCount = 0;
       addOrderItem();
       openModal('newOrderModal');
     }
 
-    /**
-     * إضافة منتج للطلب الجديد
-     */
-    let itemCount = 0;
     function addOrderItem() {
       itemCount++;
       const itemsList = document.getElementById('itemsList');
@@ -1119,12 +1134,9 @@
           </div>
         </div>
       `;
-      itemsList.innerHTML += itemHtml;
+      itemsList.insertAdjacentHTML('beforeend', itemHtml);
     }
 
-    /**
-     * إزالة منتج من الطلب
-     */
     function removeOrderItem(itemId) {
       const element = document.getElementById(`item-${itemId}`);
       if (element) {
@@ -1132,9 +1144,6 @@
       }
     }
 
-    /**
-     * إنشاء طلب جديد
-     */
     async function createNewOrder(event) {
       event.preventDefault();
 
@@ -1145,7 +1154,7 @@
           const price = parseFloat(itemDiv.querySelector('.order-item-price').value);
           const quantity = parseInt(itemDiv.querySelector('.order-item-qty').value);
 
-          if (name && price && quantity) {
+          if (name && !isNaN(price) && !isNaN(quantity)) {
             items.push({
               name,
               price,
@@ -1181,12 +1190,12 @@
 
         const data = await response.json();
 
-        if (data.success) {
+        if (response.ok && data.success) {
           showAlert(`✅ تم إنشاء الطلب: ${data.data.order_number}`, 'success');
           closeModal('newOrderModal');
           loadAllData();
         } else {
-          showAlert(data.error, 'error');
+          showAlert(data.error || 'فشل في إنشاء الطلب', 'error');
         }
       } catch (error) {
         console.error('❌ خطأ:', error);
@@ -1194,68 +1203,62 @@
       }
     }
 
-    /**
-     * تصفية الطلبات
-     */
     function filterOrders() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
       const status = document.getElementById('statusFilter').value;
       const sort = document.getElementById('sortFilter').value;
 
-      let filtered = allOrders;
+      let filtered = [...allOrders];
 
-      // تطبيق البحث
       if (search) {
         filtered = filtered.filter(order =>
-          order.order_number.toLowerCase().includes(search) ||
-          order.customer_name.toLowerCase().includes(search)
+          String(order.order_number || '').toLowerCase().includes(search) ||
+          String(order.customer_name || '').toLowerCase().includes(search) ||
+          String(order.customer_email || '').toLowerCase().includes(search) ||
+          String(order.customer_phone || '').toLowerCase().includes(search)
         );
       }
 
-      // تطبيق التصفية حسب الحالة
       if (status) {
         filtered = filtered.filter(order => order.status === status);
       }
 
-      // تطبيق الترتيب
-      const [sortBy, order] = sort.split('-');
+      const [sortBy, sortDirection] = sort.split('-');
       filtered.sort((a, b) => {
         let aVal = a[sortBy];
         let bVal = b[sortBy];
 
         if (sortBy === 'created_at') {
-          aVal = new Date(aVal);
-          bVal = new Date(bVal);
+          aVal = new Date(aVal || 0).getTime();
+          bVal = new Date(bVal || 0).getTime();
+        } else if (sortBy === 'total') {
+          aVal = Number(aVal || 0);
+          bVal = Number(bVal || 0);
         }
 
-        if (order === 'ASC') {
-          return aVal > bVal ? 1 : -1;
-        } else {
-          return aVal < bVal ? 1 : -1;
-        }
+        return sortDirection === 'ASC'
+          ? (aVal > bVal ? 1 : -1)
+          : (aVal < bVal ? 1 : -1);
       });
 
       displayOrders(filtered);
     }
 
-    /**
-     * تصدير إلى CSV
-     */
     function exportToCSV() {
       const headers = ['رقم الطلب', 'اسم العميل', 'البريد', 'الهاتف', 'المبلغ', 'الحالة', 'التاريخ'];
       const rows = allOrders.map(order => [
-        order.order_number,
-        order.customer_name,
-        order.customer_email,
-        order.customer_phone,
-        order.total,
+        order.order_number || '',
+        order.customer_name || '',
+        order.customer_email || '',
+        order.customer_phone || '',
+        order.total || 0,
         HELPERS.getStatusLabel(order.status),
-        HELPERS.formatDateTime(order.created_at)
+        order.created_at ? HELPERS.formatDateTime(order.created_at) : ''
       ]);
 
       let csv = headers.join(',') + '\n';
       rows.forEach(row => {
-        csv += row.map(cell => `"${cell}"`).join(',') + '\n';
+        csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n';
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -1267,7 +1270,6 @@
       showAlert('تم تصدير البيانات بنجاح', 'success', 2000);
     }
 
-    // دوال مساعدة
     function openModal(modalId) {
       document.getElementById(modalId).classList.add('active');
     }
@@ -1294,13 +1296,11 @@
 
     function logout() {
       if (confirm('هل تريد تسجيل الخروج؟')) {
-        // يمكنك إضافة منطق تسجيل الخروج هنا
         alert('تم تسجيل الخروج');
         window.location.href = '/';
       }
     }
 
-    // إغلاق الـ Modals عند الضغط خارجها
     window.onclick = function(event) {
       if (event.target.classList.contains('modal')) {
         event.target.classList.remove('active');
