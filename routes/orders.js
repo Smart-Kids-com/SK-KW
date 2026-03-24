@@ -52,7 +52,9 @@ router.post('/', async (req, res) => {
 
     const shippingCost = HELPERS.calculateShipping(subtotal);
     const total = subtotal + shippingCost;
-    const orderNumber = HELPERS.generateOrderNumber();
+
+    // رقم مؤقت فقط لاستخراج السجل المحفوظ بأمان
+    const tempOrderNumber = `TEMP-${Date.now()}`;
 
     // 1) احفظ الطلب الرئيسي أولًا بدون الاعتماد على lastInsertRowid
     await db.run(
@@ -61,7 +63,7 @@ router.post('/', async (req, res) => {
        customer_city, customer_district, subtotal, shipping_cost, total, status, notes)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        orderNumber,
+        tempOrderNumber,
         customerName,
         customerEmail,
         customerPhone,
@@ -76,14 +78,14 @@ router.post('/', async (req, res) => {
       ]
     );
 
-    // 2) هات الـ id الحقيقي باستخدام order_number
+    // 2) هات الـ id الحقيقي باستخدام الرقم المؤقت
     const savedOrder = await db.get(
       `SELECT id
        FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}
        WHERE order_number = ?
        ORDER BY id DESC
        LIMIT 1`,
-      [orderNumber]
+      [tempOrderNumber]
     );
 
     if (!savedOrder || !savedOrder.id) {
@@ -95,7 +97,18 @@ router.post('/', async (req, res) => {
 
     const savedOrderId = savedOrder.id;
 
-    // 3) احفظ عناصر الطلب
+    // 3) توليد رقم الطلب النهائي بالتسلسل بعد آخر رقم Shopify = SK4060
+    const SHOPIFY_LAST_ORDER = 4060;
+    const nextOrderNumber = `SK${SHOPIFY_LAST_ORDER + savedOrderId}`;
+
+    await db.run(
+      `UPDATE ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}
+       SET order_number = ?
+       WHERE id = ?`,
+      [nextOrderNumber, savedOrderId]
+    );
+
+    // 4) احفظ عناصر الطلب
     for (const item of items) {
       await db.run(
         `INSERT INTO ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS}
@@ -111,13 +124,13 @@ router.post('/', async (req, res) => {
       );
     }
 
-    // 4) نجاح مباشر
+    // 5) نجاح مباشر
     return res.status(201).json({
       success: true,
       message: 'تم إنشاء الطلب بنجاح',
       data: {
         id: savedOrderId,
-        order_number: orderNumber,
+        order_number: nextOrderNumber,
         customer_name: customerName,
         customer_email: customerEmail,
         customer_phone: customerPhone,
