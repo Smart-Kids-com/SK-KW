@@ -53,7 +53,6 @@
       opacity: 0.95;
     }
 
-    /* Search Card */
     .search-card {
       background: white;
       border-radius: 12px;
@@ -112,7 +111,6 @@
       transform: translateY(0);
     }
 
-    /* Loading State */
     .loading {
       display: none;
       text-align: center;
@@ -139,7 +137,6 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Order Info Card */
     .order-card {
       background: white;
       border-radius: 12px;
@@ -166,6 +163,7 @@
     .order-header h2 {
       color: var(--primary);
       font-size: 1.5rem;
+      word-break: break-word;
     }
 
     .status-badge {
@@ -201,7 +199,6 @@
       color: #991b1b;
     }
 
-    /* Timeline */
     .timeline {
       margin: 2rem 0;
     }
@@ -276,7 +273,6 @@
       color: #999;
     }
 
-    /* Order Details */
     .details-section {
       margin: 2rem 0;
       padding: 1.5rem;
@@ -305,6 +301,7 @@
 
     .detail-value {
       color: #666;
+      word-break: break-word;
     }
 
     .items-list {
@@ -338,7 +335,6 @@
       font-size: 0.9rem;
     }
 
-    /* Summary */
     .summary {
       background: var(--primary);
       color: white;
@@ -362,7 +358,6 @@
       margin-top: 0.75rem;
     }
 
-    /* Alert Messages */
     .alert {
       display: none;
       padding: 1rem;
@@ -392,7 +387,6 @@
       border: 1px solid #93c5fd;
     }
 
-    /* Empty State */
     .empty-state {
       text-align: center;
       padding: 3rem 1rem;
@@ -416,7 +410,6 @@
       margin-bottom: 0.5rem;
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
       .container {
         padding: 1rem;
@@ -448,19 +441,17 @@
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
     <div class="header">
       <h1>🔍 تتبع طلبك</h1>
       <p>أدخل رقم الطلب لمعرفة حالته</p>
     </div>
 
-    <!-- Search Card -->
     <div class="search-card">
       <h2>🔎 البحث عن الطلب</h2>
       <div class="search-form">
-        <input 
-          type="text" 
-          id="orderNumberInput" 
+        <input
+          type="text"
+          id="orderNumberInput"
           placeholder="أدخل رقم الطلب (مثال: ORD-12345678-XXXX)"
           onkeypress="if(event.key === 'Enter') trackOrder()"
         />
@@ -468,25 +459,20 @@
       </div>
     </div>
 
-    <!-- Alert -->
     <div id="alert" class="alert"></div>
 
-    <!-- Loading -->
     <div id="loading" class="loading">
       <div class="spinner"></div>
       <p>جاري البحث عن الطلب...</p>
     </div>
 
-    <!-- Empty State -->
     <div id="emptyState" class="empty-state active">
       <div class="empty-state-icon">📭</div>
       <p>لم يتم العثور على رقم طلب</p>
       <p style="font-size: 0.9rem; color: #ccc;">ابدأ بالبحث أعلاه</p>
     </div>
 
-    <!-- Order Card -->
     <div id="orderCard" class="order-card">
-      <!-- Order Header -->
       <div class="order-header">
         <div>
           <h2 id="orderNumber">ORD-XXXXXXXX-XXXX</h2>
@@ -495,7 +481,6 @@
         <div id="statusContainer" class="status-badge pending"></div>
       </div>
 
-      <!-- Timeline -->
       <div class="timeline">
         <div class="timeline-step" id="step-pending">
           <div class="timeline-dot">📝</div>
@@ -530,7 +515,6 @@
         </div>
       </div>
 
-      <!-- Customer Details -->
       <div class="details-section">
         <h3>👤 معلومات العميل</h3>
         <div class="detail-row">
@@ -551,25 +535,23 @@
         </div>
       </div>
 
-      <!-- Items -->
       <div class="details-section">
         <h3>📦 المنتجات</h3>
         <div id="itemsList" class="items-list"></div>
       </div>
 
-      <!-- Summary -->
       <div class="summary">
         <div class="summary-row">
           <span>الإجمالي الجزئي:</span>
-          <span id="summarySubtotal">د.ك 0.000</span>
+          <span id="summarySubtotal">KWD 0.000</span>
         </div>
         <div class="summary-row">
           <span>الشحن:</span>
-          <span id="summaryShipping">د.ك 0.000</span>
+          <span id="summaryShipping">KWD 0.000</span>
         </div>
         <div class="summary-row total">
           <span>الإجمالي الكلي:</span>
-          <span id="summaryTotal">د.ك 0.000</span>
+          <span id="summaryTotal">KWD 0.000</span>
         </div>
       </div>
     </div>
@@ -578,9 +560,31 @@
   <script>
     const API_BASE = '/api/orders';
 
-    /**
-     * تتبع الطلب
-     */
+    const HELPERS_FALLBACK = {
+      formatCurrency(value) {
+        const num = Number(value || 0);
+        return `KWD ${num.toFixed(3)}`;
+      },
+      formatDateTime(value) {
+        if (!value) return '-';
+        const d = new Date(value);
+        if (isNaN(d)) return value;
+        return d.toLocaleString('ar-KW');
+      },
+      getStatusLabel(status) {
+        const labels = {
+          pending: 'في الانتظار',
+          processing: 'قيد التجهيز',
+          shipped: 'تم الشحن',
+          completed: 'مكتمل',
+          cancelled: 'ملغي'
+        };
+        return labels[status] || status || '-';
+      }
+    };
+
+    const H = (typeof HELPERS !== 'undefined' && HELPERS) ? HELPERS : HELPERS_FALLBACK;
+
     async function trackOrder() {
       const orderNumber = document.getElementById('orderNumberInput').value.trim();
 
@@ -593,104 +597,98 @@
         showLoading(true);
         hideAlert();
 
-        const response = await fetch(`${API_BASE}/track/${orderNumber}`);
+        const response = await fetch(`${API_BASE}/track/${encodeURIComponent(orderNumber)}`);
         const data = await response.json();
 
-        if (data.success) {
-          displayOrder(data.data);
-          showAlert('✅ تم العثور على الطلب', 'info', 2000);
-        } else {
-          showAlert('❌ لم يتم العثور على الطلب. تحقق من رقم الطلب', 'error');
-          document.getElementById('orderCard').classList.remove('active');
-          document.getElementById('emptyState').classList.add('active');
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'حدث خطأ أثناء البحث');
         }
 
-        showLoading(false);
+        displayOrder(data.data);
+        showAlert('✅ تم العثور على الطلب', 'info', 2000);
       } catch (error) {
         console.error('❌ خطأ:', error);
-        showAlert('حدث خطأ أثناء البحث', 'error');
+        showAlert(error.message || 'حدث خطأ أثناء البحث', 'error');
+        document.getElementById('orderCard').classList.remove('active');
+        document.getElementById('emptyState').classList.add('active');
+      } finally {
         showLoading(false);
       }
     }
 
-    /**
-     * عرض تفاصيل الطلب
-     */
     function displayOrder(order) {
-      // معلومات الطلب الأساسية
-      document.getElementById('orderNumber').textContent = order.order_number;
-      document.getElementById('orderDate').textContent = HELPERS.formatDateTime(order.created_at);
+      document.getElementById('orderNumber').textContent = order.order_number || '-';
+      document.getElementById('orderDate').textContent = order.created_at ? H.formatDateTime(order.created_at) : '-';
 
-      // الحالة
       const statusContainer = document.getElementById('statusContainer');
-      statusContainer.className = `status-badge ${order.status}`;
-      statusContainer.textContent = HELPERS.getStatusLabel(order.status);
+      statusContainer.className = `status-badge ${order.status || 'pending'}`;
+      statusContainer.textContent = H.getStatusLabel(order.status);
 
-      // معلومات العميل
-      document.getElementById('customerName').textContent = order.customer_name;
-      document.getElementById('customerEmail').textContent = order.customer_email;
-      document.getElementById('customerPhone').textContent = order.customer_phone;
-      document.getElementById('customerAddress').textContent = order.customer_address;
+      document.getElementById('customerName').textContent = order.customer_name || '-';
+      document.getElementById('customerEmail').textContent = order.customer_email || '-';
+      document.getElementById('customerPhone').textContent = order.customer_phone || '-';
+      document.getElementById('customerAddress').textContent = order.customer_address || '-';
 
-      // المنتجات
       const itemsList = document.getElementById('itemsList');
-      if (order.items && order.items.length > 0) {
-        itemsList.innerHTML = order.items.map(item => `
-          <div class="item">
-            <div class="item-header">
-              <div class="item-name">${item.product_name}</div>
-              <div>${HELPERS.formatCurrency(item.subtotal)}</div>
+      const items = order.items || [];
+
+      if (items.length > 0) {
+        itemsList.innerHTML = items.map(item => {
+          const unitPrice = Number(item.product_price ?? item.price ?? 0);
+          const qty = Number(item.quantity ?? 0);
+          const itemSubtotal = Number(item.subtotal ?? (unitPrice * qty));
+
+          return `
+            <div class="item">
+              <div class="item-header">
+                <div class="item-name">${item.product_name || item.name || 'منتج'}</div>
+                <div>${H.formatCurrency(itemSubtotal)}</div>
+              </div>
+              <div class="item-qty">الكمية: ${qty} × ${H.formatCurrency(unitPrice)}</div>
             </div>
-            <div class="item-qty">الكمية: ${item.quantity} × ${HELPERS.formatCurrency(item.product_price)}</div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
+      } else {
+        itemsList.innerHTML = `<p style="color:#666;">لا توجد منتجات مرتبطة بهذا الطلب</p>`;
       }
 
-      // الملخص
-      document.getElementById('summarySubtotal').textContent = HELPERS.formatCurrency(order.subtotal);
-      document.getElementById('summaryShipping').textContent = HELPERS.formatCurrency(order.shipping_cost);
-      document.getElementById('summaryTotal').textContent = HELPERS.formatCurrency(order.total);
+      document.getElementById('summarySubtotal').textContent = H.formatCurrency(order.subtotal || 0);
+      document.getElementById('summaryShipping').textContent = H.formatCurrency(order.shipping_cost || 0);
+      document.getElementById('summaryTotal').textContent = H.formatCurrency(order.total || 0);
 
-      // تحديث Timeline
       updateTimeline(order);
 
-      // إظهار البطاقة
       document.getElementById('orderCard').classList.add('active');
       document.getElementById('emptyState').classList.remove('active');
     }
 
-    /**
-     * تحديث Timeline حسب حالة الطلب
-     */
     function updateTimeline(order) {
       const statuses = ['pending', 'processing', 'shipped', 'completed'];
-      const dateFields = {
-        pending: order.created_at,
-        processing: order.created_at,
-        shipped: order.shipped_at || order.created_at,
-        completed: order.completed_at || order.created_at
-      };
+      const currentIndex = statuses.indexOf(order.status);
 
       statuses.forEach(status => {
         const step = document.getElementById(`step-${status}`);
         const date = document.getElementById(`date-${status}`);
 
-        if (statuses.indexOf(order.status) >= statuses.indexOf(status)) {
+        step.classList.remove('completed', 'active');
+
+        const stepIndex = statuses.indexOf(status);
+        if (currentIndex > stepIndex) {
           step.classList.add('completed');
-
-          if (order.status === status) {
-            step.classList.add('active');
-          }
+        } else if (currentIndex === stepIndex) {
+          step.classList.add('active');
         }
 
-        const dateValue = dateFields[status];
-        if (dateValue) {
-          date.textContent = HELPERS.formatDateTime(dateValue);
-        }
+        let dateValue = null;
+        if (status === 'pending') dateValue = order.created_at;
+        if (status === 'processing' && currentIndex >= 1) dateValue = order.updated_at || order.created_at;
+        if (status === 'shipped' && currentIndex >= 2) dateValue = order.shipped_at || order.updated_at || order.created_at;
+        if (status === 'completed' && currentIndex >= 3) dateValue = order.completed_at || order.updated_at || order.created_at;
+
+        date.textContent = dateValue ? H.formatDateTime(dateValue) : '--';
       });
     }
 
-    // دوال مساعدة
     function showLoading(show) {
       document.getElementById('loading').classList.toggle('active', show);
     }
@@ -711,9 +709,16 @@
       document.getElementById('alert').classList.remove('active');
     }
 
-    // السماح بالبحث بالضغط على Enter
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('orderNumberInput').focus();
+      const params = new URLSearchParams(window.location.search);
+      const orderFromUrl = params.get('order');
+
+      if (orderFromUrl) {
+        document.getElementById('orderNumberInput').value = orderFromUrl;
+        trackOrder();
+      } else {
+        document.getElementById('orderNumberInput').focus();
+      }
     });
   </script>
 </body>
