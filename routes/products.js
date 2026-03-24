@@ -129,7 +129,6 @@ router.post('/', async (req, res) => {
     const finalSku = sku ? String(sku).trim() : null;
     const finalStatus = normalizeStatus(status);
 
-    // تحقق من slug
     const existingSlug = await db.get(
       `SELECT id FROM products WHERE slug = ?`,
       [finalSlug]
@@ -142,7 +141,6 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // تحقق من sku
     if (finalSku) {
       const existingSku = await db.get(
         `SELECT id FROM products WHERE sku = ?`,
