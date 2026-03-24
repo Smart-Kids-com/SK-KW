@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>شكراً لطلبك - Smart Kids Kuwait</title>
+  <script src="/config/system.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --primary:#667eea;
+      --secondary:#764ba2;
+      --success:#10b981;
+      --danger:#ef4444;
+      --info:#3b82f6;
+      --light:#f3f4f6;
+      --dark:#1f2937;
+      --border:#e5e7eb;
+      --card:#ffffff;
+    }
+    body{
+      font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+      background:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%);
+      min-height:100vh;
+      color:var(--dark);
+    }
+    .container{
+      max-width:900px;
+      margin:0 auto;
+      padding:1.25rem;
+    }
+    .hero{
+      background:rgba(255,255,255,.96);
+      border-radius:18px;
+      padding:2rem 1.5rem;
+      box-shadow:0 18px 40px rgba(0,0,0,.18);
+      text-align:center;
+      margin:1.5rem 0;
+    }
+    .hero-icon{
+      width:84px;
+      height:84px;
+      margin:0 auto 1rem;
+      border-radius:50%;
+      background:rgba(16,185,129,.12);
+      color:var(--success);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:2.2rem;
+      font-weight:800;
+    }
+    .hero h1{
+      color:var(--success);
+      font-size:2rem;
+      margin-bottom:.5rem;
+    }
+    .hero p{
+      color:#666;
+      line-height:1.8;
+      font-size:1rem;
+    }
+    .card{
+      background:var(--card);
+      border-radius:16px;
+      padding:1.4rem;
+      margin-bottom:1.25rem;
+      box-shadow:0 10px 28px rgba(0,0,0,.14);
+    }
+    .card h2{
+      color:var(--primary);
+      margin-bottom:1rem;
+      font-size:1.2rem;
+    }
+    .alert{
+      display:none;
+      padding:1rem;
+      border-radius:10px;
+      margin-bottom:1rem;
+      line-height:1.8;
+    }
+    .alert.active{display:block}
+    .alert.error{
+      background:#fee2e2;
+      color:#991b1b;
+      border:1px solid #fca5a5;
+    }
+    .alert.info{
+      background:#dbeafe;
+      color:#1e40af;
+      border:1px solid #93c5fd;
+    }
+    .loading{
+      display:none;
+      text-align:center;
+      color:var(--primary);
+      padding:2rem 0;
+    }
+    .loading.active{display:block}
+    .spinner{
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      border:4px solid var(--light);
+      border-top-color:var(--primary);
+      animation:spin 1s linear infinite;
+      margin:0 auto 1rem;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .order-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:1rem;
+    }
+    .info-box{
+      background:#fafafa;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:1rem;
+    }
+    .info-label{
+      font-size:.9rem;
+      color:#666;
+      margin-bottom:.35rem;
+    }
+    .info-value{
+      font-weight:700;
+      color:var(--dark);
+      word-break:break-word;
+      line-height:1.7;
+    }
+    .status-badge{
+      display:inline-block;
+      padding:.5rem .9rem;
+      border-radius:999px;
+      font-size:.9rem;
+      font-weight:700;
+    }
+    .status-badge.pending{background:#fef3c7;color:#92400e}
+    .status-badge.processing{background:#dbeafe;color:#1e40af}
+    .status-badge.shipped{background:#e9d5ff;color:#6b21a8}
+    .status-badge.completed{background:#dcfce7;color:#166534}
+    .status-badge.cancelled{background:#fee2e2;color:#991b1b}
+    .items-list{
+      display:grid;
+      gap:.85rem;
+    }
+    .item{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:1rem;
+      background:#fff;
+    }
+    .item-top{
+      display:flex;
+      justify-content:space-between;
+      gap:1rem;
+      align-items:center;
+      margin-bottom:.5rem;
+      flex-wrap:wrap;
+    }
+    .item-name{
+      font-weight:700;
+      color:var(--dark);
+    }
+    .item-meta{
+      color:#666;
+      font-size:.92rem;
+      line-height:1.7;
+    }
+    .summary{
+      background:linear-gradient(135deg,var(--primary),var(--secondary));
+      color:#fff;
+      border-radius:14px;
+      padding:1.2rem;
+    }
+    .summary-row{
+      display:flex;
+      justify-content:space-between;
+      gap:1rem;
+      margin-bottom:.7rem;
+      line-height:1.7;
+    }
+    .summary-row.total{
+      border-top:1px solid rgba(255,255,255,.25);
+      padding-top:.8rem;
+      margin-top:.8rem;
+      font-size:1.15rem;
+      font-weight:800;
+    }
+    .actions{
+      display:flex;
+      gap:.8rem;
+      flex-wrap:wrap;
+      margin-top:1rem;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.5rem;
+      min-height:48px;
+      padding:0 1rem;
+      border-radius:10px;
+      border:none;
+      cursor:pointer;
+      font-weight:700;
+      text-decoration:none;
+      transition:.2s ease;
+    }
+    .btn.primary{
+      background:var(--primary);
+      color:#fff;
+    }
+    .btn.primary:hover{
+      background:var(--secondary);
+    }
+    .btn.light{
+      background:#fff;
+      color:var(--primary);
+      border:1px solid var(--border);
+    }
+    .btn.light:hover{
+      background:#f8fafc;
+    }
+    .hide{display:none!important}
+    @media (max-width:700px){
+      .order-grid{grid-template-columns:1fr}
+      .hero h1{font-size:1.6rem}
+      .actions .btn{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="alert" class="alert"></div>
+
+    <section class="hero">
+      <div class="hero-icon">✓</div>
+      <h1>شكراً لطلبك</h1>
+      <p>
+        تم استلام طلبك بنجاح. يمكنك مراجعة التفاصيل أدناه ومتابعة حالة الطلب في أي وقت.
+      </p>
+    </section>
+
+    <div id="loading" class="loading active">
+      <div class="spinner"></div>
+      <p>جاري تحميل تفاصيل الطلب...</p>
+    </div>
+
+    <section id="orderSection" class="hide">
+      <div class="card">
+        <h2>معلومات الطلب</h2>
+        <div class="order-grid">
+          <div class="info-box">
+            <div class="info-label">رقم الطلب</div>
+            <div class="info-value" id="orderNumber">--</div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-label">الحالة</div>
+            <div class="info-value"><span id="orderStatus" class="status-badge pending">--</span></div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-label">تاريخ الطلب</div>
+            <div class="info-value" id="orderDate">--</div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-label">طريقة المتابعة</div>
+            <div class="info-value">استخدم رقم الطلب في صفحة التتبع</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>بيانات العميل</h2>
+        <div class="order-grid">
+          <div class="info-box">
+            <div class="info-label">الاسم</div>
+            <div class="info-value" id="customerName">--</div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-label">البريد الإلكتروني</div>
+            <div class="info-value" id="customerEmail">--</div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-label">رقم الهاتف</div>
+            <div class="info-value" id="customerPhone">--</div>
+          </div>
+
+          <div class="info-box">
+            <div class="info-label">العنوان</div>
+            <div class="info-value" id="customerAddress">--</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>المنتجات</h2>
+        <div id="itemsList" class="items-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>ملخص الطلب</h2>
+        <div class="summary">
+          <div class="summary-row">
+            <span>الإجمالي الجزئي</span>
+            <span id="subtotal">KWD 0.000</span>
+          </div>
+          <div class="summary-row">
+            <span>الشحن</span>
+            <span id="shipping">KWD 0.000</span>
+          </div>
+          <div class="summary-row total">
+            <span>الإجمالي الكلي</span>
+            <span id="total">KWD 0.000</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <a id="trackBtn" class="btn primary" href="./track.html">تتبع الطلب</a>
+          <a class="btn light" href="./index.html">العودة للمتجر</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const HELPERS_FALLBACK = {
+      formatCurrency(value) {
+        const num = Number(value || 0);
+        return `KWD ${num.toFixed(3)}`;
+      },
+      formatDateTime(value) {
+        if (!value) return '-';
+        const d = new Date(value);
+        if (isNaN(d)) return value;
+        return d.toLocaleString('ar-KW');
+      },
+      getStatusLabel(status) {
+        const labels = {
+          pending: 'في الانتظار',
+          processing: 'قيد التجهيز',
+          shipped: 'تم الشحن',
+          completed: 'مكتمل',
+          cancelled: 'ملغي'
+        };
+        return labels[status] || status || '-';
+      }
+    };
+
+    const H = (typeof HELPERS !== 'undefined' && HELPERS) ? HELPERS : HELPERS_FALLBACK;
+
+    function showAlert(message, type = 'info') {
+      const alert = document.getElementById('alert');
+      alert.textContent = message;
+      alert.className = `alert active ${type}`;
+    }
+
+    function showLoading(show) {
+      document.getElementById('loading').classList.toggle('active', show);
+    }
+
+    function renderItems(items) {
+      const itemsList = document.getElementById('itemsList');
+
+      if (!items || !items.length) {
+        itemsList.innerHTML = `<div class="item"><div class="item-name">لا توجد منتجات مرتبطة بهذا الطلب</div></div>`;
+        return;
+      }
+
+      itemsList.innerHTML = items.map(item => {
+        const unitPrice = Number(item.product_price ?? item.price ?? 0);
+        const qty = Number(item.quantity ?? 0);
+        const itemSubtotal = Number(item.subtotal ?? (unitPrice * qty));
+
+        return `
+          <div class="item">
+            <div class="item-top">
+              <div class="item-name">${item.product_name || item.name || 'منتج'}</div>
+              <div class="item-name">${H.formatCurrency(itemSubtotal)}</div>
+            </div>
+            <div class="item-meta">
+              الكمية: ${qty} × ${H.formatCurrency(unitPrice)}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderOrder(order) {
+      document.getElementById('orderNumber').textContent = order.order_number || '-';
+      document.getElementById('orderDate').textContent = order.created_at ? H.formatDateTime(order.created_at) : '-';
+      document.getElementById('customerName').textContent = order.customer_name || '-';
+      document.getElementById('customerEmail').textContent = order.customer_email || '-';
+      document.getElementById('customerPhone').textContent = order.customer_phone || '-';
+      document.getElementById('customerAddress').textContent = order.customer_address || '-';
+
+      const statusEl = document.getElementById('orderStatus');
+      statusEl.className = `status-badge ${order.status || 'pending'}`;
+      statusEl.textContent = H.getStatusLabel(order.status);
+
+      document.getElementById('subtotal').textContent = H.formatCurrency(order.subtotal || 0);
+      document.getElementById('shipping').textContent = H.formatCurrency(order.shipping_cost || 0);
+      document.getElementById('total').textContent = H.formatCurrency(order.total || 0);
+
+      document.getElementById('trackBtn').href = `./track.html?order=${encodeURIComponent(order.order_number || '')}`;
+
+      renderItems(order.items || []);
+
+      document.getElementById('orderSection').classList.remove('hide');
+    }
+
+    async function loadOrder() {
+      const params = new URLSearchParams(window.location.search);
+      const orderNumberFromUrl = params.get('order');
+
+      let orderNumber = orderNumberFromUrl;
+
+      if (!orderNumber) {
+        try {
+          const lastOrder = JSON.parse(localStorage.getItem('last_order') || 'null');
+          orderNumber = lastOrder?.order_number || lastOrder?.orderNumber || '';
+        } catch {
+          orderNumber = '';
+        }
+      }
+
+      if (!orderNumber) {
+        showLoading(false);
+        showAlert('لا يوجد رقم طلب لعرضه', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/orders/track/${encodeURIComponent(orderNumber)}`);
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'تعذر تحميل بيانات الطلب');
+        }
+
+        renderOrder(data.data);
+      } catch (error) {
+        console.error('❌ Track fetch error:', error);
+        showAlert(error.message || 'تعذر تحميل بيانات الطلب', 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadOrder);
+  </script>
+</body>
+</html>

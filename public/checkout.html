@@ -1045,9 +1045,9 @@
 
           setTimeout(() => {
             if (orderNumber) {
-              window.location.href = `./track.html?order=${encodeURIComponent(orderNumber)}`;
+              window.location.href = `./thank-you.html?order=${encodeURIComponent(orderNumber)}`; 
             } else {
-              window.location.href = './track.html';
+              window.location.href = './thank-you.html';
             }
           }, 1500);
         } else if (!response.ok) {
