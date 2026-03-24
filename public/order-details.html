@@ -1,846 +1,1164 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Order Details - Smart Kids Kuwait</title>
   <script src="/config/system.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *{box-sizing:border-box;margin:0;padding:0}
 
     :root{
-      --bg:#f5f5f5;
-      --card:#ffffff;
-      --text:#1f1f1f;
-      --muted:#6f6f6f;
-      --line:#e7e7e7;
-      --soft:#f2f2f2;
-      --black:#232323;
-      --chip-yellow:#efe17a;
-      --chip-yellow-text:#5b4d00;
-      --chip-beige:#eacb98;
-      --chip-beige-text:#5c4520;
-      --success:#1f8b4c;
-      --danger:#d95757;
-      --blue:#2c6bed;
-      --shadow:0 8px 24px rgba(0,0,0,.06);
-      --radius-xl:26px;
-      --radius-lg:20px;
-      --radius-md:16px;
-      --radius-sm:12px;
+      --bg:#f6f6f7;
+      --panel:#ffffff;
+      --line:#e1e3e5;
+      --text:#303030;
+      --muted:#6d7175;
+      --topbar:#111213;
+      --sidebar:#efefef;
+      --chip-payment-bg:#f8dca8;
+      --chip-payment-text:#8a6116;
+      --chip-fulfill-bg:#e8e8e8;
+      --chip-fulfill-text:#616161;
+      --green:#008060;
+      --blue:#005bd3;
+      --danger:#d82c0d;
+      --shadow:0 1px 0 rgba(0,0,0,.04),0 2px 8px rgba(0,0,0,.04);
+      --sidebar-w:292px;
+      --topbar-h:72px;
+      --mobile-green:#97ea67;
     }
 
-    body{
-      font-family:"Segoe UI", Tahoma, Arial, sans-serif;
+    html,body{
       background:var(--bg);
       color:var(--text);
+      font-family:Inter,"Segoe UI",Tahoma,Arial,sans-serif;
     }
 
-    a{ color:inherit; text-decoration:none; }
+    a{text-decoration:none;color:inherit}
+    button,input,textarea,select{font-family:inherit}
+    .hidden{display:none!important}
 
-    .page{
-      max-width:900px;
-      margin:0 auto;
-      min-height:100vh;
-      background:var(--bg);
-    }
+    .app{min-height:100vh}
 
-    .topbar{
+    .desktop-shell{display:none}
+    .desktop-topbar{
+      height:var(--topbar-h);
+      background:var(--topbar);
+      color:#fff;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
-      padding:20px 18px;
-      background:#fff;
+      padding:0 18px;
       position:sticky;
       top:0;
-      z-index:20;
-      border-bottom:1px solid var(--line);
+      z-index:50;
     }
-
-    .topbar-left,
-    .topbar-right{
+    .desktop-topbar-left{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      min-width:0;
+    }
+    .shopify-mark{
       display:flex;
       align-items:center;
       gap:10px;
+      font-size:18px;
+      font-weight:800;
+      white-space:nowrap;
     }
-
-    .icon-btn{
-      width:56px;
-      height:56px;
-      border:none;
-      border-radius:50%;
-      background:#efefef;
+    .desktop-search{
+      width:min(810px,52vw);
+      position:relative;
+    }
+    .desktop-search input{
+      width:100%;
+      height:44px;
+      border-radius:14px;
+      border:1px solid #3a3a3d;
+      background:#2a2a2c;
+      color:#fff;
+      padding:0 92px 0 42px;
+      font-size:14px;
+      outline:none;
+    }
+    .desktop-search input::placeholder{color:#c9c9cb}
+    .desktop-search .icon{
+      position:absolute;
+      left:14px;
+      top:50%;
+      transform:translateY(-50%);
+      color:#d0d0d2;
+      font-size:16px;
+      pointer-events:none;
+    }
+    .desktop-search .kbd{
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform:translateY(-50%);
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:11px;
+      color:#d5d5d7;
+    }
+    .desktop-search .kbd span{
+      padding:3px 6px;
+      border-radius:6px;
+      background:#444447;
+      border:1px solid #515154;
+      font-weight:700;
+    }
+    .desktop-topbar-right{
       display:flex;
       align-items:center;
+      gap:14px;
+      white-space:nowrap;
+    }
+    .icon-btn{
+      width:34px;
+      height:34px;
+      display:inline-flex;
+      align-items:center;
       justify-content:center;
+      border:none;
+      background:transparent;
+      color:inherit;
       cursor:pointer;
-      font-size:1.35rem;
-      color:#333;
-      flex:0 0 auto;
+      font-size:18px;
+    }
+    .account-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      font-weight:700;
+      color:#fff;
+    }
+    .account-chip img{
+      width:30px;height:30px;border-radius:50%;object-fit:cover;background:#fff;
     }
 
-    .topbar-title{
-      font-size:1.15rem;
-      font-weight:800;
-      line-height:1.2;
-      text-align:center;
-      flex:1;
+    .desktop-body{
+      display:grid;
+      grid-template-columns:var(--sidebar-w) minmax(0,1fr);
+      min-height:calc(100vh - var(--topbar-h));
+    }
+    .desktop-sidebar{
+      border-right:1px solid var(--line);
+      background:var(--sidebar);
+      padding:14px 12px 18px;
+      position:sticky;
+      top:var(--topbar-h);
+      height:calc(100vh - var(--topbar-h));
+      overflow:auto;
+    }
+    .side-group{margin-bottom:14px}
+    .side-link{
+      min-height:44px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:0 12px;
+      border-radius:12px;
+      color:#303030;
+      font-weight:600;
+      font-size:15px;
+      cursor:pointer;
+    }
+    .side-link:hover{background:#e9e9ea}
+    .side-link.active{
+      background:#fff;
+      box-shadow:inset 0 0 0 1px #e1e1e3;
+    }
+    .side-link-left{
+      display:flex;
+      align-items:center;
+      gap:12px;
       min-width:0;
     }
-
-    .topbar-title.small{
-      font-size:1.05rem;
+    .side-link small{
+      color:#6f7377;
+      font-weight:700;
+      background:#e4e4e5;
+      padding:3px 10px;
+      border-radius:999px;
+    }
+    .side-label{
+      font-size:13px;
+      color:#6d7175;
+      padding:10px 10px 6px;
+      font-weight:700;
     }
 
-    .screen{
-      display:none;
+    .desktop-main{
+      padding:18px 18px 30px;
+      overflow:auto;
     }
-
-    .screen.active{
-      display:block;
+    .desktop-content-wrap{
+      max-width:1380px;
+      margin:0 auto;
     }
 
     .alert{
       display:none;
-      margin:14px 16px 0;
-      padding:14px 16px;
-      border-radius:14px;
+      margin-bottom:12px;
+      padding:12px 14px;
+      border-radius:12px;
+      font-size:14px;
       font-weight:700;
     }
+    .alert.active{display:block}
+    .alert.success{background:#e3f1df;color:#0b6b42;border:1px solid #bfdcb9}
+    .alert.error{background:#ffe9e5;color:#9d240d;border:1px solid #f1c7bf}
 
-    .alert.active{ display:block; }
-    .alert.success{ background:#e9f8ef; color:#17784a; border:1px solid #bfe6cd; }
-    .alert.error{ background:#fff1f1; color:#9a2d2d; border:1px solid #efc2c2; }
-
-    .loading{
-      display:none;
-      padding:40px 16px;
-      text-align:center;
-      color:#666;
-      font-size:1rem;
-    }
-
-    .loading.active{ display:block; }
-
-    .empty{
-      padding:48px 20px;
-      text-align:center;
-      color:#7b7b7b;
-    }
-
-    .list-day{
-      padding:12px 16px;
-      background:#efefef;
-      color:#707070;
-      font-size:.95rem;
-      font-weight:700;
-      border-top:1px solid var(--line);
-      border-bottom:1px solid var(--line);
-    }
-
-    .order-list{
-      background:#fff;
-      border-top:1px solid var(--line);
-      border-bottom:1px solid var(--line);
-    }
-
-    .order-row{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:12px;
-      padding:18px 16px;
-      border-bottom:1px solid var(--line);
-      cursor:pointer;
-      background:#fff;
-    }
-
-    .order-row:last-child{
-      border-bottom:none;
-    }
-
-    .order-row:hover{
-      background:#fafafa;
-    }
-
-    .order-number{
-      font-size:1.1rem;
-      font-weight:800;
-      margin-bottom:8px;
-    }
-
-    .order-meta{
-      font-size:.95rem;
-      color:#353535;
-      line-height:1.55;
-      margin-bottom:8px;
-    }
-
-    .order-badges{
+    .desktop-order-header{
       display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-bottom:8px;
-    }
-
-    .chip{
-      min-height:34px;
-      padding:0 14px;
-      border:none;
-      border-radius:999px;
-      font-size:.92rem;
-      font-weight:700;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      white-space:nowrap;
-      cursor:pointer;
-    }
-
-    .chip.fulfillment{
-      background:var(--chip-yellow);
-      color:var(--chip-yellow-text);
-    }
-
-    .chip.payment{
-      background:var(--chip-beige);
-      color:var(--chip-beige-text);
-    }
-
-    .order-note{
-      font-size:.95rem;
-      color:#2f2f2f;
-      line-height:1.5;
-    }
-
-    .order-amount{
-      font-size:1.05rem;
-      font-weight:500;
-      white-space:nowrap;
-      align-self:start;
-      padding-top:4px;
-    }
-
-    .section{
-      background:#fff;
-      margin-top:10px;
-      border-top:1px solid var(--line);
-      border-bottom:1px solid var(--line);
-    }
-
-    .section-pad{
-      padding:18px 20px;
-    }
-
-    .summary-top{
-      display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
-      gap:12px;
-      margin-bottom:18px;
-    }
-
-    .badges-inline{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-
-    .dots-btn{
-      width:44px;
-      height:44px;
-      border:none;
-      border-radius:50%;
-      background:transparent;
-      cursor:pointer;
-      font-size:1.4rem;
-      color:#4a4a4a;
-    }
-
-    .money-grid{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
       gap:16px;
-      row-gap:10px;
-      align-items:start;
+      margin-bottom:18px;
+      direction:ltr;
+    }
+    .desktop-order-title-wrap{min-width:0}
+    .desktop-breadcrumb{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
       margin-bottom:6px;
     }
-
-    .money-label{
-      font-size:.98rem;
-      color:#6c6c6c;
-      line-height:1.45;
-    }
-
-    .money-label strong{
-      display:block;
-      color:#262626;
-      font-size:.98rem;
-      margin-bottom:2px;
-    }
-
-    .money-value{
-      font-size:1rem;
-      color:#252525;
-      white-space:nowrap;
-      text-align:right;
-    }
-
-    .money-value.total{
-      font-size:1.06rem;
+    .desktop-order-title{
+      font-size:18px;
       font-weight:800;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .desktop-order-sub{
+      font-size:14px;
+      color:#5c5f62;
+    }
+    .desktop-header-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      direction:ltr;
+      justify-content:flex-end;
     }
 
-    .hr{
-      height:1px;
-      background:var(--line);
-      margin:16px 0;
-    }
-
-    .action-stack{
-      display:grid;
-      gap:12px;
-      margin-top:18px;
-    }
-
-    .main-btn,
-    .ghost-btn,
-    .contact-btn{
-      min-height:58px;
-      border-radius:18px;
-      border:none;
+    .ghost-btn,.dark-btn{
+      min-height:38px;
+      padding:0 14px;
+      border-radius:12px;
+      border:1px solid #d4d4d7;
+      background:#fff;
       cursor:pointer;
-      font-size:1rem;
-      font-weight:800;
-      padding:0 18px;
-      width:100%;
+      font-size:14px;
+      font-weight:700;
+      color:#303030;
     }
-
-    .main-btn{
-      background:var(--black);
+    .dark-btn{
+      background:#2a2a2c;
+      border-color:#2a2a2c;
       color:#fff;
     }
 
-    .ghost-btn{
-      background:#fff;
-      color:#2a2a2a;
-      border:1px solid #d8d8d8;
-    }
-
-    .info-row{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:16px;
+    .status-chip{
+      min-height:30px;
+      padding:0 10px;
+      border-radius:999px;
+      display:inline-flex;
       align-items:center;
-      padding:18px 20px;
-      border-top:1px solid var(--line);
-    }
-
-    .info-row:first-child{
-      border-top:none;
-    }
-
-    .info-row-title{
-      font-size:1rem;
-      color:#303030;
-    }
-
-    .info-row-sub{
-      font-size:.95rem;
-      color:#6f6f6f;
-      margin-top:4px;
-    }
-
-    .info-row-right{
-      color:#6c6c6c;
-      font-size:1rem;
+      gap:6px;
+      font-size:13px;
+      font-weight:700;
       white-space:nowrap;
     }
-
-    .section-title{
-      font-size:1rem;
-      font-weight:800;
-      margin-bottom:6px;
+    .status-chip .dot{
+      width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.75;
+    }
+    .status-chip.payment{
+      background:var(--chip-payment-bg);
+      color:var(--chip-payment-text);
+    }
+    .status-chip.fulfillment{
+      background:var(--chip-fulfill-bg);
+      color:var(--chip-fulfill-text);
     }
 
-    .section-subtitle{
-      color:#6f6f6f;
-      font-size:.95rem;
-      line-height:1.45;
-    }
-
-    .customer-head{
+    .desktop-order-grid{
       display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:16px;
+      grid-template-columns:minmax(0,1fr) 360px;
+      gap:22px;
       align-items:start;
-      margin-bottom:16px;
     }
 
-    .customer-name{
-      font-size:1rem;
-      font-weight:700;
-      line-height:1.45;
-      margin-top:14px;
-    }
+    .stack{display:grid;gap:18px}
 
-    .customer-orders{
-      color:#7a7a7a;
-      font-size:.95rem;
-      margin-top:4px;
-    }
-
-    .contact-actions{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-bottom:18px;
-    }
-
-    .contact-btn{
+    .card-panel{
       background:#fff;
-      border:1px solid #dcdcdc;
-      color:#2a2a2a;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
+      border:1px solid #dcdcdf;
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
     }
 
-    .address-label{
-      color:#7a7a7a;
-      font-size:.95rem;
-      margin-bottom:6px;
-    }
-
-    .address-text{
-      font-size:1rem;
-      line-height:1.5;
-      color:#303030;
-      white-space:pre-line;
-    }
-
-    .fulfillment-top{
+    .card-pad{padding:18px}
+    .card-head{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:12px;
       margin-bottom:12px;
+      direction:ltr;
+    }
+    .card-title{
+      font-size:16px;
+      font-weight:800;
+      color:#303030;
+    }
+    .muted{color:var(--muted)}
+    .line{border-top:1px solid #e6e6e8}
+
+    .fulfilled-date-row{
+      min-height:58px;
+      border:1px solid #e5e5e7;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:0 16px;
+      margin-bottom:14px;
+      direction:ltr;
+      font-size:14px;
+      font-weight:700;
     }
 
-    .fulfillment-note{
-      color:#6b5a14;
-      font-size:.96rem;
-      line-height:1.5;
-      margin-bottom:16px;
-    }
-
-    .profile-box{
-      border:1px solid #dfdfdf;
-      border-radius:18px;
-      padding:14px 16px;
-      margin-bottom:18px;
-      background:#fff;
-    }
-
-    .profile-label{
-      color:#7a7a7a;
-      font-size:.92rem;
-      margin-bottom:6px;
-    }
-
-    .profile-value{
-      color:var(--blue);
-      font-size:1rem;
-      line-height:1.4;
-    }
-
-    .item-card{
+    .product-row{
       display:grid;
-      grid-template-columns:92px minmax(0,1fr) auto;
+      grid-template-columns:54px minmax(0,1fr) auto auto;
       gap:14px;
       align-items:center;
-      padding:10px 0 0;
-      margin-bottom:18px;
-    }
-
-    .item-image{
-      width:92px;
-      height:92px;
+      border:1px solid #e5e5e7;
       border-radius:14px;
-      object-fit:cover;
-      background:#f2f2f2;
-      border:1px solid #e2e2e2;
+      padding:12px 14px;
+      direction:ltr;
     }
-
-    .item-name{
-      font-size:1.02rem;
+    .product-thumb{
+      width:54px;height:54px;border-radius:10px;overflow:hidden;background:#f3f3f4;border:1px solid #ececee;
+      display:flex;align-items:center;justify-content:center;font-size:22px;
+    }
+    .product-thumb img{width:100%;height:100%;object-fit:cover}
+    .product-title{
+      font-size:14px;
       font-weight:700;
-      line-height:1.4;
-      margin-bottom:6px;
+      line-height:1.45;
+      color:#303030;
+      text-align:right;
+      direction:rtl;
     }
-
-    .item-price{
-      color:#666;
-      font-size:1rem;
+    .qty-chip{
+      width:28px;height:28px;border-radius:999px;background:#efefef;color:#555;
+      display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;
     }
-
-    .item-qty{
-      font-size:1rem;
-      font-weight:800;
+    .product-price{
+      font-size:14px;
+      font-weight:700;
       white-space:nowrap;
     }
 
+    .summary-grid{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:14px;
+      direction:ltr;
+      font-size:14px;
+      line-height:1.55;
+    }
+    .summary-grid .label-col{
+      display:grid;
+      gap:12px;
+    }
+    .summary-grid .value-col{
+      display:grid;
+      gap:12px;
+      text-align:right;
+      white-space:nowrap;
+      font-weight:700;
+    }
+    .summary-row-title{font-weight:700}
+    .summary-row-sub{color:#4d5154}
+    .summary-strong{font-weight:800;font-size:15px}
+    .summary-actions{
+      display:flex;
+      gap:12px;
+      justify-content:flex-end;
+      margin-top:14px;
+      direction:ltr;
+      flex-wrap:wrap;
+    }
+    .sidebar-card .card-pad{padding:18px}
+    .sidebar-block{
+      display:grid;
+      gap:12px;
+      font-size:14px;
+      line-height:1.55;
+    }
+    .sidebar-link{color:var(--blue);font-weight:600}
+    .sidebar-section-title{
+      font-size:14px;
+      font-weight:800;
+      color:#303030;
+      margin-bottom:4px;
+    }
+
+    .timeline-wrap{
+      padding:18px 18px 22px;
+    }
     .timeline-head{
-      padding:18px 20px 14px;
-      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .timeline-title{
+      font-size:16px;
+      font-weight:800;
+    }
+    .comment-box{
+      border:1px solid #dcdcdf;
+      border-radius:16px;
+      overflow:hidden;
+      margin-bottom:18px;
+      background:#fff;
+    }
+    .comment-top{
+      min-height:78px;
+      padding:14px 16px;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      direction:ltr;
+    }
+    .comment-avatar{
+      width:34px;height:34px;border-radius:50%;overflow:hidden;background:#fff;flex:0 0 auto;
+      border:1px solid #ececee;
+    }
+    .comment-avatar img{width:100%;height:100%;object-fit:cover}
+    .comment-input{
+      flex:1;
+      border:none;
+      outline:none;
+      font-size:14px;
+      background:transparent;
+      color:#303030;
+    }
+    .comment-bottom{
+      min-height:52px;
+      border-top:1px solid #ececee;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 14px;
+      direction:ltr;
+    }
+    .comment-tools{display:flex;gap:14px;color:#7a7d81;font-size:20px}
+    .timeline-note{
+      font-size:14px;
+      color:#6d7175;
+      margin-bottom:14px;
+      text-align:right;
     }
 
     .timeline-list{
-      padding:6px 20px 20px;
+      position:relative;
+      display:grid;
+      gap:20px;
+      padding-left:36px;
+      direction:ltr;
     }
-
-    .timeline-date{
-      color:#666;
-      font-size:.95rem;
+    .timeline-list::before{
+      content:"";
+      position:absolute;
+      left:12px;
+      top:0;
+      bottom:0;
+      width:2px;
+      background:#dedee1;
+    }
+    .timeline-group-label{
+      font-size:14px;
       font-weight:700;
-      margin:14px 0 10px 32px;
+      color:#6d7175;
+      margin-bottom:2px;
     }
-
     .timeline-item{
       position:relative;
-      padding-left:32px;
-      margin-bottom:22px;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:18px;
+      align-items:start;
     }
-
     .timeline-item::before{
       content:"";
       position:absolute;
-      left:10px;
-      top:4px;
-      width:12px;
-      height:12px;
-      border-radius:50%;
-      background:#444;
-      z-index:2;
+      left:-24px;
+      top:6px;
+      width:10px;height:10px;border-radius:50%;
+      background:#6d7175;
+      box-shadow:0 0 0 4px var(--bg);
+    }
+    .timeline-item-text{
+      font-size:14px;
+      line-height:1.6;
+      color:#303030;
+    }
+    .timeline-item-time{
+      font-size:14px;
+      color:#6d7175;
+      white-space:nowrap;
     }
 
-    .timeline-item::after{
+    .mobile-shell{display:block}
+    .mobile-header{
+      background:#000;
+      color:#fff;
+      padding:16px 14px 24px;
+    }
+    .mobile-header-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .mobile-header-brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+    .mobile-avatar-main,.mobile-store{
+      width:58px;height:58px;border-radius:18px;flex:0 0 auto;overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .mobile-avatar-main{
+      border-radius:50%;
+      background:#fff;
+    }
+    .mobile-avatar-main img{
+      width:100%;height:100%;object-fit:cover;
+    }
+    .mobile-store{
+      background:var(--mobile-green);
+      color:#24420c;
+      font-size:28px;
+    }
+    .mobile-brand-text h1{
+      font-size:20px;
+      line-height:1.15;
+      font-weight:900;
+      margin-bottom:4px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .mobile-brand-text p{
+      font-size:12px;
+      color:#d7d7d9;
+    }
+    .mobile-bell{font-size:32px;line-height:1}
+
+    .mobile-main{
+      margin-top:-8px;
+      padding:0 10px 18px;
+    }
+    .mobile-surface{
+      background:#fff;
+      border-radius:34px;
+      box-shadow:var(--shadow);
+      border:1px solid #ececee;
+      overflow:hidden;
+      padding:14px;
+    }
+
+    .mobile-order-head{margin-bottom:14px}
+    .mobile-order-nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
+      direction:ltr;
+    }
+    .round-icon{
+      width:48px;height:48px;border-radius:50%;border:none;background:#f1f1f2;color:#444;cursor:pointer;
+      display:inline-flex;align-items:center;justify-content:center;font-size:22px;
+    }
+    .mobile-order-number{
+      font-size:18px;
+      font-weight:900;
+      color:#232324;
+    }
+    .mobile-order-sub{
+      font-size:14px;
+      color:#5a5d61;
+      line-height:1.45;
+      margin-top:8px;
+      direction:ltr;
+      text-align:left;
+    }
+
+    .mobile-section{
+      background:#fff;
+      border:1px solid #e6e6e8;
+      border-radius:22px;
+      padding:14px;
+      margin-bottom:14px;
+    }
+    .mobile-section-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
+      direction:ltr;
+    }
+
+    .mobile-summary-grid{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:12px;
+      direction:ltr;
+      font-size:14px;
+      line-height:1.55;
+    }
+    .mobile-summary-left,
+    .mobile-summary-right{
+      display:grid;
+      gap:10px;
+    }
+    .mobile-summary-right{
+      text-align:right;
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    .mobile-product-card{
+      display:grid;
+      grid-template-columns:64px minmax(0,1fr) auto;
+      gap:12px;
+      align-items:center;
+      direction:ltr;
+    }
+    .mobile-product-thumb{
+      width:64px;height:64px;border-radius:12px;overflow:hidden;background:#f3f3f4;border:1px solid #ececee;
+      display:flex;align-items:center;justify-content:center;font-size:24px;
+    }
+    .mobile-product-thumb img{width:100%;height:100%;object-fit:cover}
+    .mobile-product-title{
+      font-size:15px;
+      font-weight:800;
+      line-height:1.45;
+      text-align:right;
+      direction:rtl;
+    }
+    .mobile-product-price{
+      font-size:14px;
+      font-weight:700;
+      text-align:right;
+      white-space:nowrap;
+    }
+
+    .mobile-customer-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin:12px 0;
+      direction:ltr;
+    }
+
+    .contact-btn{
+      min-height:46px;
+      border-radius:14px;
+      border:1px solid #d7d7da;
+      background:#fff;
+      font-size:14px;
+      font-weight:700;
+      color:#303030;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+
+    .mobile-timeline-list{
+      position:relative;
+      display:grid;
+      gap:18px;
+      padding-left:26px;
+      direction:ltr;
+    }
+    .mobile-timeline-list::before{
       content:"";
       position:absolute;
-      left:15px;
-      top:16px;
-      width:2px;
-      height:calc(100% + 14px);
-      background:#d7d7d7;
-      z-index:1;
-    }
-
-    .timeline-item:last-child::after{
-      display:none;
-    }
-
-    .timeline-time{
-      color:#666;
-      font-size:.9rem;
-      font-weight:700;
-      margin-bottom:6px;
-    }
-
-    .timeline-text{
-      color:#343434;
-      font-size:1rem;
-      line-height:1.5;
-    }
-
-    .timeline-link{
-      color:var(--blue);
-      font-size:.98rem;
-      margin-top:6px;
-      display:inline-block;
-      cursor:pointer;
-    }
-
-    .bottom-comment{
-      position:sticky;
+      left:9px;
+      top:0;
       bottom:0;
-      background:#fff;
-      border-top:1px solid var(--line);
-      padding:10px 14px;
+      width:2px;
+      background:#dedee1;
+    }
+    .mobile-timeline-item{
+      position:relative;
       display:grid;
-      grid-template-columns:52px minmax(0,1fr) 52px;
-      gap:10px;
-      align-items:center;
+      gap:6px;
+    }
+    .mobile-timeline-item::before{
+      content:"";
+      position:absolute;
+      left:-21px;
+      top:7px;
+      width:10px;height:10px;border-radius:50%;
+      background:#6d7175;
+      box-shadow:0 0 0 4px #fff;
+    }
+    .mobile-timeline-time{
+      font-size:13px;
+      color:#6d7175;
+      font-weight:700;
+    }
+    .mobile-timeline-text{
+      font-size:14px;
+      line-height:1.55;
+      color:#303030;
     }
 
-    .comment-attach,
-    .comment-send{
-      width:52px;
-      height:52px;
-      border:none;
-      background:#fff;
-      color:#666;
-      font-size:1.45rem;
-      cursor:pointer;
-      border-radius:16px;
+    .loading{
+      padding:40px 18px;
+      text-align:center;
+      color:#6d7175;
+      font-size:15px;
+      font-weight:700;
     }
 
-    .comment-box{
-      height:52px;
-      border:none;
-      background:#f2f2f2;
-      border-radius:18px;
-      padding:0 18px;
-      font-size:1rem;
-      color:#333;
+    @media (min-width:1100px){
+      .desktop-shell{display:block}
+      .mobile-shell{display:none}
     }
-
-    .comment-box::placeholder{
-      color:#b2b2b2;
+    @media (max-width:1099px){
+      .desktop-shell{display:none}
+      .mobile-shell{display:block}
     }
-
-    .hidden{
-      display:none !important;
-    }
-
-    @media (max-width: 640px){
-      .topbar{
-        padding:16px 14px;
-      }
-
-      .icon-btn{
-        width:48px;
-        height:48px;
-      }
-
-      .section-pad,
-      .timeline-head,
-      .timeline-list,
-      .info-row{
-        padding-left:16px;
-        padding-right:16px;
-      }
-
-      .contact-actions{
-        grid-template-columns:1fr;
-      }
-
-      .item-card{
-        grid-template-columns:80px minmax(0,1fr) auto;
-      }
-
-      .item-image{
-        width:80px;
-        height:80px;
-      }
+    @media (max-width:640px){
+      .mobile-brand-text h1{font-size:18px}
+      .mobile-bell{font-size:28px}
+      .mobile-avatar-main,.mobile-store{width:54px;height:54px}
+      .mobile-product-card{grid-template-columns:56px minmax(0,1fr) auto}
+      .mobile-product-thumb{width:56px;height:56px}
+      .mobile-customer-actions{grid-template-columns:1fr}
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <div id="alert" class="alert"></div>
+  <div class="app">
+    <div class="desktop-shell">
+      <header class="desktop-topbar">
+        <div class="desktop-topbar-left">
+          <div class="shopify-mark">
+            <span style="font-size:28px;">🛍️</span>
+            <span>shopify</span>
+          </div>
 
-    <div id="loading" class="loading active">Loading...</div>
-
-    <!-- SCREEN 1: SUMMARY -->
-    <section id="screen-summary" class="screen active hidden">
-      <header class="topbar">
-        <div class="topbar-left">
-          <button class="icon-btn" onclick="goBack()">‹</button>
+          <div class="desktop-search">
+            <span class="icon">⌕</span>
+            <input type="text" placeholder="Search" />
+            <div class="kbd"><span>CTRL</span><span>K</span></div>
+          </div>
         </div>
-        <div class="topbar-title" id="topOrderNumber">Order</div>
-        <div class="topbar-right">
-          <button class="icon-btn" type="button" onclick="window.print()">🖨</button>
-          <button class="icon-btn" type="button">⋯</button>
+
+        <div class="desktop-topbar-right">
+          <button class="icon-btn">🎭</button>
+          <button class="icon-btn">🔔</button>
+          <div class="account-chip">
+            <img src="https://smartkidskw.com/logo-sk-smart-kids.png" alt="Smart Kids Kuwait">
+            <span>الأطفال المبتكرون الكويت</span>
+          </div>
         </div>
       </header>
 
-      <section class="section">
-        <div class="section-pad">
-          <div class="summary-top">
-            <div class="badges-inline">
-              <button id="badgePaymentSummary" class="chip payment" type="button">Payment pending</button>
-            </div>
-            <button class="dots-btn" type="button">⋯</button>
+      <div class="desktop-body">
+        <aside class="desktop-sidebar">
+          <div class="side-group">
+            <a class="side-link" href="/admin-enhanced.html">
+              <div class="side-link-left"><span>⌂</span><span>Home</span></div>
+            </a>
+
+            <a class="side-link active" href="/admin-enhanced.html#orders">
+              <div class="side-link-left"><span>🧾</span><span>Orders</span></div>
+              <small id="desktopOrdersCountBadge">0</small>
+            </a>
+
+            <div class="side-link"><div class="side-link-left"><span>🏷️</span><span>Products</span></div></div>
+            <div class="side-link"><div class="side-link-left"><span>👤</span><span>Customers</span></div></div>
+            <div class="side-link"><div class="side-link-left"><span>📣</span><span>Marketing</span></div></div>
+            <div class="side-link"><div class="side-link-left"><span>⚙️</span><span>Discounts</span></div></div>
+            <div class="side-link"><div class="side-link-left"><span>🖼️</span><span>Content</span></div></div>
+            <div class="side-link"><div class="side-link-left"><span>🌍</span><span>Markets</span></div></div>
+            <div class="side-link"><div class="side-link-left"><span>📊</span><span>Analytics</span></div></div>
           </div>
+        </aside>
 
-          <div style="margin-bottom:14px; color:#555; font-size:1rem;">
-            <span id="summaryItemsCount">1 item</span>
+        <main class="desktop-main">
+          <div class="desktop-content-wrap">
+            <div id="desktopAlert" class="alert"></div>
+            <div id="desktopLoading" class="loading">Loading order...</div>
+
+            <section id="desktopOrderContent" class="hidden">
+              <div class="desktop-order-header">
+                <div class="desktop-order-title-wrap">
+                  <div class="desktop-breadcrumb">
+                    <span>🧾</span>
+                    <span>›</span>
+                    <div class="desktop-order-title">
+                      <span id="desktopOrderNumber">SK0000</span>
+                      <span id="desktopPaymentChipTop" class="status-chip payment"><span class="dot"></span>Payment pending</span>
+                      <span id="desktopFulfillmentChipTop" class="status-chip fulfillment"><span class="dot"></span>Unfulfilled</span>
+                    </div>
+                  </div>
+                  <div class="desktop-order-sub" id="desktopOrderSubLine">—</div>
+                </div>
+
+                <div class="desktop-header-actions">
+                  <button class="ghost-btn">Restock</button>
+                  <button class="ghost-btn">Return</button>
+                  <button class="ghost-btn" onclick="goBackToOrders()">Edit</button>
+                  <button class="ghost-btn">Print ▾</button>
+                  <button class="ghost-btn">More actions ▾</button>
+                </div>
+              </div>
+
+              <div class="desktop-order-grid">
+                <div class="stack">
+                  <div class="card-panel">
+                    <div class="card-pad">
+                      <div class="card-head">
+                        <div id="desktopFulfillmentChipCard" class="status-chip fulfillment"><span class="dot"></span>Unfulfilled</div>
+                        <div id="desktopFulfillmentRef" class="card-title">—</div>
+                      </div>
+
+                      <div class="fulfilled-date-row">
+                        <div>🗓 <span id="desktopFulfilledDate">—</span></div>
+                        <div>⋯</div>
+                      </div>
+
+                      <div class="product-row">
+                        <div class="product-thumb" id="desktopProductThumb">📦</div>
+                        <div class="product-title" id="desktopProductTitle">—</div>
+                        <div style="display:flex;align-items:center;gap:8px;justify-self:end;">
+                          <div class="product-price" id="desktopProductUnitPrice">KWD 0.000</div>
+                          <div>×</div>
+                          <div class="qty-chip" id="desktopProductQty">1</div>
+                        </div>
+                        <div class="product-price" id="desktopProductLineTotal">KWD 0.000</div>
+                      </div>
+
+                      <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+                        <button class="dark-btn">Add tracking</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card-panel">
+                    <div class="card-pad">
+                      <div class="card-head">
+                        <div id="desktopPaymentChipCard" class="status-chip payment"><span class="dot"></span>Payment pending</div>
+                        <div>⋯</div>
+                      </div>
+
+                      <div class="summary-grid">
+                        <div class="label-col">
+                          <div><div class="summary-row-title">Subtotal</div></div>
+                          <div>
+                            <div class="summary-row-title">Shipping</div>
+                            <div class="summary-row-sub" id="desktopShippingText">—</div>
+                          </div>
+                          <div class="summary-strong">Total</div>
+                        </div>
+
+                        <div class="value-col">
+                          <div id="desktopSubtotal">KWD 0.000</div>
+                          <div id="desktopShippingCost">KWD 0.000</div>
+                          <div class="summary-strong" id="desktopTotal">KWD 0.000</div>
+                        </div>
+                      </div>
+
+                      <div class="line" style="margin:16px -18px 14px;"></div>
+
+                      <div class="summary-grid">
+                        <div class="label-col">
+                          <div class="summary-row-title">Paid</div>
+                          <div class="summary-row-title">Balance</div>
+                        </div>
+                        <div class="value-col">
+                          <div id="desktopPaid">KWD 0.000</div>
+                          <div id="desktopBalance">KWD 0.000</div>
+                        </div>
+                      </div>
+
+                      <div class="summary-actions">
+                        <button class="ghost-btn" onclick="sendInvoice()">Send invoice</button>
+                        <button class="dark-btn" onclick="markAsPaid()">Mark as paid</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-panel timeline-wrap">
+                    <div class="timeline-head">
+                      <div><div class="timeline-title">Timeline</div></div>
+                    </div>
+
+                    <div class="comment-box">
+                      <div class="comment-top">
+                        <div class="comment-avatar">
+                          <img src="https://smartkidskw.com/logo-sk-smart-kids.png" alt="">
+                        </div>
+                        <input class="comment-input" type="text" placeholder="Leave a comment..." />
+                      </div>
+                      <div class="comment-bottom">
+                        <div class="comment-tools"><span>☺</span><span>@</span><span>#</span><span>🔗</span></div>
+                        <button class="ghost-btn" style="min-height:34px;">Post</button>
+                      </div>
+                    </div>
+
+                    <div class="timeline-note">Only you and other staff can see comments</div>
+                    <div class="timeline-list" id="desktopTimelineList"></div>
+                  </div>
+                </div>
+
+                <div class="stack">
+                  <div class="card-panel sidebar-card">
+                    <div class="card-pad">
+                      <div class="card-head">
+                        <div class="card-title">Notes</div>
+                        <div>✎</div>
+                      </div>
+                      <div id="desktopNotesText" class="sidebar-block muted">No notes from customer</div>
+                    </div>
+                  </div>
+
+                  <div class="card-panel sidebar-card">
+                    <div class="card-pad">
+                      <div class="card-head">
+                        <div class="card-title">Customer</div>
+                        <div>✕</div>
+                      </div>
+
+                      <div class="sidebar-block">
+                        <div>
+                          <div class="sidebar-link" id="desktopCustomerName">—</div>
+                          <div class="sidebar-link" id="desktopCustomerOrdersHint">1 order</div>
+                        </div>
+
+                        <div>
+                          <div class="sidebar-section-title">Contact information</div>
+                          <div class="sidebar-link" id="desktopCustomerEmail">—</div>
+                          <div id="desktopCustomerPhone" class="muted">—</div>
+                        </div>
+
+                        <div>
+                          <div class="sidebar-section-title">Shipping address</div>
+                          <div id="desktopAddressBlock">—</div>
+                          <div class="sidebar-link" style="margin-top:6px;">View map</div>
+                        </div>
+
+                        <div>
+                          <div class="sidebar-section-title">Billing address</div>
+                          <div class="muted">Same as shipping address</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card-panel sidebar-card">
+                    <div class="card-pad">
+                      <div class="card-head">
+                        <div class="card-title">Conversion summary</div>
+                      </div>
+                      <div class="sidebar-block">
+                        <div id="desktopConversion1">This is their 1st order</div>
+                        <div>1st session from Online Store</div>
+                        <div id="desktopConversion3">1 session over 1 day</div>
+                        <div class="sidebar-link">View conversion details</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card-panel sidebar-card">
+                    <div class="card-pad">
+                      <div class="card-head">
+                        <div class="card-title">Order risk</div>
+                        <div>⌕</div>
+                      </div>
+                      <div class="sidebar-block muted">Analysis not available</div>
+                    </div>
+                  </div>
+
+                  <div class="card-panel sidebar-card">
+                    <div class="card-pad">
+                      <div class="card-head">
+                        <div class="card-title">Tags</div>
+                        <div>✎</div>
+                      </div>
+                      <input type="text" style="width:100%;height:42px;border:1px solid #d6d6d9;border-radius:12px;padding:0 12px;outline:none;" placeholder="">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
-
-          <div class="money-grid">
-            <div class="money-label">
-              <strong>Subtotal</strong>
-            </div>
-            <div class="money-value" id="summarySubtotal">KWD 0.000</div>
-
-            <div class="money-label">
-              <strong>Shipping</strong>
-              <span id="summaryShippingText">-</span>
-            </div>
-            <div class="money-value" id="summaryShipping">KWD 0.000</div>
-
-            <div class="money-label">
-              <strong>Total</strong>
-            </div>
-            <div class="money-value total" id="summaryTotal">KWD 0.000</div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="money-grid">
-            <div class="money-label">
-              <strong>Paid</strong>
-            </div>
-            <div class="money-value" id="summaryPaid">KWD 0.000</div>
-
-            <div class="money-label">
-              <strong>Balance</strong>
-            </div>
-            <div class="money-value" id="summaryBalance">KWD 0.000</div>
-          </div>
-
-          <div class="action-stack">
-            <button class="main-btn" type="button" onclick="sendInvoice()">Send invoice</button>
-            <button class="ghost-btn" type="button" onclick="markAsPaid()">Mark as paid</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="info-row">
-          <div class="info-row-title">Add tags</div>
-          <div class="info-row-right">⊕</div>
-        </div>
-
-        <div class="info-row">
-          <div>
-            <div class="info-row-title">Conversion details</div>
-          </div>
-          <div class="info-row-right" id="conversionDetailsValue">-</div>
-        </div>
-
-        <div class="info-row">
-          <div>
-            <div class="info-row-title">Order risk</div>
-          </div>
-          <div class="info-row-right">No analysis</div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="timeline-head">
-          <div class="section-title">Timeline</div>
-          <div class="section-subtitle">Only you and other staff can see comments</div>
-        </div>
-        <div id="timelineListSummary" class="timeline-list"></div>
-      </section>
-
-      <div class="bottom-comment">
-        <button class="comment-attach" type="button">⎋</button>
-        <input class="comment-box" type="text" placeholder="Leave a comment..." />
-        <button class="comment-send" type="button">➤</button>
+        </main>
       </div>
-    </section>
+    </div>
 
-    <!-- SCREEN 2: CUSTOMER + FULFILLMENT -->
-    <section id="screen-customer" class="screen hidden">
-      <header class="topbar">
-        <div class="topbar-left">
-          <button class="icon-btn" onclick="goBack()">‹</button>
-        </div>
-        <div class="topbar-title small" id="topOrderNumberCustomer">Order</div>
-        <div class="topbar-right">
-          <button class="icon-btn" type="button" onclick="window.print()">🖨</button>
-          <button class="icon-btn" type="button">⋯</button>
+    <div class="mobile-shell">
+      <header class="mobile-header">
+        <div class="mobile-header-row">
+          <div class="mobile-header-brand">
+            <div class="mobile-avatar-main">
+              <img src="https://smartkidskw.com/logo-sk-smart-kids.png" alt="">
+            </div>
+
+            <div class="mobile-bell">🔔</div>
+
+            <div class="mobile-brand-text">
+              <h1>الأطفال المبتكرون الكويت</h1>
+              <p>Smart Kids Kuwait Admin</p>
+            </div>
+          </div>
+
+          <div class="mobile-store">🏬</div>
         </div>
       </header>
 
-      <section class="section">
-        <div class="section-pad">
-          <div class="badges-inline" style="margin-bottom:10px;">
-            <button id="badgeFulfillmentCustomer" class="chip fulfillment" type="button">Unfulfilled</button>
-            <button id="badgePaymentCustomer" class="chip payment" type="button">Payment pending</button>
-          </div>
+      <main class="mobile-main">
+        <div id="mobileAlert" class="alert"></div>
+        <div class="mobile-surface">
+          <div id="mobileLoading" class="loading">Loading order...</div>
 
-          <div style="font-size:.98rem; color:#616161; line-height:1.5;">
-            <span id="customerTopDate">-</span> • Online Store
-          </div>
-        </div>
-      </section>
+          <section id="mobileOrderContent" class="hidden">
+            <div class="mobile-order-head">
+              <div class="mobile-order-nav">
+                <button class="round-icon" onclick="goBackToOrders()">‹</button>
+                <div style="display:flex;gap:8px;">
+                  <button class="round-icon">🖨</button>
+                  <button class="round-icon">⋯</button>
+                </div>
+              </div>
 
-      <section class="section">
-        <div class="section-pad">
-          <div class="customer-head">
-            <div>
-              <div class="section-title">Customer</div>
-              <div class="customer-name" id="customerNameBlock">-</div>
-              <div class="customer-orders" id="customerOrdersCount">1 order</div>
+              <div class="mobile-order-number" id="mobileOrderNumber">SK0000</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;direction:ltr;">
+                <span id="mobilePaymentChipTop" class="status-chip payment"><span class="dot"></span>Payment pending</span>
+                <span id="mobileFulfillmentChipTop" class="status-chip fulfillment"><span class="dot"></span>Unfulfilled</span>
+              </div>
+              <div class="mobile-order-sub" id="mobileOrderSubLine">—</div>
             </div>
-            <button class="dots-btn" type="button">⋯</button>
-          </div>
 
-          <div class="contact-actions">
-            <a id="emailDetailsBtn" class="contact-btn" href="#">
-              ✉️ <span>Email details</span>
-            </a>
-            <a id="phoneDetailsBtn" class="contact-btn" href="#">
-              ☎️ <span>Phone details</span>
-            </a>
-          </div>
+            <div class="mobile-section">
+              <div class="mobile-section-head">
+                <div id="mobileFulfillmentChipCard" class="status-chip fulfillment"><span class="dot"></span>Unfulfilled</div>
+                <div>⋯</div>
+              </div>
 
-          <div class="address-label">Default address</div>
-          <div class="address-text" id="customerAddressBlock">-</div>
-        </div>
-      </section>
+              <div class="mobile-product-card">
+                <div class="mobile-product-thumb" id="mobileProductThumb">📦</div>
+                <div>
+                  <div class="mobile-product-title" id="mobileProductTitle">—</div>
+                  <div class="mobile-product-price" id="mobileProductUnitPrice">KWD 0.000 × <span id="mobileProductQty">1</span></div>
+                </div>
+                <div class="mobile-product-price" id="mobileProductLineTotal">KWD 0.000</div>
+              </div>
 
-      <section class="section">
-        <div class="section-pad">
-          <div class="fulfillment-top">
-            <div class="badges-inline">
-              <button id="badgeFulfillmentSection" class="chip fulfillment" type="button">Unfulfilled</button>
+              <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+                <button class="dark-btn">Add tracking</button>
+              </div>
             </div>
-            <button class="dots-btn" type="button">⋯</button>
-          </div>
 
-          <div class="fulfillment-note" id="fulfillmentNote">-</div>
+            <div class="mobile-section">
+              <div class="mobile-section-head">
+                <div id="mobilePaymentChipCard" class="status-chip payment"><span class="dot"></span>Payment pending</div>
+                <div>⋯</div>
+              </div>
 
-          <div class="profile-box">
-            <div class="profile-label">Shipping profile</div>
-            <div class="profile-value">General profile</div>
-          </div>
+              <div class="mobile-summary-grid">
+                <div class="mobile-summary-left">
+                  <div>Subtotal</div>
+                  <div>Shipping</div>
+                  <div style="font-weight:800;">Total</div>
+                  <div>Paid</div>
+                  <div>Balance</div>
+                </div>
 
-          <div id="itemsListCustomer"></div>
+                <div class="mobile-summary-right">
+                  <div id="mobileSubtotal">KWD 0.000</div>
+                  <div id="mobileShippingCost">KWD 0.000</div>
+                  <div id="mobileTotal" style="font-weight:800;">KWD 0.000</div>
+                  <div id="mobilePaid">KWD 0.000</div>
+                  <div id="mobileBalance">KWD 0.000</div>
+                </div>
+              </div>
 
-          <button class="main-btn" type="button" onclick="markAsFulfilled()">Mark as fulfilled</button>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-pad">
-          <div class="badges-inline" style="margin-bottom:14px;">
-            <button id="badgePaymentSection" class="chip payment" type="button">Payment pending</button>
-          </div>
-
-          <div class="money-grid">
-            <div class="money-label">
-              <strong>Subtotal</strong>
+              <div style="display:grid;gap:10px;margin-top:14px;">
+                <button class="ghost-btn" onclick="sendInvoice()">Send invoice</button>
+                <button class="dark-btn" onclick="markAsPaid()">Mark as paid</button>
+              </div>
             </div>
-            <div class="money-value" id="customerSubtotal">KWD 0.000</div>
 
-            <div class="money-label">
-              <strong>Total</strong>
+            <div class="mobile-section">
+              <div class="mobile-section-head">
+                <div class="card-title">Customer</div>
+                <div>✎</div>
+              </div>
+
+              <div style="display:grid;gap:10px;font-size:14px;line-height:1.55;">
+                <div class="sidebar-link" id="mobileCustomerName">—</div>
+                <div class="sidebar-link" id="mobileCustomerOrdersHint">1 order</div>
+
+                <div class="mobile-customer-actions">
+                  <a id="mobileEmailBtn" class="contact-btn" href="#">✉️ Email</a>
+                  <a id="mobilePhoneBtn" class="contact-btn" href="#">☎️ Call</a>
+                </div>
+
+                <div>
+                  <div class="sidebar-section-title">Shipping address</div>
+                  <div id="mobileAddressBlock">—</div>
+                </div>
+
+                <div>
+                  <div class="sidebar-section-title">Notes</div>
+                  <div id="mobileNotesText" class="muted">No notes from customer</div>
+                </div>
+              </div>
             </div>
-            <div class="money-value total" id="customerTotal">KWD 0.000</div>
-          </div>
+
+            <div class="mobile-section">
+              <div class="mobile-section-head">
+                <div class="card-title">Timeline</div>
+              </div>
+              <div class="mobile-timeline-list" id="mobileTimelineList"></div>
+            </div>
+          </section>
         </div>
-      </section>
-    </section>
+      </main>
+    </div>
   </div>
 
   <script>
     const API_BASE = '/api/orders';
-
     const HELPERS_FALLBACK = {
       formatCurrency(value) {
         const num = Number(value || 0);
@@ -857,312 +1175,273 @@
           hour: 'numeric',
           minute: '2-digit'
         });
-      },
-      formatDateShort(value) {
-        if (!value) return '-';
-        const d = new Date(value);
-        if (isNaN(d)) return value;
-        return d.toLocaleString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit'
-        });
       }
     };
-
     const H = (typeof HELPERS !== 'undefined' && HELPERS) ? HELPERS : HELPERS_FALLBACK;
-
     let currentOrder = null;
 
     document.addEventListener('DOMContentLoaded', () => {
-      loadOrderDetails();
+      loadOrder();
     });
 
-    async function loadOrderDetails() {
-      showLoading(true);
-
+    async function loadOrder() {
       try {
+        setLoading(true);
+
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
         const orderNumber = params.get('order');
 
-        if (!id && !orderNumber) {
-          throw new Error('Missing order id or order number');
-        }
+        if (!id && !orderNumber) throw new Error('Order id is missing');
 
         let response;
-        let data;
-
         if (id) {
           response = await fetch(`${API_BASE}/${encodeURIComponent(id)}`);
-          data = await response.json();
         } else {
           response = await fetch(`${API_BASE}/track/${encodeURIComponent(orderNumber)}`);
-          data = await response.json();
         }
 
-        if (!response.ok || !data.success) {
-          throw new Error(data?.error || 'Failed to load order');
-        }
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || 'Failed to load order');
 
         currentOrder = normalizeOrder(data.data);
         renderOrder(currentOrder);
-
-        document.getElementById('screen-summary').classList.remove('hidden');
-        document.getElementById('screen-customer').classList.remove('hidden');
       } catch (error) {
-        console.error(error);
         showAlert(error.message || 'Failed to load order', 'error');
       } finally {
-        showLoading(false);
+        setLoading(false);
       }
     }
 
     function normalizeOrder(order) {
       const items = Array.isArray(order.items) ? order.items.map((item, index) => {
-        const price = Number(item.product_price ?? item.price ?? 0);
+        const unitPrice = Number(item.product_price ?? item.price ?? 0);
         const quantity = Number(item.quantity ?? 1);
-        const subtotal = Number(item.subtotal ?? (price * quantity));
+        const subtotal = Number(item.subtotal ?? (unitPrice * quantity));
         return {
           ...item,
-          id: item.id || index + 1,
-          product_name: item.product_name || item.name || 'Product',
-          price,
+          product_name: item.product_name || item.name || `Product ${index + 1}`,
+          unit_price: unitPrice,
           quantity,
           subtotal,
           image: item.image || item.image_url || ''
         };
       }) : [];
 
-      const itemsCount = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0) || items.length || 1;
+      const firstItem = items[0] || {
+        product_name: 'Order item',
+        unit_price: Number(order.total || 0),
+        quantity: 1,
+        subtotal: Number(order.total || 0),
+        image: ''
+      };
 
       const total = Number(order.total || 0);
-      const shippingCost = Number(order.shipping_cost || 0);
-      const subtotal = Number(order.subtotal || Math.max(total - shippingCost, 0));
+      const shipping = Number(order.shipping_cost || 0);
+      const subtotal = Number(order.subtotal || Math.max(total - shipping, 0));
       const paid = order.status === 'completed' ? total : 0;
       const balance = Math.max(total - paid, 0);
 
       return {
         ...order,
         items,
-        itemsCount,
-        subtotal,
-        shipping_cost: shippingCost,
+        firstItem,
         total,
+        shipping_cost: shipping,
+        subtotal,
         paid,
-        balance
+        balance,
+        itemsCount: items.reduce((sum, item) => sum + Number(item.quantity || 0), 0) || 1
       };
     }
 
     function renderOrder(order) {
-      const orderNo = order.order_number || `#${order.id || ''}`;
+      const orderNumber = order.order_number || `#${order.id || ''}`;
       const paymentLabel = getPaymentLabel(order);
       const fulfillmentLabel = getFulfillmentLabel(order);
-      const createdAtText = formatTopDate(order.created_at);
-      const customerOrders = estimateCustomerOrders(order);
+      const orderSub = `${formatOrderDateLine(order.created_at)} • Online Store`;
 
-      document.getElementById('topOrderNumber').textContent = orderNo;
-      document.getElementById('topOrderNumberCustomer').textContent = orderNo;
+      setText('desktopOrdersCountBadge', '1');
 
-      document.getElementById('badgePaymentSummary').textContent = paymentLabel;
-      document.getElementById('badgePaymentCustomer').textContent = paymentLabel;
-      document.getElementById('badgePaymentSection').textContent = paymentLabel;
+      setText('desktopOrderNumber', orderNumber);
+      setText('desktopOrderSubLine', orderSub);
+      setStatusChip('desktopPaymentChipTop', paymentLabel, 'payment');
+      setStatusChip('desktopPaymentChipCard', paymentLabel, 'payment');
+      setStatusChip('desktopFulfillmentChipTop', fulfillmentLabel, 'fulfillment');
+      setStatusChip('desktopFulfillmentChipCard', fulfillmentLabel, 'fulfillment');
+      setText('desktopFulfillmentRef', orderNumber);
+      setText('desktopFulfilledDate', formatDetailDate(order.updated_at || order.created_at));
 
-      document.getElementById('badgeFulfillmentCustomer').textContent = fulfillmentLabel;
-      document.getElementById('badgeFulfillmentSection').textContent = fulfillmentLabel;
+      renderProductThumb('desktopProductThumb', order.firstItem.image);
+      setText('desktopProductTitle', order.firstItem.product_name);
+      setText('desktopProductUnitPrice', H.formatCurrency(order.firstItem.unit_price));
+      setText('desktopProductQty', String(order.firstItem.quantity));
+      setText('desktopProductLineTotal', H.formatCurrency(order.firstItem.subtotal));
 
-      document.getElementById('summaryItemsCount').textContent = `${order.itemsCount} item${order.itemsCount > 1 ? 's' : ''}`;
-      document.getElementById('summarySubtotal').textContent = H.formatCurrency(order.subtotal);
-      document.getElementById('summaryShipping').textContent = H.formatCurrency(order.shipping_cost);
-      document.getElementById('summaryShippingText').textContent = getShippingText(order);
-      document.getElementById('summaryTotal').textContent = H.formatCurrency(order.total);
-      document.getElementById('summaryPaid').textContent = H.formatCurrency(order.paid);
-      document.getElementById('summaryBalance').textContent = H.formatCurrency(order.balance);
+      setText('desktopSubtotal', H.formatCurrency(order.subtotal));
+      setText('desktopShippingCost', H.formatCurrency(order.shipping_cost));
+      setText('desktopShippingText', getShippingText(order));
+      setText('desktopTotal', H.formatCurrency(order.total));
+      setText('desktopPaid', H.formatCurrency(order.paid));
+      setText('desktopBalance', H.formatCurrency(order.balance));
 
-      document.getElementById('conversionDetailsValue').textContent = customerOrders;
-      document.getElementById('customerTopDate').textContent = createdAtText;
-      document.getElementById('customerNameBlock').textContent = order.customer_name || '-';
-      document.getElementById('customerOrdersCount').textContent = customerOrders;
-      document.getElementById('customerAddressBlock').textContent = buildAddress(order);
-      document.getElementById('fulfillmentNote').textContent = buildFulfillmentNote(order);
-      document.getElementById('customerSubtotal').textContent = H.formatCurrency(order.subtotal);
-      document.getElementById('customerTotal').textContent = H.formatCurrency(order.total);
+      setText('desktopNotesText', order.notes || 'No notes from customer');
+      setText('desktopCustomerName', order.customer_name || '-');
+      setText('desktopCustomerOrdersHint', '1 order');
+      setText('desktopCustomerEmail', order.customer_email || '-');
+      setText('desktopCustomerPhone', order.customer_phone || '-');
+      setHTML('desktopAddressBlock', nl2br(buildAddress(order)));
+      setText('desktopConversion1', 'This is their 1st order');
+      setText('desktopConversion3', '1 session over 1 day');
 
-      const emailBtn = document.getElementById('emailDetailsBtn');
-      const phoneBtn = document.getElementById('phoneDetailsBtn');
+      setText('mobileOrderNumber', orderNumber);
+      setText('mobileOrderSubLine', orderSub);
+      setStatusChip('mobilePaymentChipTop', paymentLabel, 'payment');
+      setStatusChip('mobilePaymentChipCard', paymentLabel, 'payment');
+      setStatusChip('mobileFulfillmentChipTop', fulfillmentLabel, 'fulfillment');
+      setStatusChip('mobileFulfillmentChipCard', fulfillmentLabel, 'fulfillment');
 
-      emailBtn.href = order.customer_email ? `mailto:${order.customer_email}` : '#';
-      phoneBtn.href = order.customer_phone ? `tel:${order.customer_phone}` : '#';
+      renderProductThumb('mobileProductThumb', order.firstItem.image);
+      setText('mobileProductTitle', order.firstItem.product_name);
+      setText('mobileProductUnitPrice', `${H.formatCurrency(order.firstItem.unit_price)} × ${order.firstItem.quantity}`);
+      setText('mobileProductQty', String(order.firstItem.quantity));
+      setText('mobileProductLineTotal', H.formatCurrency(order.firstItem.subtotal));
 
-      renderItems(order.items);
+      setText('mobileSubtotal', H.formatCurrency(order.subtotal));
+      setText('mobileShippingCost', H.formatCurrency(order.shipping_cost));
+      setText('mobileTotal', H.formatCurrency(order.total));
+      setText('mobilePaid', H.formatCurrency(order.paid));
+      setText('mobileBalance', H.formatCurrency(order.balance));
+
+      setText('mobileCustomerName', order.customer_name || '-');
+      setText('mobileCustomerOrdersHint', '1 order');
+      setHTML('mobileAddressBlock', nl2br(buildAddress(order)));
+      setText('mobileNotesText', order.notes || 'No notes from customer');
+
+      const emailBtn = document.getElementById('mobileEmailBtn');
+      const phoneBtn = document.getElementById('mobilePhoneBtn');
+      if (emailBtn) emailBtn.href = order.customer_email ? `mailto:${order.customer_email}` : '#';
+      if (phoneBtn) phoneBtn.href = order.customer_phone ? `tel:${order.customer_phone}` : '#';
+
       renderTimeline(order);
 
-      document.title = `${orderNo} - Order Details`;
-    }
-
-    function renderItems(items) {
-      const container = document.getElementById('itemsListCustomer');
-
-      if (!items.length) {
-        container.innerHTML = `<div style="color:#777; margin-bottom:16px;">No items found</div>`;
-        return;
-      }
-
-      container.innerHTML = items.map(item => `
-        <div class="item-card">
-          ${
-            item.image
-              ? `<img class="item-image" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.product_name)}">`
-              : `<div class="item-image"></div>`
-          }
-          <div>
-            <div class="item-name">${escapeHtml(item.product_name)}</div>
-            <div class="item-price">${escapeHtml(H.formatCurrency(item.price))}</div>
-          </div>
-          <div class="item-qty">× ${escapeHtml(String(item.quantity))}</div>
-        </div>
-      `).join('');
+      document.getElementById('desktopOrderContent').classList.remove('hidden');
+      document.getElementById('mobileOrderContent').classList.remove('hidden');
+      document.title = `${orderNumber} - Order Details`;
     }
 
     function renderTimeline(order) {
-      const timelineSummary = document.getElementById('timelineListSummary');
       const events = buildTimeline(order);
+      const desktopEl = document.getElementById('desktopTimelineList');
+      const mobileEl = document.getElementById('mobileTimelineList');
+      desktopEl.innerHTML = '';
+      mobileEl.innerHTML = '';
 
-      if (!events.length) {
-        timelineSummary.innerHTML = `<div style="color:#777;">No timeline events</div>`;
-        return;
-      }
-
-      let html = '';
-      let lastDateLabel = '';
-
+      let lastGroup = '';
       events.forEach(event => {
-        if (event.dateLabel !== lastDateLabel) {
-          html += `<div class="timeline-date">${escapeHtml(event.dateLabel)}</div>`;
-          lastDateLabel = event.dateLabel;
+        if (event.group !== lastGroup) {
+          desktopEl.insertAdjacentHTML('beforeend', `<div class="timeline-group-label">${escapeHtml(event.group)}</div>`);
+          lastGroup = event.group;
         }
 
-        html += `
+        desktopEl.insertAdjacentHTML('beforeend', `
           <div class="timeline-item">
-            <div class="timeline-time">${escapeHtml(event.timeLabel)}</div>
-            <div class="timeline-text">${escapeHtml(event.text)}</div>
-            ${event.linkText ? `<span class="timeline-link">${escapeHtml(event.linkText)}</span>` : ''}
+            <div class="timeline-item-text">${escapeHtml(event.text)}</div>
+            <div class="timeline-item-time">${escapeHtml(event.time)}</div>
           </div>
-        `;
-      });
+        `);
 
-      timelineSummary.innerHTML = html;
+        mobileEl.insertAdjacentHTML('beforeend', `
+          <div class="mobile-timeline-item">
+            <div class="mobile-timeline-time">${escapeHtml(event.group)} • ${escapeHtml(event.time)}</div>
+            <div class="mobile-timeline-text">${escapeHtml(event.text)}</div>
+          </div>
+        `);
+      });
     }
 
     function buildTimeline(order) {
+      const created = new Date(order.created_at || Date.now());
+      const updated = new Date(order.updated_at || order.created_at || Date.now());
       const events = [];
-      const createdAt = order.created_at || new Date().toISOString();
 
       events.push({
-        dateLabel: dateOnlyLabel(createdAt),
-        timeLabel: timeOnlyLabel(createdAt),
-        text: `Order was placed by ${order.customer_name || 'customer'} on Online Store (${order.order_number || ''}).`
+        group: dayLabel(created),
+        time: timeLabel(created),
+        text: `Order ${order.order_number || ''} was created by ${order.customer_name || 'customer'}.`
       });
 
       events.push({
-        dateLabel: dateOnlyLabel(createdAt),
-        timeLabel: timeOnlyLabel(createdAt),
-        text: `${H.formatCurrency(order.total)} payment is pending.`,
-        linkText: order.balance > 0 ? 'Payment pending' : ''
-      });
-
-      events.push({
-        dateLabel: dateOnlyLabel(createdAt),
-        timeLabel: timeOnlyLabel(createdAt),
-        text: `Confirmation was generated for this order.`
+        group: dayLabel(created),
+        time: timeLabel(created),
+        text: `${getPaymentLabel(order)} for ${H.formatCurrency(order.total)}.`
       });
 
       if (order.customer_email) {
         events.push({
-          dateLabel: dateOnlyLabel(createdAt),
-          timeLabel: timeOnlyLabel(createdAt),
-          text: `Order confirmation email was sent to ${order.customer_name || 'customer'} (${order.customer_email}).`,
-          linkText: 'Resend email'
+          group: dayLabel(created),
+          time: timeLabel(created),
+          text: `Confirmation email was sent to ${order.customer_email}.`
         });
       }
 
-      if (order.updated_at && order.updated_at !== createdAt) {
-        events.unshift({
-          dateLabel: dateOnlyLabel(order.updated_at),
-          timeLabel: timeOnlyLabel(order.updated_at),
-          text: `Order details were updated.`
+      if (updated.getTime() !== created.getTime()) {
+        events.push({
+          group: dayLabel(updated),
+          time: timeLabel(updated),
+          text: `Order was updated.`
         });
       }
 
-      if (order.status === 'shipped' && order.shipped_at) {
-        events.unshift({
-          dateLabel: dateOnlyLabel(order.shipped_at),
-          timeLabel: timeOnlyLabel(order.shipped_at),
-          text: `Order was marked as shipped.`
+      if (order.status === 'completed') {
+        events.push({
+          group: dayLabel(updated),
+          time: timeLabel(updated),
+          text: `Order was marked as completed.`
         });
-      }
-
-      if (order.status === 'completed' && order.completed_at) {
-        events.unshift({
-          dateLabel: dateOnlyLabel(order.completed_at),
-          timeLabel: timeOnlyLabel(order.completed_at),
-          text: `Order was marked as completed and paid.`
+      } else if (order.status === 'shipped') {
+        events.push({
+          group: dayLabel(updated),
+          time: timeLabel(updated),
+          text: `Order was marked as fulfilled.`
+        });
+      } else if (order.status === 'processing') {
+        events.push({
+          group: dayLabel(updated),
+          time: timeLabel(updated),
+          text: `Order is being processed.`
         });
       }
 
       return events;
     }
 
+    function setLoading(show) {
+      document.getElementById('desktopLoading').classList.toggle('hidden', !show);
+      document.getElementById('mobileLoading').classList.toggle('hidden', !show);
+    }
+
     function getPaymentLabel(order) {
-      return order.balance > 0 ? 'Payment pending' : 'Paid';
+      return Number(order.balance || 0) > 0 ? 'Payment pending' : 'Paid';
     }
 
     function getFulfillmentLabel(order) {
-      if (order.status === 'completed') return 'Fulfilled';
-      if (order.status === 'shipped') return 'Shipped';
+      if (order.status === 'completed' || order.status === 'shipped') return 'Fulfilled';
       if (order.status === 'processing') return 'Processing';
-      if (order.status === 'cancelled') return 'Cancelled';
+      if (order.status === 'cancelled') return 'Archived';
       return 'Unfulfilled';
     }
 
     function getShippingText(order) {
-      if (Number(order.shipping_cost || 0) === 0) {
-        return 'The order qualifies for free shipping';
-      }
-      return `Delivery fee`;
-    }
-
-    function buildFulfillmentNote(order) {
-      const shippingLine = Number(order.shipping_cost || 0) === 0
+      return Number(order.shipping_cost || 0) === 0
         ? 'The order qualifies for free shipping'
-        : `Shipping fee ${H.formatCurrency(order.shipping_cost)}`;
-
-      const country = order.customer_city || 'Kuwait';
-      return `${shippingLine} • ${country}`;
+        : 'Standard shipping';
     }
 
-    function buildAddress(order) {
-      const parts = [
-        order.customer_district || '',
-        order.customer_address || '',
-        order.customer_city || '',
-        'KU',
-        'Kuwait'
-      ].filter(Boolean);
-
-      return parts.join('\n');
-    }
-
-    function estimateCustomerOrders(order) {
-      return '2nd order';
-    }
-
-    function formatTopDate(value) {
+    function formatOrderDateLine(value) {
       if (!value) return '-';
       const d = new Date(value);
-      if (isNaN(d)) return value;
+      if (isNaN(d)) return '-';
       return d.toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',
@@ -1172,59 +1451,90 @@
       });
     }
 
-    function dateOnlyLabel(value) {
+    function formatDetailDate(value) {
+      if (!value) return '-';
       const d = new Date(value);
-      if (isNaN(d)) return 'Timeline';
+      if (isNaN(d)) return '-';
       return d.toLocaleDateString('en-US', {
-        weekday: 'long'
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
       });
     }
 
-    function timeOnlyLabel(value) {
-      const d = new Date(value);
-      if (isNaN(d)) return '-';
-      return d.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit'
-      });
+    function dayLabel(date) {
+      return date.toLocaleDateString('en-US', { weekday: 'long' });
+    }
+
+    function timeLabel(date) {
+      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    }
+
+    function buildAddress(order) {
+      return [
+        order.customer_district || '',
+        order.customer_address || '',
+        order.customer_city || '',
+        'KU',
+        'Kuwait'
+      ].filter(Boolean).join('\n');
+    }
+
+    function renderProductThumb(id, imageUrl) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (imageUrl) {
+        el.innerHTML = `<img src="${escapeHtml(imageUrl)}" alt="">`;
+      } else {
+        el.textContent = '📦';
+      }
+    }
+
+    function setStatusChip(id, text, type) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.className = `status-chip ${type}`;
+      el.innerHTML = `<span class="dot"></span>${escapeHtml(text)}`;
+    }
+
+    function goBackToOrders() {
+      window.location.href = '/admin-enhanced.html#orders';
     }
 
     function sendInvoice() {
-      if (!currentOrder) return;
-      if (currentOrder.customer_email) {
-        window.location.href = `mailto:${currentOrder.customer_email}?subject=${encodeURIComponent('Invoice ' + (currentOrder.order_number || ''))}`;
-      } else {
+      if (!currentOrder?.customer_email) {
         showAlert('No email available for this order', 'error');
+        return;
       }
+      window.location.href = `mailto:${currentOrder.customer_email}?subject=${encodeURIComponent('Invoice ' + (currentOrder.order_number || ''))}`;
     }
 
     function markAsPaid() {
       showAlert('زر شكلي الآن. نوصله بالـ backend بعدين.', 'success');
     }
 
-    function markAsFulfilled() {
-      showAlert('زر شكلي الآن. نوصله بالـ backend بعدين.', 'success');
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
     }
 
-    function goBack() {
-      if (document.referrer && document.referrer.includes(window.location.host)) {
-        history.back();
-      } else {
-        window.location.href = '/admin-enhanced.html';
-      }
-    }
-
-    function showLoading(show) {
-      document.getElementById('loading').classList.toggle('active', show);
+    function setHTML(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = value;
     }
 
     function showAlert(message, type = 'success', duration = 3000) {
-      const alert = document.getElementById('alert');
-      alert.textContent = message;
-      alert.className = `alert active ${type}`;
-      if (duration) {
-        setTimeout(() => alert.classList.remove('active'), duration);
-      }
+      ['desktopAlert', 'mobileAlert'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = message;
+        el.className = `alert active ${type}`;
+        setTimeout(() => el.classList.remove('active'), duration);
+      });
+    }
+
+    function nl2br(str) {
+      return escapeHtml(str).replace(/\n/g, '<br>');
     }
 
     function escapeHtml(value) {
