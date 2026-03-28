@@ -15,9 +15,6 @@ class DatabaseManager {
     this.useTurso = USE_TURSO;
   }
 
-  /**
-   * فتح الاتصال بقاعدة البيانات
-   */
   async open() {
     if (this.useTurso) {
       console.log('🌐 اتصال بـ Turso (إنتاج)');
@@ -42,14 +39,9 @@ class DatabaseManager {
     }
   }
 
-  /**
-   * إغلاق الاتصال
-   */
   async close() {
     if (this.useTurso) {
-      if (client) {
-        client = null;
-      }
+      if (client) client = null;
     } else {
       return new Promise((resolve, reject) => {
         if (this.db) {
@@ -69,14 +61,11 @@ class DatabaseManager {
     }
   }
 
-  /**
-   * تنفيذ استعلام مخصص
-   */
   async run(sql, params = []) {
     if (this.useTurso) {
       try {
         const result = await client.execute({
-          sql: sql,
+          sql,
           args: params
         });
         return {
@@ -103,14 +92,11 @@ class DatabaseManager {
     }
   }
 
-  /**
-   * الحصول على صف واحد
-   */
   async get(sql, params = []) {
     if (this.useTurso) {
       try {
         const result = await client.execute({
-          sql: sql,
+          sql,
           args: params
         });
         return result.rows.length > 0 ? result.rows[0] : null;
@@ -131,14 +117,11 @@ class DatabaseManager {
     }
   }
 
-  /**
-   * الحصول على جميع الصفوف
-   */
   async all(sql, params = []) {
     if (this.useTurso) {
       try {
         const result = await client.execute({
-          sql: sql,
+          sql,
           args: params
         });
         return result.rows;
@@ -159,9 +142,6 @@ class DatabaseManager {
     }
   }
 
-  /**
-   * Transaction
-   */
   async transaction(callback) {
     if (this.useTurso) {
       try {
@@ -207,9 +187,6 @@ class DatabaseManager {
     }
   }
 
-  /**
-   * إنشاء الجداول
-   */
   async initializeTables() {
     const sqlCommands = [
       `CREATE TABLE IF NOT EXISTS ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS} (
@@ -254,8 +231,23 @@ class DatabaseManager {
         image_url TEXT DEFAULT '',
         stock INTEGER NOT NULL DEFAULT 0,
         status TEXT NOT NULL DEFAULT 'active',
+        product_type TEXT DEFAULT '',
+        vendor TEXT DEFAULT '',
+        category TEXT DEFAULT '',
+        tags TEXT DEFAULT '',
+        seo_title TEXT DEFAULT '',
+        seo_description TEXT DEFAULT '',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )`,
+
+      `CREATE TABLE IF NOT EXISTS product_images (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        product_id INTEGER NOT NULL,
+        image_url TEXT NOT NULL,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
       )`,
 
       `CREATE INDEX IF NOT EXISTS idx_order_number ON ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}(order_number)`,
@@ -265,7 +257,18 @@ class DatabaseManager {
 
       `CREATE INDEX IF NOT EXISTS idx_products_status ON products(status)`,
       `CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug)`,
-      `CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku)`
+      `CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku)`,
+      `CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(product_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_product_images_sort_order ON product_images(sort_order)`
+    ];
+
+    const migrationCommands = [
+      `ALTER TABLE products ADD COLUMN product_type TEXT DEFAULT ''`,
+      `ALTER TABLE products ADD COLUMN vendor TEXT DEFAULT ''`,
+      `ALTER TABLE products ADD COLUMN category TEXT DEFAULT ''`,
+      `ALTER TABLE products ADD COLUMN tags TEXT DEFAULT ''`,
+      `ALTER TABLE products ADD COLUMN seo_title TEXT DEFAULT ''`,
+      `ALTER TABLE products ADD COLUMN seo_description TEXT DEFAULT ''`
     ];
 
     for (const sql of sqlCommands) {
@@ -275,6 +278,22 @@ class DatabaseManager {
       } catch (err) {
         if (!String(err.message || '').includes('already')) {
           console.warn('⚠️ تحذير:', err.message);
+        }
+      }
+    }
+
+    for (const sql of migrationCommands) {
+      try {
+        await this.run(sql);
+        console.log('✅ تم تنفيذ migration');
+      } catch (err) {
+        const message = String(err.message || '').toLowerCase();
+        if (
+          !message.includes('duplicate column') &&
+          !message.includes('already exists') &&
+          !message.includes('duplicate')
+        ) {
+          console.warn('⚠️ تحذير migration:', err.message);
         }
       }
     }

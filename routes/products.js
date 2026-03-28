@@ -29,6 +29,99 @@ function toInteger(value, fallback = 0) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+function normalizeText(value = '') {
+  return String(value || '').trim();
+}
+
+function normalizeTags(tags) {
+  if (Array.isArray(tags)) {
+    return tags
+      .map(tag => normalizeText(tag))
+      .filter(Boolean)
+      .join(',');
+  }
+
+  return normalizeText(tags);
+}
+
+function parseTags(tags) {
+  return String(tags || '')
+    .split(',')
+    .map(tag => tag.trim())
+    .filter(Boolean);
+}
+
+function normalizeImages(images, fallbackImageUrl = '') {
+  let result = [];
+
+  if (Array.isArray(images)) {
+    result = images
+      .map((image, index) => {
+        if (typeof image === 'string') {
+          const url = normalizeText(image);
+          return url ? { image_url: url, sort_order: index } : null;
+        }
+
+        if (image && typeof image === 'object') {
+          const url = normalizeText(image.image_url || image.url || image.imageUrl || '');
+          if (!url) return null;
+
+          return {
+            image_url: url,
+            sort_order: Number.isFinite(Number(image.sort_order))
+              ? Number(image.sort_order)
+              : index
+          };
+        }
+
+        return null;
+      })
+      .filter(Boolean);
+  }
+
+  if (!result.length && fallbackImageUrl) {
+    result = [{
+      image_url: normalizeText(fallbackImageUrl),
+      sort_order: 0
+    }];
+  }
+
+  return result;
+}
+
+async function getProductImages(productId) {
+  return await db.all(
+    `SELECT id, product_id, image_url, sort_order, created_at
+     FROM product_images
+     WHERE product_id = ?
+     ORDER BY sort_order ASC, id ASC`,
+    [productId]
+  );
+}
+
+async function enrichProduct(product) {
+  if (!product) return null;
+
+  const images = await getProductImages(product.id);
+
+  return {
+    ...product,
+    tags_list: parseTags(product.tags),
+    images,
+    primary_image: images.length ? images[0].image_url : (product.image_url || '')
+  };
+}
+
+async function enrichProducts(products = []) {
+  const enriched = [];
+
+  for (const product of products) {
+    enriched.push(await enrichProduct(product));
+  }
+
+  return enriched;
+}
+
 /**
  * GET /api/products/stats/summary
  */
@@ -78,9 +171,11 @@ router.get('/slug/:slug', async (req, res) => {
       });
     }
 
+    const enrichedProduct = await enrichProduct(product);
+
     return res.json({
       success: true,
-      data: product
+      data: enrichedProduct
     });
   } catch (error) {
     console.error('❌ خطأ في جلب المنتج بالـ slug:', error);
@@ -105,10 +200,17 @@ router.post('/', async (req, res) => {
       salePrice,
       imageUrl,
       stock,
-      status
+      status,
+      productType,
+      vendor,
+      category,
+      tags,
+      seoTitle,
+      seoDescription,
+      images
     } = req.body;
 
-    if (!productName || String(productName).trim() === '') {
+    if (!productName || normalizeText(productName) === '') {
       return res.status(400).json({
         success: false,
         error: 'اسم المنتج مطلوب'
@@ -126,8 +228,10 @@ router.post('/', async (req, res) => {
     const finalSalePrice = toNumber(salePrice, 0);
     const finalStock = toInteger(stock, 0);
     const finalSlug = slugify(slug || productName);
-    const finalSku = sku ? String(sku).trim() : null;
+    const finalSku = normalizeText(sku) || null;
     const finalStatus = normalizeStatus(status);
+    const finalImages = normalizeImages(images, imageUrl);
+    const primaryImage = finalImages.length ? finalImages[0].image_url : normalizeText(imageUrl);
 
     const existingSlug = await db.get(
       `SELECT id FROM products WHERE slug = ?`,
@@ -157,18 +261,40 @@ router.post('/', async (req, res) => {
 
     await db.run(
       `INSERT INTO products
-      (product_name, slug, sku, description, price, sale_price, image_url, stock, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (
+        product_name,
+        slug,
+        sku,
+        description,
+        price,
+        sale_price,
+        image_url,
+        stock,
+        status,
+        product_type,
+        vendor,
+        category,
+        tags,
+        seo_title,
+        seo_description
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        String(productName).trim(),
+        normalizeText(productName),
         finalSlug,
         finalSku,
         description || '',
         finalPrice,
         finalSalePrice,
-        imageUrl || '',
+        primaryImage || '',
         finalStock,
-        finalStatus
+        finalStatus,
+        normalizeText(productType),
+        normalizeText(vendor),
+        normalizeText(category),
+        normalizeTags(tags),
+        normalizeText(seoTitle),
+        normalizeText(seoDescription)
       ]
     );
 
@@ -177,10 +303,22 @@ router.post('/', async (req, res) => {
       [finalSlug]
     );
 
+    if (savedProduct && finalImages.length) {
+      for (const image of finalImages) {
+        await db.run(
+          `INSERT INTO product_images (product_id, image_url, sort_order)
+           VALUES (?, ?, ?)`,
+          [savedProduct.id, image.image_url, image.sort_order]
+        );
+      }
+    }
+
+    const enrichedProduct = await enrichProduct(savedProduct);
+
     return res.status(201).json({
       success: true,
       message: 'تم إنشاء المنتج بنجاح',
-      data: savedProduct
+      data: enrichedProduct
     });
   } catch (error) {
     console.error('❌ خطأ في إنشاء المنتج:', error);
@@ -206,7 +344,14 @@ router.put('/:id', async (req, res) => {
       salePrice,
       imageUrl,
       stock,
-      status
+      status,
+      productType,
+      vendor,
+      category,
+      tags,
+      seoTitle,
+      seoDescription,
+      images
     } = req.body;
 
     const product = await db.get(
@@ -225,7 +370,7 @@ router.put('/:id', async (req, res) => {
     const updateValues = [];
 
     if (productName !== undefined) {
-      const finalName = String(productName).trim();
+      const finalName = normalizeText(productName);
       if (!finalName) {
         return res.status(400).json({
           success: false,
@@ -262,7 +407,7 @@ router.put('/:id', async (req, res) => {
     }
 
     if (sku !== undefined) {
-      const finalSku = String(sku || '').trim() || null;
+      const finalSku = normalizeText(sku) || null;
 
       if (finalSku) {
         const existingSku = await db.get(
@@ -305,11 +450,6 @@ router.put('/:id', async (req, res) => {
       updateValues.push(finalSalePrice);
     }
 
-    if (imageUrl !== undefined) {
-      updateFields.push('image_url = ?');
-      updateValues.push(imageUrl || '');
-    }
-
     if (stock !== undefined) {
       const finalStock = toInteger(stock, 0);
       updateFields.push('stock = ?');
@@ -320,6 +460,49 @@ router.put('/:id', async (req, res) => {
       const finalStatus = normalizeStatus(status);
       updateFields.push('status = ?');
       updateValues.push(finalStatus);
+    }
+
+    if (productType !== undefined) {
+      updateFields.push('product_type = ?');
+      updateValues.push(normalizeText(productType));
+    }
+
+    if (vendor !== undefined) {
+      updateFields.push('vendor = ?');
+      updateValues.push(normalizeText(vendor));
+    }
+
+    if (category !== undefined) {
+      updateFields.push('category = ?');
+      updateValues.push(normalizeText(category));
+    }
+
+    if (tags !== undefined) {
+      updateFields.push('tags = ?');
+      updateValues.push(normalizeTags(tags));
+    }
+
+    if (seoTitle !== undefined) {
+      updateFields.push('seo_title = ?');
+      updateValues.push(normalizeText(seoTitle));
+    }
+
+    if (seoDescription !== undefined) {
+      updateFields.push('seo_description = ?');
+      updateValues.push(normalizeText(seoDescription));
+    }
+
+    const finalImages = images !== undefined
+      ? normalizeImages(images, imageUrl)
+      : (imageUrl !== undefined ? normalizeImages([], imageUrl) : null);
+
+    if (imageUrl !== undefined || images !== undefined) {
+      const primaryImage = finalImages && finalImages.length
+        ? finalImages[0].image_url
+        : normalizeText(imageUrl);
+
+      updateFields.push('image_url = ?');
+      updateValues.push(primaryImage || '');
     }
 
     updateFields.push('updated_at = CURRENT_TIMESTAMP');
@@ -340,15 +523,29 @@ router.put('/:id', async (req, res) => {
       updateValues
     );
 
+    if (finalImages !== null) {
+      await db.run(`DELETE FROM product_images WHERE product_id = ?`, [id]);
+
+      for (const image of finalImages) {
+        await db.run(
+          `INSERT INTO product_images (product_id, image_url, sort_order)
+           VALUES (?, ?, ?)`,
+          [id, image.image_url, image.sort_order]
+        );
+      }
+    }
+
     const updatedProduct = await db.get(
       `SELECT * FROM products WHERE id = ?`,
       [id]
     );
 
+    const enrichedProduct = await enrichProduct(updatedProduct);
+
     return res.json({
       success: true,
       message: 'تم تحديث المنتج بنجاح',
-      data: updatedProduct
+      data: enrichedProduct
     });
   } catch (error) {
     console.error('❌ خطأ في تحديث المنتج:', error);
@@ -378,6 +575,7 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
+    await db.run(`DELETE FROM product_images WHERE product_id = ?`, [id]);
     await db.run(
       `DELETE FROM products WHERE id = ?`,
       [id]
@@ -419,9 +617,11 @@ router.get('/:id', async (req, res) => {
       });
     }
 
+    const enrichedProduct = await enrichProduct(product);
+
     return res.json({
       success: true,
-      data: product
+      data: enrichedProduct
     });
   } catch (error) {
     console.error('❌ خطأ في جلب المنتج:', error);
@@ -461,9 +661,22 @@ router.get('/', async (req, res) => {
         OR sku LIKE ?
         OR slug LIKE ?
         OR description LIKE ?
+        OR product_type LIKE ?
+        OR vendor LIKE ?
+        OR category LIKE ?
+        OR tags LIKE ?
       )`);
       const searchValue = `%${String(search).trim()}%`;
-      params.push(searchValue, searchValue, searchValue, searchValue);
+      params.push(
+        searchValue,
+        searchValue,
+        searchValue,
+        searchValue,
+        searchValue,
+        searchValue,
+        searchValue,
+        searchValue
+      );
     }
 
     if (where.length > 0) {
@@ -477,7 +690,10 @@ router.get('/', async (req, res) => {
       'price',
       'sale_price',
       'stock',
-      'status'
+      'status',
+      'product_type',
+      'vendor',
+      'category'
     ];
 
     const sortColumn = validSortColumns.includes(sort) ? sort : 'created_at';
@@ -489,6 +705,7 @@ router.get('/', async (req, res) => {
     params.push(toInteger(limit, 50), toInteger(offset, 0));
 
     const products = await db.all(sql, params);
+    const enrichedProducts = await enrichProducts(products);
 
     let countSql = `SELECT COUNT(*) as total FROM products`;
     const countParams = [];
@@ -498,7 +715,16 @@ router.get('/', async (req, res) => {
       if (status) countParams.push(status);
       if (search) {
         const searchValue = `%${String(search).trim()}%`;
-        countParams.push(searchValue, searchValue, searchValue, searchValue);
+        countParams.push(
+          searchValue,
+          searchValue,
+          searchValue,
+          searchValue,
+          searchValue,
+          searchValue,
+          searchValue,
+          searchValue
+        );
       }
     }
 
@@ -509,7 +735,7 @@ router.get('/', async (req, res) => {
 
     return res.json({
       success: true,
-      data: products,
+      data: enrichedProducts,
       pagination: {
         total,
         limit: parsedLimit,
