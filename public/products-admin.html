@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,7 +16,9 @@
       --side:#f6f6f7;
       --green:#16a34a;
       --green-bg:#bbf7d0;
-      --blue:#0ea5e9;
+      --yellow:#f59e0b;
+      --yellow-bg:#fde68a;
+      --gray-bg:#e5e7eb;
       --shadow:0 1px 2px rgba(0,0,0,.08);
       --radius:14px;
     }
@@ -26,6 +28,7 @@
       background:var(--bg);
       color:var(--text);
       min-height:100vh;
+      direction:ltr;
     }
 
     a{text-decoration:none;color:inherit}
@@ -108,7 +111,7 @@
     .sidebar{
       grid-area:side;
       background:var(--side);
-      border-left:1px solid #ddd;
+      border-right:1px solid #ddd;
       padding:14px 14px 20px;
       overflow:auto;
     }
@@ -119,6 +122,8 @@
       color:var(--muted);
       margin:10px 10px 8px;
       font-weight:700;
+      direction:ltr;
+      text-align:left;
     }
 
     .nav-item{
@@ -131,6 +136,8 @@
       color:#111;
       font-weight:600;
       margin-bottom:4px;
+      direction:ltr;
+      text-align:left;
     }
 
     .nav-item.active{
@@ -138,7 +145,7 @@
     }
 
     .nav-sub{
-      padding-right:42px;
+      padding-left:42px;
       color:#444;
       font-weight:500;
     }
@@ -167,6 +174,23 @@
       margin:0 auto;
     }
 
+    .alert{
+      display:none;
+      margin-bottom:14px;
+      padding:14px 16px;
+      border-radius:14px;
+      font-weight:700;
+      border:1px solid transparent;
+      background:#fff;
+      direction:rtl;
+      text-align:right;
+    }
+
+    .alert.active{display:block}
+    .alert.success{background:#dcfce7;border-color:#86efac;color:#166534}
+    .alert.error{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+    .alert.warning{background:#fef3c7;border-color:#fcd34d;color:#92400e}
+
     .page-head{
       display:flex;
       align-items:center;
@@ -182,6 +206,7 @@
       display:flex;
       align-items:center;
       gap:10px;
+      direction:ltr;
     }
 
     .page-actions{
@@ -220,15 +245,17 @@
     .summary-grid{
       display:grid;
       grid-template-columns:180px repeat(3,1fr);
+      direction:ltr;
     }
 
     .summary-cell{
       padding:16px 18px;
-      border-left:1px solid var(--line);
+      border-right:1px solid var(--line);
       min-height:86px;
+      text-align:left;
     }
 
-    .summary-cell:last-child{border-left:none}
+    .summary-cell:first-child{border-right:none}
     .summary-label{
       color:#444;
       font-size:13px;
@@ -268,6 +295,7 @@
       align-items:center;
       gap:8px;
       flex-wrap:wrap;
+      direction:ltr;
     }
 
     .tab{
@@ -291,6 +319,7 @@
       align-items:center;
       gap:8px;
       flex-wrap:wrap;
+      position:relative;
     }
 
     .icon-btn{
@@ -303,12 +332,33 @@
       font-size:16px;
     }
 
+    .selection-pill{
+      min-height:38px;
+      padding:0 12px;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      border:1px solid #d1d5db;
+      border-radius:12px;
+      background:#f9fafb;
+      font-weight:800;
+      color:#111;
+    }
+
+    .selection-pill.active{
+      display:inline-flex;
+    }
+
     .filters-row{
       display:grid;
       grid-template-columns:1.4fr 220px 220px 120px;
       gap:12px;
       padding:14px;
       border-bottom:1px solid var(--line);
+    }
+
+    .filters-row.hidden{
+      display:none;
     }
 
     .field input,
@@ -345,13 +395,14 @@
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:1080px;
+      min-width:1180px;
+      direction:ltr;
     }
 
     th,td{
       padding:14px 16px;
       border-bottom:1px solid var(--line);
-      text-align:right;
+      text-align:left;
       vertical-align:middle;
       background:#fff;
     }
@@ -376,7 +427,9 @@
       display:flex;
       align-items:center;
       gap:12px;
-      min-width:280px;
+      min-width:320px;
+      direction:rtl;
+      text-align:right;
     }
 
     .thumb{
@@ -412,6 +465,7 @@
     .product-sub{
       font-size:13px;
       color:var(--muted);
+      direction:rtl;
     }
 
     .status-badge{
@@ -433,7 +487,7 @@
 
     .status-badge.draft{
       color:#92400e;
-      background:#fde68a;
+      background:var(--yellow-bg);
     }
 
     .status-badge.archived{
@@ -475,6 +529,7 @@
       color:#6b7280;
       font-size:14px;
       font-weight:600;
+      direction:ltr;
     }
 
     .pagination-right{
@@ -524,6 +579,47 @@
       outline:none;
     }
 
+    .dropdown{
+      position:absolute;
+      top:46px;
+      left:0;
+      min-width:220px;
+      background:#fff;
+      border:1px solid #d1d5db;
+      border-radius:14px;
+      box-shadow:0 12px 30px rgba(0,0,0,.12);
+      display:none;
+      z-index:25;
+      overflow:hidden;
+    }
+
+    .dropdown.active{
+      display:block;
+    }
+
+    .dropdown button{
+      width:100%;
+      text-align:left;
+      padding:12px 14px;
+      border:none;
+      background:#fff;
+      cursor:pointer;
+      font-weight:700;
+      border-bottom:1px solid #f1f5f9;
+    }
+
+    .dropdown button:last-child{
+      border-bottom:none;
+    }
+
+    .dropdown button:hover{
+      background:#f8fafc;
+    }
+
+    .hidden-file{
+      display:none;
+    }
+
     @media (max-width: 1100px){
       .app{
         grid-template-columns:1fr;
@@ -539,7 +635,7 @@
         grid-template-columns:1fr 1fr;
       }
       .summary-cell{
-        border-left:none;
+        border-right:none;
         border-bottom:1px solid var(--line);
       }
       .summary-cell:nth-last-child(-n+2){
@@ -570,12 +666,14 @@
         border-bottom:none !important;
       }
       table{
-        min-width:860px;
+        min-width:980px;
       }
     }
   </style>
 </head>
 <body>
+  <input id="importFileInput" class="hidden-file" type="file" accept=".json,.csv,application/json,text/csv" />
+
   <div class="mobile-top">
     <div class="mobile-top-row">
       <div class="mobile-title">Products</div>
@@ -587,7 +685,7 @@
   <div class="app">
     <header class="topbar">
       <div class="top-left">
-        <div class="brand">shopify</div>
+        <div class="brand">Smartkidsfy</div>
       </div>
 
       <div class="search-wrap">
@@ -604,7 +702,7 @@
     <aside class="sidebar">
       <div class="side-group">
         <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
-        <a class="nav-item" href="/admin-enhanced.html"><span>📦 Orders</span><span class="badge-count">2,575</span></a>
+        <a class="nav-item" href="/admin-enhanced.html"><span>📦 Orders</span><span class="badge-count" id="ordersCountBadge">—</span></a>
         <a class="nav-item active" href="/products-admin"><span>🏷️ Products</span></a>
         <div class="nav-item nav-sub"><span>Collections</span></div>
         <div class="nav-item nav-sub"><span>Inventory</span></div>
@@ -639,14 +737,16 @@
 
     <main class="main">
       <div class="page">
+        <div id="alert" class="alert"></div>
+
         <div class="page-head">
-          <div class="page-title">🏷️ Products</div>
+          <div class="page-title">Products 🏷️</div>
 
           <div class="page-actions">
-            <button class="btn">Export</button>
-            <button class="btn">Import</button>
-            <button class="btn">More actions</button>
             <button class="btn primary" onclick="goToCreateProduct()">Add product</button>
+            <button class="btn" onclick="toggleActionsMenu()">More actions</button>
+            <button class="btn" onclick="triggerImport()">Import</button>
+            <button class="btn" onclick="exportProductsCsv()">Export</button>
           </div>
         </div>
 
@@ -655,6 +755,7 @@
             <div class="summary-cell">
               <div class="summary-label">Date range</div>
               <div class="summary-value">30 days</div>
+              <div class="summary-sub">Summary view</div>
             </div>
             <div class="summary-cell">
               <div class="summary-label">Total products</div>
@@ -684,13 +785,22 @@
             </div>
 
             <div class="tools">
-              <button class="icon-btn" title="Search">🔎</button>
-              <button class="icon-btn" title="Filter">☰</button>
-              <button class="icon-btn" title="Sort">⇅</button>
+              <div id="selectionCount" class="selection-pill">0 selected</div>
+              <button class="icon-btn" title="Toggle filters" onclick="toggleFilters()">☰</button>
+              <button class="icon-btn" title="Sort" onclick="cycleSort()">⇅</button>
+              <button class="icon-btn" title="Refresh" onclick="refreshPageData()">↻</button>
+
+              <div id="actionsDropdown" class="dropdown">
+                <button onclick="refreshPageData()">Refresh data</button>
+                <button onclick="bulkSetStatus('active')">Activate selected</button>
+                <button onclick="bulkSetStatus('archived')">Archive selected</button>
+                <button onclick="bulkDuplicateSelected()">Duplicate selected</button>
+                <button onclick="bulkDeleteSelected()">Delete selected</button>
+              </div>
             </div>
           </div>
 
-          <div class="filters-row">
+          <div id="filtersRow" class="filters-row">
             <div class="field">
               <input type="text" id="searchInput" placeholder="Search by name / SKU / slug / tags">
             </div>
@@ -721,7 +831,7 @@
             <table>
               <thead>
                 <tr>
-                  <th style="width:52px"><input class="check" type="checkbox"></th>
+                  <th style="width:52px"><input id="selectAllCheckbox" class="check" type="checkbox"></th>
                   <th>Product</th>
                   <th>Status</th>
                   <th>Inventory</th>
@@ -742,8 +852,8 @@
           <div class="pagination">
             <div class="pagination-left" id="paginationText">0-0</div>
             <div class="pagination-right">
-              <button class="icon-btn">‹</button>
-              <button class="icon-btn">›</button>
+              <button class="icon-btn" onclick="noopPager()">‹</button>
+              <button class="icon-btn" onclick="noopPager()">›</button>
             </div>
           </div>
         </section>
@@ -753,8 +863,23 @@
 
   <script>
     const API_BASE = '/api/products';
+    const ORDERS_API = '/api/orders';
     let currentProducts = [];
     let currentStatus = '';
+    let selectedIds = [];
+    let filtersVisible = true;
+    let currentSortIndex = 0;
+
+    const sortOptions = [
+      'created_at-DESC',
+      'created_at-ASC',
+      'product_name-ASC',
+      'product_name-DESC',
+      'stock-DESC',
+      'stock-ASC',
+      'price-DESC',
+      'price-ASC'
+    ];
 
     function escapeHtml(value) {
       return String(value ?? '')
@@ -763,6 +888,15 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+    }
+
+    function showAlert(message, type='success') {
+      const el = document.getElementById('alert');
+      el.textContent = message;
+      el.className = `alert active ${type}`;
+      setTimeout(() => {
+        el.classList.remove('active');
+      }, 3500);
     }
 
     function formatPrice(value) {
@@ -787,8 +921,78 @@
       top.value = val;
     }
 
+    function syncIncomingSearch(sourceValue) {
+      document.getElementById('searchInput').value = sourceValue;
+      document.getElementById('mobileSearchInput').value = sourceValue;
+      document.getElementById('desktopSearchTop').value = sourceValue;
+    }
+
     function goToCreateProduct() {
       window.location.href = '/product-edit.html';
+    }
+
+    function updateSelectionUi() {
+      const pill = document.getElementById('selectionCount');
+      const selectAll = document.getElementById('selectAllCheckbox');
+
+      pill.textContent = `${selectedIds.length} selected`;
+      pill.classList.toggle('active', selectedIds.length > 0);
+
+      const visibleIds = currentProducts.map(p => Number(p.id));
+      const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedIds.includes(id));
+      selectAll.checked = allVisibleSelected;
+    }
+
+    function toggleSelectAll(checked) {
+      if (checked) {
+        selectedIds = currentProducts.map(p => Number(p.id));
+      } else {
+        selectedIds = [];
+      }
+      renderProducts(currentProducts);
+      updateSelectionUi();
+    }
+
+    function toggleOneSelection(id, checked) {
+      const numericId = Number(id);
+      if (checked) {
+        if (!selectedIds.includes(numericId)) selectedIds.push(numericId);
+      } else {
+        selectedIds = selectedIds.filter(v => v !== numericId);
+      }
+      updateSelectionUi();
+    }
+
+    function toggleFilters() {
+      filtersVisible = !filtersVisible;
+      document.getElementById('filtersRow').classList.toggle('hidden', !filtersVisible);
+    }
+
+    function toggleActionsMenu() {
+      document.getElementById('actionsDropdown').classList.toggle('active');
+    }
+
+    function closeActionsMenu() {
+      document.getElementById('actionsDropdown').classList.remove('active');
+    }
+
+    function cycleSort() {
+      currentSortIndex = (currentSortIndex + 1) % sortOptions.length;
+      document.getElementById('sortFilter').value = sortOptions[currentSortIndex];
+      loadProducts();
+    }
+
+    function noopPager() {
+      showAlert('Pagination UI جاهزة، والآن القائمة تجلب حتى 200 منتج في الصفحة.', 'warning');
+    }
+
+    async function loadOrdersCount() {
+      try {
+        const response = await fetch(`${ORDERS_API}?limit=1&offset=0`);
+        const result = await response.json();
+        if (!response.ok || !result.success) return;
+        document.getElementById('ordersCountBadge').textContent = result.pagination?.total ?? '—';
+      } catch (_) {}
     }
 
     async function loadProducts() {
@@ -819,8 +1023,11 @@
         }
 
         currentProducts = result.data || [];
+        selectedIds = selectedIds.filter(id => currentProducts.some(p => Number(p.id) === id));
+
         renderProducts(currentProducts);
         updatePagination(currentProducts);
+        updateSelectionUi();
       } catch (error) {
         console.error(error);
         document.getElementById('productsTableBody').innerHTML = `
@@ -845,6 +1052,14 @@
       }
     }
 
+    async function refreshPageData() {
+      closeActionsMenu();
+      await loadOrdersCount();
+      await loadSummary();
+      await loadProducts();
+      showAlert('تم تحديث البيانات', 'success');
+    }
+
     function updatePagination(products) {
       const total = products.length;
       document.getElementById('paginationText').textContent = total ? `1-${total}` : '0-0';
@@ -865,9 +1080,15 @@
       tbody.innerHTML = products.map(product => {
         const primaryImage = product.primary_image || product.image_url || '';
         const inventoryClass = getInventoryClass(product.stock);
+        const numericId = Number(product.id);
+        const checked = selectedIds.includes(numericId) ? 'checked' : '';
+
         return `
           <tr>
-            <td><input class="check" type="checkbox"></td>
+            <td>
+              <input class="check" type="checkbox" ${checked}
+                onchange="toggleOneSelection(${numericId}, this.checked)">
+            </td>
             <td>
               <div class="product-cell">
                 ${
@@ -891,7 +1112,7 @@
             <td><span class="${inventoryClass}">${Number(product.stock || 0)} in stock</span></td>
             <td>${escapeHtml(product.category || '-')}</td>
             <td>${escapeHtml(product.vendor || '-')}</td>
-            <td>${formatPrice(product.sale_price > 0 ? product.sale_price : product.price)}</td>
+            <td>${formatPrice(Number(product.sale_price || 0) > 0 ? product.sale_price : product.price)}</td>
             <td>
               <div class="table-actions">
                 <button class="mini-btn" onclick="editProduct(${product.id})">Edit</button>
@@ -920,7 +1141,7 @@
         salePrice: Number(product.sale_price || 0),
         imageUrl: product.image_url || '',
         stock: Number(product.stock || 0),
-        status: product.status || 'draft',
+        status: 'draft',
         productType: product.product_type || '',
         vendor: product.vendor || '',
         category: product.category || '',
@@ -947,9 +1168,311 @@
 
         await loadSummary();
         await loadProducts();
+        showAlert('تم نسخ المنتج', 'success');
       } catch (error) {
         alert(error.message || 'Duplicate failed');
       }
+    }
+
+    async function bulkSetStatus(status) {
+      closeActionsMenu();
+      if (!selectedIds.length) {
+        showAlert('اختر منتجًا واحدًا على الأقل', 'warning');
+        return;
+      }
+
+      try {
+        for (const id of selectedIds) {
+          const response = await fetch(`${API_BASE}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+          });
+
+          const result = await response.json();
+          if (!response.ok || !result.success) {
+            throw new Error(result.error || `Failed on product ${id}`);
+          }
+        }
+
+        await refreshPageData();
+        showAlert(`تم تحديث حالة ${selectedIds.length} منتج`, 'success');
+        selectedIds = [];
+        updateSelectionUi();
+      } catch (error) {
+        showAlert(error.message || 'Bulk status update failed', 'error');
+      }
+    }
+
+    async function bulkDeleteSelected() {
+      closeActionsMenu();
+      if (!selectedIds.length) {
+        showAlert('اختر منتجًا واحدًا على الأقل', 'warning');
+        return;
+      }
+
+      if (!confirm(`هل أنت متأكد من حذف ${selectedIds.length} منتج؟`)) {
+        return;
+      }
+
+      try {
+        for (const id of selectedIds) {
+          const response = await fetch(`${API_BASE}/${id}`, {
+            method: 'DELETE'
+          });
+
+          const result = await response.json();
+          if (!response.ok || !result.success) {
+            throw new Error(result.error || `Failed on product ${id}`);
+          }
+        }
+
+        selectedIds = [];
+        await refreshPageData();
+        showAlert('تم حذف المنتجات المحددة', 'success');
+      } catch (error) {
+        showAlert(error.message || 'Bulk delete failed', 'error');
+      }
+    }
+
+    async function bulkDuplicateSelected() {
+      closeActionsMenu();
+      if (!selectedIds.length) {
+        showAlert('اختر منتجًا واحدًا على الأقل', 'warning');
+        return;
+      }
+
+      try {
+        for (const id of selectedIds) {
+          const product = currentProducts.find(p => Number(p.id) === Number(id));
+          if (!product) continue;
+
+          const payload = {
+            productName: `${product.product_name} - Copy`,
+            slug: '',
+            sku: '',
+            description: product.description || '',
+            price: Number(product.price || 0),
+            salePrice: Number(product.sale_price || 0),
+            imageUrl: product.image_url || '',
+            stock: Number(product.stock || 0),
+            status: 'draft',
+            productType: product.product_type || '',
+            vendor: product.vendor || '',
+            category: product.category || '',
+            tags: product.tags_list || [],
+            seoTitle: product.seo_title || '',
+            seoDescription: product.seo_description || '',
+            images: Array.isArray(product.images) ? product.images.map(img => ({
+              image_url: img.image_url,
+              sort_order: img.sort_order
+            })) : []
+          };
+
+          const response = await fetch(API_BASE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (!response.ok || !result.success) {
+            throw new Error(result.error || `Duplicate failed on product ${id}`);
+          }
+        }
+
+        await refreshPageData();
+        showAlert('تم نسخ المنتجات المحددة', 'success');
+      } catch (error) {
+        showAlert(error.message || 'Bulk duplicate failed', 'error');
+      }
+    }
+
+    function exportProductsCsv() {
+      if (!currentProducts.length) {
+        showAlert('لا توجد منتجات للتصدير', 'warning');
+        return;
+      }
+
+      const headers = [
+        'id',
+        'product_name',
+        'slug',
+        'sku',
+        'description',
+        'price',
+        'sale_price',
+        'stock',
+        'status',
+        'product_type',
+        'vendor',
+        'category',
+        'tags',
+        'seo_title',
+        'seo_description',
+        'image_url'
+      ];
+
+      const rows = currentProducts.map(product => [
+        product.id || '',
+        product.product_name || '',
+        product.slug || '',
+        product.sku || '',
+        product.description || '',
+        product.price || 0,
+        product.sale_price || 0,
+        product.stock || 0,
+        product.status || '',
+        product.product_type || '',
+        product.vendor || '',
+        product.category || '',
+        Array.isArray(product.tags_list) ? product.tags_list.join(', ') : (product.tags || ''),
+        product.seo_title || '',
+        product.seo_description || '',
+        product.primary_image || product.image_url || ''
+      ]);
+
+      let csv = headers.join(',') + '\n';
+      rows.forEach(row => {
+        csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `products_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+
+      showAlert('تم تصدير CSV بنجاح', 'success');
+    }
+
+    function triggerImport() {
+      document.getElementById('importFileInput').click();
+    }
+
+    function parseCsvLine(line) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        const next = line[i + 1];
+
+        if (char === '"' && inQuotes && next === '"') {
+          current += '"';
+          i++;
+        } else if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(current);
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+
+      result.push(current);
+      return result;
+    }
+
+    function csvToObjects(text) {
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      if (lines.length < 2) return [];
+
+      const headers = parseCsvLine(lines[0]).map(h => h.trim());
+      return lines.slice(1).map(line => {
+        const values = parseCsvLine(line);
+        const obj = {};
+        headers.forEach((header, index) => {
+          obj[header] = (values[index] || '').trim();
+        });
+        return obj;
+      });
+    }
+
+    async function importProductsFromObjects(items) {
+      if (!Array.isArray(items) || !items.length) {
+        showAlert('الملف فارغ أو غير صالح', 'warning');
+        return;
+      }
+
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const item of items) {
+        const payload = {
+          productName: item.productName || item.product_name || '',
+          slug: item.slug || '',
+          sku: item.sku || '',
+          description: item.description || '',
+          price: Number(item.price || 0),
+          salePrice: Number(item.salePrice || item.sale_price || 0),
+          imageUrl: item.imageUrl || item.image_url || '',
+          stock: Number(item.stock || 0),
+          status: item.status || 'active',
+          productType: item.productType || item.product_type || '',
+          vendor: item.vendor || '',
+          category: item.category || '',
+          tags: typeof item.tags === 'string' ? item.tags.split(',').map(v => v.trim()).filter(Boolean) : (item.tags || []),
+          seoTitle: item.seoTitle || item.seo_title || '',
+          seoDescription: item.seoDescription || item.seo_description || '',
+          images: []
+        };
+
+        if (!payload.productName) {
+          failCount++;
+          continue;
+        }
+
+        try {
+          const response = await fetch(API_BASE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (!response.ok || !result.success) {
+            failCount++;
+          } else {
+            successCount++;
+          }
+        } catch (_) {
+          failCount++;
+        }
+      }
+
+      await refreshPageData();
+      showAlert(`تم الاستيراد. نجح: ${successCount} | فشل: ${failCount}`, failCount ? 'warning' : 'success');
+    }
+
+    function setupImport() {
+      document.getElementById('importFileInput').addEventListener('change', async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        try {
+          const text = await file.text();
+          let data = [];
+
+          if (file.name.toLowerCase().endsWith('.json')) {
+            data = JSON.parse(text);
+          } else if (file.name.toLowerCase().endsWith('.csv')) {
+            data = csvToObjects(text);
+          } else {
+            showAlert('صيغة الملف غير مدعومة', 'error');
+            return;
+          }
+
+          await importProductsFromObjects(data);
+        } catch (error) {
+          console.error(error);
+          showAlert('فشل في قراءة ملف الاستيراد', 'error');
+        } finally {
+          event.target.value = '';
+        }
+      });
     }
 
     function setupTabs() {
@@ -969,20 +1492,9 @@
       const mobile = document.getElementById('mobileSearchInput');
       const top = document.getElementById('desktopSearchTop');
 
-      mobile.addEventListener('input', () => {
-        desktop.value = mobile.value;
-        top.value = mobile.value;
-      });
-
-      top.addEventListener('input', () => {
-        desktop.value = top.value;
-        mobile.value = top.value;
-      });
-
-      desktop.addEventListener('input', () => {
-        mobile.value = desktop.value;
-        top.value = desktop.value;
-      });
+      mobile.addEventListener('input', () => syncIncomingSearch(mobile.value));
+      top.addEventListener('input', () => syncIncomingSearch(top.value));
+      desktop.addEventListener('input', () => syncIncomingSearch(desktop.value));
 
       mobile.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') loadProducts();
@@ -997,9 +1509,24 @@
       });
     }
 
+    document.addEventListener('click', (event) => {
+      const dropdown = document.getElementById('actionsDropdown');
+      const trigger = event.target.closest('.page-actions .btn:nth-child(2), .tools');
+      if (!dropdown.contains(event.target) && !trigger) {
+        closeActionsMenu();
+      }
+    });
+
     document.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('selectAllCheckbox').addEventListener('change', function() {
+        toggleSelectAll(this.checked);
+      });
+
       setupTabs();
       setupSearchSync();
+      setupImport();
+
+      await loadOrdersCount();
       await loadSummary();
       await loadProducts();
     });
