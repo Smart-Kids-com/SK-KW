@@ -99,7 +99,7 @@
 
     .desktop-search input {
       width: 100%;
-      height: 44px;
+      height: 40px;
       border-radius: 12px;
       border: 1px solid #3a3a3d;
       background: #2a2a2c;
@@ -200,7 +200,7 @@
     }
 
     .side-link {
-      min-height: 04px;
+      min-height: 40px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1336,14 +1336,14 @@
       <div class="desktop-body">
         <aside class="desktop-sidebar">
           <div class="side-group">
-            <a class="side-link active" href="/admin-enhanced">
-  <div class="side-link-left">
-    <span>⌂</span>
-    <span>Home</span>
-  </div>
-</a>
+            <div class="side-link active">
+              <div class="side-link-left">
+                <span>⌂</span>
+                <span>Home</span>
+              </div>
+            </div>
 
-            <a class="side-link active" href="/orders" onclick="scrollToOrdersDesktop()">
+            <div class="side-link active" onclick="scrollToOrdersDesktop()">
               <div class="side-link-left">
                 <span>🧾</span>
                 <span>Orders</span>
@@ -1352,8 +1352,8 @@
             </div>
 
             <a class="side-link" href="/products-admin">
-  <div class="side-link-left"><span>🏷️</span><span>Products</span></div>
-</a>
+              <div class="side-link-left"><span>🏷️</span><span>Products</span></div>
+            </a>
             <div class="side-link">
               <div class="side-link-left"><span>👤</span><span>Customers</span></div>
             </div>
