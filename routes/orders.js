@@ -57,6 +57,74 @@ async function getOrderByNumberWithItems(orderNumber) {
   };
 }
 
+function normalizeOrderItems(items) {
+  if (!Array.isArray(items)) return [];
+
+  return items
+    .map((item, index) => {
+      const quantity = Math.max(1, toNumber(item.quantity, 1));
+      const price = Math.max(0, toNumber(item.price, 0));
+
+      const productName = String(
+        item.product_name ||
+        item.name ||
+        item.title ||
+        `منتج ${index + 1}`
+      ).trim();
+
+      const productId = String(
+        item.product_id ||
+        item.productId ||
+        `manual_${Date.now()}_${index}`
+      ).trim();
+
+      const productImage = String(
+        item.product_image ||
+        item.image ||
+        item.image_url ||
+        ''
+      ).trim();
+
+      return {
+        product_id: productId,
+        product_name: productName || `منتج ${index + 1}`,
+        product_image: productImage,
+        price,
+        quantity
+      };
+    })
+    .filter(item => item.product_name && item.quantity > 0);
+}
+
+function calculateSubtotal(items) {
+  return items.reduce((sum, item) => {
+    return sum + (toNumber(item.price, 0) * toNumber(item.quantity, 1));
+  }, 0);
+}
+
+async function replaceOrderItems(orderId, items) {
+  await db.run(
+    `DELETE FROM ${ORDER_ITEMS_TABLE} WHERE order_id = ?`,
+    [orderId]
+  );
+
+  for (const item of items) {
+    await db.run(
+      `INSERT INTO ${ORDER_ITEMS_TABLE}
+      (order_id, product_id, product_name, product_image, price, quantity)
+      VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        orderId,
+        item.product_id,
+        item.product_name,
+        item.product_image,
+        toNumber(item.price, 0),
+        toNumber(item.quantity, 1)
+      ]
+    );
+  }
+}
+
 /**
  * POST /api/orders - إنشاء طلب جديد
  */
@@ -451,7 +519,7 @@ router.put('/:id/shipping', async (req, res) => {
     console.error('❌ خطأ في تحديث الشحن:', error);
     return res.status(500).json({
       success: false,
-      error: 'فشل في تحديث الشحن'
+      error: 'فشل في تحديث بيانات الشحن'
     });
   }
 });
@@ -672,6 +740,13 @@ router.post('/:id/cancel', async (req, res) => {
 
 /**
  * PUT /api/orders/:id - تحديث عام للطلب
+ * يدعم الآن:
+ * - status
+ * - notes
+ * - customer fields
+ * - shipping fields
+ * - items
+ * - subtotal / total recalculation
  */
 router.put('/:id', async (req, res) => {
   try {
@@ -685,7 +760,8 @@ router.put('/:id', async (req, res) => {
       customerAddress,
       customerCity,
       customerDistrict,
-      shippingCost
+      shippingCost,
+      items
     } = req.body;
 
     const order = await db.get(
@@ -786,19 +862,40 @@ router.put('/:id', async (req, res) => {
       updateValues.push(String(customerDistrict || '').trim());
     }
 
-    if (shippingCost !== undefined) {
-      const finalShipping = toNumber(shippingCost, 0);
-      const subtotal = toNumber(order.subtotal, 0);
-      const newTotal = subtotal + finalShipping;
+    let finalShipping = shippingCost !== undefined
+      ? Math.max(0, toNumber(shippingCost, 0))
+      : toNumber(order.shipping_cost, 0);
+
+    let finalSubtotal = toNumber(order.subtotal, 0);
+    let shouldReplaceItems = false;
+    let normalizedItems = [];
+
+    if (items !== undefined) {
+      normalizedItems = normalizeOrderItems(items);
+
+      if (!normalizedItems.length) {
+        return res.status(400).json({
+          success: false,
+          error: 'يجب أن يحتوي الطلب على منتج واحد على الأقل'
+        });
+      }
+
+      finalSubtotal = calculateSubtotal(normalizedItems);
+      shouldReplaceItems = true;
+    }
+
+    if (shippingCost !== undefined || items !== undefined) {
+      updateFields.push('subtotal = ?');
+      updateValues.push(finalSubtotal);
 
       updateFields.push('shipping_cost = ?');
       updateValues.push(finalShipping);
 
       updateFields.push('total = ?');
-      updateValues.push(newTotal);
+      updateValues.push(finalSubtotal + finalShipping);
     }
 
-    if (!updateFields.length) {
+    if (!updateFields.length && !shouldReplaceItems) {
       return res.status(400).json({
         success: false,
         error: 'لا توجد بيانات للتحديث'
@@ -814,6 +911,10 @@ router.put('/:id', async (req, res) => {
        WHERE id = ?`,
       updateValues
     );
+
+    if (shouldReplaceItems) {
+      await replaceOrderItems(id, normalizedItems);
+    }
 
     const updatedOrder = await getOrderWithItems(id);
 

@@ -1,738 +1,668 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اتصل بنا - Smart Kids Kuwait</title>
-    <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457">
-    <meta name="description" content="تواصل مع فريق Smart Kids Kuwait - خدمة العملاء والدعم التقني">
-    
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        :root {
-            --purple-dark: #6a4c93;
-            --purple-light: #9b59b6;
-            --glass-bg: rgba(255,255,255,0.25);
-            --glass-border: rgba(255,255,255,0.18);
-            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --info-color: #3498db;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #6a4c93 0%, #9b59b6 100%);
-            color: #333;
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-        
-        .header {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            padding: 2rem 1rem;
-            box-shadow: var(--glass-shadow);
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        
-        .header h1 {
-            font-size: 2.2rem;
-            color: var(--purple-dark);
-            margin-bottom: 0.5rem;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-        
-        .nav {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-        
-        .nav a {
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.9);
-            color: var(--purple-dark);
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: bold;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-        }
-        
-        .nav a:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-            background: white;
-        }
-        
-        .contact-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin: 2rem 0;
-        }
-        
-        .contact-info {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2.5rem;
-            box-shadow: var(--glass-shadow);
-        }
-        
-        .contact-form {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2.5rem;
-            box-shadow: var(--glass-shadow);
-        }
-        
-        .contact-method {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            background: linear-gradient(145deg, #f8f9ff, #e8f0ff);
-            border-radius: 15px;
-            border-right: 4px solid var(--purple-dark);
-            transition: transform 0.3s;
-        }
-        
-        .contact-method:hover {
-            transform: translateX(-5px);
-        }
-        
-        .contact-method .icon {
-            font-size: 2rem;
-            width: 60px;
-            height: 60px;
-            background: var(--purple-dark);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .contact-method .details h3 {
-            color: var(--purple-dark);
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .contact-method .details p {
-            color: #666;
-            font-size: 1rem;
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--purple-dark);
-            font-weight: bold;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s;
-            font-family: inherit;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: var(--purple-light);
-            outline: none;
-            box-shadow: 0 0 10px rgba(155, 89, 182, 0.2);
-        }
-        
-        .form-group textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-        
-        .submit-btn {
-            background: linear-gradient(45deg, var(--purple-dark), var(--purple-light));
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
-        }
-        
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(106, 76, 147, 0.4);
-        }
-        
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin: 2rem 0;
-            flex-wrap: wrap;
-        }
-        
-        .social-link {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 12px 20px;
-            background: var(--purple-dark);
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            transition: all 0.3s;
-            font-weight: bold;
-        }
-        
-        .social-link:hover {
-            background: var(--purple-light);
-            transform: translateY(-2px);
-        }
-        
-        .hours-card {
-            background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 20px;
-            text-align: center;
-            margin: 2rem 0;
-        }
-        
-        .hours-card h3 {
-            font-size: 1.4rem;
-            margin-bottom: 1rem;
-        }
-        
-        .hours-list {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-        
-        .hours-item {
-            background: rgba(255,255,255,0.1);
-            padding: 1rem;
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .faq-section {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2.5rem;
-            box-shadow: var(--glass-shadow);
-            margin: 2rem 0;
-        }
-        
-        .faq-item {
-            margin-bottom: 1.5rem;
-            border: 1px solid #eee;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .faq-question {
-            background: #f8f9ff;
-            padding: 1.2rem;
-            cursor: pointer;
-            transition: background 0.3s;
-            font-weight: bold;
-            color: var(--purple-dark);
-        }
-        
-        .faq-question:hover {
-            background: #e8f0ff;
-        }
-        
-        .faq-answer {
-            padding: 1.2rem;
-            background: white;
-            border-top: 1px solid #eee;
-        }
-        
-        .location-map {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2.5rem;
-            box-shadow: var(--glass-shadow);
-            margin: 2rem 0;
-            text-align: center;
-        }
-        
-        @media (max-width: 768px) {
-            .contact-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .contact-info,
-            .contact-form {
-                padding: 1.5rem;
-            }
-            
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            
-            .hours-list {
-                grid-template-columns: 1fr;
-            }
-            
-            .social-links {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
-        
-        /* أيقونات تسجيل الدخول والحساب */
-        .user-icons {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 1001;
-        }
-        
-        .user-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.25);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 2px solid rgba(255,255,255,0.18);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6a4c93;
-            text-decoration: none;
-            font-size: 1.5rem;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(31, 38, 135, 0.2);
-        }
-        
-        .user-icon:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(31, 38, 135, 0.3);
-            background: rgba(255,255,255,0.4);
-        }
-        
-        .user-icon.logged-in {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
-        }
-        
-        /* أيقونة واتساب الثابتة */
-        .whatsapp-float {
-            position: fixed;
-            width: 60px;
-            height: 60px;
-            bottom: 25px;
-            right: 25px;
-            background: #25D366;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            color: white;
-            text-decoration: none;
-            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-            z-index: 1000;
-            transition: all 0.3s ease;
-            animation: pulse 2s infinite;
-        }
-        
-        .whatsapp-float:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 30px rgba(37, 211, 102, 0.6);
-        }
-        
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(37, 211, 102, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>اتصل بنا - Smart Kids Kuwait</title>
+  <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457">
+  <meta name="description" content="تواصل مع فريق Smart Kids Kuwait - خدمة العملاء والدعم">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root{
+      --purple-dark:#6a4c93;
+      --purple:#7b56a8;
+      --purple-light:#9b59b6;
+      --bg:#f5f2fa;
+      --card:#ffffff;
+      --text:#2f2a38;
+      --muted:#746d80;
+      --line:#e7deef;
+      --shadow:0 10px 30px rgba(106,76,147,.12);
+      --radius:24px;
+      --radius-sm:18px;
+      --green:#25D366;
+    }
+
+    body{
+      font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+      background:linear-gradient(180deg,#ede5f8 0%, #f7f3fc 260px, #f7f4fb 100%);
+      color:var(--text);
+      line-height:1.7;
+      min-height:100vh;
+    }
+
+    a{ text-decoration:none; color:inherit; }
+    img{ max-width:100%; display:block; }
+
+    .topbar{
+      background:#000;
+      color:#fff;
+      padding:16px 18px;
+      position:sticky;
+      top:0;
+      z-index:1000;
+      box-shadow:0 8px 24px rgba(0,0,0,.12);
+    }
+
+    .topbar-inner{
+      max-width:1100px;
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .brand-logo{
+      width:60px;
+      height:60px;
+      object-fit:contain;
+      border-radius:50%;
+      background:#fff;
+      padding:4px;
+      flex:0 0 auto;
+    }
+
+    .brand-text{
+      min-width:0;
+    }
+
+    .brand-text h1{
+      font-size:clamp(1.3rem,2.5vw,2rem);
+      line-height:1.15;
+      margin-bottom:2px;
+      color:#fff;
+      font-weight:800;
+    }
+
+    .brand-text p{
+      color:#d9d3e3;
+      font-size:.95rem;
+    }
+
+    .header-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex:0 0 auto;
+    }
+
+    .circle-btn{
+      width:56px;
+      height:56px;
+      border-radius:18px;
+      border:none;
+      background:linear-gradient(180deg,#f5f0fb,#e7daf7);
+      box-shadow:0 8px 18px rgba(0,0,0,.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      transition:.2s ease;
+      padding:0;
+      overflow:hidden;
+    }
+
+    .circle-btn:hover{
+      transform:translateY(-2px);
+    }
+
+    .circle-btn img{
+      width:24px;
+      height:24px;
+      object-fit:contain;
+    }
+
+    .container{
+      max-width:1100px;
+      margin:22px auto 40px;
+      padding:0 16px;
+    }
+
+    .hero{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:32px;
+      box-shadow:var(--shadow);
+      padding:26px 20px;
+      text-align:center;
+      margin-bottom:18px;
+    }
+
+    .hero-logo{
+      width:min(420px, 88%);
+      margin:0 auto 10px;
+      object-fit:contain;
+    }
+
+    .hero-title{
+      font-size:clamp(2rem,4vw,3.1rem);
+      color:var(--purple-dark);
+      font-weight:900;
+      margin-bottom:6px;
+    }
+
+    .hero-sub{
+      font-size:clamp(1.05rem,2.3vw,1.5rem);
+      color:var(--text);
+    }
+
+    .quick-nav{
+      display:flex;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:12px;
+      margin:18px 0 24px;
+    }
+
+    .quick-nav a{
+      min-width:180px;
+      text-align:center;
+      padding:13px 20px;
+      border-radius:999px;
+      background:#fff;
+      border:1px solid var(--line);
+      color:var(--purple-dark);
+      font-weight:800;
+      box-shadow:var(--shadow);
+      transition:.2s ease;
+    }
+
+    .quick-nav a:hover{
+      transform:translateY(-2px);
+    }
+
+    .section{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:32px;
+      box-shadow:var(--shadow);
+      padding:26px 20px;
+      margin-bottom:22px;
+    }
+
+    .section-title{
+      text-align:center;
+      font-size:clamp(1.8rem,3vw,2.8rem);
+      color:var(--purple-dark);
+      font-weight:900;
+      margin-bottom:22px;
+    }
+
+    .contact-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+    }
+
+    .contact-card{
+      background:#f8f5fc;
+      border:1px solid #eadff4;
+      border-radius:26px;
+      padding:22px 20px;
+      display:flex;
+      align-items:center;
+      gap:16px;
+      min-height:128px;
+      box-shadow:0 6px 18px rgba(106,76,147,.07);
+    }
+
+    .contact-icon{
+      width:72px;
+      height:72px;
+      border-radius:50%;
+      background:linear-gradient(180deg,#7e58aa,#6a4c93);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 auto;
+      overflow:hidden;
+      box-shadow:0 8px 18px rgba(106,76,147,.18);
+    }
+
+    .contact-icon img{
+      width:34px;
+      height:34px;
+      object-fit:contain;
+      filter:brightness(0) invert(1);
+    }
+
+    .contact-text h3{
+      color:var(--purple-dark);
+      font-size:1.65rem;
+      margin-bottom:6px;
+      font-weight:900;
+    }
+
+    .contact-text p{
+      color:#5f5a69;
+      font-size:1rem;
+      line-height:1.7;
+    }
+
+    .social-grid{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:14px;
+      margin-top:8px;
+    }
+
+    .social-box{
+      background:linear-gradient(180deg,#7f58ab,#6f4e98);
+      color:#fff;
+      border-radius:24px;
+      padding:18px 12px;
+      text-align:center;
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 10px 24px rgba(106,76,147,.16);
+      transition:.2s ease;
+      min-height:118px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+    }
+
+    .social-box:hover{
+      transform:translateY(-3px);
+    }
+
+    .social-box img{
+      width:34px;
+      height:34px;
+      object-fit:contain;
+    }
+
+    .social-box span{
+      font-size:1.05rem;
+      font-weight:800;
+      line-height:1.3;
+    }
+
+    .faq-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .faq-item{
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      background:#fff;
+    }
+
+    .faq-question{
+      width:100%;
+      border:none;
+      background:#faf8fd;
+      color:var(--purple-dark);
+      font-size:1.05rem;
+      font-weight:800;
+      text-align:right;
+      padding:16px 18px;
+      cursor:pointer;
+    }
+
+    .faq-answer{
+      display:none;
+      padding:16px 18px;
+      color:#5d5867;
+      border-top:1px solid var(--line);
+      background:#fff;
+    }
+
+    .faq-item.open .faq-answer{
+      display:block;
+    }
+
+    .whatsapp-float{
+      position:fixed;
+      width:66px;
+      height:66px;
+      bottom:22px;
+      right:22px;
+      background:#fff;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      box-shadow:0 10px 26px rgba(37,211,102,.28);
+      z-index:1200;
+      transition:.2s ease;
+      overflow:hidden;
+      border:5px solid #ccefd9;
+    }
+
+    .whatsapp-float:hover{
+      transform:scale(1.06);
+    }
+
+    .whatsapp-float img{
+      width:34px;
+      height:34px;
+      object-fit:contain;
+    }
+
+    @media (max-width:900px){
+      .social-grid{
+        grid-template-columns:repeat(3, minmax(0,1fr));
+      }
+    }
+
+    @media (max-width:768px){
+      .topbar{
+        padding:14px 12px;
+      }
+
+      .topbar-inner{
+        align-items:center;
+      }
+
+      .brand-logo{
+        width:54px;
+        height:54px;
+      }
+
+      .circle-btn{
+        width:52px;
+        height:52px;
+        border-radius:16px;
+      }
+
+      .container{
+        padding:0 12px;
+      }
+
+      .hero{
+        padding:22px 16px;
+        border-radius:28px;
+      }
+
+      .quick-nav a{
+        min-width:155px;
+      }
+
+      .section{
+        border-radius:28px;
+        padding:22px 16px;
+      }
+
+      .contact-grid{
+        grid-template-columns:1fr;
+      }
+
+      .contact-card{
+        flex-direction:row;
+        padding:18px 16px;
+      }
+
+      .social-grid{
+        grid-template-columns:repeat(2, minmax(0,1fr));
+      }
+
+      .social-box{
+        min-height:102px;
+        border-radius:20px;
+      }
+    }
+
+    @media (max-width:460px){
+      .brand-text h1{
+        font-size:1.05rem;
+      }
+
+      .brand-text p{
+        font-size:.82rem;
+      }
+
+      .hero-title{
+        font-size:2.3rem;
+      }
+
+      .hero-sub{
+        font-size:1rem;
+      }
+
+      .contact-card{
+        align-items:center;
+      }
+
+      .contact-text h3{
+        font-size:1.35rem;
+      }
+
+      .social-grid{
+        grid-template-columns:1fr;
+      }
+
+      .quick-nav{
+        gap:10px;
+      }
+
+      .quick-nav a{
+        width:100%;
+        min-width:0;
+      }
+    }
+  </style>
 </head>
 <body>
-    <!-- أيقونات تسجيل الدخول والحساب -->
-    <div class="user-icons">
-        <a href="./login.html" class="user-icon" id="loginIcon" title="تسجيل الدخول">
-            🔐
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <img class="brand-logo" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457" alt="Smart Kids Kuwait">
+        <div class="brand-text">
+          <h1>الأطفال المبتكرون الكويت</h1>
+          <p>Smart Kids Kuwait Admin</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <a href="./profile.html" class="circle-btn" title="حسابي" id="profileIcon">
+          <img src="/account-icon.png" alt="حسابي">
         </a>
-        <a href="./profile.html" class="user-icon" id="profileIcon" title="حسابي">
-            👤
+        <a href="./login.html" class="circle-btn" title="تسجيل الدخول" id="loginIcon">
+          <img src="/lock-icon.png" alt="تسجيل الدخول">
         </a>
+      </div>
     </div>
+  </div>
 
-    <!-- أيقونة واتساب الثابتة -->
-    <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
-        💬
-    </a>
-    <div class="header">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
-            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" style="height: 80px; object-fit: contain;">
+  <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="واتساب" rel="noopener">
+    <img src="/whatsapp.png" alt="WhatsApp">
+  </a>
+
+  <div class="container">
+    <section class="hero">
+      <img class="hero-logo" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo">
+      <h2 class="hero-title">اتصل بنا 📞</h2>
+      <p class="hero-sub">Smart Kids Kuwait</p>
+    </section>
+
+    <nav class="quick-nav">
+      <a href="./index.html">🏠 الصفحة الرئيسية</a>
+      <a href="./products-full.html">🛍️ المتجر</a>
+      <a href="./shipping-policy.html">🚚 سياسة الشحن</a>
+      <a href="./about.html">ℹ️ عن المتجر</a>
+    </nav>
+
+    <section class="section">
+      <h2 class="section-title">معلومات التواصل 📋</h2>
+
+      <div class="contact-grid">
+        <a class="contact-card" href="https://wa.me/96566635393" target="_blank" rel="noopener">
+          <div class="contact-icon">
+            <img src="/whatsapp.png" alt="WhatsApp">
+          </div>
+          <div class="contact-text">
+            <h3>واتساب</h3>
+            <p>+965 XXXX XXXX</p>
+            <p>للتواصل السريع والاستفسارات</p>
+          </div>
+        </a>
+
+        <a class="contact-card" href="tel:+96566635393">
+          <div class="contact-icon">
+            <img src="/phone-icon.png" alt="Phone">
+          </div>
+          <div class="contact-text">
+            <h3>الهاتف</h3>
+            <p>+965 XXXX XXXX</p>
+            <p>خدمة العملاء والمبيعات</p>
+          </div>
+        </a>
+
+        <a class="contact-card" href="mailto:info@smartkidskuwait.com">
+          <div class="contact-icon">
+            <img src="/email-icon.png" alt="Email">
+          </div>
+          <div class="contact-text">
+            <h3>البريد الإلكتروني</h3>
+            <p>info@smartkidskuwait.com</p>
+            <p>للاستفسارات العامة</p>
+          </div>
+        </a>
+
+        <a class="contact-card" href="mailto:orders@smartkidskuwait.com">
+          <div class="contact-icon">
+            <img src="/orders-icon.png" alt="Orders">
+          </div>
+          <div class="contact-text">
+            <h3>الطلبات والمبيعات</h3>
+            <p>orders@smartkidskuwait.com</p>
+            <p>للطلبات والمتابعة</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">تابعنا</h2>
+      <div class="social-grid">
+        <a href="https://wa.me/96566635393" target="_blank" rel="noopener" class="social-box">
+          <img src="/whatsapp.png" alt="واتساب">
+          <span>واتساب</span>
+        </a>
+
+        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" class="social-box">
+          <img src="/facebook.png" alt="فيسبوك">
+          <span>فيسبوك</span>
+        </a>
+
+        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" class="social-box">
+          <img src="/instagram.png" alt="إنستغرام">
+          <span>إنستغرام</span>
+        </a>
+
+        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" class="social-box">
+          <img src="/pinterest.png" alt="بنترست">
+          <span>بنترست</span>
+        </a>
+
+        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" class="social-box">
+          <img src="/tiktok.png" alt="تيك توك">
+          <span>تيك توك</span>
+        </a>
+
+        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" class="social-box">
+          <img src="/snapchat.png" alt="سناب شات">
+          <span>سناب شات</span>
+        </a>
+
+        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" class="social-box">
+          <img src="/youtube.png" alt="يوتيوب">
+          <span>يوتيوب</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">الأسئلة الشائعة ❓</h2>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-question" type="button">كيف يمكنني تتبع طلبي؟</button>
+          <div class="faq-answer">
+            بعد تأكيد الطلب يصلك رقم الطلب، ويمكنك متابعة الحالة من الموقع أو عبر التواصل معنا.
+          </div>
         </div>
-        <h1>📞 اتصل بنا</h1>
-        <p>Smart Kids Kuwait - نحن هنا لخدمتكم</p>
-    </div>
-    
-    <div class="container">
-        <div class="nav">
-            <a href="./index.html">🏠 الصفحة الرئيسية</a>
-            <a href="./products-full.html">🛍️ المتجر</a>
-            <a href="./shipping-policy.html">🚚 سياسة الشحن</a>
-            <a href="./about.html">ℹ️ عن المتجر</a>
+
+        <div class="faq-item">
+          <button class="faq-question" type="button">ما هي طرق الدفع المتاحة؟</button>
+          <div class="faq-answer">
+            نوفر وسائل الدفع المتاحة في الكويت حسب ما يظهر في صفحة الدفع عند إتمام الطلب.
+          </div>
         </div>
-        
-        <div class="contact-grid">
-            <div class="contact-info">
-                <h2 style="color: var(--purple-dark); margin-bottom: 2rem; text-align: center;">📋 معلومات التواصل</h2>
-                
-                <div class="contact-method">
-                    <div class="icon">📱</div>
-                    <div class="details">
-                        <h3>واتساب</h3>
-                        <p>+965 XXXX XXXX</p>
-                        <p>متاح 24/7 للاستفسارات العاجلة</p>
-                    </div>
-                </div>
-                
-                <div class="contact-method">
-                    <div class="icon">📞</div>
-                    <div class="details">
-                        <h3>الهاتف</h3>
-                        <p>+965 XXXX XXXX</p>
-                        <p>خدمة العملاء والمبيعات</p>
-                    </div>
-                </div>
-                
-                <div class="contact-method">
-                    <div class="icon">📧</div>
-                    <div class="details">
-                        <h3>البريد الإلكتروني</h3>
-                        <p>info@smartkidskuwait.com</p>
-                        <p>للاستفسارات العامة</p>
-                    </div>
-                </div>
-                
-                <div class="contact-method">
-                    <div class="icon">🛍️</div>
-                    <div class="details">
-                        <h3>المبيعات والطلبات</h3>
-                        <p>orders@smartkidskuwait.com</p>
-                        <p>لمتابعة الطلبات والمبيعات</p>
-                    </div>
-                </div>
-                
-                <div class="contact-method">
-                    <div class="icon">🔧</div>
-                    <div class="details">
-                        <h3>الدعم التقني</h3>
-                        <p>support@smartkidskuwait.com</p>
-                        <p>للمساعدة التقنية</p>
-                    </div>
-                </div>
-                
-                <div class="contact-method">
-                    <div class="icon">📍</div>
-                    <div class="details">
-                        <h3>العنوان</h3>
-                        <p>مدينة الكويت، الكويت</p>
-                        <p>المكتب الرئيسي</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="contact-form">
-                <h2 style="color: var(--purple-dark); margin-bottom: 2rem; text-align: center;">✉️ أرسل لنا رسالة</h2>
-                
-                <form id="contactForm">
-                    <div class="form-group">
-                        <label for="name">الاسم الكامل *</label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="email">البريد الإلكتروني *</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="phone">رقم الهاتف</label>
-                        <input type="tel" id="phone" name="phone">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="subject">موضوع الرسالة *</label>
-                        <select id="subject" name="subject" required>
-                            <option value="">اختر الموضوع</option>
-                            <option value="order">استفسار عن طلب</option>
-                            <option value="product">استفسار عن منتج</option>
-                            <option value="shipping">استفسار عن الشحن</option>
-                            <option value="return">طلب إرجاع أو استبدال</option>
-                            <option value="complaint">شكوى</option>
-                            <option value="suggestion">اقتراح</option>
-                            <option value="other">أخرى</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="message">الرسالة *</label>
-                        <textarea id="message" name="message" placeholder="اكتب رسالتك هنا..." required></textarea>
-                    </div>
-                    
-                    <button type="submit" class="submit-btn">📤 إرسال الرسالة</button>
-                </form>
-            </div>
+
+        <div class="faq-item">
+          <button class="faq-question" type="button">كم يستغرق التوصيل؟</button>
+          <div class="faq-answer">
+            مدة التوصيل تختلف حسب المنطقة وطريقة الشحن، وتظهر التفاصيل النهائية أثناء الطلب.
+          </div>
         </div>
-        
-        <div class="hours-card">
-            <h3>🕒 أوقات العمل</h3>
-            <p>نحن متاحون لخدمتكم في الأوقات التالية</p>
-            
-            <div class="hours-list">
-                <div class="hours-item">
-                    <strong>الأحد - الخميس</strong><br>
-                    9:00 ص - 8:00 م
-                </div>
-                <div class="hours-item">
-                    <strong>الجمعة</strong><br>
-                    2:00 م - 8:00 م
-                </div>
-                <div class="hours-item">
-                    <strong>السبت</strong><br>
-                    10:00 ص - 6:00 م
-                </div>
-                <div class="hours-item">
-                    <strong>العطل الرسمية</strong><br>
-                    مغلق
-                </div>
-            </div>
+
+        <div class="faq-item">
+          <button class="faq-question" type="button">هل يمكنني إرجاع المنتج؟</button>
+          <div class="faq-answer">
+            نعم، حسب سياسة الإرجاع والاستبدال المعتمدة في المتجر.
+          </div>
         </div>
-        
-       <div class="social-links">
-  <a href="https://wa.me/96566635393" target="_blank" rel="noopener"
-     class="social-link"
-     onmouseover="this.querySelector('img').src='/whatsapp-hover.png';"
-     onmouseout="this.querySelector('img').src='/whatsapp.png';">
-    <img src="/whatsapp.png" alt="WhatsApp" width="22" height="22" style="display:block">
-    واتساب
-  </a>
+      </div>
+    </section>
+  </div>
 
-  <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener"
-     class="social-link"
-     onmouseover="this.querySelector('img').src='/facebook-hover.png';"
-     onmouseout="this.querySelector('img').src='/facebook.png';">
-    <img src="/facebook.png" alt="Facebook" width="22" height="22" style="display:block">
-    فيسبوك
-  </a>
-
-  <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener"
-     class="social-link"
-     onmouseover="this.querySelector('img').src='/instagram-hover.png';"
-     onmouseout="this.querySelector('img').src='/instagram.png';">
-    <img src="/instagram.png" alt="Instagram" width="22" height="22" style="display:block">
-    إنستغرام
-  </a>
-
-  <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener"
-     class="social-link"
-     onmouseover="this.querySelector('img').src='/pinterest-hover.png';"
-     onmouseout="this.querySelector('img').src='/pinterest.png';">
-    <img src="/pinterest.png" alt="Pinterest" width="22" height="22" style="display:block">
-    بنترست
-  </a>
-
-  <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener"
-     class="social-link"
-     onmouseover="this.querySelector('img').src='/tiktok-hover.png';"
-     onmouseout="this.querySelector('img').src='/tiktok.png';">
-    <img src="/tiktok.png" alt="TikTok" width="22" height="22" style="display:block">
-    تيك توك
-  </a>
-
-  <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener"
-     class="social-link"
-     onmouseover="this.querySelector('img').src='/snapchat-hover.png';"
-     onmouseout="this.querySelector('img').src='/snapchat.png';">
-    <img src="/snapchat.png" alt="Snapchat" width="22" height="22" style="display:block">
-    سناب شات
-  </a>
-
-  <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener"
-     class="social-link"
-     onmouseover="this.querySelector('img').src='/youtube-hover.png';"
-     onmouseout="this.querySelector('img').src='/youtube.png';">
-    <img src="/youtube.png" alt="YouTube" width="22" height="22" style="display:block">
-    يوتيوب
-  </a>
-</div>
-
-        
-        <div class="faq-section">
-            <h2 style="color: var(--purple-dark); margin-bottom: 2rem; text-align: center;">❓ الأسئلة الشائعة</h2>
-            
-            <div class="faq-item">
-                <div class="faq-question">كيف يمكنني تتبع طلبي؟</div>
-                <div class="faq-answer">
-                    <p>بعد تأكيد طلبك، ستحصل على رقم تتبع عبر SMS أو WhatsApp. يمكنك استخدام هذا الرقم لتتبع حالة الطلب على موقعنا أو الاتصال بخدمة العملاء.</p>
-                </div>
-            </div>
-            
-            <div class="faq-item">
-                <div class="faq-question">ما هي طرق الدفع المتاحة؟</div>
-                <div class="faq-answer">
-                    <p>نقبل البطاقات الائتمانية (Visa, MasterCard)، K-Net، والدفع عند التسليم داخل الكويت. للطلبات الدولية، نقبل البطاقات الائتمانية فقط.</p>
-                </div>
-            </div>
-            
-            <div class="faq-item">
-                <div class="faq-question">كم يستغرق التوصيل؟</div>
-                <div class="faq-answer">
-                    <p>التوصيل داخل الكويت: 1-3 أيام عمل. خارج الكويت: 5-7 أيام عمل. التوصيل السريع متاح لمحافظتي العاصمة وحولي خلال 24 ساعة.</p>
-                </div>
-            </div>
-            
-            <div class="faq-item">
-                <div class="faq-question">هل يمكنني إرجاع المنتج؟</div>
-                <div class="faq-answer">
-                    <p>نعم، يمكنك إرجاع المنتج خلال 14 يوماً من تاريخ الاستلام، بشرط أن يكون في حالته الأصلية مع العبوة الأصلية. راجع سياسة الإرجاع للتفاصيل الكاملة.</p>
-                </div>
-            </div>
-            
-            <div class="faq-item">
-                <div class="faq-question">هل تقدمون ضمان على المنتجات؟</div>
-                <div class="faq-answer">
-                    <p>جميع منتجاتنا مضمونة ضد عيوب التصنيع. مدة الضمان تختلف حسب نوع المنتج وتتراوح من 6 أشهر إلى سنتين.</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="location-map">
-            <h2 style="color: var(--purple-dark); margin-bottom: 2rem;">📍 موقعنا</h2>
-            <p style="margin-bottom: 2rem; color: #666;">مدينة الكويت، الكويت</p>
-            <div style="background: #f8f9ff; padding: 2rem; border-radius: 15px; border: 2px dashed var(--purple-light);">
-                <h3 style="color: var(--purple-dark); margin-bottom: 1rem;">🗺️ الخريطة التفاعلية</h3>
-                <p style="color: #666;">ستتم إضافة الخريطة التفاعلية قريباً</p>
-                <p style="margin-top: 1rem; font-size: 0.9rem; color: #888;">يمكنكم التواصل معنا لمعرفة العنوان التفصيلي</p>
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData);
-            
-            // Here you would normally send the data to your server
-            console.log('Form data:', data);
-            
-            // Show success message
-            alert('تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.');
-            
-            // Reset form
-            this.reset();
+  <script>
+    document.querySelectorAll('.faq-question').forEach(button => {
+      button.addEventListener('click', function () {
+        const item = this.parentElement;
+        document.querySelectorAll('.faq-item').forEach(faq => {
+          if (faq !== item) faq.classList.remove('open');
         });
-        
-        // FAQ toggle functionality
-        document.querySelectorAll('.faq-question').forEach(question => {
-            question.addEventListener('click', function() {
-                const answer = this.nextElementSibling;
-                const isVisible = answer.style.display === 'block';
-                
-                // Hide all answers
-                document.querySelectorAll('.faq-answer').forEach(ans => {
-                    ans.style.display = 'none';
-                });
-                
-                // Show clicked answer if it wasn't visible
-                if (!isVisible) {
-                    answer.style.display = 'block';
-                }
-            });
-        });
-        
-        // تحديث أيقونات تسجيل الدخول
-        function updateUserIcons() {
-            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
-            const loginIcon = document.getElementById('loginIcon');
-            const profileIcon = document.getElementById('profileIcon');
-            
-            if (isLoggedIn) {
-                loginIcon.innerHTML = '✓';
-                loginIcon.title = 'مسجل دخول';
-                loginIcon.classList.add('logged-in');
-                loginIcon.href = '#';
-                loginIcon.onclick = logout;
-                
-                profileIcon.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
-                profileIcon.style.color = 'white';
-            } else {
-                loginIcon.innerHTML = '🔐';
-                loginIcon.title = 'تسجيل الدخول';
-                loginIcon.classList.remove('logged-in');
-                loginIcon.href = './login.html';
-                loginIcon.onclick = null;
-            }
-        }
-        
-        function logout() {
-            if (confirm('هل تريد تسجيل الخروج؟')) {
-                localStorage.removeItem('userLoggedIn');
-                localStorage.removeItem('userEmail');
-                localStorage.removeItem('userName');
-                updateUserIcons();
-                alert('تم تسجيل الخروج بنجاح');
-            }
-        }
-        
-        // تحديث الأيقونات عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', updateUserIcons);
-    </script>
+        item.classList.toggle('open');
+      });
+    });
+
+    function updateUserIcons() {
+      const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+      const loginIcon = document.getElementById('loginIcon');
+
+      if (!loginIcon) return;
+
+      if (isLoggedIn) {
+        loginIcon.href = '#';
+        loginIcon.title = 'تسجيل الخروج';
+        loginIcon.onclick = function (e) {
+          e.preventDefault();
+          logout();
+        };
+      } else {
+        loginIcon.href = './login.html';
+        loginIcon.title = 'تسجيل الدخول';
+        loginIcon.onclick = null;
+      }
+    }
+
+    function logout() {
+      if (confirm('هل تريد تسجيل الخروج؟')) {
+        localStorage.removeItem('userLoggedIn');
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userName');
+        updateUserIcons();
+        alert('تم تسجيل الخروج بنجاح');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', updateUserIcons);
+  </script>
 </body>
 </html>
