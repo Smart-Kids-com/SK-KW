@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Products - Smart Kids Kuwait</title>
+  <title>Product edit - Smart Kids Kuwait</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     :root{
       --bg:#f3f3f3;
-      --card:#ffffff;
+      --card:#fff;
       --line:#e5e7eb;
       --text:#202223;
       --muted:#6d7175;
@@ -20,7 +20,6 @@
       --yellow-bg:#fde68a;
       --gray-bg:#e5e7eb;
       --shadow:0 1px 2px rgba(0,0,0,.08);
-      --radius:14px;
     }
 
     body{
@@ -32,7 +31,7 @@
     }
 
     a{text-decoration:none;color:inherit}
-    button,input,select{font-family:inherit}
+    button,input,textarea,select{font-family:inherit}
 
     .app{
       min-height:100vh;
@@ -140,15 +139,8 @@
       text-align:left;
     }
 
-    .nav-item.active{
-      background:#e9eaeb;
-    }
-
-    .nav-sub{
-      padding-left:42px;
-      color:#444;
-      font-weight:500;
-    }
+    .nav-item.active{background:#e9eaeb}
+    .nav-sub{padding-left:42px;color:#444;font-weight:500}
 
     .badge-count{
       background:#e5e7eb;
@@ -193,23 +185,55 @@
 
     .page-head{
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
       gap:16px;
       margin-bottom:16px;
       flex-wrap:wrap;
     }
 
+    .head-left{
+      display:flex;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .back-btn{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+      font-size:20px;
+    }
+
+    .title-wrap{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
     .page-title{
       font-size:20px;
-      font-weight:800;
+      font-weight:900;
       display:flex;
       align-items:center;
       gap:10px;
+      flex-wrap:wrap;
       direction:ltr;
     }
 
-    .page-actions{
+    .subline{
+      color:#6b7280;
+      font-size:14px;
+      font-weight:600;
+      direction:ltr;
+    }
+
+    .head-actions{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
@@ -233,315 +257,254 @@
       border-color:#111;
     }
 
-    .summary{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:18px;
-      overflow:hidden;
-      box-shadow:var(--shadow);
-      margin-bottom:16px;
-    }
-
-    .summary-grid{
-      display:grid;
-      grid-template-columns:180px repeat(3,1fr);
-      direction:ltr;
-    }
-
-    .summary-cell{
-      padding:16px 18px;
-      border-right:1px solid var(--line);
-      min-height:86px;
-      text-align:left;
-    }
-
-    .summary-cell:first-child{border-right:none}
-    .summary-label{
-      color:#444;
-      font-size:13px;
-      margin-bottom:8px;
-      font-weight:700;
-    }
-    .summary-value{
-      font-size:17px;
-      font-weight:800;
-    }
-    .summary-sub{
-      font-size:13px;
-      color:#6b7280;
-      margin-top:6px;
-    }
-
-    .products-card{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:18px;
-      overflow:hidden;
-      box-shadow:var(--shadow);
-    }
-
-    .tabs-row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:12px 14px;
-      border-bottom:1px solid var(--line);
-      flex-wrap:wrap;
-    }
-
-    .tabs{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-      direction:ltr;
-    }
-
-    .tab{
-      height:36px;
-      border:none;
-      background:transparent;
-      border-radius:12px;
-      padding:0 14px;
-      font-weight:700;
-      color:#444;
-      cursor:pointer;
-    }
-
-    .tab.active{
-      background:#ededee;
-      color:#111;
-    }
-
-    .tools{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-      position:relative;
-    }
-
-    .icon-btn{
-      width:38px;
-      height:38px;
-      border-radius:12px;
-      border:1px solid #d1d5db;
+    .btn.danger{
       background:#fff;
-      cursor:pointer;
-      font-size:16px;
-    }
-
-    .selection-pill{
-      min-height:38px;
-      padding:0 12px;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      border:1px solid #d1d5db;
-      border-radius:12px;
-      background:#f9fafb;
-      font-weight:800;
-      color:#111;
-    }
-
-    .selection-pill.active{
-      display:inline-flex;
-    }
-
-    .filters-row{
-      display:grid;
-      grid-template-columns:1.4fr 220px 220px 120px;
-      gap:12px;
-      padding:14px;
-      border-bottom:1px solid var(--line);
-    }
-
-    .filters-row.hidden{
-      display:none;
-    }
-
-    .field input,
-    .field select{
-      width:100%;
-      height:42px;
-      border-radius:12px;
-      border:1px solid #d1d5db;
-      background:#fff;
-      padding:0 14px;
-      font-size:15px;
-      outline:none;
-    }
-
-    .field input:focus,
-    .field select:focus{
-      border-color:#9ca3af;
-    }
-
-    .search-btn{
-      height:42px;
-      border:none;
-      border-radius:12px;
-      background:#111827;
-      color:#fff;
-      font-weight:800;
-      cursor:pointer;
-    }
-
-    .table-wrap{
-      overflow:auto;
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      min-width:1180px;
-      direction:ltr;
-    }
-
-    th,td{
-      padding:14px 16px;
-      border-bottom:1px solid var(--line);
-      text-align:left;
-      vertical-align:middle;
-      background:#fff;
-    }
-
-    th{
-      font-size:13px;
-      color:#4b5563;
-      font-weight:800;
-      white-space:nowrap;
-    }
-
-    tr:hover td{
-      background:#fafafa;
-    }
-
-    .check{
-      width:20px;
-      height:20px;
-    }
-
-    .product-cell{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width:320px;
-      direction:rtl;
-      text-align:right;
-    }
-
-    .thumb{
-      width:54px;
-      height:54px;
-      border-radius:12px;
-      object-fit:cover;
-      background:#eee;
-      border:1px solid #e5e7eb;
-      flex-shrink:0;
-    }
-
-    .thumb-placeholder{
-      width:54px;
-      height:54px;
-      border-radius:12px;
-      background:#f3f4f6;
-      border:1px solid #e5e7eb;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#9ca3af;
-      font-size:20px;
-      flex-shrink:0;
-    }
-
-    .product-name{
-      font-weight:800;
-      line-height:1.45;
-      margin-bottom:4px;
-    }
-
-    .product-sub{
-      font-size:13px;
-      color:var(--muted);
-      direction:rtl;
+      color:#991b1b;
+      border-color:#fecaca;
     }
 
     .status-badge{
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      min-width:66px;
-      height:30px;
+      min-width:74px;
+      height:32px;
       padding:0 12px;
       border-radius:999px;
       font-size:13px;
       font-weight:800;
     }
 
-    .status-badge.active{
-      color:#166534;
-      background:var(--green-bg);
+    .status-badge.active{background:var(--green-bg);color:#166534}
+    .status-badge.draft{background:var(--yellow-bg);color:#92400e}
+    .status-badge.archived{background:#e5e7eb;color:#374151}
+
+    .layout{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 360px;
+      gap:20px;
+      align-items:start;
     }
 
-    .status-badge.draft{
-      color:#92400e;
-      background:var(--yellow-bg);
+    .stack{display:grid;gap:18px}
+    .sidebar-stack{display:grid;gap:18px}
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
     }
 
-    .status-badge.archived{
-      color:#374151;
-      background:#e5e7eb;
-    }
-
-    .inventory-good{color:#166534;font-weight:800}
-    .inventory-low{color:#b45309;font-weight:800}
-    .inventory-zero{color:#b91c1c;font-weight:800}
-
-    .table-actions{
+    .card-head{
+      padding:16px 18px;
+      border-bottom:1px solid var(--line);
       display:flex;
-      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
       flex-wrap:wrap;
     }
 
-    .mini-btn{
-      border:none;
+    .card-title{
+      font-size:16px;
+      font-weight:800;
+      direction:ltr;
+    }
+
+    .card-body{padding:18px}
+
+    .field{
+      display:grid;
+      gap:8px;
+      margin-bottom:16px;
+    }
+
+    .field:last-child{margin-bottom:0}
+
+    .field label{
+      font-size:14px;
+      font-weight:700;
+      color:#374151;
+      direction:ltr;
+      text-align:left;
+    }
+
+    .input,.textarea,.select{
+      width:100%;
+      border:1px solid #d1d5db;
+      border-radius:12px;
+      background:#fff;
+      padding:12px 14px;
+      font-size:15px;
+      outline:none;
+    }
+
+    .input{height:46px}
+    .textarea{
+      min-height:200px;
+      resize:vertical;
+      line-height:1.8;
+      direction:rtl;
+      text-align:right;
+    }
+
+    .input:focus,.textarea:focus,.select:focus{
+      border-color:#9ca3af;
+      box-shadow:0 0 0 3px rgba(156,163,175,.15);
+    }
+
+    .rtl-input{
+      direction:rtl;
+      text-align:right;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .hint{
+      font-size:12px;
+      color:#6b7280;
+      line-height:1.7;
+      direction:rtl;
+      text-align:right;
+    }
+
+    .media-grid{
+      display:grid;
+      grid-template-columns:240px 1fr;
+      gap:16px;
+      align-items:start;
+    }
+
+    .primary-preview{
+      width:100%;
+      aspect-ratio:1/1;
+      border:1px solid var(--line);
+      border-radius:16px;
       background:#f3f4f6;
-      color:#111;
+      object-fit:cover;
+    }
+
+    .thumbs{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(96px,1fr));
+      gap:12px;
+    }
+
+    .thumb-card{
+      border:1px solid var(--line);
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+    }
+
+    .thumb-img{
+      width:100%;
+      aspect-ratio:1/1;
+      object-fit:cover;
+      background:#f3f4f6;
+      display:block;
+    }
+
+    .thumb-tools{
+      padding:8px;
+      display:grid;
+      gap:8px;
+    }
+
+    .mini-input{
+      width:100%;
+      height:36px;
+      border:1px solid #d1d5db;
       border-radius:10px;
+      padding:0 10px;
+      font-size:13px;
+      outline:none;
+      direction:ltr;
+      text-align:left;
+    }
+
+    .mini-btn{
       height:34px;
-      padding:0 12px;
+      border:none;
+      border-radius:10px;
+      background:#f3f4f6;
       cursor:pointer;
       font-weight:700;
     }
 
-    .pagination{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      padding:12px 14px;
-      flex-wrap:wrap;
+    .mini-btn.danger{
+      background:#fee2e2;
+      color:#991b1b;
     }
 
-    .pagination-left{
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .seo-preview{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      background:#fafafa;
+      line-height:1.7;
+      direction:ltr;
+      text-align:left;
+    }
+
+    .seo-site{
       color:#6b7280;
+      font-size:13px;
+      word-break:break-all;
+    }
+
+    .seo-link{
+      color:#1d4ed8;
+      font-size:22px;
+      line-height:1.5;
+      font-weight:500;
+      margin:6px 0;
+    }
+
+    .seo-desc{
+      color:#374151;
       font-size:14px;
-      font-weight:600;
+    }
+
+    .meta-list{display:grid;gap:12px}
+    .meta-row{
+      display:grid;
+      gap:6px;
+      padding-bottom:12px;
+      border-bottom:1px solid var(--line);
+    }
+    .meta-row:last-child{
+      padding-bottom:0;
+      border-bottom:none;
+    }
+
+    .meta-label{
+      font-size:13px;
+      color:#6b7280;
+      font-weight:700;
       direction:ltr;
     }
 
-    .pagination-right{
-      display:flex;
-      gap:8px;
-    }
-
-    .empty{
-      padding:46px 20px;
-      text-align:center;
-      color:#6b7280;
+    .meta-value{
+      font-size:15px;
       font-weight:700;
+      color:#111827;
+      word-break:break-word;
+      direction:ltr;
+      text-align:left;
     }
 
     .mobile-top{
@@ -554,7 +517,7 @@
       z-index:60;
     }
 
-    .mobile-top-row{
+    .mobile-row{
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -563,123 +526,43 @@
     }
 
     .mobile-title{
-      font-size:22px;
+      font-size:20px;
       font-weight:900;
-      white-space:nowrap;
+      line-height:1.3;
     }
 
-    .mobile-top-search{
-      width:100%;
-      height:42px;
-      border:none;
-      border-radius:12px;
-      background:#2a2b2d;
-      color:#fff;
-      padding:0 14px;
-      outline:none;
-    }
-
-    .dropdown{
-      position:absolute;
-      top:46px;
-      left:0;
-      min-width:220px;
-      background:#fff;
-      border:1px solid #d1d5db;
-      border-radius:14px;
-      box-shadow:0 12px 30px rgba(0,0,0,.12);
-      display:none;
-      z-index:25;
-      overflow:hidden;
-    }
-
-    .dropdown.active{
-      display:block;
-    }
-
-    .dropdown button{
-      width:100%;
-      text-align:left;
-      padding:12px 14px;
-      border:none;
-      background:#fff;
-      cursor:pointer;
-      font-weight:700;
-      border-bottom:1px solid #f1f5f9;
-    }
-
-    .dropdown button:last-child{
-      border-bottom:none;
-    }
-
-    .dropdown button:hover{
-      background:#f8fafc;
-    }
-
-    .hidden-file{
-      display:none;
-    }
-
-    @media (max-width: 1100px){
+    @media (max-width:1100px){
       .app{
         grid-template-columns:1fr;
         grid-template-rows:auto 1fr;
-        grid-template-areas:
-          "main";
+        grid-template-areas:"main";
       }
       .topbar,.sidebar{display:none}
       .mobile-top{display:block}
       .main{padding:14px}
-      .page{max-width:100%}
-      .summary-grid{
-        grid-template-columns:1fr 1fr;
-      }
-      .summary-cell{
-        border-right:none;
-        border-bottom:1px solid var(--line);
-      }
-      .summary-cell:nth-last-child(-n+2){
-        border-bottom:none;
-      }
-      .filters-row{
-        grid-template-columns:1fr;
-      }
+      .layout{grid-template-columns:1fr}
     }
 
-    @media (max-width: 700px){
-      .page-head{
-        align-items:flex-start;
-      }
-      .page-actions{
-        width:100%;
-      }
-      .page-actions .btn{
-        flex:1;
-      }
-      .summary-grid{
-        grid-template-columns:1fr;
-      }
-      .summary-cell{
-        border-bottom:1px solid var(--line) !important;
-      }
-      .summary-cell:last-child{
-        border-bottom:none !important;
-      }
-      table{
-        min-width:980px;
-      }
+    @media (max-width:800px){
+      .media-grid{grid-template-columns:1fr}
+      .grid-2{grid-template-columns:1fr}
+    }
+
+    @media (max-width:640px){
+      .page-head{align-items:flex-start}
+      .head-actions{width:100%}
+      .head-actions .btn{flex:1}
+      .card-body,.card-head{padding:14px}
+      .seo-link{font-size:18px}
     }
   </style>
 </head>
 <body>
-  <input id="importFileInput" class="hidden-file" type="file" accept=".json,.csv,application/json,text/csv" />
-
   <div class="mobile-top">
-    <div class="mobile-top-row">
-      <div class="mobile-title">Products</div>
-      <button class="btn primary" onclick="goToCreateProduct()">Add product</button>
+    <div class="mobile-row">
+      <div class="mobile-title" id="mobilePageTitle">Add product</div>
+      <button class="btn primary" onclick="saveProduct()">Save</button>
     </div>
-    <input class="mobile-top-search" id="mobileSearchInput" type="text" placeholder="Search products">
   </div>
 
   <div class="app">
@@ -689,7 +572,7 @@
       </div>
 
       <div class="search-wrap">
-        <input class="top-search" id="desktopSearchTop" type="text" placeholder="Search">
+        <input class="top-search" type="text" placeholder="Search">
       </div>
 
       <div class="top-right">
@@ -702,7 +585,7 @@
     <aside class="sidebar">
       <div class="side-group">
         <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
-        <a class="nav-item" href="/admin-enhanced.html"><span>📦 Orders</span><span class="badge-count" id="ordersCountBadge">—</span></a>
+        <a class="nav-item" href="/admin-enhanced.html"><span>📦 Orders</span><span class="badge-count">—</span></a>
         <a class="nav-item active" href="/products-admin"><span>🏷️ Products</span></a>
         <div class="nav-item nav-sub"><span>Collections</span></div>
         <div class="nav-item nav-sub"><span>Inventory</span></div>
@@ -740,146 +623,225 @@
         <div id="alert" class="alert"></div>
 
         <div class="page-head">
-          <div class="page-title">Products 🏷️</div>
+          <div class="head-left">
+            <button class="back-btn" onclick="goBack()">‹</button>
+            <div class="title-wrap">
+              <div class="page-title">
+                <span id="pageTitle">Add product</span>
+                <span id="statusBadgeWrap"></span>
+              </div>
+              <div class="subline" id="sublineText">Create a new product</div>
+            </div>
+          </div>
 
-          <div class="page-actions">
-            <button class="btn primary" onclick="goToCreateProduct()">Add product</button>
-            <button class="btn" onclick="toggleActionsMenu()">More actions</button>
-            <button class="btn" onclick="triggerImport()">Import</button>
-            <button class="btn" onclick="exportProductsCsv()">Export</button>
+          <div class="head-actions">
+            <button class="btn" type="button" onclick="previewProduct()">View</button>
+            <button class="btn" type="button" onclick="duplicateCurrentProduct()">Duplicate</button>
+            <button class="btn danger" id="deleteBtn" type="button" onclick="deleteCurrentProduct()" style="display:none;">Delete</button>
+            <button class="btn primary" type="button" onclick="saveProduct()">Save</button>
           </div>
         </div>
 
-        <section class="summary">
-          <div class="summary-grid">
-            <div class="summary-cell">
-              <div class="summary-label">Date range</div>
-              <div class="summary-value">30 days</div>
-              <div class="summary-sub">Summary view</div>
-            </div>
-            <div class="summary-cell">
-              <div class="summary-label">Total products</div>
-              <div class="summary-value" id="summaryTotalProducts">0</div>
-              <div class="summary-sub">All products</div>
-            </div>
-            <div class="summary-cell">
-              <div class="summary-label">Active products</div>
-              <div class="summary-value" id="summaryActiveProducts">0</div>
-              <div class="summary-sub">Published and active</div>
-            </div>
-            <div class="summary-cell">
-              <div class="summary-label">Total inventory</div>
-              <div class="summary-value" id="summaryTotalInventory">0</div>
-              <div class="summary-sub">Units in stock</div>
-            </div>
-          </div>
-        </section>
-
-        <section class="products-card">
-          <div class="tabs-row">
-            <div class="tabs">
-              <button class="tab active" data-status="">All</button>
-              <button class="tab" data-status="active">Active</button>
-              <button class="tab" data-status="draft">Draft</button>
-              <button class="tab" data-status="archived">Archived</button>
-            </div>
-
-            <div class="tools">
-              <div id="selectionCount" class="selection-pill">0 selected</div>
-              <button class="icon-btn" title="Toggle filters" onclick="toggleFilters()">☰</button>
-              <button class="icon-btn" title="Sort" onclick="cycleSort()">⇅</button>
-              <button class="icon-btn" title="Refresh" onclick="refreshPageData()">↻</button>
-
-              <div id="actionsDropdown" class="dropdown">
-                <button onclick="refreshPageData()">Refresh data</button>
-                <button onclick="bulkSetStatus('active')">Activate selected</button>
-                <button onclick="bulkSetStatus('archived')">Archive selected</button>
-                <button onclick="bulkDuplicateSelected()">Duplicate selected</button>
-                <button onclick="bulkDeleteSelected()">Delete selected</button>
+        <div class="layout">
+          <section class="stack">
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Title</div>
+              </div>
+              <div class="card-body">
+                <div class="field">
+                  <label for="productName">Product title</label>
+                  <input class="input rtl-input" id="productName" type="text" placeholder="اسم المنتج">
+                </div>
               </div>
             </div>
-          </div>
 
-          <div id="filtersRow" class="filters-row">
-            <div class="field">
-              <input type="text" id="searchInput" placeholder="Search by name / SKU / slug / tags">
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Description</div>
+              </div>
+              <div class="card-body">
+                <div class="field">
+                  <label for="description">Product description</label>
+                  <textarea class="textarea" id="description" placeholder="وصف المنتج"></textarea>
+                </div>
+              </div>
             </div>
-            <div class="field">
-              <select id="statusFilter">
-                <option value="">All statuses</option>
-                <option value="active">Active</option>
-                <option value="draft">Draft</option>
-                <option value="archived">Archived</option>
-              </select>
-            </div>
-            <div class="field">
-              <select id="sortFilter">
-                <option value="created_at-DESC">Newest first</option>
-                <option value="created_at-ASC">Oldest first</option>
-                <option value="product_name-ASC">Product A-Z</option>
-                <option value="product_name-DESC">Product Z-A</option>
-                <option value="stock-DESC">Inventory high-low</option>
-                <option value="stock-ASC">Inventory low-high</option>
-                <option value="price-DESC">Price high-low</option>
-                <option value="price-ASC">Price low-high</option>
-              </select>
-            </div>
-            <button class="search-btn" onclick="loadProducts()">Search</button>
-          </div>
 
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th style="width:52px"><input id="selectAllCheckbox" class="check" type="checkbox"></th>
-                  <th>Product</th>
-                  <th>Status</th>
-                  <th>Inventory</th>
-                  <th>Category</th>
-                  <th>Vendor</th>
-                  <th>Price</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="productsTableBody">
-                <tr>
-                  <td colspan="8" class="empty">Loading products...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Media</div>
+              </div>
+              <div class="card-body">
+                <div class="media-grid">
+                  <div>
+                    <img id="primaryPreview" class="primary-preview" alt="Primary image preview" src="" />
+                  </div>
 
-          <div class="pagination">
-            <div class="pagination-left" id="paginationText">0-0</div>
-            <div class="pagination-right">
-              <button class="icon-btn" onclick="noopPager()">‹</button>
-              <button class="icon-btn" onclick="noopPager()">›</button>
+                  <div>
+                    <div id="imagesContainer" class="thumbs"></div>
+
+                    <div class="toolbar">
+                      <button class="btn" type="button" onclick="addImageField()">+ Add image</button>
+                    </div>
+
+                    <div class="hint" style="margin-top:12px">
+                      أضف روابط الصور المباشرة. أول صورة تعتبر الصورة الرئيسية.
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </section>
+
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Pricing</div>
+              </div>
+              <div class="card-body">
+                <div class="grid-2">
+                  <div class="field">
+                    <label for="price">Price</label>
+                    <input class="input" id="price" type="number" step="0.001" placeholder="0.000">
+                  </div>
+                  <div class="field">
+                    <label for="salePrice">Compare-at / Sale price</label>
+                    <input class="input" id="salePrice" type="number" step="0.001" placeholder="0.000">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Inventory</div>
+              </div>
+              <div class="card-body">
+                <div class="grid-2">
+                  <div class="field">
+                    <label for="stock">Available quantity</label>
+                    <input class="input" id="stock" type="number" placeholder="0">
+                  </div>
+                  <div class="field">
+                    <label for="sku">SKU</label>
+                    <input class="input" id="sku" type="text" placeholder="SKU">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Search engine listing</div>
+              </div>
+              <div class="card-body">
+                <div class="seo-preview">
+                  <div class="seo-site" id="seoSiteText">https://smartkidskw.com/products/...</div>
+                  <div class="seo-link" id="seoTitlePreview">Product title</div>
+                  <div class="seo-desc" id="seoDescPreview">Product description will appear here.</div>
+                </div>
+
+                <div class="field" style="margin-top:16px">
+                  <label for="slug">URL handle / slug</label>
+                  <input class="input" id="slug" type="text" placeholder="يُنشأ تلقائيًا إذا تُرك فارغًا">
+                </div>
+
+                <div class="field">
+                  <label for="seoTitle">SEO title</label>
+                  <input class="input rtl-input" id="seoTitle" type="text" placeholder="عنوان تحسين الظهور">
+                </div>
+
+                <div class="field">
+                  <label for="seoDescription">SEO description</label>
+                  <textarea class="textarea" id="seoDescription" placeholder="وصف SEO" style="min-height:120px"></textarea>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="sidebar-stack">
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Status</div>
+              </div>
+              <div class="card-body">
+                <div class="field">
+                  <label for="status">Product status</label>
+                  <select class="select" id="status">
+                    <option value="active">Active</option>
+                    <option value="draft">Draft</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Product organization</div>
+              </div>
+              <div class="card-body">
+                <div class="field">
+                  <label for="productType">Type</label>
+                  <input class="input rtl-input" id="productType" type="text" placeholder="مثل: كتب تعليمية">
+                </div>
+
+                <div class="field">
+                  <label for="vendor">Vendor</label>
+                  <input class="input rtl-input" id="vendor" type="text" placeholder="اسم البائع / العلامة">
+                </div>
+
+                <div class="field">
+                  <label for="category">Category</label>
+                  <input class="input rtl-input" id="category" type="text" placeholder="مثل: Print Books">
+                </div>
+
+                <div class="field">
+                  <label for="tags">Tags</label>
+                  <input class="input rtl-input" id="tags" type="text" placeholder="tag1, tag2, tag3">
+                  <div class="hint">افصل بين التاجات بفاصلة ,</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Live data</div>
+              </div>
+              <div class="card-body">
+                <div class="meta-list">
+                  <div class="meta-row">
+                    <div class="meta-label">Product ID</div>
+                    <div class="meta-value" id="metaId">New</div>
+                  </div>
+                  <div class="meta-row">
+                    <div class="meta-label">Created at</div>
+                    <div class="meta-value" id="metaCreatedAt">—</div>
+                  </div>
+                  <div class="meta-row">
+                    <div class="meta-label">Updated at</div>
+                    <div class="meta-value" id="metaUpdatedAt">—</div>
+                  </div>
+                  <div class="meta-row">
+                    <div class="meta-label">Primary image</div>
+                    <div class="meta-value" id="metaPrimaryImage">—</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
     </main>
   </div>
 
   <script>
     const API_BASE = '/api/products';
-    const ORDERS_API = '/api/orders';
-    let currentProducts = [];
-    let currentStatus = '';
-    let selectedIds = [];
-    let filtersVisible = true;
-    let currentSortIndex = 0;
+    const SITE_BASE = `${location.origin}/products/`;
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
 
-    const sortOptions = [
-      'created_at-DESC',
-      'created_at-ASC',
-      'product_name-ASC',
-      'product_name-DESC',
-      'stock-DESC',
-      'stock-ASC',
-      'price-DESC',
-      'price-ASC'
-    ];
+    let currentProduct = null;
+    let imageRows = [];
 
     function escapeHtml(value) {
       return String(value ?? '')
@@ -899,259 +861,350 @@
       }, 3500);
     }
 
-    function formatPrice(value) {
-      const num = Number(value || 0);
-      return `KWD ${num.toFixed(3)}`;
+    function goBack() {
+      window.location.href = '/products-admin';
     }
 
-    function getInventoryClass(stock) {
-      const s = Number(stock || 0);
-      if (s <= 0) return 'inventory-zero';
-      if (s <= 5) return 'inventory-low';
-      return 'inventory-good';
+    function formatDate(value) {
+      if (!value) return '—';
+      const d = new Date(value);
+      if (isNaN(d)) return value;
+      return d.toLocaleString('en-GB');
     }
 
-    function syncSearchInputs() {
-      const desktop = document.getElementById('searchInput');
-      const mobile = document.getElementById('mobileSearchInput');
-      const top = document.getElementById('desktopSearchTop');
-
-      const val = desktop.value.trim();
-      mobile.value = val;
-      top.value = val;
+    function statusBadgeHtml(status) {
+      const s = status || 'draft';
+      const label = s.charAt(0).toUpperCase() + s.slice(1);
+      return `<span class="status-badge ${escapeHtml(s)}">${escapeHtml(label)}</span>`;
     }
 
-    function syncIncomingSearch(sourceValue) {
-      document.getElementById('searchInput').value = sourceValue;
-      document.getElementById('mobileSearchInput').value = sourceValue;
-      document.getElementById('desktopSearchTop').value = sourceValue;
-    }
+    function setHeaderState() {
+      const title = currentProduct ? (currentProduct.product_name || 'Product') : 'Add product';
+      document.getElementById('pageTitle').textContent = title;
+      document.getElementById('mobilePageTitle').textContent = title;
 
-    function goToCreateProduct() {
-      window.location.href = '/product-edit.html';
-    }
-
-    function updateSelectionUi() {
-      const pill = document.getElementById('selectionCount');
-      const selectAll = document.getElementById('selectAllCheckbox');
-
-      pill.textContent = `${selectedIds.length} selected`;
-      pill.classList.toggle('active', selectedIds.length > 0);
-
-      const visibleIds = currentProducts.map(p => Number(p.id));
-      const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedIds.includes(id));
-      selectAll.checked = allVisibleSelected;
-    }
-
-    function toggleSelectAll(checked) {
-      if (checked) {
-        selectedIds = currentProducts.map(p => Number(p.id));
+      if (currentProduct) {
+        document.getElementById('statusBadgeWrap').innerHTML = statusBadgeHtml(currentProduct.status || document.getElementById('status').value);
+        document.getElementById('sublineText').textContent =
+          `${currentProduct.created_at ? formatDate(currentProduct.created_at) : ''}`;
+        document.getElementById('deleteBtn').style.display = 'inline-flex';
       } else {
-        selectedIds = [];
+        document.getElementById('statusBadgeWrap').innerHTML = '';
+        document.getElementById('sublineText').textContent = 'Create a new product';
+        document.getElementById('deleteBtn').style.display = 'none';
       }
-      renderProducts(currentProducts);
-      updateSelectionUi();
     }
 
-    function toggleOneSelection(id, checked) {
-      const numericId = Number(id);
-      if (checked) {
-        if (!selectedIds.includes(numericId)) selectedIds.push(numericId);
+    function getImageListFromUI() {
+      return imageRows
+        .map((row, index) => {
+          const input = document.getElementById(`image-url-${row.id}`);
+          const val = (input?.value || '').trim();
+          if (!val) return null;
+          return {
+            image_url: val,
+            sort_order: index
+          };
+        })
+        .filter(Boolean);
+    }
+
+    function updatePrimaryPreview() {
+      const images = getImageListFromUI();
+      const primary = images.length ? images[0].image_url : '';
+      const img = document.getElementById('primaryPreview');
+
+      if (primary) {
+        img.src = primary;
       } else {
-        selectedIds = selectedIds.filter(v => v !== numericId);
+        img.src =
+          'data:image/svg+xml;utf8,' +
+          encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="600" height="600">
+              <rect width="100%" height="100%" fill="#f3f4f6"/>
+              <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9ca3af" font-size="28">No image</text>
+            </svg>
+          `);
       }
-      updateSelectionUi();
+
+      document.getElementById('metaPrimaryImage').textContent = primary || '—';
     }
 
-    function toggleFilters() {
-      filtersVisible = !filtersVisible;
-      document.getElementById('filtersRow').classList.toggle('hidden', !filtersVisible);
-    }
+    function renderImages() {
+      const container = document.getElementById('imagesContainer');
 
-    function toggleActionsMenu() {
-      document.getElementById('actionsDropdown').classList.toggle('active');
-    }
-
-    function closeActionsMenu() {
-      document.getElementById('actionsDropdown').classList.remove('active');
-    }
-
-    function cycleSort() {
-      currentSortIndex = (currentSortIndex + 1) % sortOptions.length;
-      document.getElementById('sortFilter').value = sortOptions[currentSortIndex];
-      loadProducts();
-    }
-
-    function noopPager() {
-      showAlert('Pagination UI جاهزة، والآن القائمة تجلب حتى 200 منتج في الصفحة.', 'warning');
-    }
-
-    async function loadOrdersCount() {
-      try {
-        const response = await fetch(`${ORDERS_API}?limit=1&offset=0`);
-        const result = await response.json();
-        if (!response.ok || !result.success) return;
-        document.getElementById('ordersCountBadge').textContent = result.pagination?.total ?? '—';
-      } catch (_) {}
-    }
-
-    async function loadProducts() {
-      try {
-        const searchInput = document.getElementById('searchInput');
-        const statusFilter = document.getElementById('statusFilter');
-        const sortFilter = document.getElementById('sortFilter');
-
-        const search = searchInput.value.trim();
-        const status = statusFilter.value || currentStatus;
-        const [sort, order] = sortFilter.value.split('-');
-
-        syncSearchInputs();
-
-        const params = new URLSearchParams();
-        if (search) params.append('search', search);
-        if (status) params.append('status', status);
-        params.append('sort', sort);
-        params.append('order', order);
-        params.append('limit', '200');
-        params.append('offset', '0');
-
-        const response = await fetch(`${API_BASE}?${params.toString()}`);
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to load products');
-        }
-
-        currentProducts = result.data || [];
-        selectedIds = selectedIds.filter(id => currentProducts.some(p => Number(p.id) === id));
-
-        renderProducts(currentProducts);
-        updatePagination(currentProducts);
-        updateSelectionUi();
-      } catch (error) {
-        console.error(error);
-        document.getElementById('productsTableBody').innerHTML = `
-          <tr>
-            <td colspan="8" class="empty">Failed to load products</td>
-          </tr>
-        `;
-      }
-    }
-
-    async function loadSummary() {
-      try {
-        const response = await fetch(`${API_BASE}/stats/summary`);
-        const result = await response.json();
-        if (!response.ok || !result.success) return;
-
-        document.getElementById('summaryTotalProducts').textContent = result.data.totalProducts || 0;
-        document.getElementById('summaryActiveProducts').textContent = result.data.activeProducts || 0;
-        document.getElementById('summaryTotalInventory').textContent = result.data.totalStock || 0;
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    async function refreshPageData() {
-      closeActionsMenu();
-      await loadOrdersCount();
-      await loadSummary();
-      await loadProducts();
-      showAlert('تم تحديث البيانات', 'success');
-    }
-
-    function updatePagination(products) {
-      const total = products.length;
-      document.getElementById('paginationText').textContent = total ? `1-${total}` : '0-0';
-    }
-
-    function renderProducts(products) {
-      const tbody = document.getElementById('productsTableBody');
-
-      if (!products.length) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="8" class="empty">No products found</td>
-          </tr>
-        `;
+      if (!imageRows.length) {
+        container.innerHTML = '';
+        updatePrimaryPreview();
         return;
       }
 
-      tbody.innerHTML = products.map(product => {
-        const primaryImage = product.primary_image || product.image_url || '';
-        const inventoryClass = getInventoryClass(product.stock);
-        const numericId = Number(product.id);
-        const checked = selectedIds.includes(numericId) ? 'checked' : '';
+      container.innerHTML = imageRows.map((row, index) => {
+        const value = escapeHtml(row.value || '');
+        const preview = row.value
+          ? `<img class="thumb-img" src="${value}" alt="Product image ${index + 1}">`
+          : `<img class="thumb-img" src="data:image/svg+xml;utf8,${encodeURIComponent(`
+              <svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'>
+                <rect width='100%' height='100%' fill='#f3f4f6'/>
+                <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#9ca3af' font-size='18'>Image ${index + 1}</text>
+              </svg>
+            `)}" alt="Placeholder">`;
 
         return `
-          <tr>
-            <td>
-              <input class="check" type="checkbox" ${checked}
-                onchange="toggleOneSelection(${numericId}, this.checked)">
-            </td>
-            <td>
-              <div class="product-cell">
-                ${
-                  primaryImage
-                    ? `<img class="thumb" src="${escapeHtml(primaryImage)}" alt="${escapeHtml(product.product_name)}">`
-                    : `<div class="thumb-placeholder">🧸</div>`
-                }
-                <div>
-                  <div class="product-name">
-                    <a href="/product-edit.html?id=${product.id}">${escapeHtml(product.product_name || '-')}</a>
-                  </div>
-                  <div class="product-sub">${escapeHtml(product.sku || product.slug || '-')}</div>
-                </div>
-              </div>
-            </td>
-            <td>
-              <span class="status-badge ${escapeHtml(product.status || 'active')}">
-                ${escapeHtml((product.status || 'active').charAt(0).toUpperCase() + (product.status || 'active').slice(1))}
-              </span>
-            </td>
-            <td><span class="${inventoryClass}">${Number(product.stock || 0)} in stock</span></td>
-            <td>${escapeHtml(product.category || '-')}</td>
-            <td>${escapeHtml(product.vendor || '-')}</td>
-            <td>${formatPrice(Number(product.sale_price || 0) > 0 ? product.sale_price : product.price)}</td>
-            <td>
-              <div class="table-actions">
-                <button class="mini-btn" onclick="editProduct(${product.id})">Edit</button>
-                <button class="mini-btn" onclick="duplicateProduct(${product.id})">Duplicate</button>
-              </div>
-            </td>
-          </tr>
+          <div class="thumb-card">
+            ${preview}
+            <div class="thumb-tools">
+              <input
+                class="mini-input"
+                id="image-url-${row.id}"
+                type="url"
+                placeholder="https://..."
+                value="${value}"
+                oninput="onImageInput(${row.id})"
+              >
+              <button class="mini-btn" type="button" onclick="moveImageUp(${row.id})">Move up</button>
+              <button class="mini-btn danger" type="button" onclick="removeImageField(${row.id})">Remove</button>
+            </div>
+          </div>
         `;
       }).join('');
+
+      updatePrimaryPreview();
     }
 
-    function editProduct(id) {
-      window.location.href = `/product-edit.html?id=${id}`;
+    function addImageField(value='') {
+      imageRows.push({
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        value
+      });
+      renderImages();
     }
 
-    async function duplicateProduct(id) {
-      const product = currentProducts.find(p => Number(p.id) === Number(id));
-      if (!product) return;
+    function removeImageField(id) {
+      imageRows = imageRows.filter(row => row.id !== id);
+      renderImages();
+    }
+
+    function moveImageUp(id) {
+      const index = imageRows.findIndex(row => row.id === id);
+      if (index <= 0) return;
+      const temp = imageRows[index - 1];
+      imageRows[index - 1] = imageRows[index];
+      imageRows[index] = temp;
+      renderImages();
+    }
+
+    function onImageInput(id) {
+      const input = document.getElementById(`image-url-${id}`);
+      imageRows = imageRows.map(row =>
+        row.id === id ? { ...row, value: input.value.trim() } : row
+      );
+      renderImages();
+    }
+
+    function updateSeoPreview() {
+      const name = document.getElementById('productName').value.trim();
+      const slug = document.getElementById('slug').value.trim();
+      const seoTitle = document.getElementById('seoTitle').value.trim();
+      const seoDescription = document.getElementById('seoDescription').value.trim();
+      const description = document.getElementById('description').value.trim();
+
+      const previewTitle = seoTitle || name || 'Product title';
+      const previewDesc = seoDescription || description || 'Product description will appear here.';
+      const handle = slug || 'product-handle';
+
+      document.getElementById('seoTitlePreview').textContent = previewTitle;
+      document.getElementById('seoDescPreview').textContent = previewDesc;
+      document.getElementById('seoSiteText').textContent = `${SITE_BASE}${handle}`;
+    }
+
+    function fillMeta(product) {
+      document.getElementById('metaId').textContent = product?.id || 'New';
+      document.getElementById('metaCreatedAt').textContent = product?.created_at ? formatDate(product.created_at) : '—';
+      document.getElementById('metaUpdatedAt').textContent = product?.updated_at ? formatDate(product.updated_at) : '—';
+      document.getElementById('metaPrimaryImage').textContent = product?.primary_image || product?.image_url || '—';
+    }
+
+    function populateForm(product) {
+      document.getElementById('productName').value = product.product_name || '';
+      document.getElementById('description').value = product.description || '';
+      document.getElementById('slug').value = product.slug || '';
+      document.getElementById('seoTitle').value = product.seo_title || '';
+      document.getElementById('seoDescription').value = product.seo_description || '';
+      document.getElementById('price').value = Number(product.price || 0);
+      document.getElementById('salePrice').value = Number(product.sale_price || 0);
+      document.getElementById('stock').value = Number(product.stock || 0);
+      document.getElementById('sku').value = product.sku || '';
+      document.getElementById('status').value = product.status || 'active';
+      document.getElementById('productType').value = product.product_type || '';
+      document.getElementById('vendor').value = product.vendor || '';
+      document.getElementById('category').value = product.category || '';
+      document.getElementById('tags').value = Array.isArray(product.tags_list)
+        ? product.tags_list.join(', ')
+        : (product.tags || '');
+
+      imageRows = [];
+
+      if (Array.isArray(product.images) && product.images.length) {
+        product.images.forEach(img => addImageField(img.image_url || ''));
+      } else if (product.image_url) {
+        addImageField(product.image_url);
+      }
+
+      if (!imageRows.length) addImageField();
+
+      fillMeta(product);
+      setHeaderState();
+      updateSeoPreview();
+      updatePrimaryPreview();
+    }
+
+    function collectPayload() {
+      const images = getImageListFromUI();
+      return {
+        productName: document.getElementById('productName').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        slug: document.getElementById('slug').value.trim(),
+        seoTitle: document.getElementById('seoTitle').value.trim(),
+        seoDescription: document.getElementById('seoDescription').value.trim(),
+        price: Number(document.getElementById('price').value || 0),
+        salePrice: Number(document.getElementById('salePrice').value || 0),
+        stock: Number(document.getElementById('stock').value || 0),
+        sku: document.getElementById('sku').value.trim(),
+        status: document.getElementById('status').value,
+        productType: document.getElementById('productType').value.trim(),
+        vendor: document.getElementById('vendor').value.trim(),
+        category: document.getElementById('category').value.trim(),
+        tags: document.getElementById('tags').value
+          .split(',')
+          .map(v => v.trim())
+          .filter(Boolean),
+        imageUrl: images.length ? images[0].image_url : '',
+        images
+      };
+    }
+
+    async function loadProduct() {
+      if (!productId) {
+        currentProduct = null;
+        imageRows = [];
+        addImageField();
+        fillMeta(null);
+        setHeaderState();
+        updateSeoPreview();
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/${productId}`);
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to load product');
+        }
+
+        currentProduct = result.data;
+        populateForm(currentProduct);
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to load product', 'error');
+      }
+    }
+
+    async function saveProduct() {
+      const payload = collectPayload();
+
+      if (!payload.productName) {
+        showAlert('اسم المنتج مطلوب', 'error');
+        return;
+      }
+
+      try {
+        const isEdit = !!productId;
+        const url = isEdit ? `${API_BASE}/${productId}` : API_BASE;
+        const method = isEdit ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to save product');
+        }
+
+        currentProduct = result.data;
+        showAlert(isEdit ? 'تم تحديث المنتج بنجاح' : 'تم إنشاء المنتج بنجاح', 'success');
+
+        if (!isEdit && currentProduct?.id) {
+          window.location.href = `/product-edit.html?id=${currentProduct.id}`;
+          return;
+        }
+
+        populateForm(currentProduct);
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to save product', 'error');
+      }
+    }
+
+    async function deleteCurrentProduct() {
+      if (!productId) return;
+      if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/${productId}`, {
+          method: 'DELETE'
+        });
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to delete product');
+        }
+
+        showAlert('تم حذف المنتج بنجاح', 'success');
+        setTimeout(() => {
+          window.location.href = '/products-admin';
+        }, 700);
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to delete product', 'error');
+      }
+    }
+
+    async function duplicateCurrentProduct() {
+      if (!currentProduct) {
+        showAlert('احفظ المنتج أولًا أو افتح منتج موجود', 'error');
+        return;
+      }
 
       const payload = {
-        productName: `${product.product_name} - Copy`,
+        productName: `${currentProduct.product_name} - Copy`,
         slug: '',
         sku: '',
-        description: product.description || '',
-        price: Number(product.price || 0),
-        salePrice: Number(product.sale_price || 0),
-        imageUrl: product.image_url || '',
-        stock: Number(product.stock || 0),
+        description: currentProduct.description || '',
+        price: Number(currentProduct.price || 0),
+        salePrice: Number(currentProduct.sale_price || 0),
+        stock: Number(currentProduct.stock || 0),
         status: 'draft',
-        productType: product.product_type || '',
-        vendor: product.vendor || '',
-        category: product.category || '',
-        tags: product.tags_list || [],
-        seoTitle: product.seo_title || '',
-        seoDescription: product.seo_description || '',
-        images: Array.isArray(product.images) ? product.images.map(img => ({
-          image_url: img.image_url,
-          sort_order: img.sort_order
-        })) : []
+        productType: currentProduct.product_type || '',
+        vendor: currentProduct.vendor || '',
+        category: currentProduct.category || '',
+        tags: Array.isArray(currentProduct.tags_list) ? currentProduct.tags_list : [],
+        seoTitle: currentProduct.seo_title || '',
+        seoDescription: currentProduct.seo_description || '',
+        imageUrl: currentProduct.primary_image || currentProduct.image_url || '',
+        images: Array.isArray(currentProduct.images)
+          ? currentProduct.images.map(img => ({
+              image_url: img.image_url,
+              sort_order: img.sort_order
+            }))
+          : []
       };
 
       try {
@@ -1162,373 +1215,42 @@
         });
 
         const result = await response.json();
+
         if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Duplicate failed');
+          throw new Error(result.error || 'Failed to duplicate product');
         }
 
-        await loadSummary();
-        await loadProducts();
-        showAlert('تم نسخ المنتج', 'success');
+        window.location.href = `/product-edit.html?id=${result.data.id}`;
       } catch (error) {
-        alert(error.message || 'Duplicate failed');
+        console.error(error);
+        showAlert(error.message || 'Failed to duplicate product', 'error');
       }
     }
 
-    async function bulkSetStatus(status) {
-      closeActionsMenu();
-      if (!selectedIds.length) {
-        showAlert('اختر منتجًا واحدًا على الأقل', 'warning');
-        return;
-      }
-
-      try {
-        for (const id of selectedIds) {
-          const response = await fetch(`${API_BASE}/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status })
-          });
-
-          const result = await response.json();
-          if (!response.ok || !result.success) {
-            throw new Error(result.error || `Failed on product ${id}`);
-          }
-        }
-
-        await refreshPageData();
-        showAlert(`تم تحديث حالة ${selectedIds.length} منتج`, 'success');
-        selectedIds = [];
-        updateSelectionUi();
-      } catch (error) {
-        showAlert(error.message || 'Bulk status update failed', 'error');
-      }
+    function previewProduct() {
+      const payload = collectPayload();
+      const title = payload.seoTitle || payload.productName || 'Product title';
+      const desc = payload.seoDescription || payload.description || 'No description';
+      alert(`${title}\n\n${desc}`);
     }
-
-    async function bulkDeleteSelected() {
-      closeActionsMenu();
-      if (!selectedIds.length) {
-        showAlert('اختر منتجًا واحدًا على الأقل', 'warning');
-        return;
-      }
-
-      if (!confirm(`هل أنت متأكد من حذف ${selectedIds.length} منتج؟`)) {
-        return;
-      }
-
-      try {
-        for (const id of selectedIds) {
-          const response = await fetch(`${API_BASE}/${id}`, {
-            method: 'DELETE'
-          });
-
-          const result = await response.json();
-          if (!response.ok || !result.success) {
-            throw new Error(result.error || `Failed on product ${id}`);
-          }
-        }
-
-        selectedIds = [];
-        await refreshPageData();
-        showAlert('تم حذف المنتجات المحددة', 'success');
-      } catch (error) {
-        showAlert(error.message || 'Bulk delete failed', 'error');
-      }
-    }
-
-    async function bulkDuplicateSelected() {
-      closeActionsMenu();
-      if (!selectedIds.length) {
-        showAlert('اختر منتجًا واحدًا على الأقل', 'warning');
-        return;
-      }
-
-      try {
-        for (const id of selectedIds) {
-          const product = currentProducts.find(p => Number(p.id) === Number(id));
-          if (!product) continue;
-
-          const payload = {
-            productName: `${product.product_name} - Copy`,
-            slug: '',
-            sku: '',
-            description: product.description || '',
-            price: Number(product.price || 0),
-            salePrice: Number(product.sale_price || 0),
-            imageUrl: product.image_url || '',
-            stock: Number(product.stock || 0),
-            status: 'draft',
-            productType: product.product_type || '',
-            vendor: product.vendor || '',
-            category: product.category || '',
-            tags: product.tags_list || [],
-            seoTitle: product.seo_title || '',
-            seoDescription: product.seo_description || '',
-            images: Array.isArray(product.images) ? product.images.map(img => ({
-              image_url: img.image_url,
-              sort_order: img.sort_order
-            })) : []
-          };
-
-          const response = await fetch(API_BASE, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-
-          const result = await response.json();
-          if (!response.ok || !result.success) {
-            throw new Error(result.error || `Duplicate failed on product ${id}`);
-          }
-        }
-
-        await refreshPageData();
-        showAlert('تم نسخ المنتجات المحددة', 'success');
-      } catch (error) {
-        showAlert(error.message || 'Bulk duplicate failed', 'error');
-      }
-    }
-
-    function exportProductsCsv() {
-      if (!currentProducts.length) {
-        showAlert('لا توجد منتجات للتصدير', 'warning');
-        return;
-      }
-
-      const headers = [
-        'id',
-        'product_name',
-        'slug',
-        'sku',
-        'description',
-        'price',
-        'sale_price',
-        'stock',
-        'status',
-        'product_type',
-        'vendor',
-        'category',
-        'tags',
-        'seo_title',
-        'seo_description',
-        'image_url'
-      ];
-
-      const rows = currentProducts.map(product => [
-        product.id || '',
-        product.product_name || '',
-        product.slug || '',
-        product.sku || '',
-        product.description || '',
-        product.price || 0,
-        product.sale_price || 0,
-        product.stock || 0,
-        product.status || '',
-        product.product_type || '',
-        product.vendor || '',
-        product.category || '',
-        Array.isArray(product.tags_list) ? product.tags_list.join(', ') : (product.tags || ''),
-        product.seo_title || '',
-        product.seo_description || '',
-        product.primary_image || product.image_url || ''
-      ]);
-
-      let csv = headers.join(',') + '\n';
-      rows.forEach(row => {
-        csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n';
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `products_${new Date().toISOString().split('T')[0]}.csv`;
-      link.click();
-
-      showAlert('تم تصدير CSV بنجاح', 'success');
-    }
-
-    function triggerImport() {
-      document.getElementById('importFileInput').click();
-    }
-
-    function parseCsvLine(line) {
-      const result = [];
-      let current = '';
-      let inQuotes = false;
-
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        const next = line[i + 1];
-
-        if (char === '"' && inQuotes && next === '"') {
-          current += '"';
-          i++;
-        } else if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-          result.push(current);
-          current = '';
-        } else {
-          current += char;
-        }
-      }
-
-      result.push(current);
-      return result;
-    }
-
-    function csvToObjects(text) {
-      const lines = text.split(/\r?\n/).filter(Boolean);
-      if (lines.length < 2) return [];
-
-      const headers = parseCsvLine(lines[0]).map(h => h.trim());
-      return lines.slice(1).map(line => {
-        const values = parseCsvLine(line);
-        const obj = {};
-        headers.forEach((header, index) => {
-          obj[header] = (values[index] || '').trim();
-        });
-        return obj;
-      });
-    }
-
-    async function importProductsFromObjects(items) {
-      if (!Array.isArray(items) || !items.length) {
-        showAlert('الملف فارغ أو غير صالح', 'warning');
-        return;
-      }
-
-      let successCount = 0;
-      let failCount = 0;
-
-      for (const item of items) {
-        const payload = {
-          productName: item.productName || item.product_name || '',
-          slug: item.slug || '',
-          sku: item.sku || '',
-          description: item.description || '',
-          price: Number(item.price || 0),
-          salePrice: Number(item.salePrice || item.sale_price || 0),
-          imageUrl: item.imageUrl || item.image_url || '',
-          stock: Number(item.stock || 0),
-          status: item.status || 'active',
-          productType: item.productType || item.product_type || '',
-          vendor: item.vendor || '',
-          category: item.category || '',
-          tags: typeof item.tags === 'string' ? item.tags.split(',').map(v => v.trim()).filter(Boolean) : (item.tags || []),
-          seoTitle: item.seoTitle || item.seo_title || '',
-          seoDescription: item.seoDescription || item.seo_description || '',
-          images: []
-        };
-
-        if (!payload.productName) {
-          failCount++;
-          continue;
-        }
-
-        try {
-          const response = await fetch(API_BASE, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-
-          const result = await response.json();
-          if (!response.ok || !result.success) {
-            failCount++;
-          } else {
-            successCount++;
-          }
-        } catch (_) {
-          failCount++;
-        }
-      }
-
-      await refreshPageData();
-      showAlert(`تم الاستيراد. نجح: ${successCount} | فشل: ${failCount}`, failCount ? 'warning' : 'success');
-    }
-
-    function setupImport() {
-      document.getElementById('importFileInput').addEventListener('change', async (event) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        try {
-          const text = await file.text();
-          let data = [];
-
-          if (file.name.toLowerCase().endsWith('.json')) {
-            data = JSON.parse(text);
-          } else if (file.name.toLowerCase().endsWith('.csv')) {
-            data = csvToObjects(text);
-          } else {
-            showAlert('صيغة الملف غير مدعومة', 'error');
-            return;
-          }
-
-          await importProductsFromObjects(data);
-        } catch (error) {
-          console.error(error);
-          showAlert('فشل في قراءة ملف الاستيراد', 'error');
-        } finally {
-          event.target.value = '';
-        }
-      });
-    }
-
-    function setupTabs() {
-      document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          currentStatus = tab.dataset.status || '';
-          document.getElementById('statusFilter').value = currentStatus;
-          loadProducts();
-        });
-      });
-    }
-
-    function setupSearchSync() {
-      const desktop = document.getElementById('searchInput');
-      const mobile = document.getElementById('mobileSearchInput');
-      const top = document.getElementById('desktopSearchTop');
-
-      mobile.addEventListener('input', () => syncIncomingSearch(mobile.value));
-      top.addEventListener('input', () => syncIncomingSearch(top.value));
-      desktop.addEventListener('input', () => syncIncomingSearch(desktop.value));
-
-      mobile.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') loadProducts();
-      });
-
-      top.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') loadProducts();
-      });
-
-      desktop.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') loadProducts();
-      });
-    }
-
-    document.addEventListener('click', (event) => {
-      const dropdown = document.getElementById('actionsDropdown');
-      const trigger = event.target.closest('.page-actions .btn:nth-child(2), .tools');
-      if (!dropdown.contains(event.target) && !trigger) {
-        closeActionsMenu();
-      }
-    });
 
     document.addEventListener('DOMContentLoaded', async () => {
-      document.getElementById('selectAllCheckbox').addEventListener('change', function() {
-        toggleSelectAll(this.checked);
+      [
+        'productName',
+        'slug',
+        'seoTitle',
+        'seoDescription',
+        'description'
+      ].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateSeoPreview);
       });
 
-      setupTabs();
-      setupSearchSync();
-      setupImport();
+      document.getElementById('status').addEventListener('change', () => {
+        const s = document.getElementById('status').value;
+        document.getElementById('statusBadgeWrap').innerHTML = statusBadgeHtml(s);
+      });
 
-      await loadOrdersCount();
-      await loadSummary();
-      await loadProducts();
+      await loadProduct();
     });
   </script>
 </body>
