@@ -1,163 +1,1535 @@
-#!/usr/bin/env node
-// server.js - خادم Express الرئيسي لنظام إدارة الطلبات
-require('dotenv').config();
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Products - Smart Kids Kuwait</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f3f3f3;
+      --card:#ffffff;
+      --line:#e5e7eb;
+      --text:#202223;
+      --muted:#6d7175;
+      --top:#111213;
+      --side:#f6f6f7;
+      --green:#16a34a;
+      --green-bg:#bbf7d0;
+      --yellow:#f59e0b;
+      --yellow-bg:#fde68a;
+      --gray-bg:#e5e7eb;
+      --shadow:0 1px 2px rgba(0,0,0,.08);
+      --radius:14px;
+    }
 
-const express = require('express');
-const path = require('path');
-const cors = require('cors');
-const bodyParser = require('body-parser');
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      direction:ltr;
+    }
 
-const db = require('./db/turso-manager');
-const ordersRoutes = require('./routes/orders');
-const productsRoutes = require('./routes/products');
-const { SYSTEM_CONFIG } = require('./config/system');
+    a{text-decoration:none;color:inherit}
+    button,input,select{font-family:inherit}
 
-const PORT = process.env.PORT || 3000;
-const HOST = process.env.HOST || 'localhost';
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:290px 1fr;
+      grid-template-rows:72px 1fr;
+      grid-template-areas:
+        "top top"
+        "side main";
+    }
 
-// إنشاء تطبيق Express
-const app = express();
+    .topbar{
+      grid-area:top;
+      background:var(--top);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:0 18px;
+      position:sticky;
+      top:0;
+      z-index:50;
+    }
 
-// Middleware
-app.use(cors());
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+    .top-left{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
 
-// خدمة الملفات الثابتة
-app.use(express.static(path.join(__dirname, 'public')));
+    .brand{
+      font-size:20px;
+      font-weight:800;
+      white-space:nowrap;
+    }
 
-// Headers مخصصة
-app.use((req, res, next) => {
-  res.header('X-Content-Type-Options', 'nosniff');
-  res.header('X-Frame-Options', 'DENY');
-  next();
-});
+    .search-wrap{
+      flex:1;
+      max-width:720px;
+      margin:0 auto;
+      width:100%;
+    }
 
-// Routes للـ API
-app.use('/api/orders', ordersRoutes);
-app.use('/api/products', productsRoutes);
+    .top-search{
+      width:100%;
+      height:42px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:#2a2b2d;
+      color:#fff;
+      padding:0 16px;
+      outline:none;
+      font-size:15px;
+    }
 
-// Route للـ Health Check
-app.get('/api/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'النظام يعمل بشكل صحيح',
-    timestamp: new Date().toISOString()
-  });
-});
+    .top-right{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      white-space:nowrap;
+    }
 
-// Route للصفحات الرئيسية
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+    .avatar{
+      width:34px;
+      height:34px;
+      border-radius:999px;
+      background:#2a2b2d;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+    }
 
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
+    .sidebar{
+      grid-area:side;
+      background:var(--side);
+      border-right:1px solid #ddd;
+      padding:14px 14px 20px;
+      overflow:auto;
+    }
 
-app.get('/admin-enhanced', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin-enhanced.html'));
-});
+    .side-group{margin-bottom:18px}
+    .side-title{
+      font-size:13px;
+      color:var(--muted);
+      margin:10px 10px 8px;
+      font-weight:700;
+      direction:ltr;
+      text-align:left;
+    }
 
-app.get('/products-admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'products-admin.html'));
-});
+    .nav-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:11px 12px;
+      border-radius:12px;
+      color:#111;
+      font-weight:600;
+      margin-bottom:4px;
+      direction:ltr;
+      text-align:left;
+    }
 
-app.get('/product-edit.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'product-edit.html'));
-});
+    .nav-item.active{
+      background:#e9eaeb;
+    }
 
-app.get('/track', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'track.html'));
-});
+    .nav-sub{
+      padding-left:42px;
+      color:#444;
+      font-weight:500;
+    }
 
-// معالج الأخطاء العام
-app.use((err, req, res, next) => {
-  console.error('❌ خطأ في التطبيق:', err);
-  res.status(500).json({
-    success: false,
-    error: 'حدث خطأ في الخادم',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-});
+    .badge-count{
+      background:#e5e7eb;
+      min-width:34px;
+      height:24px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13px;
+      color:#444;
+      padding:0 8px;
+    }
 
-// معالج الـ 404
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    error: 'الصفحة غير موجودة'
-  });
-});
+    .main{
+      grid-area:main;
+      padding:20px;
+      overflow:auto;
+    }
 
-/**
- * دالة بدء الخادم مع معالجة الأخطاء
- */
-async function startServer() {
-  try {
-    // فتح الاتصال بقاعدة البيانات
-    await db.open();
+    .page{
+      max-width:1460px;
+      margin:0 auto;
+    }
 
-    // تهيئة الجداول
-    await db.initializeTables();
+    .alert{
+      display:none;
+      margin-bottom:14px;
+      padding:14px 16px;
+      border-radius:14px;
+      font-weight:700;
+      border:1px solid transparent;
+      background:#fff;
+      direction:rtl;
+      text-align:right;
+    }
 
-    // بدء الخادم
-    const server = app.listen(PORT, HOST, () => {
-      console.log('\n╔════════════════════════════════════════════════════════╗');
-      console.log('║          🚀 نظام إدارة الطلبات - Smart Kids           ║');
-      console.log('╠════════════════════════════════════════════════════════╣');
-      console.log(`║ ✅ الخادم يعمل على: http://${HOST}:${PORT}`);
-      console.log('║ ✅ قاعدة البيانات جاهزة');
-      console.log('║ ✅ جميع الوحدات محملة');
-      console.log('╠════════════════════════════════════════════════════════╣');
-      console.log('║ الروابط المتاحة:');
-      console.log(`║ 📍 الصفحة الرئيسية: http://${HOST}:${PORT}/`);
-      console.log(`║ 📊 لوحة الإدارة: http://${HOST}:${PORT}/admin`);
-      console.log(`║ 📈 لوحة متقدمة: http://${HOST}:${PORT}/admin-enhanced`);
-      console.log(`║ 🏷️ إدارة المنتجات: http://${HOST}:${PORT}/products-admin`);
-      console.log(`║ ✏️ تعديل/إضافة منتج: http://${HOST}:${PORT}/product-edit.html`);
-      console.log(`║ 🔍 تتبع الطلبات: http://${HOST}:${PORT}/track`);
-      console.log('║');
-      console.log('║ API Endpoints:');
-      console.log(`║ GET    http://${HOST}:${PORT}/api/orders`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/orders/:id`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/orders/track/:orderNumber`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/orders`);
-      console.log(`║ PUT    http://${HOST}:${PORT}/api/orders/:id`);
-      console.log(`║ DELETE http://${HOST}:${PORT}/api/orders/:id`);
-      console.log('║');
-      console.log(`║ GET    http://${HOST}:${PORT}/api/products`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/products/:id`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/products/slug/:slug`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/products/stats/summary`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/products`);
-      console.log(`║ PUT    http://${HOST}:${PORT}/api/products/:id`);
-      console.log(`║ DELETE http://${HOST}:${PORT}/api/products/:id`);
-      console.log('╚════════════════════════════════════════════════════════╝\n');
-    });
+    .alert.active{display:block}
+    .alert.success{background:#dcfce7;border-color:#86efac;color:#166534}
+    .alert.error{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+    .alert.warning{background:#fef3c7;border-color:#fcd34d;color:#92400e}
 
-    // معالجة إيقاف الخادم
-    process.on('SIGINT', async () => {
-      console.log('\n\n🛑 جاري إيقاف الخادم...');
-      server.close(async () => {
-        await db.close();
-        console.log('✅ تم إيقاف الخادم بنجاح');
-        process.exit(0);
+    .page-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:16px;
+      flex-wrap:wrap;
+    }
+
+    .page-title{
+      font-size:20px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      direction:ltr;
+    }
+
+    .page-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      height:38px;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      color:#111;
+      padding:0 14px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+    }
+
+    .btn.primary{
+      background:#111;
+      color:#fff;
+      border-color:#111;
+    }
+
+    .summary{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      margin-bottom:16px;
+    }
+
+    .summary-grid{
+      display:grid;
+      grid-template-columns:180px repeat(3,1fr);
+      direction:ltr;
+    }
+
+    .summary-cell{
+      padding:16px 18px;
+      border-right:1px solid var(--line);
+      min-height:86px;
+      text-align:left;
+    }
+
+    .summary-cell:first-child{border-right:none}
+    .summary-label{
+      color:#444;
+      font-size:13px;
+      margin-bottom:8px;
+      font-weight:700;
+    }
+    .summary-value{
+      font-size:17px;
+      font-weight:800;
+    }
+    .summary-sub{
+      font-size:13px;
+      color:#6b7280;
+      margin-top:6px;
+    }
+
+    .products-card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+
+    .tabs-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 14px;
+      border-bottom:1px solid var(--line);
+      flex-wrap:wrap;
+    }
+
+    .tabs{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      direction:ltr;
+    }
+
+    .tab{
+      height:36px;
+      border:none;
+      background:transparent;
+      border-radius:12px;
+      padding:0 14px;
+      font-weight:700;
+      color:#444;
+      cursor:pointer;
+    }
+
+    .tab.active{
+      background:#ededee;
+      color:#111;
+    }
+
+    .tools{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      position:relative;
+    }
+
+    .icon-btn{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      cursor:pointer;
+      font-size:16px;
+    }
+
+    .selection-pill{
+      min-height:38px;
+      padding:0 12px;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      border:1px solid #d1d5db;
+      border-radius:12px;
+      background:#f9fafb;
+      font-weight:800;
+      color:#111;
+    }
+
+    .selection-pill.active{
+      display:inline-flex;
+    }
+
+    .filters-row{
+      display:grid;
+      grid-template-columns:1.4fr 220px 220px 120px;
+      gap:12px;
+      padding:14px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .filters-row.hidden{
+      display:none;
+    }
+
+    .field input,
+    .field select{
+      width:100%;
+      height:42px;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      padding:0 14px;
+      font-size:15px;
+      outline:none;
+    }
+
+    .field input:focus,
+    .field select:focus{
+      border-color:#9ca3af;
+    }
+
+    .search-btn{
+      height:42px;
+      border:none;
+      border-radius:12px;
+      background:#111827;
+      color:#fff;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .table-wrap{
+      overflow:auto;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:1180px;
+      direction:ltr;
+    }
+
+    th,td{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      vertical-align:middle;
+      background:#fff;
+    }
+
+    th{
+      font-size:13px;
+      color:#4b5563;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    tr:hover td{
+      background:#fafafa;
+    }
+
+    .check{
+      width:20px;
+      height:20px;
+    }
+
+    .product-cell{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:320px;
+      direction:rtl;
+      text-align:right;
+    }
+
+    .thumb{
+      width:54px;
+      height:54px;
+      border-radius:12px;
+      object-fit:cover;
+      background:#eee;
+      border:1px solid #e5e7eb;
+      flex-shrink:0;
+    }
+
+    .thumb-placeholder{
+      width:54px;
+      height:54px;
+      border-radius:12px;
+      background:#f3f4f6;
+      border:1px solid #e5e7eb;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#9ca3af;
+      font-size:20px;
+      flex-shrink:0;
+    }
+
+    .product-name{
+      font-weight:800;
+      line-height:1.45;
+      margin-bottom:4px;
+    }
+
+    .product-sub{
+      font-size:13px;
+      color:var(--muted);
+      direction:rtl;
+    }
+
+    .status-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:66px;
+      height:30px;
+      padding:0 12px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .status-badge.active{
+      color:#166534;
+      background:var(--green-bg);
+    }
+
+    .status-badge.draft{
+      color:#92400e;
+      background:var(--yellow-bg);
+    }
+
+    .status-badge.archived{
+      color:#374151;
+      background:#e5e7eb;
+    }
+
+    .inventory-good{color:#166534;font-weight:800}
+    .inventory-low{color:#b45309;font-weight:800}
+    .inventory-zero{color:#b91c1c;font-weight:800}
+
+    .table-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .mini-btn{
+      border:none;
+      background:#f3f4f6;
+      color:#111;
+      border-radius:10px;
+      height:34px;
+      padding:0 12px;
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .pagination{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:12px 14px;
+      flex-wrap:wrap;
+    }
+
+    .pagination-left{
+      color:#6b7280;
+      font-size:14px;
+      font-weight:600;
+      direction:ltr;
+    }
+
+    .pagination-right{
+      display:flex;
+      gap:8px;
+    }
+
+    .empty{
+      padding:46px 20px;
+      text-align:center;
+      color:#6b7280;
+      font-weight:700;
+    }
+
+    .mobile-top{
+      display:none;
+      background:#111;
+      color:#fff;
+      padding:14px 14px 12px;
+      position:sticky;
+      top:0;
+      z-index:60;
+    }
+
+    .mobile-top-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .mobile-title{
+      font-size:22px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .mobile-top-search{
+      width:100%;
+      height:42px;
+      border:none;
+      border-radius:12px;
+      background:#2a2b2d;
+      color:#fff;
+      padding:0 14px;
+      outline:none;
+    }
+
+    .dropdown{
+      position:absolute;
+      top:46px;
+      left:0;
+      min-width:220px;
+      background:#fff;
+      border:1px solid #d1d5db;
+      border-radius:14px;
+      box-shadow:0 12px 30px rgba(0,0,0,.12);
+      display:none;
+      z-index:25;
+      overflow:hidden;
+    }
+
+    .dropdown.active{
+      display:block;
+    }
+
+    .dropdown button{
+      width:100%;
+      text-align:left;
+      padding:12px 14px;
+      border:none;
+      background:#fff;
+      cursor:pointer;
+      font-weight:700;
+      border-bottom:1px solid #f1f5f9;
+    }
+
+    .dropdown button:last-child{
+      border-bottom:none;
+    }
+
+    .dropdown button:hover{
+      background:#f8fafc;
+    }
+
+    .hidden-file{
+      display:none;
+    }
+
+    @media (max-width: 1100px){
+      .app{
+        grid-template-columns:1fr;
+        grid-template-rows:auto 1fr;
+        grid-template-areas:
+          "main";
+      }
+      .topbar,.sidebar{display:none}
+      .mobile-top{display:block}
+      .main{padding:14px}
+      .page{max-width:100%}
+      .summary-grid{
+        grid-template-columns:1fr 1fr;
+      }
+      .summary-cell{
+        border-right:none;
+        border-bottom:1px solid var(--line);
+      }
+      .summary-cell:nth-last-child(-n+2){
+        border-bottom:none;
+      }
+      .filters-row{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 700px){
+      .page-head{
+        align-items:flex-start;
+      }
+      .page-actions{
+        width:100%;
+      }
+      .page-actions .btn{
+        flex:1;
+      }
+      .summary-grid{
+        grid-template-columns:1fr;
+      }
+      .summary-cell{
+        border-bottom:1px solid var(--line) !important;
+      }
+      .summary-cell:last-child{
+        border-bottom:none !important;
+      }
+      table{
+        min-width:980px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <input id="importFileInput" class="hidden-file" type="file" accept=".json,.csv,application/json,text/csv" />
+
+  <div class="mobile-top">
+    <div class="mobile-top-row">
+      <div class="mobile-title">Products</div>
+      <button class="btn primary" onclick="goToCreateProduct()">Add product</button>
+    </div>
+    <input class="mobile-top-search" id="mobileSearchInput" type="text" placeholder="Search products">
+  </div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="top-left">
+        <div class="brand">Smartkidsfy</div>
+      </div>
+
+      <div class="search-wrap">
+        <input class="top-search" id="desktopSearchTop" type="text" placeholder="Search">
+      </div>
+
+      <div class="top-right">
+        <div class="avatar">🛍️</div>
+        <div class="avatar">🔔</div>
+        <div style="font-weight:800">الأطفال المبتكرون الكويت</div>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <div class="side-group">
+        <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
+        <a class="nav-item" href="/admin-enhanced.html"><span>📦 Orders</span><span class="badge-count" id="ordersCountBadge">—</span></a>
+        <a class="nav-item active" href="/products-admin"><span>🏷️ Products</span></a>
+        <div class="nav-item nav-sub"><span>Collections</span></div>
+        <div class="nav-item nav-sub"><span>Inventory</span></div>
+        <div class="nav-item nav-sub"><span>Purchase orders</span></div>
+        <div class="nav-item nav-sub"><span>Transfers</span></div>
+        <div class="nav-item nav-sub"><span>Gift cards</span></div>
+      </div>
+
+      <div class="side-group">
+        <a class="nav-item" href="#"><span>👥 Customers</span></a>
+        <a class="nav-item" href="#"><span>📣 Marketing</span></a>
+        <a class="nav-item" href="#"><span>🏷️ Discounts</span></a>
+        <a class="nav-item" href="#"><span>📝 Content</span></a>
+        <a class="nav-item" href="#"><span>🌍 Markets</span></a>
+        <a class="nav-item" href="#"><span>📊 Analytics</span></a>
+      </div>
+
+      <div class="side-group">
+        <div class="side-title">Sales channels</div>
+        <div class="nav-item nav-sub"><span>Facebook & Instagram</span></div>
+        <div class="nav-item nav-sub"><span>Point of Sale</span></div>
+        <div class="nav-item nav-sub"><span>Online Store</span></div>
+        <div class="nav-item nav-sub"><span>Google & YouTube</span></div>
+        <div class="nav-item nav-sub"><span>Inbox</span></div>
+        <div class="nav-item nav-sub"><span>Headless</span></div>
+      </div>
+
+      <div class="side-group">
+        <a class="nav-item" href="#"><span>⚙️ Settings</span></a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page">
+        <div id="alert" class="alert"></div>
+
+        <div class="page-head">
+          <div class="page-title">Products 🏷️</div>
+
+          <div class="page-actions">
+            <button class="btn primary" onclick="goToCreateProduct()">Add product</button>
+            <button class="btn" onclick="toggleActionsMenu()">More actions</button>
+            <button class="btn" onclick="triggerImport()">Import</button>
+            <button class="btn" onclick="exportProductsCsv()">Export</button>
+          </div>
+        </div>
+
+        <section class="summary">
+          <div class="summary-grid">
+            <div class="summary-cell">
+              <div class="summary-label">Date range</div>
+              <div class="summary-value">30 days</div>
+              <div class="summary-sub">Summary view</div>
+            </div>
+            <div class="summary-cell">
+              <div class="summary-label">Total products</div>
+              <div class="summary-value" id="summaryTotalProducts">0</div>
+              <div class="summary-sub">All products</div>
+            </div>
+            <div class="summary-cell">
+              <div class="summary-label">Active products</div>
+              <div class="summary-value" id="summaryActiveProducts">0</div>
+              <div class="summary-sub">Published and active</div>
+            </div>
+            <div class="summary-cell">
+              <div class="summary-label">Total inventory</div>
+              <div class="summary-value" id="summaryTotalInventory">0</div>
+              <div class="summary-sub">Units in stock</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="products-card">
+          <div class="tabs-row">
+            <div class="tabs">
+              <button class="tab active" data-status="">All</button>
+              <button class="tab" data-status="active">Active</button>
+              <button class="tab" data-status="draft">Draft</button>
+              <button class="tab" data-status="archived">Archived</button>
+            </div>
+
+            <div class="tools">
+              <div id="selectionCount" class="selection-pill">0 selected</div>
+              <button class="icon-btn" title="Toggle filters" onclick="toggleFilters()">☰</button>
+              <button class="icon-btn" title="Sort" onclick="cycleSort()">⇅</button>
+              <button class="icon-btn" title="Refresh" onclick="refreshPageData()">↻</button>
+
+              <div id="actionsDropdown" class="dropdown">
+                <button onclick="refreshPageData()">Refresh data</button>
+                <button onclick="bulkSetStatus('active')">Activate selected</button>
+                <button onclick="bulkSetStatus('archived')">Archive selected</button>
+                <button onclick="bulkDuplicateSelected()">Duplicate selected</button>
+                <button onclick="bulkDeleteSelected()">Delete selected</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="filtersRow" class="filters-row">
+            <div class="field">
+              <input type="text" id="searchInput" placeholder="Search by name / SKU / slug / tags">
+            </div>
+            <div class="field">
+              <select id="statusFilter">
+                <option value="">All statuses</option>
+                <option value="active">Active</option>
+                <option value="draft">Draft</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
+            <div class="field">
+              <select id="sortFilter">
+                <option value="created_at-DESC">Newest first</option>
+                <option value="created_at-ASC">Oldest first</option>
+                <option value="product_name-ASC">Product A-Z</option>
+                <option value="product_name-DESC">Product Z-A</option>
+                <option value="stock-DESC">Inventory high-low</option>
+                <option value="stock-ASC">Inventory low-high</option>
+                <option value="price-DESC">Price high-low</option>
+                <option value="price-ASC">Price low-high</option>
+              </select>
+            </div>
+            <button class="search-btn" onclick="loadProducts()">Search</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:52px"><input id="selectAllCheckbox" class="check" type="checkbox"></th>
+                  <th>Product</th>
+                  <th>Status</th>
+                  <th>Inventory</th>
+                  <th>Category</th>
+                  <th>Vendor</th>
+                  <th>Price</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="productsTableBody">
+                <tr>
+                  <td colspan="8" class="empty">Loading products...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination">
+            <div class="pagination-left" id="paginationText">0-0</div>
+            <div class="pagination-right">
+              <button class="icon-btn" onclick="noopPager()">‹</button>
+              <button class="icon-btn" onclick="noopPager()">›</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const API_BASE = '/api/products';
+    const ORDERS_API = '/api/orders';
+    let currentProducts = [];
+    let currentStatus = '';
+    let selectedIds = [];
+    let filtersVisible = true;
+    let currentSortIndex = 0;
+
+    const sortOptions = [
+      'created_at-DESC',
+      'created_at-ASC',
+      'product_name-ASC',
+      'product_name-DESC',
+      'stock-DESC',
+      'stock-ASC',
+      'price-DESC',
+      'price-ASC'
+    ];
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showAlert(message, type='success') {
+      const el = document.getElementById('alert');
+      el.textContent = message;
+      el.className = `alert active ${type}`;
+      setTimeout(() => {
+        el.classList.remove('active');
+      }, 3500);
+    }
+
+    function formatPrice(value) {
+      const num = Number(value || 0);
+      return `KWD ${num.toFixed(3)}`;
+    }
+
+    function getInventoryClass(stock) {
+      const s = Number(stock || 0);
+      if (s <= 0) return 'inventory-zero';
+      if (s <= 5) return 'inventory-low';
+      return 'inventory-good';
+    }
+
+    function syncSearchInputs() {
+      const desktop = document.getElementById('searchInput');
+      const mobile = document.getElementById('mobileSearchInput');
+      const top = document.getElementById('desktopSearchTop');
+
+      const val = desktop.value.trim();
+      mobile.value = val;
+      top.value = val;
+    }
+
+    function syncIncomingSearch(sourceValue) {
+      document.getElementById('searchInput').value = sourceValue;
+      document.getElementById('mobileSearchInput').value = sourceValue;
+      document.getElementById('desktopSearchTop').value = sourceValue;
+    }
+
+    function goToCreateProduct() {
+      window.location.href = '/product-edit.html';
+    }
+
+    function updateSelectionUi() {
+      const pill = document.getElementById('selectionCount');
+      const selectAll = document.getElementById('selectAllCheckbox');
+
+      pill.textContent = `${selectedIds.length} selected`;
+      pill.classList.toggle('active', selectedIds.length > 0);
+
+      const visibleIds = currentProducts.map(p => Number(p.id));
+      const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selectedIds.includes(id));
+      selectAll.checked = allVisibleSelected;
+    }
+
+    function toggleSelectAll(checked) {
+      if (checked) {
+        selectedIds = currentProducts.map(p => Number(p.id));
+      } else {
+        selectedIds = [];
+      }
+      renderProducts(currentProducts);
+      updateSelectionUi();
+    }
+
+    function toggleOneSelection(id, checked) {
+      const numericId = Number(id);
+      if (checked) {
+        if (!selectedIds.includes(numericId)) selectedIds.push(numericId);
+      } else {
+        selectedIds = selectedIds.filter(v => v !== numericId);
+      }
+      updateSelectionUi();
+    }
+
+    function toggleFilters() {
+      filtersVisible = !filtersVisible;
+      document.getElementById('filtersRow').classList.toggle('hidden', !filtersVisible);
+    }
+
+    function toggleActionsMenu() {
+      document.getElementById('actionsDropdown').classList.toggle('active');
+    }
+
+    function closeActionsMenu() {
+      document.getElementById('actionsDropdown').classList.remove('active');
+    }
+
+    function cycleSort() {
+      currentSortIndex = (currentSortIndex + 1) % sortOptions.length;
+      document.getElementById('sortFilter').value = sortOptions[currentSortIndex];
+      loadProducts();
+    }
+
+    function noopPager() {
+      showAlert('Pagination UI جاهزة، والآن القائمة تجلب حتى 200 منتج في الصفحة.', 'warning');
+    }
+
+    async function loadOrdersCount() {
+      try {
+        const response = await fetch(`${ORDERS_API}?limit=1&offset=0`);
+        const result = await response.json();
+        if (!response.ok || !result.success) return;
+        document.getElementById('ordersCountBadge').textContent = result.pagination?.total ?? '—';
+      } catch (_) {}
+    }
+
+    async function loadProducts() {
+      try {
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const sortFilter = document.getElementById('sortFilter');
+
+        const search = searchInput.value.trim();
+        const status = statusFilter.value || currentStatus;
+        const [sort, order] = sortFilter.value.split('-');
+
+        syncSearchInputs();
+
+        const params = new URLSearchParams();
+        if (search) params.append('search', search);
+        if (status) params.append('status', status);
+        params.append('sort', sort);
+        params.append('order', order);
+        params.append('limit', '200');
+        params.append('offset', '0');
+
+        const response = await fetch(`${API_BASE}?${params.toString()}`);
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to load products');
+        }
+
+        currentProducts = result.data || [];
+        selectedIds = selectedIds.filter(id => currentProducts.some(p => Number(p.id) === id));
+
+        renderProducts(currentProducts);
+        updatePagination(currentProducts);
+        updateSelectionUi();
+      } catch (error) {
+        console.error(error);
+        document.getElementById('productsTableBody').innerHTML = `
+          <tr>
+            <td colspan="8" class="empty">Failed to load products</td>
+          </tr>
+        `;
+      }
+    }
+
+    async function loadSummary() {
+      try {
+        const response = await fetch(`${API_BASE}/stats/summary`);
+        const result = await response.json();
+        if (!response.ok || !result.success) return;
+
+        document.getElementById('summaryTotalProducts').textContent = result.data.totalProducts || 0;
+        document.getElementById('summaryActiveProducts').textContent = result.data.activeProducts || 0;
+        document.getElementById('summaryTotalInventory').textContent = result.data.totalStock || 0;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function refreshPageData() {
+      closeActionsMenu();
+      await loadOrdersCount();
+      await loadSummary();
+      await loadProducts();
+      showAlert('تم تحديث البيانات', 'success');
+    }
+
+    function updatePagination(products) {
+      const total = products.length;
+      document.getElementById('paginationText').textContent = total ? `1-${total}` : '0-0';
+    }
+
+    function renderProducts(products) {
+      const tbody = document.getElementById('productsTableBody');
+
+      if (!products.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty">No products found</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = products.map(product => {
+        const primaryImage = product.primary_image || product.image_url || '';
+        const inventoryClass = getInventoryClass(product.stock);
+        const numericId = Number(product.id);
+        const checked = selectedIds.includes(numericId) ? 'checked' : '';
+
+        return `
+          <tr>
+            <td>
+              <input class="check" type="checkbox" ${checked}
+                onchange="toggleOneSelection(${numericId}, this.checked)">
+            </td>
+            <td>
+              <div class="product-cell">
+                ${
+                  primaryImage
+                    ? `<img class="thumb" src="${escapeHtml(primaryImage)}" alt="${escapeHtml(product.product_name)}">`
+                    : `<div class="thumb-placeholder">🧸</div>`
+                }
+                <div>
+                  <div class="product-name">
+                    <a href="/product-edit.html?id=${product.id}">${escapeHtml(product.product_name || '-')}</a>
+                  </div>
+                  <div class="product-sub">${escapeHtml(product.sku || product.slug || '-')}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="status-badge ${escapeHtml(product.status || 'active')}">
+                ${escapeHtml((product.status || 'active').charAt(0).toUpperCase() + (product.status || 'active').slice(1))}
+              </span>
+            </td>
+            <td><span class="${inventoryClass}">${Number(product.stock || 0)} in stock</span></td>
+            <td>${escapeHtml(product.category || '-')}</td>
+            <td>${escapeHtml(product.vendor || '-')}</td>
+            <td>${formatPrice(Number(product.sale_price || 0) > 0 ? product.sale_price : product.price)}</td>
+            <td>
+              <div class="table-actions">
+                <button class="mini-btn" onclick="editProduct(${product.id})">Edit</button>
+                <button class="mini-btn" onclick="duplicateProduct(${product.id})">Duplicate</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function editProduct(id) {
+      window.location.href = `/product-edit.html?id=${id}`;
+    }
+
+    async function duplicateProduct(id) {
+      const product = currentProducts.find(p => Number(p.id) === Number(id));
+      if (!product) return;
+
+      const payload = {
+        productName: `${product.product_name} - Copy`,
+        slug: '',
+        sku: '',
+        description: product.description || '',
+        price: Number(product.price || 0),
+        salePrice: Number(product.sale_price || 0),
+        imageUrl: product.image_url || '',
+        stock: Number(product.stock || 0),
+        status: 'draft',
+        productType: product.product_type || '',
+        vendor: product.vendor || '',
+        category: product.category || '',
+        tags: product.tags_list || [],
+        seoTitle: product.seo_title || '',
+        seoDescription: product.seo_description || '',
+        images: Array.isArray(product.images) ? product.images.map(img => ({
+          image_url: img.image_url,
+          sort_order: img.sort_order
+        })) : []
+      };
+
+      try {
+        const response = await fetch(API_BASE, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Duplicate failed');
+        }
+
+        await loadSummary();
+        await loadProducts();
+        showAlert('تم نسخ المنتج', 'success');
+      } catch (error) {
+        alert(error.message || 'Duplicate failed');
+      }
+    }
+
+    async function bulkSetStatus(status) {
+      closeActionsMenu();
+      if (!selectedIds.length) {
+        showAlert('اختر منتجًا واحدًا على الأقل', 'warning');
+        return;
+      }
+
+      try {
+        for (const id of selectedIds) {
+          const response = await fetch(`${API_BASE}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+          });
+
+          const result = await response.json();
+          if (!response.ok || !result.success) {
+            throw new Error(result.error || `Failed on product ${id}`);
+          }
+        }
+
+        await refreshPageData();
+        showAlert(`تم تحديث حالة ${selectedIds.length} منتج`, 'success');
+        selectedIds = [];
+        updateSelectionUi();
+      } catch (error) {
+        showAlert(error.message || 'Bulk status update failed', 'error');
+      }
+    }
+
+    async function bulkDeleteSelected() {
+      closeActionsMenu();
+      if (!selectedIds.length) {
+        showAlert('اختر منتجًا واحدًا على الأقل', 'warning');
+        return;
+      }
+
+      if (!confirm(`هل أنت متأكد من حذف ${selectedIds.length} منتج؟`)) {
+        return;
+      }
+
+      try {
+        for (const id of selectedIds) {
+          const response = await fetch(`${API_BASE}/${id}`, {
+            method: 'DELETE'
+          });
+
+          const result = await response.json();
+          if (!response.ok || !result.success) {
+            throw new Error(result.error || `Failed on product ${id}`);
+          }
+        }
+
+        selectedIds = [];
+        await refreshPageData();
+        showAlert('تم حذف المنتجات المحددة', 'success');
+      } catch (error) {
+        showAlert(error.message || 'Bulk delete failed', 'error');
+      }
+    }
+
+    async function bulkDuplicateSelected() {
+      closeActionsMenu();
+      if (!selectedIds.length) {
+        showAlert('اختر منتجًا واحدًا على الأقل', 'warning');
+        return;
+      }
+
+      try {
+        for (const id of selectedIds) {
+          const product = currentProducts.find(p => Number(p.id) === Number(id));
+          if (!product) continue;
+
+          const payload = {
+            productName: `${product.product_name} - Copy`,
+            slug: '',
+            sku: '',
+            description: product.description || '',
+            price: Number(product.price || 0),
+            salePrice: Number(product.sale_price || 0),
+            imageUrl: product.image_url || '',
+            stock: Number(product.stock || 0),
+            status: 'draft',
+            productType: product.product_type || '',
+            vendor: product.vendor || '',
+            category: product.category || '',
+            tags: product.tags_list || [],
+            seoTitle: product.seo_title || '',
+            seoDescription: product.seo_description || '',
+            images: Array.isArray(product.images) ? product.images.map(img => ({
+              image_url: img.image_url,
+              sort_order: img.sort_order
+            })) : []
+          };
+
+          const response = await fetch(API_BASE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (!response.ok || !result.success) {
+            throw new Error(result.error || `Duplicate failed on product ${id}`);
+          }
+        }
+
+        await refreshPageData();
+        showAlert('تم نسخ المنتجات المحددة', 'success');
+      } catch (error) {
+        showAlert(error.message || 'Bulk duplicate failed', 'error');
+      }
+    }
+
+    function exportProductsCsv() {
+      if (!currentProducts.length) {
+        showAlert('لا توجد منتجات للتصدير', 'warning');
+        return;
+      }
+
+      const headers = [
+        'id',
+        'product_name',
+        'slug',
+        'sku',
+        'description',
+        'price',
+        'sale_price',
+        'stock',
+        'status',
+        'product_type',
+        'vendor',
+        'category',
+        'tags',
+        'seo_title',
+        'seo_description',
+        'image_url'
+      ];
+
+      const rows = currentProducts.map(product => [
+        product.id || '',
+        product.product_name || '',
+        product.slug || '',
+        product.sku || '',
+        product.description || '',
+        product.price || 0,
+        product.sale_price || 0,
+        product.stock || 0,
+        product.status || '',
+        product.product_type || '',
+        product.vendor || '',
+        product.category || '',
+        Array.isArray(product.tags_list) ? product.tags_list.join(', ') : (product.tags || ''),
+        product.seo_title || '',
+        product.seo_description || '',
+        product.primary_image || product.image_url || ''
+      ]);
+
+      let csv = headers.join(',') + '\n';
+      rows.forEach(row => {
+        csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n';
       });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `products_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+
+      showAlert('تم تصدير CSV بنجاح', 'success');
+    }
+
+    function triggerImport() {
+      document.getElementById('importFileInput').click();
+    }
+
+    function parseCsvLine(line) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        const next = line[i + 1];
+
+        if (char === '"' && inQuotes && next === '"') {
+          current += '"';
+          i++;
+        } else if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(current);
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+
+      result.push(current);
+      return result;
+    }
+
+    function csvToObjects(text) {
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      if (lines.length < 2) return [];
+
+      const headers = parseCsvLine(lines[0]).map(h => h.trim());
+      return lines.slice(1).map(line => {
+        const values = parseCsvLine(line);
+        const obj = {};
+        headers.forEach((header, index) => {
+          obj[header] = (values[index] || '').trim();
+        });
+        return obj;
+      });
+    }
+
+    async function importProductsFromObjects(items) {
+      if (!Array.isArray(items) || !items.length) {
+        showAlert('الملف فارغ أو غير صالح', 'warning');
+        return;
+      }
+
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const item of items) {
+        const payload = {
+          productName: item.productName || item.product_name || '',
+          slug: item.slug || '',
+          sku: item.sku || '',
+          description: item.description || '',
+          price: Number(item.price || 0),
+          salePrice: Number(item.salePrice || item.sale_price || 0),
+          imageUrl: item.imageUrl || item.image_url || '',
+          stock: Number(item.stock || 0),
+          status: item.status || 'active',
+          productType: item.productType || item.product_type || '',
+          vendor: item.vendor || '',
+          category: item.category || '',
+          tags: typeof item.tags === 'string' ? item.tags.split(',').map(v => v.trim()).filter(Boolean) : (item.tags || []),
+          seoTitle: item.seoTitle || item.seo_title || '',
+          seoDescription: item.seoDescription || item.seo_description || '',
+          images: []
+        };
+
+        if (!payload.productName) {
+          failCount++;
+          continue;
+        }
+
+        try {
+          const response = await fetch(API_BASE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (!response.ok || !result.success) {
+            failCount++;
+          } else {
+            successCount++;
+          }
+        } catch (_) {
+          failCount++;
+        }
+      }
+
+      await refreshPageData();
+      showAlert(`تم الاستيراد. نجح: ${successCount} | فشل: ${failCount}`, failCount ? 'warning' : 'success');
+    }
+
+    function setupImport() {
+      document.getElementById('importFileInput').addEventListener('change', async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        try {
+          const text = await file.text();
+          let data = [];
+
+          if (file.name.toLowerCase().endsWith('.json')) {
+            data = JSON.parse(text);
+          } else if (file.name.toLowerCase().endsWith('.csv')) {
+            data = csvToObjects(text);
+          } else {
+            showAlert('صيغة الملف غير مدعومة', 'error');
+            return;
+          }
+
+          await importProductsFromObjects(data);
+        } catch (error) {
+          console.error(error);
+          showAlert('فشل في قراءة ملف الاستيراد', 'error');
+        } finally {
+          event.target.value = '';
+        }
+      });
+    }
+
+    function setupTabs() {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentStatus = tab.dataset.status || '';
+          document.getElementById('statusFilter').value = currentStatus;
+          loadProducts();
+        });
+      });
+    }
+
+    function setupSearchSync() {
+      const desktop = document.getElementById('searchInput');
+      const mobile = document.getElementById('mobileSearchInput');
+      const top = document.getElementById('desktopSearchTop');
+
+      mobile.addEventListener('input', () => syncIncomingSearch(mobile.value));
+      top.addEventListener('input', () => syncIncomingSearch(top.value));
+      desktop.addEventListener('input', () => syncIncomingSearch(desktop.value));
+
+      mobile.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') loadProducts();
+      });
+
+      top.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') loadProducts();
+      });
+
+      desktop.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') loadProducts();
+      });
+    }
+
+    document.addEventListener('click', (event) => {
+      const dropdown = document.getElementById('actionsDropdown');
+      const trigger = event.target.closest('.page-actions .btn:nth-child(2), .tools');
+      if (!dropdown.contains(event.target) && !trigger) {
+        closeActionsMenu();
+      }
     });
 
-    // معالج الأخطاء التي لم يتم التعامل معها
-    process.on('uncaughtException', (err) => {
-      console.error('❌ خطأ غير متوقع:', err);
-      process.exit(1);
+    document.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('selectAllCheckbox').addEventListener('change', function() {
+        toggleSelectAll(this.checked);
+      });
+
+      setupTabs();
+      setupSearchSync();
+      setupImport();
+
+      await loadOrdersCount();
+      await loadSummary();
+      await loadProducts();
     });
-
-  } catch (error) {
-    console.error('❌ فشل في بدء الخادم:', error);
-    process.exit(1);
-  }
-}
-
-// بدء التطبيق
-startServer();
-
-module.exports = app;
+  </script>
+</body>
+</html>
