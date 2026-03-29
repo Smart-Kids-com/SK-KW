@@ -1901,10 +1901,11 @@
     let currentView = 'home';
     let itemCount = 0;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      loadAllData();
-      setInterval(loadAllData, 30000);
-    });
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadAllData();
+  await handleInitialOrderEditFromUrl();
+  setInterval(loadAllData, 30000);
+});
 
     async function loadAllData() {
       try {
@@ -2343,6 +2344,41 @@
         showAlert(error.message || 'Failed to load order', 'error');
       }
     }
+
+    async function handleInitialOrderEditFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const editOrderId = params.get('editOrder');
+    const editOrderNumber = params.get('editOrderNumber');
+
+    if (window.location.hash === '#orders') {
+      setView('orders');
+      scrollToOrdersDesktop();
+      document.querySelector('.mobile-orders-section')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+
+    if (editOrderId) {
+      await editOrder(editOrderId);
+      return;
+    }
+
+    if (editOrderNumber) {
+      const matched = (allOrders || []).find(
+        order => String(order.order_number || '') === String(editOrderNumber)
+      );
+
+      if (matched?.id) {
+        await editOrder(matched.id);
+        return;
+      }
+    }
+  } catch (error) {
+    showAlert(error.message || 'Failed to open order edit modal from URL', 'error');
+  }
+}
 
     async function saveOrderChanges(event) {
       event.preventDefault();
