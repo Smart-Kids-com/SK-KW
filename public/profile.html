@@ -1,553 +1,583 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>الملف الشخصي - Smart Kids Kuwait</title>
     <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457">
-    <meta name="description" content="إدارة حسابك الشخصي في Smart Kids Kuwait - معلوماتك، طلباتك، وإعداداتك">
-    
+    <meta name="description" content="إدارة حسابك الشخصي في Smart Kids Kuwait">
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        :root {
-            --purple-dark: #6a4c93;
-            --purple-light: #9b59b6;
-            --glass-bg: rgba(255,255,255,0.25);
-            --glass-border: rgba(255,255,255,0.18);
-            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --info-color: #3498db;
-            --danger-color: #e74c3c;
+        *{margin:0;padding:0;box-sizing:border-box}
+
+        :root{
+            --purple-dark:#6a4c93;
+            --purple:#7b56a8;
+            --purple-light:#9b59b6;
+            --bg:#f5f2fa;
+            --card:#ffffff;
+            --text:#2f2a38;
+            --muted:#746d80;
+            --line:#e7deef;
+            --shadow:0 10px 30px rgba(106,76,147,.12);
+            --soft:#faf8fd;
+            --success:#27ae60;
+            --warning:#f39c12;
+            --danger:#e74c3c;
         }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #6a4c93 0%, #9b59b6 100%);
-            color: #333;
-            line-height: 1.6;
-            min-height: 100vh;
+
+        body{
+            font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+            background:linear-gradient(180deg,#ede5f8 0%, #f7f3fc 260px, #f7f4fb 100%);
+            color:var(--text);
+            line-height:1.7;
+            min-height:100vh;
         }
-        
-        .header {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            padding: 2rem 1rem;
-            box-shadow: var(--glass-shadow);
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+
+        a{text-decoration:none;color:inherit}
+        button,input,select{font-family:inherit}
+
+        .topbar{
+            background:#000;
+            color:#fff;
+            padding:16px 18px;
+            position:sticky;
+            top:0;
+            z-index:1000;
+            box-shadow:0 8px 24px rgba(0,0,0,.12);
         }
-        
-        .header h1 {
-            font-size: 2.2rem;
-            color: var(--purple-dark);
-            margin-bottom: 0.5rem;
+
+        .topbar-inner{
+            max-width:1100px;
+            margin:0 auto;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
         }
-        
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:14px;
+            min-width:0;
         }
-        
-        .nav {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin: 2rem 0;
+
+        .brand-logo{
+            width:60px;
+            height:60px;
+            object-fit:contain;
+            border-radius:50%;
+            background:#fff;
+            padding:4px;
+            flex:0 0 auto;
         }
-        
-        .nav a {
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.9);
-            color: var(--purple-dark);
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: bold;
-            transition: all 0.3s;
-            font-size: 0.9rem;
+
+        .brand-text{min-width:0}
+
+        .brand-text h1{
+            font-size:clamp(1.3rem,2.5vw,2rem);
+            line-height:1.15;
+            margin-bottom:2px;
+            color:#fff;
+            font-weight:800;
         }
-        
-        .nav a:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-            background: white;
+
+        .brand-text p{
+            color:#d9d3e3;
+            font-size:.95rem;
         }
-        
-        .profile-grid {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 2rem;
-            margin: 2rem 0;
+
+        .header-actions{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            flex:0 0 auto;
         }
-        
-        .sidebar {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: var(--glass-shadow);
-            height: fit-content;
+
+        .circle-btn{
+            width:56px;
+            height:56px;
+            border-radius:18px;
+            border:none;
+            background:linear-gradient(180deg,#f5f0fb,#e7daf7);
+            box-shadow:0 8px 18px rgba(0,0,0,.12);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            cursor:pointer;
+            transition:.2s ease;
+            padding:0;
+            overflow:hidden;
         }
-        
-        .profile-avatar {
-            text-align: center;
-            margin-bottom: 2rem;
+
+        .circle-btn:hover{transform:translateY(-2px)}
+
+        .circle-btn svg{
+            width:26px;
+            height:26px;
+            stroke:#6a4c93;
         }
-        
-        .avatar-img {
-            width: 120px;
-            height: 120px;
-            background: var(--purple-dark);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            margin: 0 auto 1rem;
+
+        .page-wrap{
+            max-width:1100px;
+            margin:22px auto 40px;
+            padding:0 16px;
         }
-        
-        .profile-name {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: var(--purple-dark);
-            margin-bottom: 0.5rem;
+
+        .hero{
+            background:var(--card);
+            border:1px solid var(--line);
+            border-radius:32px;
+            box-shadow:var(--shadow);
+            padding:26px 20px;
+            text-align:center;
+            margin-bottom:20px;
         }
-        
-        .profile-email {
-            color: #666;
-            margin-bottom: 1rem;
+
+        .hero-logo{
+            width:min(380px,88%);
+            margin:0 auto 10px;
+            object-fit:contain;
+            display:block;
         }
-        
-        .sidebar-menu {
-            list-style: none;
+
+        .hero h1{
+            font-size:clamp(2rem,4vw,3rem);
+            color:var(--purple-dark);
+            font-weight:900;
+            margin-bottom:6px;
         }
-        
-        .sidebar-menu li {
-            margin-bottom: 0.5rem;
+
+        .hero p{
+            font-size:clamp(1rem,2vw,1.15rem);
+            color:var(--text);
         }
-        
-        .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            padding: 12px 15px;
-            color: #666;
-            text-decoration: none;
-            border-radius: 10px;
-            transition: all 0.3s;
+
+        .quick-nav{
+            display:flex;
+            justify-content:center;
+            flex-wrap:wrap;
+            gap:12px;
+            margin:18px 0 24px;
         }
-        
-        .sidebar-menu a:hover,
-        .sidebar-menu a.active {
-            background: var(--purple-light);
-            color: white;
+
+        .quick-nav a{
+            min-width:180px;
+            text-align:center;
+            padding:13px 20px;
+            border-radius:999px;
+            background:#fff;
+            border:1px solid var(--line);
+            color:var(--purple-dark);
+            font-weight:800;
+            box-shadow:var(--shadow);
+            transition:.2s ease;
         }
-        
-        .main-content {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 2.5rem;
-            box-shadow: var(--glass-shadow);
+
+        .quick-nav a:hover{transform:translateY(-2px)}
+
+        .profile-layout{
+            display:grid;
+            grid-template-columns:280px minmax(0,1fr);
+            gap:18px;
         }
-        
-        .section {
-            display: none;
+
+        .sidebar,
+        .content-card{
+            background:var(--card);
+            border:1px solid var(--line);
+            border-radius:28px;
+            box-shadow:var(--shadow);
         }
-        
-        .section.active {
-            display: block;
+
+        .sidebar{
+            padding:20px;
+            height:fit-content;
+            position:sticky;
+            top:94px;
         }
-        
-        .section h2 {
-            color: var(--purple-dark);
-            font-size: 1.8rem;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid var(--purple-light);
-            padding-bottom: 0.5rem;
+
+        .profile-top{
+            text-align:center;
+            padding-bottom:18px;
+            border-bottom:1px solid var(--line);
+            margin-bottom:16px;
         }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+
+        .avatar{
+            width:92px;
+            height:92px;
+            border-radius:50%;
+            margin:0 auto 12px;
+            background:linear-gradient(180deg,#7f58ab,#6f4e98);
+            color:#fff;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:2.2rem;
+            font-weight:800;
+            box-shadow:0 10px 24px rgba(106,76,147,.18);
         }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
+
+        .profile-name{
+            font-size:1.2rem;
+            font-weight:900;
+            color:var(--purple-dark);
+            margin-bottom:4px;
         }
-        
-        .form-group.full-width {
-            grid-column: 1 / -1;
+
+        .profile-email{
+            color:var(--muted);
+            font-size:.95rem;
+            word-break:break-word;
         }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--purple-dark);
-            font-weight: bold;
+
+        .sidebar-menu{
+            display:grid;
+            gap:8px;
         }
-        
+
+        .menu-item{
+            width:100%;
+            border:none;
+            background:#faf8fd;
+            color:#5f5a69;
+            text-align:right;
+            padding:14px 16px;
+            border-radius:16px;
+            cursor:pointer;
+            font-size:1rem;
+            font-weight:800;
+            transition:.2s ease;
+        }
+
+        .menu-item.active,
+        .menu-item:hover{
+            background:linear-gradient(45deg,var(--purple-dark),var(--purple-light));
+            color:#fff;
+        }
+
+        .content-card{
+            padding:22px;
+        }
+
+        .section{display:none}
+        .section.active{display:block}
+
+        .section h2{
+            color:var(--purple-dark);
+            font-size:1.8rem;
+            margin-bottom:16px;
+            font-weight:900;
+        }
+
+        .section-sub{
+            color:var(--muted);
+            margin-bottom:18px;
+        }
+
+        .stats-grid{
+            display:grid;
+            grid-template-columns:repeat(4,minmax(0,1fr));
+            gap:14px;
+            margin-bottom:22px;
+        }
+
+        .stat-card{
+            background:var(--soft);
+            border:1px solid var(--line);
+            border-radius:20px;
+            padding:18px 14px;
+            text-align:center;
+        }
+
+        .stat-number{
+            font-size:1.9rem;
+            font-weight:900;
+            color:var(--purple-dark);
+            margin-bottom:4px;
+        }
+
+        .stat-label{
+            color:var(--muted);
+            font-size:.92rem;
+        }
+
+        .box-list{
+            display:grid;
+            gap:12px;
+        }
+
+        .info-box{
+            background:var(--soft);
+            border:1px solid var(--line);
+            border-radius:18px;
+            padding:16px;
+        }
+
+        .info-box strong{
+            display:block;
+            color:var(--purple-dark);
+            margin-bottom:4px;
+        }
+
+        .simple-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:14px;
+        }
+
+        .form-group{
+            margin-bottom:14px;
+        }
+
+        .form-group label{
+            display:block;
+            margin-bottom:6px;
+            color:var(--purple-dark);
+            font-weight:800;
+        }
+
         .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s;
-            font-family: inherit;
+        .form-group select{
+            width:100%;
+            padding:14px 15px;
+            border:1.5px solid #ddd7e6;
+            border-radius:16px;
+            background:#faf8fd;
+            font-size:1rem;
+            color:#333;
+            transition:.25s;
         }
-        
+
         .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: var(--purple-light);
-            outline: none;
-            box-shadow: 0 0 10px rgba(155, 89, 182, 0.2);
+        .form-group select:focus{
+            outline:none;
+            border-color:var(--purple-dark);
+            background:#fff;
+            box-shadow:0 0 0 4px rgba(106,76,147,.08);
         }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 25px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
+
+        .full-width{grid-column:1 / -1}
+
+        .btn{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            padding:13px 20px;
+            border:none;
+            border-radius:999px;
+            font-size:1rem;
+            font-weight:800;
+            cursor:pointer;
+            transition:.2s ease;
         }
-        
-        .btn-primary {
-            background: linear-gradient(45deg, var(--purple-dark), var(--purple-light));
-            color: white;
+
+        .btn:hover{transform:translateY(-2px)}
+
+        .btn-primary{
+            background:linear-gradient(45deg,var(--purple-dark),var(--purple-light));
+            color:#fff;
         }
-        
-        .btn-success {
-            background: var(--success-color);
-            color: white;
+
+        .btn-outline{
+            background:#fff;
+            color:var(--purple-dark);
+            border:1px solid var(--line);
         }
-        
-        .btn-warning {
-            background: var(--warning-color);
-            color: white;
+
+        .btn-danger{
+            background:var(--danger);
+            color:#fff;
         }
-        
-        .btn-danger {
-            background: var(--danger-color);
-            color: white;
+
+        .orders-list{
+            display:grid;
+            gap:12px;
         }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+
+        .order-card{
+            background:var(--soft);
+            border:1px solid var(--line);
+            border-radius:20px;
+            padding:16px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+            flex-wrap:wrap;
         }
-        
-        .orders-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1.5rem 0;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+        .order-meta strong{
+            display:block;
+            color:var(--purple-dark);
+            font-size:1.08rem;
+            margin-bottom:4px;
         }
-        
-        .orders-table th {
-            background: var(--purple-dark);
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            font-weight: bold;
+
+        .order-meta span{
+            color:var(--muted);
+            font-size:.95rem;
         }
-        
-        .orders-table td {
-            padding: 1rem;
-            text-align: center;
-            border-bottom: 1px solid #eee;
+
+        .status-badge{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:7px 12px;
+            border-radius:999px;
+            font-size:.82rem;
+            font-weight:800;
+            white-space:nowrap;
         }
-        
-        .orders-table tr:nth-child(even) {
-            background: #f8f9ff;
+
+        .status-processing{background:#e7f0ff;color:#1855a7}
+        .status-shipped{background:#e7f7eb;color:#1d7f45}
+        .status-delivered{background:#e8f7f9;color:#16606d}
+
+        .address-card{
+            background:var(--soft);
+            border:1px solid var(--line);
+            border-radius:20px;
+            padding:18px;
+            margin-bottom:12px;
         }
-        
-        .orders-table tr:hover {
-            background: #e8f0ff;
+
+        .address-card strong{
+            color:var(--purple-dark);
+            display:block;
+            margin-bottom:6px;
         }
-        
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
+
+        .actions-row{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            margin-top:18px;
         }
-        
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
+
+        .logout-wrap{
+            margin-top:24px;
+            padding-top:18px;
+            border-top:1px solid var(--line);
         }
-        
-        .status-processing {
-            background: #cce5ff;
-            color: #004085;
+
+        .notice{
+            background:#fff7df;
+            border:1px solid #efd98a;
+            color:#6c5a18;
+            padding:14px 16px;
+            border-radius:16px;
+            font-weight:700;
+            margin-bottom:16px;
         }
-        
-        .status-shipped {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-delivered {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-        
-        .address-card {
-            background: #f8f9ff;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            position: relative;
-        }
-        
-        .address-card.default {
-            border-color: var(--success-color);
-            background: #e8f5e8;
-        }
-        
-        .address-card .address-actions {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-        }
-        
-        .default-badge {
-            background: var(--success-color);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-        
-        .stat-card {
-            background: linear-gradient(145deg, #f8f9ff, #e8f0ff);
-            padding: 1.5rem;
-            border-radius: 15px;
-            text-align: center;
-            border-right: 4px solid var(--purple-dark);
-        }
-        
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--purple-dark);
-            margin-bottom: 0.5rem;
-        }
-        
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .notification-item {
-            background: #f8f9ff;
-            border-right: 4px solid var(--info-color);
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 10px;
-        }
-        
-        .notification-item.success {
-            border-right-color: var(--success-color);
-            background: #e8f5e8;
-        }
-        
-        .notification-item.warning {
-            border-right-color: var(--warning-color);
-            background: #fef9e7;
-        }
-        
-        @media (max-width: 768px) {
-            .profile-grid {
-                grid-template-columns: 1fr;
+
+        @media (max-width:900px){
+            .profile-layout{
+                grid-template-columns:1fr;
             }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
+
+            .sidebar{
+                position:static;
             }
-            
-            .sidebar {
-                order: 2;
-            }
-            
-            .main-content {
-                order: 1;
-                padding: 2rem 1.5rem;
-            }
-            
-            .header h1 {
-                font-size: 1.8rem;
+
+            .stats-grid{
+                grid-template-columns:repeat(2,minmax(0,1fr));
             }
         }
-        
-        /* أيقونات تسجيل الدخول والحساب */
-        .user-icons {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 1001;
+
+        @media (max-width:768px){
+            .topbar{padding:14px 12px}
+            .brand-logo{width:54px;height:54px}
+            .circle-btn{width:52px;height:52px;border-radius:16px}
+            .page-wrap{padding:0 12px}
+            .hero,.sidebar,.content-card{border-radius:24px}
+            .hero{padding:22px 16px}
+            .content-card,.sidebar{padding:16px}
+            .simple-grid{grid-template-columns:1fr}
         }
-        
-        .user-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.25);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 2px solid rgba(255,255,255,0.18);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #6a4c93;
-            text-decoration: none;
-            font-size: 1.5rem;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(31, 38, 135, 0.2);
-        }
-        
-        .user-icon:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(31, 38, 135, 0.3);
-            background: rgba(255,255,255,0.4);
-        }
-        
-        .user-icon.logged-in {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
-        }
-        
-        /* أيقونة واتساب الثابتة */
-        .whatsapp-float {
-            position: fixed;
-            width: 60px;
-            height: 60px;
-            bottom: 25px;
-            right: 25px;
-            background: #25D366;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            color: white;
-            text-decoration: none;
-            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-            z-index: 1000;
-            transition: all 0.3s ease;
-            animation: pulse 2s infinite;
-        }
-        
-        .whatsapp-float:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 30px rgba(37, 211, 102, 0.6);
-        }
-        
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(37, 211, 102, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
-            }
+
+        @media (max-width:460px){
+            .brand-text h1{font-size:1.05rem}
+            .brand-text p{font-size:.82rem}
+            .hero h1{font-size:2.2rem}
+            .quick-nav{gap:10px}
+            .quick-nav a{width:100%;min-width:0}
+            .stats-grid{grid-template-columns:1fr}
         }
     </style>
 </head>
 <body>
-    <!-- أيقونات تسجيل الدخول والحساب -->
-    <div class="user-icons">
-        <a href="./login.html" class="user-icon" id="loginIcon" title="تسجيل الدخول">
-            🔐
-        </a>
-        <a href="./profile.html" class="user-icon" id="profileIcon" title="حسابي" style="background: linear-gradient(45deg, #28a745, #20c997); color: white;">
-            👤
-        </a>
-    </div>
+    <div class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">
+                <img class="brand-logo" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457" alt="Smart Kids Kuwait">
+                <div class="brand-text">
+                    <h1>الأطفال المبتكرون الكويت</h1>
+                    <p>Smart Kids Kuwait</p>
+                </div>
+            </div>
 
-    <!-- أيقونة واتساب الثابتة -->
-    <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
-        💬
-    </a>
+            <div class="header-actions">
+                <a href="./cart.html" class="circle-btn" title="السلة" aria-label="السلة">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="20" r="1.6"></circle>
+                        <circle cx="18" cy="20" r="1.6"></circle>
+                        <path d="M3 4h2l2.2 10.2a1 1 0 0 0 1 .8h9.8a1 1 0 0 0 1-.8L21 7H7"></path>
+                    </svg>
+                </a>
 
-    <div class="header">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
-            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" style="height: 80px; object-fit: contain;">
+                <a href="./profile.html" class="circle-btn" title="حسابي" aria-label="حسابي">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21a8 8 0 0 0-16 0"></path>
+                        <circle cx="12" cy="8" r="4"></circle>
+                    </svg>
+                </a>
+            </div>
         </div>
-        <h1>👤 الملف الشخصي</h1>
-        <p>إدارة حسابك وطلباتك في Smart Kids Kuwait</p>
     </div>
-    
-    <div class="container">
-        <div class="nav">
+
+    <div class="page-wrap">
+        <section class="hero">
+            <img class="hero-logo" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" style="width:min(380px,88%);margin:0 auto 10px;display:block;">
+            <h1>الملف الشخصي</h1>
+            <p>إدارة بياناتك وطلباتك بشكل بسيط</p>
+        </section>
+
+        <nav class="quick-nav">
             <a href="./index.html">🏠 الصفحة الرئيسية</a>
             <a href="./products-full.html">🛍️ المتجر</a>
             <a href="./contact.html">📞 اتصل بنا</a>
             <a href="./about.html">ℹ️ عن المتجر</a>
-        </div>
-        
-        <div class="profile-grid">
-            <div class="sidebar">
-                <div class="profile-avatar">
-                    <div class="avatar-img">👤</div>
-                    <div class="profile-name">أحمد محمد</div>
-                    <div class="profile-email">ahmed@example.com</div>
+        </nav>
+
+        <div class="profile-layout">
+            <aside class="sidebar">
+                <div class="profile-top">
+                    <div class="avatar" id="avatarLetter">أ</div>
+                    <div class="profile-name" id="profileName">أحمد محمد</div>
+                    <div class="profile-email" id="profileEmail">ahmed@example.com</div>
                 </div>
-                
-                <ul class="sidebar-menu">
-                    <li><a href="#" class="menu-item active" data-section="overview">📊 نظرة عامة</a></li>
-                    <li><a href="#" class="menu-item" data-section="personal-info">👤 المعلومات الشخصية</a></li>
-                    <li><a href="#" class="menu-item" data-section="orders">📦 طلباتي</a></li>
-                    <li><a href="#" class="menu-item" data-section="addresses">📍 العناوين</a></li>
-                    <li><a href="#" class="menu-item" data-section="notifications">🔔 الإشعارات</a></li>
-                    <li><a href="#" class="menu-item" data-section="security">🔒 الأمان</a></li>
-                    <li><a href="#" class="menu-item" data-section="preferences">⚙️ الإعدادات</a></li>
-                </ul>
-            </div>
-            
-            <div class="main-content">
-                <!-- نظرة عامة -->
-                <div class="section active" id="overview">
-                    <h2>📊 نظرة عامة على الحساب</h2>
-                    
+
+                <div class="sidebar-menu">
+                    <button class="menu-item active" data-section="overview">نظرة عامة</button>
+                    <button class="menu-item" data-section="orders">طلباتي</button>
+                    <button class="menu-item" data-section="personal-info">المعلومات الشخصية</button>
+                    <button class="menu-item" data-section="addresses">العناوين</button>
+                </div>
+
+                <div class="logout-wrap">
+                    <button class="btn btn-danger" onclick="logout()" style="width:100%;">تسجيل الخروج</button>
+                </div>
+            </aside>
+
+            <main class="content-card">
+                <section class="section active" id="overview">
+                    <h2>نظرة عامة</h2>
+                    <p class="section-sub">ملخص سريع عن حسابك.</p>
+
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-number">12</div>
@@ -555,7 +585,7 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-number">85.5</div>
-                            <div class="stat-label">إجمالي المشتريات (د.ك)</div>
+                            <div class="stat-label">إجمالي المشتريات</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-number">3</div>
@@ -563,362 +593,178 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-number">2</div>
-                            <div class="stat-label">الطلبات النشطة</div>
+                            <div class="stat-label">طلبات نشطة</div>
                         </div>
                     </div>
-                    
-                    <h3 style="color: var(--purple-dark); margin: 2rem 0 1rem;">📈 النشاط الأخير</h3>
-                    
-                    <div class="notification-item success">
-                        <strong>تم تسليم الطلب #12345</strong><br>
-                        <small>تم تسليم طلبك بنجاح في 20 ديسمبر 2024</small>
+
+                    <div class="box-list">
+                        <div class="info-box">
+                            <strong>آخر طلب</strong>
+                            #12346 — 25.500 د.ك — قيد المعالجة
+                        </div>
+                        <div class="info-box">
+                            <strong>العنوان الافتراضي</strong>
+                            السالمية، محافظة حولي، الكويت
+                        </div>
                     </div>
-                    
-                    <div class="notification-item">
-                        <strong>طلب جديد قيد المعالجة #12346</strong><br>
-                        <small>طلبك قيد التجهيز وسيتم الشحن قريباً</small>
+                </section>
+
+                <section class="section" id="orders">
+                    <h2>طلباتي</h2>
+                    <p class="section-sub">آخر الطلبات المسجلة على الحساب.</p>
+
+                    <div class="orders-list">
+                        <div class="order-card">
+                            <div class="order-meta">
+                                <strong>#12346</strong>
+                                <span>22 ديسمبر 2024 • 25.500 د.ك</span>
+                            </div>
+                            <div class="actions-row">
+                                <span class="status-badge status-processing">قيد المعالجة</span>
+                                <a href="#" class="btn btn-outline">عرض</a>
+                            </div>
+                        </div>
+
+                        <div class="order-card">
+                            <div class="order-meta">
+                                <strong>#12345</strong>
+                                <span>20 ديسمبر 2024 • 18.750 د.ك</span>
+                            </div>
+                            <div class="actions-row">
+                                <span class="status-badge status-delivered">تم التسليم</span>
+                                <a href="#" class="btn btn-outline">عرض</a>
+                            </div>
+                        </div>
+
+                        <div class="order-card">
+                            <div class="order-meta">
+                                <strong>#12344</strong>
+                                <span>15 ديسمبر 2024 • 32.250 د.ك</span>
+                            </div>
+                            <div class="actions-row">
+                                <span class="status-badge status-shipped">تم الشحن</span>
+                                <a href="#" class="btn btn-outline">تتبع</a>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <div class="notification-item warning">
-                        <strong>تحديث معلومات العنوان</strong><br>
-                        <small>يرجى التحقق من عناوينك المحفوظة وتحديثها</small>
-                    </div>
-                </div>
-                
-                <!-- المعلومات الشخصية -->
-                <div class="section" id="personal-info">
-                    <h2>👤 المعلومات الشخصية</h2>
-                    
-                    <form class="form-grid">
+                </section>
+
+                <section class="section" id="personal-info">
+                    <h2>المعلومات الشخصية</h2>
+                    <p class="section-sub">يمكنك تحديث بياناتك الأساسية من هنا.</p>
+
+                    <form class="simple-grid" onsubmit="saveForm(event)">
                         <div class="form-group">
                             <label for="firstName">الاسم الأول</label>
-                            <input type="text" id="firstName" name="firstName" value="أحمد">
+                            <input type="text" id="firstName" value="أحمد">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="lastName">اسم العائلة</label>
-                            <input type="text" id="lastName" name="lastName" value="محمد">
+                            <input type="text" id="lastName" value="محمد">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="email">البريد الإلكتروني</label>
-                            <input type="email" id="email" name="email" value="ahmed@example.com">
+                            <input type="email" id="email" value="ahmed@example.com">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="phone">رقم الهاتف</label>
-                            <input type="tel" id="phone" name="phone" value="+965 XXXX XXXX">
+                            <input type="tel" id="phone" value="+965 XXXX XXXX">
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="birthdate">تاريخ الميلاد</label>
-                            <input type="date" id="birthdate" name="birthdate" value="1990-01-01">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="gender">الجنس</label>
-                            <select id="gender" name="gender">
-                                <option value="male">ذكر</option>
-                                <option value="female">أنثى</option>
-                            </select>
-                        </div>
-                        
+
                         <div class="form-group full-width">
-                            <button type="submit" class="btn btn-primary">💾 حفظ التغييرات</button>
+                            <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
                         </div>
                     </form>
-                </div>
-                
-                <!-- الطلبات -->
-                <div class="section" id="orders">
-                    <h2>📦 طلباتي</h2>
-                    
-                    <table class="orders-table">
-                        <thead>
-                            <tr>
-                                <th>رقم الطلب</th>
-                                <th>التاريخ</th>
-                                <th>الإجمالي</th>
-                                <th>الحالة</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>#12346</td>
-                                <td>22 ديسمبر 2024</td>
-                                <td>25.500 د.ك</td>
-                                <td><span class="status-badge status-processing">قيد المعالجة</span></td>
-                                <td><a href="#" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">عرض</a></td>
-                            </tr>
-                            <tr>
-                                <td>#12345</td>
-                                <td>20 ديسمبر 2024</td>
-                                <td>18.750 د.ك</td>
-                                <td><span class="status-badge status-delivered">تم التسليم</span></td>
-                                <td><a href="#" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">عرض</a></td>
-                            </tr>
-                            <tr>
-                                <td>#12344</td>
-                                <td>15 ديسمبر 2024</td>
-                                <td>32.250 د.ك</td>
-                                <td><span class="status-badge status-shipped">تم الشحن</span></td>
-                                <td><a href="#" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">تتبع</a></td>
-                            </tr>
-                            <tr>
-                                <td>#12343</td>
-                                <td>10 ديسمبر 2024</td>
-                                <td>9.500 د.ك</td>
-                                <td><span class="status-badge status-delivered">تم التسليم</span></td>
-                                <td><a href="#" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">عرض</a></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- العناوين -->
-                <div class="section" id="addresses">
-                    <h2>📍 العناوين المحفوظة</h2>
-                    
-                    <div class="address-card default">
-                        <div class="default-badge">افتراضي</div>
-                        <div class="address-actions">
-                            <button class="btn btn-warning" style="padding: 6px 12px; font-size: 0.8rem;">تعديل</button>
-                        </div>
-                        <h4 style="color: var(--purple-dark); margin-bottom: 0.5rem;">المنزل</h4>
-                        <p><strong>أحمد محمد الكندري</strong></p>
-                        <p>شارع الخليج العربي، قطعة 5، منزل 25</p>
-                        <p>السالمية، محافظة حولي</p>
-                        <p>الكويت</p>
-                        <p><strong>الهاتف:</strong> +965 XXXX XXXX</p>
-                    </div>
-                    
+                </section>
+
+                <section class="section" id="addresses">
+                    <h2>العناوين</h2>
+                    <p class="section-sub">العناوين المحفوظة في الحساب.</p>
+
                     <div class="address-card">
-                        <div class="address-actions">
-                            <button class="btn btn-warning" style="padding: 6px 12px; font-size: 0.8rem; margin-left: 0.5rem;">تعديل</button>
-                            <button class="btn btn-danger" style="padding: 6px 12px; font-size: 0.8rem;">حذف</button>
-                        </div>
-                        <h4 style="color: var(--purple-dark); margin-bottom: 0.5rem;">العمل</h4>
-                        <p><strong>أحمد محمد الكندري</strong></p>
-                        <p>برج التجارة، الطابق 15، مكتب 1502</p>
-                        <p>الشرق، محافظة العاصمة</p>
-                        <p>الكويت</p>
-                        <p><strong>الهاتف:</strong> +965 YYYY YYYY</p>
+                        <strong>المنزل</strong>
+                        أحمد محمد الكندري<br>
+                        شارع الخليج العربي، قطعة 5، منزل 25<br>
+                        السالمية، محافظة حولي، الكويت<br>
+                        الهاتف: +965 XXXX XXXX
                     </div>
-                    
-                    <button class="btn btn-success" style="margin-top: 1rem;">➕ إضافة عنوان جديد</button>
-                </div>
-                
-                <!-- الإشعارات -->
-                <div class="section" id="notifications">
-                    <h2>🔔 الإشعارات والتحديثات</h2>
-                    
-                    <form>
-                        <h3 style="color: var(--purple-dark); margin-bottom: 1rem;">إعدادات الإشعارات</h3>
-                        
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" checked style="margin-left: 0.5rem;">
-                                إشعارات الطلبات والشحن
-                            </label>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" checked style="margin-left: 0.5rem;">
-                                العروض والخصومات الخاصة
-                            </label>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" style="margin-left: 0.5rem;">
-                                النشرة البريدية الأسبوعية
-                            </label>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" checked style="margin-left: 0.5rem;">
-                                إشعارات المنتجات الجديدة
-                            </label>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">💾 حفظ الإعدادات</button>
-                    </form>
-                    
-                    <h3 style="color: var(--purple-dark); margin: 2rem 0 1rem;">📬 الإشعارات الأخيرة</h3>
-                    
-                    <div class="notification-item success">
-                        <strong>🎉 تم تسليم طلبك بنجاح!</strong><br>
-                        <small>20 ديسمبر 2024 - الطلب #12345</small>
-                    </div>
-                    
-                    <div class="notification-item">
-                        <strong>📦 تم شحن طلبك</strong><br>
-                        <small>19 ديسمبر 2024 - الطلب #12345 - رقم التتبع: TRK123456</small>
-                    </div>
-                    
-                    <div class="notification-item warning">
-                        <strong>⏰ عرض خاص ينتهي قريباً!</strong><br>
-                        <small>18 ديسمبر 2024 - خصم 25% على مجموعة الألعاب التعليمية</small>
-                    </div>
-                </div>
-                
-                <!-- الأمان -->
-                <div class="section" id="security">
-                    <h2>🔒 الأمان وكلمة المرور</h2>
-                    
-                    <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem;">
-                        <h4 style="color: var(--success-color); margin-bottom: 0.5rem;">✅ حسابك آمن</h4>
-                        <p>تم تحديث كلمة المرور آخر مرة في 1 ديسمبر 2024</p>
-                    </div>
-                    
-                    <form class="form-grid">
-                        <div class="form-group full-width">
-                            <label for="currentPassword">كلمة المرور الحالية</label>
-                            <input type="password" id="currentPassword" name="currentPassword">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="newPassword">كلمة المرور الجديدة</label>
-                            <input type="password" id="newPassword" name="newPassword">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="confirmPassword">تأكيد كلمة المرور</label>
-                            <input type="password" id="confirmPassword" name="confirmPassword">
-                        </div>
-                        
-                        <div class="form-group full-width">
-                            <button type="submit" class="btn btn-primary">🔐 تحديث كلمة المرور</button>
-                        </div>
-                    </form>
-                    
-                    <h3 style="color: var(--purple-dark); margin: 2rem 0 1rem;">🛡️ إعدادات الأمان الإضافية</h3>
-                    
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" checked style="margin-left: 0.5rem;">
-                            تفعيل إشعارات تسجيل الدخول
-                        </label>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" style="margin-left: 0.5rem;">
-                            المصادقة الثنائية (2FA)
-                        </label>
-                    </div>
-                </div>
-                
-                <!-- الإعدادات -->
-                <div class="section" id="preferences">
-                    <h2>⚙️ الإعدادات والتفضيلات</h2>
-                    
-                    <form class="form-grid">
-                        <div class="form-group">
-                            <label for="language">اللغة المفضلة</label>
-                            <select id="language" name="language">
-                                <option value="ar">العربية</option>
-                                <option value="en">English</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="currency">العملة</label>
-                            <select id="currency" name="currency">
-                                <option value="KWD">دينار كويتي (د.ك)</option>
-                                <option value="USD">دولار أمريكي ($)</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group full-width">
-  <label for="interests">الاهتمامات (اختر المجموعات المفضلة)</label>
 
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin-top: 0.5rem;">
-    <label><input type="checkbox" name="interests" value="montessori" style="margin-left: 0.5rem;"> مونتيسوري</label>
-    <label><input type="checkbox" name="interests" value="stories-world" style="margin-left: 0.5rem;"> عالم القصص والحكايات المصورة</label>
-    <label><input type="checkbox" name="interests" value="bestsellers" style="margin-left: 0.5rem;"> الأفضل مبيعًا</label>
-    <label><input type="checkbox" name="interests" value="latest-releases" style="margin-left: 0.5rem;"> أحدث إصداراتنا للأطفال</label>
-    <label><input type="checkbox" name="interests" value="audio-stories" style="margin-left: 0.5rem;"> قصصي الصوتية المسموعة</label>
-    <label><input type="checkbox" name="interests" value="interactive-offers" style="margin-left: 0.5rem;"> عروض القصص التفاعلية</label>
-  </div>
-</div>
-
-                        <div class="form-group full-width">
-                            <button type="submit" class="btn btn-primary">💾 حفظ التفضيلات</button>
-                        </div>
-                    </form>
-                    
-                    <div style="border-top: 2px solid #eee; margin: 3rem 0 2rem; padding-top: 2rem;">
-                        <h3 style="color: var(--danger-color); margin-bottom: 1rem;">⚠️ منطقة الخطر</h3>
-                        <p style="margin-bottom: 1rem; color: #666;">الإجراءات التالية لا يمكن التراجع عنها</p>
-                        <button class="btn btn-danger">🗑️ حذف الحساب</button>
+                    <div class="address-card">
+                        <strong>العمل</strong>
+                        أحمد محمد الكندري<br>
+                        برج التجارة، الطابق 15، مكتب 1502<br>
+                        الشرق، محافظة العاصمة، الكويت<br>
+                        الهاتف: +965 YYYY YYYY
                     </div>
-                </div>
-            </div>
+
+                    <div class="actions-row">
+                        <button class="btn btn-primary" onclick="showMessage('تم حفظ العنوان بنجاح')">إضافة عنوان جديد</button>
+                    </div>
+                </section>
+            </main>
         </div>
     </div>
-    
+
     <script>
-        // إدارة القائمة الجانبية
         document.querySelectorAll('.menu-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // إزالة active من جميع العناصر
+            item.addEventListener('click', function () {
                 document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-                
-                // إضافة active للعنصر المحدد
+
                 this.classList.add('active');
-                const sectionId = this.getAttribute('data-section');
-                document.getElementById(sectionId).classList.add('active');
+                document.getElementById(this.dataset.section).classList.add('active');
             });
         });
-        
-        // محاكاة حفظ البيانات
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                alert('تم حفظ البيانات بنجاح!');
-            });
-        });
-        
-        // تحديث أيقونات تسجيل الدخول
-        function updateUserIcons() {
-            const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
-            const loginIcon = document.getElementById('loginIcon');
-            const profileIcon = document.getElementById('profileIcon');
-            
-            if (isLoggedIn) {
-                loginIcon.innerHTML = '✓';
-                loginIcon.title = 'مسجل دخول';
-                loginIcon.classList.add('logged-in');
-                loginIcon.href = '#';
-                loginIcon.onclick = logout;
-            } else {
-                // إعادة توجيه لصفحة تسجيل الدخول إذا لم يكن مسجل دخول
-                if (window.location.pathname.includes('profile.html')) {
-                    alert('يجب تسجيل الدخول أولاً');
-                    window.location.href = './login.html';
-                }
-            }
+
+        function saveForm(event) {
+            event.preventDefault();
+
+            const firstName = document.getElementById('firstName')?.value?.trim() || '';
+            const lastName = document.getElementById('lastName')?.value?.trim() || '';
+            const email = document.getElementById('email')?.value?.trim() || '';
+
+            const fullName = `${firstName} ${lastName}`.trim() || 'المستخدم';
+            localStorage.setItem('userName', fullName);
+            localStorage.setItem('userEmail', email);
+
+            updateProfileHeader();
+            showMessage('تم حفظ البيانات بنجاح');
         }
-        
+
+        function showMessage(message) {
+            alert(message);
+        }
+
+        function updateProfileHeader() {
+            const savedName = localStorage.getItem('userName') || 'أحمد محمد';
+            const savedEmail = localStorage.getItem('userEmail') || 'ahmed@example.com';
+
+            document.getElementById('profileName').textContent = savedName;
+            document.getElementById('profileEmail').textContent = savedEmail;
+            document.getElementById('avatarLetter').textContent = savedName.charAt(0);
+        }
+
         function logout() {
             if (confirm('هل تريد تسجيل الخروج؟')) {
                 localStorage.removeItem('userLoggedIn');
                 localStorage.removeItem('userEmail');
                 localStorage.removeItem('userName');
-                alert('تم تسجيل الخروج بنجاح');
                 window.location.href = './index.html';
             }
         }
-        
-        // تحديث الأيقونات عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', updateUserIcons);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (localStorage.getItem('userLoggedIn') !== 'true') {
+                alert('يجب تسجيل الدخول أولاً');
+                window.location.href = './login.html';
+                return;
+            }
+
+            updateProfileHeader();
+        });
     </script>
 </body>
 </html>
