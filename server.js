@@ -63,6 +63,10 @@ app.get('/products-admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'products-admin.html'));
 });
 
+app.get('/product-edit.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'product-edit.html'));
+});
+
 app.get('/track', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'track.html'));
 });
@@ -109,6 +113,8 @@ async function startServer() {
       console.log(`║ 📍 الصفحة الرئيسية: http://${HOST}:${PORT}/`);
       console.log(`║ 📊 لوحة الإدارة: http://${HOST}:${PORT}/admin`);
       console.log(`║ 📈 لوحة متقدمة: http://${HOST}:${PORT}/admin-enhanced`);
+      console.log(`║ 🏷️ إدارة المنتجات: http://${HOST}:${PORT}/products-admin`);
+      console.log(`║ ✏️ تعديل/إضافة منتج: http://${HOST}:${PORT}/product-edit.html`);
       console.log(`║ 🔍 تتبع الطلبات: http://${HOST}:${PORT}/track`);
       console.log('║');
       console.log('║ API Endpoints:');
