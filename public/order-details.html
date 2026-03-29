@@ -804,7 +804,10 @@
               <small id="desktopOrdersCountBadge">0</small>
             </a>
 
-            <div class="side-link"><div class="side-link-left"><span>🏷️</span><span>Products</span></div></div>
+            <a class="side-link" href="/products-admin">
+              <div class="side-link-left"><span>🏷️</span><span>Products</span></div>
+            </a>
+
             <div class="side-link"><div class="side-link-left"><span>👤</span><span>Customers</span></div></div>
             <div class="side-link"><div class="side-link-left"><span>📣</span><span>Marketing</span></div></div>
             <div class="side-link"><div class="side-link-left"><span>⚙️</span><span>Discounts</span></div></div>
@@ -837,7 +840,7 @@
                 <div class="desktop-header-actions">
                   <button class="ghost-btn">Restock</button>
                   <button class="ghost-btn">Return</button>
-                  <button class="ghost-btn" onclick="goBackToOrders()">Edit</button>
+                  <button class="ghost-btn" onclick="editCurrentOrder()">Edit</button>
                   <button class="ghost-btn">Print ▾</button>
                   <button class="ghost-btn">More actions ▾</button>
                 </div>
@@ -1499,6 +1502,25 @@
 
     function goBackToOrders() {
       window.location.href = '/admin-enhanced.html#orders';
+    }
+
+    function editCurrentOrder() {
+      if (!currentOrder) {
+        showAlert('Order is not loaded yet', 'error');
+        return;
+      }
+
+      if (currentOrder.id) {
+        window.location.href = `/admin-enhanced.html?editOrder=${encodeURIComponent(currentOrder.id)}#orders`;
+        return;
+      }
+
+      if (currentOrder.order_number) {
+        window.location.href = `/admin-enhanced.html?editOrderNumber=${encodeURIComponent(currentOrder.order_number)}#orders`;
+        return;
+      }
+
+      showAlert('Unable to determine order id', 'error');
     }
 
     function sendInvoice() {
