@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Order Details - Smart Kids Kuwait</title>
-  <script src="/config/system.js"></script>
+  <title>Product Details - Smart Kids Kuwait</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
+
     :root{
       --bg:#f6f6f7;
       --panel:#ffffff;
@@ -15,13 +15,13 @@
       --muted:#6d7175;
       --topbar:#111213;
       --sidebar:#efefef;
-      --chip-payment-bg:#f8dca8;
-      --chip-payment-text:#8a6116;
-      --chip-fulfill-bg:#e8e8e8;
-      --chip-fulfill-text:#616161;
       --green:#008060;
+      --green-bg:#dff3e3;
+      --yellow:#8a6116;
+      --yellow-bg:#f8dca8;
+      --gray:#616161;
+      --gray-bg:#e8e8e8;
       --blue:#005bd3;
-      --danger:#d82c0d;
       --shadow:0 1px 0 rgba(0,0,0,.04),0 2px 8px rgba(0,0,0,.04);
       --sidebar-w:292px;
       --topbar-h:72px;
@@ -37,6 +37,7 @@
     a{text-decoration:none;color:inherit}
     button,input,textarea,select{font-family:inherit}
     .hidden{display:none!important}
+
     .app{min-height:100vh}
 
     .desktop-shell{display:none}
@@ -177,13 +178,6 @@
       gap:12px;
       min-width:0;
     }
-    .side-link small{
-      color:#6f7377;
-      font-weight:700;
-      background:#e4e4e5;
-      padding:3px 10px;
-      border-radius:999px;
-    }
 
     .desktop-main{
       padding:18px 18px 30px;
@@ -206,7 +200,7 @@
     .alert.success{background:#e3f1df;color:#0b6b42;border:1px solid #bfdcb9}
     .alert.error{background:#ffe9e5;color:#9d240d;border:1px solid #f1c7bf}
 
-    .desktop-order-header{
+    .desktop-product-header{
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
@@ -214,7 +208,7 @@
       margin-bottom:18px;
       direction:ltr;
     }
-    .desktop-order-title-wrap{min-width:0}
+    .desktop-product-title-wrap{min-width:0}
     .desktop-breadcrumb{
       display:flex;
       align-items:center;
@@ -222,15 +216,15 @@
       flex-wrap:wrap;
       margin-bottom:6px;
     }
-    .desktop-order-title{
-      font-size:18px;
+    .desktop-product-title{
+      font-size:20px;
       font-weight:800;
       display:flex;
       align-items:center;
       gap:10px;
       flex-wrap:wrap;
     }
-    .desktop-order-sub{
+    .desktop-product-sub{
       font-size:14px;
       color:#5c5f62;
     }
@@ -273,22 +267,25 @@
     .status-chip .dot{
       width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.75;
     }
-    .status-chip.payment{
-      background:var(--chip-payment-bg);
-      color:var(--chip-payment-text);
+    .status-chip.active{
+      background:var(--green-bg);
+      color:var(--green);
     }
-    .status-chip.fulfillment{
-      background:var(--chip-fulfill-bg);
-      color:var(--chip-fulfill-text);
+    .status-chip.draft{
+      background:var(--yellow-bg);
+      color:var(--yellow);
+    }
+    .status-chip.archived{
+      background:var(--gray-bg);
+      color:var(--gray);
     }
 
-    .desktop-order-grid{
+    .desktop-product-grid{
       display:grid;
       grid-template-columns:minmax(0,1fr) 360px;
       gap:22px;
       align-items:start;
     }
-
     .stack{display:grid;gap:18px}
 
     .card-panel{
@@ -298,7 +295,6 @@
       box-shadow:var(--shadow);
       overflow:hidden;
     }
-
     .card-pad{padding:18px}
     .card-head{
       display:flex;
@@ -314,57 +310,83 @@
       color:#303030;
     }
     .muted{color:var(--muted)}
-    .line{border-top:1px solid #e6e6e8}
 
-    .fulfilled-date-row{
-      min-height:58px;
+    .gallery-wrap{
+      display:grid;
+      grid-template-columns:120px minmax(0,1fr);
+      gap:16px;
+      align-items:start;
+      direction:ltr;
+    }
+    .thumbs{
+      display:grid;
+      gap:10px;
+    }
+    .thumb-btn{
+      width:100%;
+      aspect-ratio:1/1;
+      border:1px solid #dedee1;
+      border-radius:12px;
+      overflow:hidden;
+      background:#fff;
+      cursor:pointer;
+    }
+    .thumb-btn.active{
+      outline:2px solid var(--blue);
+    }
+    .thumb-btn img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .main-image{
+      width:100%;
+      aspect-ratio:1/1;
       border:1px solid #e5e5e7;
-      border-radius:14px;
+      border-radius:16px;
+      overflow:hidden;
+      background:#f3f3f4;
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:0 16px;
-      margin-bottom:14px;
-      direction:ltr;
-      font-size:14px;
-      font-weight:700;
+      justify-content:center;
+      font-size:40px;
+    }
+    .main-image img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
     }
 
-    .product-row{
-      display:grid;
-      grid-template-columns:54px minmax(0,1fr) auto auto;
-      gap:14px;
-      align-items:center;
-      border:1px solid #e5e5e7;
-      border-radius:14px;
-      padding:12px 14px;
-      direction:ltr;
-    }
-    .product-thumb{
-      width:54px;height:54px;border-radius:10px;overflow:hidden;background:#f3f3f4;border:1px solid #ececee;
-      display:flex;align-items:center;justify-content:center;font-size:22px;
-    }
-    .product-thumb img{width:100%;height:100%;object-fit:cover}
-    .product-title{
-      font-size:14px;
-      font-weight:700;
-      line-height:1.45;
+    .product-description{
+      font-size:15px;
+      line-height:1.9;
       color:#303030;
-      text-align:right;
       direction:rtl;
-    }
-    .qty-chip{
-      width:28px;height:28px;border-radius:999px;background:#efefef;color:#555;
-      display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;
-    }
-    .product-price{
-      font-size:14px;
-      font-weight:700;
-      white-space:nowrap;
+      text-align:right;
+      white-space:pre-wrap;
     }
 
-    .summary-grid{
+    .price-block{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      direction:ltr;
+    }
+    .price-main{
+      font-size:24px;
+      font-weight:900;
+      color:#111;
+    }
+    .price-old{
+      font-size:16px;
+      color:#8a8d91;
+      text-decoration:line-through;
+    }
+
+    .meta-grid{
       display:grid;
       grid-template-columns:1fr auto;
       gap:14px;
@@ -372,149 +394,35 @@
       font-size:14px;
       line-height:1.55;
     }
-    .summary-grid .label-col{
+    .meta-grid .label-col{
       display:grid;
       gap:12px;
     }
-    .summary-grid .value-col{
+    .meta-grid .value-col{
       display:grid;
       gap:12px;
       text-align:right;
       white-space:nowrap;
       font-weight:700;
     }
-    .summary-row-title{font-weight:700}
-    .summary-row-sub{color:#4d5154}
-    .summary-strong{font-weight:800;font-size:15px}
-    .summary-actions{
+
+    .tag-list{
       display:flex;
-      gap:12px;
-      justify-content:flex-end;
-      margin-top:14px;
-      direction:ltr;
+      gap:8px;
       flex-wrap:wrap;
-    }
-    .sidebar-card .card-pad{padding:18px}
-    .sidebar-block{
-      display:grid;
-      gap:12px;
-      font-size:14px;
-      line-height:1.55;
-    }
-    .sidebar-link{color:var(--blue);font-weight:600}
-    .sidebar-section-title{
-      font-size:14px;
-      font-weight:800;
-      color:#303030;
-      margin-bottom:4px;
-    }
-
-    .timeline-wrap{
-      padding:18px 18px 22px;
-    }
-    .timeline-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:14px;
-    }
-    .timeline-title{
-      font-size:16px;
-      font-weight:800;
-    }
-    .comment-box{
-      border:1px solid #dcdcdf;
-      border-radius:16px;
-      overflow:hidden;
-      margin-bottom:18px;
-      background:#fff;
-    }
-    .comment-top{
-      min-height:78px;
-      padding:14px 16px;
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
       direction:ltr;
     }
-    .comment-avatar{
-      width:34px;height:34px;border-radius:50%;overflow:hidden;background:#fff;flex:0 0 auto;
-      border:1px solid #ececee;
-    }
-    .comment-avatar img{width:100%;height:100%;object-fit:cover}
-    .comment-input{
-      flex:1;
-      border:none;
-      outline:none;
-      font-size:14px;
-      background:transparent;
-      color:#303030;
-    }
-    .comment-bottom{
-      min-height:52px;
-      border-top:1px solid #ececee;
-      display:flex;
+    .tag-chip{
+      min-height:30px;
+      padding:0 12px;
+      border-radius:999px;
+      background:#f0f1f2;
+      color:#444;
+      display:inline-flex;
       align-items:center;
-      justify-content:space-between;
-      padding:0 14px;
-      direction:ltr;
-    }
-    .comment-tools{display:flex;gap:14px;color:#7a7d81;font-size:20px}
-    .timeline-note{
-      font-size:14px;
-      color:#6d7175;
-      margin-bottom:14px;
-      text-align:right;
-    }
-
-    .timeline-list{
-      position:relative;
-      display:grid;
-      gap:20px;
-      padding-left:36px;
-      direction:ltr;
-    }
-    .timeline-list::before{
-      content:"";
-      position:absolute;
-      left:12px;
-      top:0;
-      bottom:0;
-      width:2px;
-      background:#dedee1;
-    }
-    .timeline-group-label{
-      font-size:14px;
+      justify-content:center;
+      font-size:13px;
       font-weight:700;
-      color:#6d7175;
-      margin-bottom:2px;
-    }
-    .timeline-item{
-      position:relative;
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:18px;
-      align-items:start;
-    }
-    .timeline-item::before{
-      content:"";
-      position:absolute;
-      left:-24px;
-      top:6px;
-      width:10px;height:10px;border-radius:50%;
-      background:#6d7175;
-      box-shadow:0 0 0 4px var(--bg);
-    }
-    .timeline-item-text{
-      font-size:14px;
-      line-height:1.6;
-      color:#303030;
-    }
-    .timeline-item-time{
-      font-size:14px;
-      color:#6d7175;
-      white-space:nowrap;
     }
 
     .mobile-shell{display:block}
@@ -579,8 +487,8 @@
       padding:14px;
     }
 
-    .mobile-order-head{margin-bottom:14px}
-    .mobile-order-nav{
+    .mobile-product-head{margin-bottom:14px}
+    .mobile-product-nav{
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -592,12 +500,12 @@
       width:48px;height:48px;border-radius:50%;border:none;background:#f1f1f2;color:#444;cursor:pointer;
       display:inline-flex;align-items:center;justify-content:center;font-size:22px;
     }
-    .mobile-order-number{
+    .mobile-product-number{
       font-size:18px;
       font-weight:900;
       color:#232324;
     }
-    .mobile-order-sub{
+    .mobile-product-sub{
       font-size:14px;
       color:#5a5d61;
       line-height:1.45;
@@ -621,121 +529,49 @@
       margin-bottom:12px;
       direction:ltr;
     }
-
-    .mobile-summary-grid{
-      display:grid;
-      grid-template-columns:1fr auto;
-      gap:12px;
-      direction:ltr;
-      font-size:14px;
-      line-height:1.55;
-    }
-    .mobile-summary-left,
-    .mobile-summary-right{
-      display:grid;
-      gap:10px;
-    }
-    .mobile-summary-right{
-      text-align:right;
-      font-weight:700;
-      white-space:nowrap;
-    }
-
-    .mobile-product-card{
-      display:grid;
-      grid-template-columns:64px minmax(0,1fr) auto;
-      gap:12px;
-      align-items:center;
-      direction:ltr;
-    }
-    .mobile-product-thumb{
-      width:64px;height:64px;border-radius:12px;overflow:hidden;background:#f3f3f4;border:1px solid #ececee;
-      display:flex;align-items:center;justify-content:center;font-size:24px;
-    }
-    .mobile-product-thumb img{width:100%;height:100%;object-fit:cover}
-    .mobile-product-title{
-      font-size:15px;
-      font-weight:800;
-      line-height:1.45;
-      text-align:right;
-      direction:rtl;
-    }
-    .mobile-product-price{
-      font-size:14px;
-      font-weight:700;
-      text-align:right;
-      white-space:nowrap;
-    }
-
-    .mobile-customer-actions{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin:12px 0;
-      direction:ltr;
-    }
-
-    .contact-btn{
-      min-height:46px;
-      border-radius:14px;
-      border:1px solid #d7d7da;
-      background:#fff;
-      font-size:14px;
-      font-weight:700;
-      color:#303030;
-      cursor:pointer;
+    .mobile-main-image{
+      width:100%;
+      aspect-ratio:1/1;
+      border-radius:16px;
+      overflow:hidden;
+      background:#f3f3f4;
+      border:1px solid #ececee;
       display:flex;
       align-items:center;
       justify-content:center;
-      gap:8px;
+      font-size:36px;
     }
-
-    .mobile-timeline-list{
-      position:relative;
-      display:grid;
-      gap:18px;
-      padding-left:26px;
+    .mobile-main-image img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .mobile-thumbs{
+      display:flex;
+      gap:10px;
+      overflow:auto;
+      margin-top:12px;
       direction:ltr;
     }
-    .mobile-timeline-list::before{
-      content:"";
-      position:absolute;
-      left:9px;
-      top:0;
-      bottom:0;
-      width:2px;
-      background:#dedee1;
+    .mobile-thumb{
+      flex:0 0 72px;
+      width:72px;
+      height:72px;
+      border-radius:12px;
+      overflow:hidden;
+      border:1px solid #ececee;
+      background:#fff;
+      cursor:pointer;
     }
-    .mobile-timeline-item{
-      position:relative;
-      display:grid;
-      gap:6px;
+    .mobile-thumb.active{
+      outline:2px solid var(--blue);
     }
-    .mobile-timeline-item::before{
-      content:"";
-      position:absolute;
-      left:-21px;
-      top:7px;
-      width:10px;height:10px;border-radius:50%;
-      background:#6d7175;
-      box-shadow:0 0 0 4px #fff;
-    }
-    .mobile-timeline-time{
-      font-size:13px;
-      color:#6d7175;
-      font-weight:700;
-    }
-    .mobile-timeline-text{
-      font-size:14px;
-      line-height:1.55;
-      color:#303030;
-    }
-
-    .mobile-actions-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-bottom:14px;
+    .mobile-thumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
     }
 
     .loading{
@@ -758,10 +594,8 @@
       .mobile-brand-text h1{font-size:18px}
       .mobile-bell{font-size:28px}
       .mobile-avatar-main,.mobile-store{width:54px;height:54px}
-      .mobile-product-card{grid-template-columns:56px minmax(0,1fr) auto}
-      .mobile-product-thumb{width:56px;height:56px}
-      .mobile-customer-actions{grid-template-columns:1fr}
-      .mobile-actions-grid{grid-template-columns:1fr}
+      .gallery-wrap{grid-template-columns:1fr}
+      .thumbs{grid-template-columns:repeat(4,1fr)}
     }
   </style>
 </head>
@@ -799,12 +633,11 @@
               <div class="side-link-left"><span>⌂</span><span>Home</span></div>
             </a>
 
-            <a class="side-link active" href="/admin-enhanced.html#orders">
+            <a class="side-link" href="/admin-enhanced.html#orders">
               <div class="side-link-left"><span>🧾</span><span>Orders</span></div>
-              <small id="desktopOrdersCountBadge">0</small>
             </a>
 
-            <a class="side-link" href="/products-admin">
+            <a class="side-link active" href="/products-admin">
               <div class="side-link-left"><span>🏷️</span><span>Products</span></div>
             </a>
 
@@ -820,59 +653,40 @@
         <main class="desktop-main">
           <div class="desktop-content-wrap">
             <div id="desktopAlert" class="alert"></div>
-            <div id="desktopLoading" class="loading">Loading order...</div>
+            <div id="desktopLoading" class="loading">Loading product...</div>
 
-            <section id="desktopOrderContent" class="hidden">
-              <div class="desktop-order-header">
-                <div class="desktop-order-title-wrap">
+            <section id="desktopProductContent" class="hidden">
+              <div class="desktop-product-header">
+                <div class="desktop-product-title-wrap">
                   <div class="desktop-breadcrumb">
-                    <span>🧾</span>
+                    <span>🏷️</span>
                     <span>›</span>
-                    <div class="desktop-order-title">
-                      <span id="desktopOrderNumber">SK0000</span>
-                      <span id="desktopPaymentChipTop" class="status-chip payment"><span class="dot"></span>Payment pending</span>
-                      <span id="desktopFulfillmentChipTop" class="status-chip fulfillment"><span class="dot"></span>Unfulfilled</span>
+                    <div class="desktop-product-title">
+                      <span id="desktopProductName">Product</span>
+                      <span id="desktopStatusChip" class="status-chip active"><span class="dot"></span>Active</span>
                     </div>
                   </div>
-                  <div class="desktop-order-sub" id="desktopOrderSubLine">—</div>
+                  <div class="desktop-product-sub" id="desktopProductSubLine">—</div>
                 </div>
 
                 <div class="desktop-header-actions">
-                  <button class="ghost-btn" onclick="restockOrder()">Restock</button>
-                  <button class="ghost-btn" onclick="returnOrder()">Return</button>
-                  <button class="ghost-btn" onclick="editCurrentOrder()">Edit</button>
-                  <button class="ghost-btn" onclick="window.print()">Print ▾</button>
-                  <button class="ghost-btn" onclick="showMoreActions()">More actions ▾</button>
+                  <button class="ghost-btn" onclick="goBackToProducts()">Back</button>
+                  <button class="dark-btn" onclick="editCurrentProduct()">Edit product</button>
                 </div>
               </div>
 
-              <div class="desktop-order-grid">
+              <div class="desktop-product-grid">
                 <div class="stack">
                   <div class="card-panel">
                     <div class="card-pad">
                       <div class="card-head">
-                        <div id="desktopFulfillmentChipCard" class="status-chip fulfillment"><span class="dot"></span>Unfulfilled</div>
-                        <div id="desktopFulfillmentRef" class="card-title">—</div>
+                        <div class="card-title">Media</div>
+                        <div class="muted" id="desktopMediaCount">0 images</div>
                       </div>
 
-                      <div class="fulfilled-date-row">
-                        <div>🗓 <span id="desktopFulfilledDate">—</span></div>
-                        <div>⋯</div>
-                      </div>
-
-                      <div class="product-row">
-                        <div class="product-thumb" id="desktopProductThumb">📦</div>
-                        <div class="product-title" id="desktopProductTitle">—</div>
-                        <div style="display:flex;align-items:center;gap:8px;justify-self:end;">
-                          <div class="product-price" id="desktopProductUnitPrice">KWD 0.000</div>
-                          <div>×</div>
-                          <div class="qty-chip" id="desktopProductQty">1</div>
-                        </div>
-                        <div class="product-price" id="desktopProductLineTotal">KWD 0.000</div>
-                      </div>
-
-                      <div style="display:flex;justify-content:flex-end;margin-top:14px;">
-                        <button class="dark-btn" onclick="fulfillOrder()">Add tracking</button>
+                      <div class="gallery-wrap">
+                        <div class="thumbs" id="desktopThumbs"></div>
+                        <div class="main-image" id="desktopMainImage">🧸</div>
                       </div>
                     </div>
                   </div>
@@ -880,135 +694,72 @@
                   <div class="card-panel">
                     <div class="card-pad">
                       <div class="card-head">
-                        <div id="desktopPaymentChipCard" class="status-chip payment"><span class="dot"></span>Payment pending</div>
-                        <div>⋯</div>
+                        <div class="card-title">Description</div>
                       </div>
-
-                      <div class="summary-grid">
-                        <div class="label-col">
-                          <div><div class="summary-row-title">Subtotal</div></div>
-                          <div>
-                            <div class="summary-row-title">Shipping</div>
-                            <div class="summary-row-sub" id="desktopShippingText">—</div>
-                          </div>
-                          <div class="summary-strong">Total</div>
-                        </div>
-
-                        <div class="value-col">
-                          <div id="desktopSubtotal">KWD 0.000</div>
-                          <div id="desktopShippingCost">KWD 0.000</div>
-                          <div class="summary-strong" id="desktopTotal">KWD 0.000</div>
-                        </div>
-                      </div>
-
-                      <div class="line" style="margin:16px -18px 14px;"></div>
-
-                      <div class="summary-grid">
-                        <div class="label-col">
-                          <div class="summary-row-title">Paid</div>
-                          <div class="summary-row-title">Balance</div>
-                        </div>
-                        <div class="value-col">
-                          <div id="desktopPaid">KWD 0.000</div>
-                          <div id="desktopBalance">KWD 0.000</div>
-                        </div>
-                      </div>
-
-                      <div class="summary-actions">
-                        <button class="ghost-btn" onclick="sendInvoice()">Send invoice</button>
-                        <button class="dark-btn" onclick="markAsPaid()">Mark as paid</button>
-                      </div>
+                      <div class="product-description" id="desktopDescription">—</div>
                     </div>
-                  </div>
-
-                  <div class="card-panel timeline-wrap">
-                    <div class="timeline-head">
-                      <div><div class="timeline-title">Timeline</div></div>
-                    </div>
-
-                    <div class="comment-box">
-                      <div class="comment-top">
-                        <div class="comment-avatar">
-                          <img src="https://smartkidskw.com/logo-sk-smart-kids.png" alt="">
-                        </div>
-                        <input class="comment-input" id="commentInput" type="text" placeholder="Leave a comment..." />
-                      </div>
-                      <div class="comment-bottom">
-                        <div class="comment-tools"><span>☺</span><span>@</span><span>#</span><span>🔗</span></div>
-                        <button class="ghost-btn" style="min-height:34px;" onclick="saveNotesFromComment()">Post</button>
-                      </div>
-                    </div>
-
-                    <div class="timeline-note">Only you and other staff can see comments</div>
-                    <div class="timeline-list" id="desktopTimelineList"></div>
                   </div>
                 </div>
 
                 <div class="stack">
-                  <div class="card-panel sidebar-card">
+                  <div class="card-panel">
                     <div class="card-pad">
                       <div class="card-head">
-                        <div class="card-title">Notes</div>
-                        <div style="cursor:pointer" onclick="editNotes()">✎</div>
+                        <div class="card-title">Pricing</div>
                       </div>
-                      <div id="desktopNotesText" class="sidebar-block muted">No notes from customer</div>
+                      <div class="price-block">
+                        <div class="price-main" id="desktopPrice">KWD 0.000</div>
+                        <div class="price-old hidden" id="desktopSalePrice">KWD 0.000</div>
+                      </div>
                     </div>
                   </div>
 
-                  <div class="card-panel sidebar-card">
+                  <div class="card-panel">
                     <div class="card-pad">
                       <div class="card-head">
-                        <div class="card-title">Customer</div>
-                        <div style="cursor:pointer" onclick="editCustomer()">✎</div>
+                        <div class="card-title">Inventory</div>
                       </div>
-
-                      <div class="sidebar-block">
-                        <div>
-                          <div class="sidebar-link" id="desktopCustomerName">—</div>
-                          <div class="sidebar-link" id="desktopCustomerOrdersHint">1 order</div>
+                      <div class="meta-grid">
+                        <div class="label-col">
+                          <div>Stock</div>
+                          <div>SKU</div>
+                          <div>Slug</div>
                         </div>
-
-                        <div>
-                          <div class="sidebar-section-title">Contact information</div>
-                          <div class="sidebar-link" id="desktopCustomerEmail">—</div>
-                          <div id="desktopCustomerPhone" class="muted">—</div>
-                        </div>
-
-                        <div>
-                          <div class="sidebar-section-title">Shipping address</div>
-                          <div id="desktopAddressBlock">—</div>
-                          <div class="sidebar-link" style="margin-top:6px;cursor:pointer" onclick="editShipping()">View map</div>
-                        </div>
-
-                        <div>
-                          <div class="sidebar-section-title">Billing address</div>
-                          <div class="muted">Same as shipping address</div>
+                        <div class="value-col">
+                          <div id="desktopStock">0</div>
+                          <div id="desktopSku">—</div>
+                          <div id="desktopSlug">—</div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div class="card-panel sidebar-card">
+                  <div class="card-panel">
                     <div class="card-pad">
                       <div class="card-head">
-                        <div class="card-title">Conversion summary</div>
+                        <div class="card-title">Organization</div>
                       </div>
-                      <div class="sidebar-block">
-                        <div id="desktopConversion1">This is their 1st order</div>
-                        <div>1st session from Online Store</div>
-                        <div id="desktopConversion3">1 session over 1 day</div>
-                        <div class="sidebar-link">View conversion details</div>
+                      <div class="meta-grid">
+                        <div class="label-col">
+                          <div>Type</div>
+                          <div>Vendor</div>
+                          <div>Category</div>
+                        </div>
+                        <div class="value-col">
+                          <div id="desktopType">—</div>
+                          <div id="desktopVendor">—</div>
+                          <div id="desktopCategory">—</div>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div class="card-panel sidebar-card">
+                  <div class="card-panel">
                     <div class="card-pad">
                       <div class="card-head">
-                        <div class="card-title">Order risk</div>
-                        <div>⌕</div>
+                        <div class="card-title">Tags</div>
                       </div>
-                      <div class="sidebar-block muted">Analysis not available</div>
+                      <div class="tag-list" id="desktopTags"></div>
                     </div>
                   </div>
                 </div>
@@ -1042,117 +793,79 @@
       <main class="mobile-main">
         <div id="mobileAlert" class="alert"></div>
         <div class="mobile-surface">
-          <div id="mobileLoading" class="loading">Loading order...</div>
+          <div id="mobileLoading" class="loading">Loading product...</div>
 
-          <section id="mobileOrderContent" class="hidden">
-            <div class="mobile-order-head">
-              <div class="mobile-order-nav">
-                <button class="round-icon" onclick="goBackToOrders()">‹</button>
+          <section id="mobileProductContent" class="hidden">
+            <div class="mobile-product-head">
+              <div class="mobile-product-nav">
+                <button class="round-icon" onclick="goBackToProducts()">‹</button>
                 <div style="display:flex;gap:8px;">
-                  <button class="round-icon" onclick="window.print()">🖨</button>
-                  <button class="round-icon" onclick="showMoreActions()">⋯</button>
+                  <button class="round-icon" onclick="editCurrentProduct()">✎</button>
                 </div>
               </div>
 
-              <div class="mobile-order-number" id="mobileOrderNumber">SK0000</div>
+              <div class="mobile-product-number" id="mobileProductName">Product</div>
               <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;direction:ltr;">
-                <span id="mobilePaymentChipTop" class="status-chip payment"><span class="dot"></span>Payment pending</span>
-                <span id="mobileFulfillmentChipTop" class="status-chip fulfillment"><span class="dot"></span>Unfulfilled</span>
+                <span id="mobileStatusChip" class="status-chip active"><span class="dot"></span>Active</span>
               </div>
-              <div class="mobile-order-sub" id="mobileOrderSubLine">—</div>
-            </div>
-
-            <div class="mobile-actions-grid">
-              <button class="ghost-btn" onclick="editCurrentOrder()">Edit</button>
-              <button class="ghost-btn" onclick="editCustomer()">Customer</button>
-              <button class="ghost-btn" onclick="editShipping()">Shipping</button>
-              <button class="ghost-btn" onclick="editNotes()">Notes</button>
-              <button class="ghost-btn" onclick="restockOrder()">Restock</button>
-              <button class="ghost-btn" onclick="returnOrder()">Return</button>
+              <div class="mobile-product-sub" id="mobileProductSubLine">—</div>
             </div>
 
             <div class="mobile-section">
               <div class="mobile-section-head">
-                <div id="mobileFulfillmentChipCard" class="status-chip fulfillment"><span class="dot"></span>Unfulfilled</div>
-                <div>⋯</div>
+                <div class="card-title">Media</div>
+                <div class="muted" id="mobileMediaCount">0 images</div>
               </div>
+              <div class="mobile-main-image" id="mobileMainImage">🧸</div>
+              <div class="mobile-thumbs" id="mobileThumbs"></div>
+            </div>
 
-              <div class="mobile-product-card">
-                <div class="mobile-product-thumb" id="mobileProductThumb">📦</div>
-                <div>
-                  <div class="mobile-product-title" id="mobileProductTitle">—</div>
-                  <div class="mobile-product-price" id="mobileProductUnitPrice">KWD 0.000 × <span id="mobileProductQty">1</span></div>
-                </div>
-                <div class="mobile-product-price" id="mobileProductLineTotal">KWD 0.000</div>
+            <div class="mobile-section">
+              <div class="mobile-section-head">
+                <div class="card-title">Pricing</div>
               </div>
-
-              <div style="display:flex;justify-content:flex-end;margin-top:14px;">
-                <button class="dark-btn" onclick="fulfillOrder()">Add tracking</button>
+              <div class="price-block">
+                <div class="price-main" id="mobilePrice">KWD 0.000</div>
+                <div class="price-old hidden" id="mobileSalePrice">KWD 0.000</div>
               </div>
             </div>
 
             <div class="mobile-section">
               <div class="mobile-section-head">
-                <div id="mobilePaymentChipCard" class="status-chip payment"><span class="dot"></span>Payment pending</div>
-                <div>⋯</div>
+                <div class="card-title">Description</div>
               </div>
-
-              <div class="mobile-summary-grid">
-                <div class="mobile-summary-left">
-                  <div>Subtotal</div>
-                  <div>Shipping</div>
-                  <div style="font-weight:800;">Total</div>
-                  <div>Paid</div>
-                  <div>Balance</div>
-                </div>
-
-                <div class="mobile-summary-right">
-                  <div id="mobileSubtotal">KWD 0.000</div>
-                  <div id="mobileShippingCost">KWD 0.000</div>
-                  <div id="mobileTotal" style="font-weight:800;">KWD 0.000</div>
-                  <div id="mobilePaid">KWD 0.000</div>
-                  <div id="mobileBalance">KWD 0.000</div>
-                </div>
-              </div>
-
-              <div style="display:grid;gap:10px;margin-top:14px;">
-                <button class="ghost-btn" onclick="sendInvoice()">Send invoice</button>
-                <button class="dark-btn" onclick="markAsPaid()">Mark as paid</button>
-              </div>
+              <div class="product-description" id="mobileDescription">—</div>
             </div>
 
             <div class="mobile-section">
               <div class="mobile-section-head">
-                <div class="card-title">Customer</div>
-                <div style="cursor:pointer" onclick="editCustomer()">✎</div>
+                <div class="card-title">Details</div>
               </div>
-
-              <div style="display:grid;gap:10px;font-size:14px;line-height:1.55;">
-                <div class="sidebar-link" id="mobileCustomerName">—</div>
-                <div class="sidebar-link" id="mobileCustomerOrdersHint">1 order</div>
-
-                <div class="mobile-customer-actions">
-                  <a id="mobileEmailBtn" class="contact-btn" href="#">✉️ Email</a>
-                  <a id="mobilePhoneBtn" class="contact-btn" href="#">☎️ Call</a>
+              <div class="meta-grid">
+                <div class="label-col">
+                  <div>Stock</div>
+                  <div>SKU</div>
+                  <div>Slug</div>
+                  <div>Type</div>
+                  <div>Vendor</div>
+                  <div>Category</div>
                 </div>
-
-                <div>
-                  <div class="sidebar-section-title">Shipping address</div>
-                  <div id="mobileAddressBlock">—</div>
-                </div>
-
-                <div>
-                  <div class="sidebar-section-title">Notes</div>
-                  <div id="mobileNotesText" class="muted">No notes from customer</div>
+                <div class="value-col">
+                  <div id="mobileStock">0</div>
+                  <div id="mobileSku">—</div>
+                  <div id="mobileSlug">—</div>
+                  <div id="mobileType">—</div>
+                  <div id="mobileVendor">—</div>
+                  <div id="mobileCategory">—</div>
                 </div>
               </div>
             </div>
 
             <div class="mobile-section">
               <div class="mobile-section-head">
-                <div class="card-title">Timeline</div>
+                <div class="card-title">Tags</div>
               </div>
-              <div class="mobile-timeline-list" id="mobileTimelineList"></div>
+              <div class="tag-list" id="mobileTags"></div>
             </div>
           </section>
         </div>
@@ -1161,249 +874,195 @@
   </div>
 
   <script>
-    const API_BASE = '/api/orders';
-    const HELPERS_FALLBACK = {
-      formatCurrency(value) {
-        const num = Number(value || 0);
-        return `KWD ${num.toFixed(3)}`;
-      }
-    };
-    const H = (typeof HELPERS !== 'undefined' && HELPERS) ? HELPERS : HELPERS_FALLBACK;
-    let currentOrder = null;
+    const API_BASE = '/api/products';
+    let currentProduct = null;
+    let currentImages = [];
+    let currentImageIndex = 0;
 
     document.addEventListener('DOMContentLoaded', () => {
-      loadOrder();
+      loadProduct();
     });
 
-    async function loadOrder() {
+    async function loadProduct() {
       try {
         setLoading(true);
 
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
-        const orderNumber = params.get('order');
+        const slug = params.get('slug');
 
-        if (!id && !orderNumber) throw new Error('Order id is missing');
+        if (!id && !slug) {
+          throw new Error('Product id or slug is missing');
+        }
 
         let response;
         if (id) {
           response = await fetch(`${API_BASE}/${encodeURIComponent(id)}`);
         } else {
-          response = await fetch(`${API_BASE}/track/${encodeURIComponent(orderNumber)}`);
+          response = await fetch(`${API_BASE}/slug/${encodeURIComponent(slug)}`);
         }
 
         const data = await response.json();
-        if (!response.ok || !data.success) throw new Error(data.error || 'Failed to load order');
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Failed to load product');
+        }
 
-        currentOrder = normalizeOrder(data.data);
-        renderOrder(currentOrder);
+        currentProduct = normalizeProduct(data.data);
+        renderProduct(currentProduct);
       } catch (error) {
-        showAlert(error.message || 'Failed to load order', 'error');
+        showAlert(error.message || 'Failed to load product', 'error');
       } finally {
         setLoading(false);
       }
     }
 
-    function normalizeOrder(order) {
-      const items = Array.isArray(order.items) ? order.items.map((item, index) => {
-        const unitPrice = Number(item.product_price ?? item.price ?? 0);
-        const quantity = Number(item.quantity ?? 1);
-        const subtotal = Number(item.subtotal ?? (unitPrice * quantity));
-        return {
-          ...item,
-          product_name: item.product_name || item.name || `Product ${index + 1}`,
-          unit_price: unitPrice,
-          quantity,
-          subtotal,
-          image: item.product_image || item.image || item.image_url || ''
-        };
-      }) : [];
+    function normalizeProduct(product) {
+      const images = [];
 
-      const firstItem = items[0] || {
-        product_name: 'Order item',
-        unit_price: Number(order.total || 0),
-        quantity: 1,
-        subtotal: Number(order.total || 0),
-        image: ''
-      };
+      if (Array.isArray(product.images) && product.images.length) {
+        product.images.forEach(img => {
+          if (img?.image_url) images.push(img.image_url);
+        });
+      }
 
-      const total = Number(order.total || 0);
-      const shipping = Number(order.shipping_cost || 0);
-      const subtotal = Number(order.subtotal || Math.max(total - shipping, 0));
-      const paid = order.status === 'completed' ? total : 0;
-      const balance = Math.max(total - paid, 0);
+      if (!images.length && product.image_url) {
+        images.push(product.image_url);
+      }
+
+      const tags = Array.isArray(product.tags_list)
+        ? product.tags_list
+        : String(product.tags || '')
+            .split(',')
+            .map(v => v.trim())
+            .filter(Boolean);
 
       return {
-        ...order,
-        items,
-        firstItem,
-        total,
-        shipping_cost: shipping,
-        subtotal,
-        paid,
-        balance
+        ...product,
+        images,
+        tags,
+        price: Number(product.price || 0),
+        sale_price: Number(product.sale_price || 0),
+        stock: Number(product.stock || 0)
       };
     }
 
-    function renderOrder(order) {
-      const orderNumber = order.order_number || `#${order.id || ''}`;
-      const paymentLabel = getPaymentLabel(order);
-      const fulfillmentLabel = getFulfillmentLabel(order);
-      const orderSub = `${formatOrderDateLine(order.created_at)} • Online Store`;
+    function renderProduct(product) {
+      const statusText = getStatusLabel(product.status);
 
-      setText('desktopOrdersCountBadge', '1');
+      setText('desktopProductName', product.product_name || 'Product');
+      setText('desktopProductSubLine', product.slug || '-');
+      setStatusChip('desktopStatusChip', statusText, product.status || 'active');
 
-      setText('desktopOrderNumber', orderNumber);
-      setText('desktopOrderSubLine', orderSub);
-      setStatusChip('desktopPaymentChipTop', paymentLabel, 'payment');
-      setStatusChip('desktopPaymentChipCard', paymentLabel, 'payment');
-      setStatusChip('desktopFulfillmentChipTop', fulfillmentLabel, 'fulfillment');
-      setStatusChip('desktopFulfillmentChipCard', fulfillmentLabel, 'fulfillment');
-      setText('desktopFulfillmentRef', orderNumber);
-      setText('desktopFulfilledDate', formatDetailDate(order.updated_at || order.created_at));
+      setText('desktopPrice', formatCurrency(product.price));
+      if (product.sale_price > 0) {
+        setText('desktopSalePrice', formatCurrency(product.sale_price));
+        document.getElementById('desktopSalePrice').classList.remove('hidden');
+      }
 
-      renderProductThumb('desktopProductThumb', order.firstItem.image);
-      setText('desktopProductTitle', order.firstItem.product_name);
-      setText('desktopProductUnitPrice', H.formatCurrency(order.firstItem.unit_price));
-      setText('desktopProductQty', String(order.firstItem.quantity));
-      setText('desktopProductLineTotal', H.formatCurrency(order.firstItem.subtotal));
+      setText('desktopDescription', product.description || '—');
+      setText('desktopStock', String(product.stock || 0));
+      setText('desktopSku', product.sku || '—');
+      setText('desktopSlug', product.slug || '—');
+      setText('desktopType', product.product_type || '—');
+      setText('desktopVendor', product.vendor || '—');
+      setText('desktopCategory', product.category || '—');
+      setText('desktopMediaCount', `${product.images.length} images`);
 
-      setText('desktopSubtotal', H.formatCurrency(order.subtotal));
-      setText('desktopShippingCost', H.formatCurrency(order.shipping_cost));
-      setText('desktopShippingText', getShippingText(order));
-      setText('desktopTotal', H.formatCurrency(order.total));
-      setText('desktopPaid', H.formatCurrency(order.paid));
-      setText('desktopBalance', H.formatCurrency(order.balance));
+      setText('mobileProductName', product.product_name || 'Product');
+      setText('mobileProductSubLine', product.slug || '-');
+      setStatusChip('mobileStatusChip', statusText, product.status || 'active');
 
-      setText('desktopNotesText', order.notes || 'No notes from customer');
-      setText('desktopCustomerName', order.customer_name || '-');
-      setText('desktopCustomerOrdersHint', '1 order');
-      setText('desktopCustomerEmail', order.customer_email || '-');
-      setText('desktopCustomerPhone', order.customer_phone || '-');
-      setHTML('desktopAddressBlock', nl2br(buildAddress(order)));
-      setText('desktopConversion1', 'This is their 1st order');
-      setText('desktopConversion3', '1 session over 1 day');
+      setText('mobilePrice', formatCurrency(product.price));
+      if (product.sale_price > 0) {
+        setText('mobileSalePrice', formatCurrency(product.sale_price));
+        document.getElementById('mobileSalePrice').classList.remove('hidden');
+      }
 
-      setText('mobileOrderNumber', orderNumber);
-      setText('mobileOrderSubLine', orderSub);
-      setStatusChip('mobilePaymentChipTop', paymentLabel, 'payment');
-      setStatusChip('mobilePaymentChipCard', paymentLabel, 'payment');
-      setStatusChip('mobileFulfillmentChipTop', fulfillmentLabel, 'fulfillment');
-      setStatusChip('mobileFulfillmentChipCard', fulfillmentLabel, 'fulfillment');
+      setText('mobileDescription', product.description || '—');
+      setText('mobileStock', String(product.stock || 0));
+      setText('mobileSku', product.sku || '—');
+      setText('mobileSlug', product.slug || '—');
+      setText('mobileType', product.product_type || '—');
+      setText('mobileVendor', product.vendor || '—');
+      setText('mobileCategory', product.category || '—');
+      setText('mobileMediaCount', `${product.images.length} images`);
 
-      renderProductThumb('mobileProductThumb', order.firstItem.image);
-      setText('mobileProductTitle', order.firstItem.product_name);
-      setText('mobileProductUnitPrice', `${H.formatCurrency(order.firstItem.unit_price)} × ${order.firstItem.quantity}`);
-      setText('mobileProductQty', String(order.firstItem.quantity));
-      setText('mobileProductLineTotal', H.formatCurrency(order.firstItem.subtotal));
+      renderTags('desktopTags', product.tags);
+      renderTags('mobileTags', product.tags);
 
-      setText('mobileSubtotal', H.formatCurrency(order.subtotal));
-      setText('mobileShippingCost', H.formatCurrency(order.shipping_cost));
-      setText('mobileTotal', H.formatCurrency(order.total));
-      setText('mobilePaid', H.formatCurrency(order.paid));
-      setText('mobileBalance', H.formatCurrency(order.balance));
+      currentImages = product.images;
+      currentImageIndex = 0;
 
-      setText('mobileCustomerName', order.customer_name || '-');
-      setText('mobileCustomerOrdersHint', '1 order');
-      setHTML('mobileAddressBlock', nl2br(buildAddress(order)));
-      setText('mobileNotesText', order.notes || 'No notes from customer');
+      renderGallery();
 
-      const emailBtn = document.getElementById('mobileEmailBtn');
-      const phoneBtn = document.getElementById('mobilePhoneBtn');
-      if (emailBtn) emailBtn.href = order.customer_email ? `mailto:${order.customer_email}` : '#';
-      if (phoneBtn) phoneBtn.href = order.customer_phone ? `tel:${order.customer_phone}` : '#';
-
-      renderTimeline(order);
-
-      document.getElementById('desktopOrderContent').classList.remove('hidden');
-      document.getElementById('mobileOrderContent').classList.remove('hidden');
-      document.title = `${orderNumber} - Order Details`;
+      document.getElementById('desktopProductContent').classList.remove('hidden');
+      document.getElementById('mobileProductContent').classList.remove('hidden');
+      document.title = `${product.product_name || 'Product'} - Product Details`;
     }
 
-    function renderTimeline(order) {
-      const events = buildTimeline(order);
-      const desktopEl = document.getElementById('desktopTimelineList');
-      const mobileEl = document.getElementById('mobileTimelineList');
-      desktopEl.innerHTML = '';
-      mobileEl.innerHTML = '';
+    function renderGallery() {
+      renderMainImage('desktopMainImage', currentImages[currentImageIndex]);
+      renderMainImage('mobileMainImage', currentImages[currentImageIndex]);
 
-      let lastGroup = '';
-      events.forEach(event => {
-        if (event.group !== lastGroup) {
-          desktopEl.insertAdjacentHTML('beforeend', `<div class="timeline-group-label">${escapeHtml(event.group)}</div>`);
-          lastGroup = event.group;
-        }
+      const desktopThumbs = document.getElementById('desktopThumbs');
+      const mobileThumbs = document.getElementById('mobileThumbs');
 
-        desktopEl.insertAdjacentHTML('beforeend', `
-          <div class="timeline-item">
-            <div class="timeline-item-text">${escapeHtml(event.text)}</div>
-            <div class="timeline-item-time">${escapeHtml(event.time)}</div>
-          </div>
+      desktopThumbs.innerHTML = '';
+      mobileThumbs.innerHTML = '';
+
+      if (!currentImages.length) return;
+
+      currentImages.forEach((image, index) => {
+        desktopThumbs.insertAdjacentHTML('beforeend', `
+          <button class="thumb-btn ${index === currentImageIndex ? 'active' : ''}" onclick="selectImage(${index})">
+            <img src="${escapeHtml(image)}" alt="">
+          </button>
         `);
 
-        mobileEl.insertAdjacentHTML('beforeend', `
-          <div class="mobile-timeline-item">
-            <div class="mobile-timeline-time">${escapeHtml(event.group)} • ${escapeHtml(event.time)}</div>
-            <div class="mobile-timeline-text">${escapeHtml(event.text)}</div>
-          </div>
+        mobileThumbs.insertAdjacentHTML('beforeend', `
+          <button class="mobile-thumb ${index === currentImageIndex ? 'active' : ''}" onclick="selectImage(${index})">
+            <img src="${escapeHtml(image)}" alt="">
+          </button>
         `);
       });
     }
 
-    function buildTimeline(order) {
-      const created = new Date(order.created_at || Date.now());
-      const updated = new Date(order.updated_at || order.created_at || Date.now());
-      const events = [];
+    function selectImage(index) {
+      currentImageIndex = index;
+      renderGallery();
+    }
 
-      events.push({
-        group: dayLabel(created),
-        time: timeLabel(created),
-        text: `Order ${order.order_number || ''} was created by ${order.customer_name || 'customer'}.`
-      });
+    function renderMainImage(id, imageUrl) {
+      const el = document.getElementById(id);
+      if (!el) return;
 
-      events.push({
-        group: dayLabel(created),
-        time: timeLabel(created),
-        text: `${getPaymentLabel(order)} for ${H.formatCurrency(order.total)}.`
-      });
+      if (imageUrl) {
+        el.innerHTML = `<img src="${escapeHtml(imageUrl)}" alt="">`;
+      } else {
+        el.textContent = '🧸';
+      }
+    }
 
-      if (order.customer_email) {
-        events.push({
-          group: dayLabel(created),
-          time: timeLabel(created),
-          text: `Confirmation email was sent to ${order.customer_email}.`
-        });
+    function renderTags(id, tags) {
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      if (!tags || !tags.length) {
+        el.innerHTML = `<span class="tag-chip">No tags</span>`;
+        return;
       }
 
-      if (updated.getTime() !== created.getTime()) {
-        events.push({
-          group: dayLabel(updated),
-          time: timeLabel(updated),
-          text: `Order was updated.`
-        });
-      }
+      el.innerHTML = tags.map(tag => `<span class="tag-chip">${escapeHtml(tag)}</span>`).join('');
+    }
 
-      if (order.status === 'completed') {
-        events.push({
-          group: dayLabel(updated),
-          time: timeLabel(updated),
-          text: `Order was marked as completed.`
-        });
-      } else if (order.status === 'shipped') {
-        events.push({
-          group: dayLabel(updated),
-          time: timeLabel(updated),
-          text: `Order was marked as fulfilled.`
-        });
-      } else if (order.status === 'processing') {
-        events.push({
-          group: dayLabel(updated),
-          time: timeLabel(updated),
-          text: `Order is being processed.`
-        });
-      }
+    function getStatusLabel(status) {
+      if (status === 'draft') return 'Draft';
+      if (status === 'archived') return 'Archived';
+      return 'Active';
+    }
 
-      return events;
+    function formatCurrency(value) {
+      return `KWD ${Number(value || 0).toFixed(3)}`;
     }
 
     function setLoading(show) {
@@ -1411,371 +1070,28 @@
       document.getElementById('mobileLoading').classList.toggle('hidden', !show);
     }
 
-    function getPaymentLabel(order) {
-      return Number(order.balance || 0) > 0 ? 'Payment pending' : 'Paid';
-    }
-
-    function getFulfillmentLabel(order) {
-      if (order.status === 'completed' || order.status === 'shipped') return 'Fulfilled';
-      if (order.status === 'processing') return 'Processing';
-      if (order.status === 'cancelled') return 'Archived';
-      return 'Unfulfilled';
-    }
-
-    function getShippingText(order) {
-      return Number(order.shipping_cost || 0) === 0
-        ? 'The order qualifies for free shipping'
-        : 'Standard shipping';
-    }
-
-    function formatOrderDateLine(value) {
-      if (!value) return '-';
-      const d = new Date(value);
-      if (isNaN(d)) return '-';
-      return d.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit'
-      });
-    }
-
-    function formatDetailDate(value) {
-      if (!value) return '-';
-      const d = new Date(value);
-      if (isNaN(d)) return '-';
-      return d.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      });
-    }
-
-    function dayLabel(date) {
-      return date.toLocaleDateString('en-US', { weekday: 'long' });
-    }
-
-    function timeLabel(date) {
-      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    }
-
-    function buildAddress(order) {
-      return [
-        order.customer_district || '',
-        order.customer_address || '',
-        order.customer_city || '',
-        'KU',
-        'Kuwait'
-      ].filter(Boolean).join('\n');
-    }
-
-    function renderProductThumb(id, imageUrl) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      if (imageUrl) {
-        el.innerHTML = `<img src="${escapeHtml(imageUrl)}" alt="">`;
-      } else {
-        el.textContent = '📦';
+    function editCurrentProduct() {
+      if (!currentProduct?.id) {
+        showAlert('Product is not loaded', 'error');
+        return;
       }
+      window.location.href = `/product-edit.html?id=${encodeURIComponent(currentProduct.id)}`;
+    }
+
+    function goBackToProducts() {
+      window.location.href = '/products-admin';
     }
 
     function setStatusChip(id, text, type) {
       const el = document.getElementById(id);
       if (!el) return;
-      el.className = `status-chip ${type}`;
+      el.className = `status-chip ${escapeHtml(type || 'active')}`;
       el.innerHTML = `<span class="dot"></span>${escapeHtml(text)}`;
-    }
-
-    function goBackToOrders() {
-      window.location.href = '/admin-enhanced.html#orders';
-    }
-
-    function editCurrentOrder() {
-      if (!currentOrder) {
-        showAlert('Order is not loaded yet', 'error');
-        return;
-      }
-
-      if (currentOrder.id) {
-        window.location.href = `/admin-enhanced.html?editOrder=${encodeURIComponent(currentOrder.id)}#orders`;
-        return;
-      }
-
-      if (currentOrder.order_number) {
-        window.location.href = `/admin-enhanced.html?editOrderNumber=${encodeURIComponent(currentOrder.order_number)}#orders`;
-        return;
-      }
-
-      showAlert('Unable to determine order id', 'error');
-    }
-
-    async function markAsPaid() {
-      if (!currentOrder?.id) {
-        showAlert('Order is not loaded', 'error');
-        return;
-      }
-
-      try {
-        const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}/mark-paid`, {
-          method: 'POST'
-        });
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to mark as paid');
-        }
-
-        currentOrder = normalizeOrder(result.data);
-        renderOrder(currentOrder);
-        showAlert('تم تعليم الطلب كمدفوع', 'success');
-      } catch (error) {
-        showAlert(error.message || 'Failed to mark as paid', 'error');
-      }
-    }
-
-    async function fulfillOrder() {
-      if (!currentOrder?.id) {
-        showAlert('Order is not loaded', 'error');
-        return;
-      }
-
-      try {
-        const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}/fulfill`, {
-          method: 'POST'
-        });
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to fulfill order');
-        }
-
-        currentOrder = normalizeOrder(result.data);
-        renderOrder(currentOrder);
-        showAlert('تم تنفيذ الطلب بنجاح', 'success');
-      } catch (error) {
-        showAlert(error.message || 'Failed to fulfill order', 'error');
-      }
-    }
-
-    async function editNotes() {
-      if (!currentOrder?.id) {
-        showAlert('Order is not loaded', 'error');
-        return;
-      }
-
-      const notes = prompt('عدّل الملاحظات', currentOrder.notes || '');
-      if (notes === null) return;
-
-      try {
-        const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}/notes`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ notes })
-        });
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to update notes');
-        }
-
-        currentOrder = normalizeOrder(result.data);
-        renderOrder(currentOrder);
-        showAlert('تم تحديث الملاحظات', 'success');
-      } catch (error) {
-        showAlert(error.message || 'Failed to update notes', 'error');
-      }
-    }
-
-    async function saveNotesFromComment() {
-      const input = document.getElementById('commentInput');
-      if (!input) return;
-      const value = input.value.trim();
-      if (!value) {
-        showAlert('اكتب ملاحظة أولًا', 'error');
-        return;
-      }
-
-      try {
-        const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}/notes`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ notes: value })
-        });
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to update notes');
-        }
-
-        currentOrder = normalizeOrder(result.data);
-        renderOrder(currentOrder);
-        input.value = '';
-        showAlert('تم حفظ الملاحظة', 'success');
-      } catch (error) {
-        showAlert(error.message || 'Failed to save note', 'error');
-      }
-    }
-
-    async function editCustomer() {
-      if (!currentOrder?.id) {
-        showAlert('Order is not loaded', 'error');
-        return;
-      }
-
-      const customerName = prompt('اسم العميل', currentOrder.customer_name || '');
-      if (customerName === null) return;
-
-      const customerEmail = prompt('البريد الإلكتروني', currentOrder.customer_email || '');
-      if (customerEmail === null) return;
-
-      const customerPhone = prompt('رقم الهاتف', currentOrder.customer_phone || '');
-      if (customerPhone === null) return;
-
-      try {
-        const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}/customer`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ customerName, customerEmail, customerPhone })
-        });
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to update customer');
-        }
-
-        currentOrder = normalizeOrder(result.data);
-        renderOrder(currentOrder);
-        showAlert('تم تحديث بيانات العميل', 'success');
-      } catch (error) {
-        showAlert(error.message || 'Failed to update customer', 'error');
-      }
-    }
-
-    async function editShipping() {
-      if (!currentOrder?.id) {
-        showAlert('Order is not loaded', 'error');
-        return;
-      }
-
-      const customerAddress = prompt('العنوان', currentOrder.customer_address || '');
-      if (customerAddress === null) return;
-
-      const customerCity = prompt('المدينة', currentOrder.customer_city || '');
-      if (customerCity === null) return;
-
-      const customerDistrict = prompt('المنطقة', currentOrder.customer_district || '');
-      if (customerDistrict === null) return;
-
-      const shippingCost = prompt('رسوم الشحن', currentOrder.shipping_cost || 0);
-      if (shippingCost === null) return;
-
-      try {
-        const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}/shipping`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            customerAddress,
-            customerCity,
-            customerDistrict,
-            shippingCost: Number(shippingCost || 0)
-          })
-        });
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to update shipping');
-        }
-
-        currentOrder = normalizeOrder(result.data);
-        renderOrder(currentOrder);
-        showAlert('تم تحديث بيانات الشحن', 'success');
-      } catch (error) {
-        showAlert(error.message || 'Failed to update shipping', 'error');
-      }
-    }
-
-    function returnOrder() {
-      showAlert('زر Return مؤجل للمرحلة التالية', 'success');
-    }
-
-    function restockOrder() {
-      showAlert('زر Restock مؤجل للمرحلة التالية', 'success');
-    }
-
-    function showMoreActions() {
-      if (!currentOrder?.id) {
-        showAlert('Order is not loaded', 'error');
-        return;
-      }
-
-      const action = prompt('اكتب الأمر: archive أو cancel');
-      if (!action) return;
-
-      const normalized = action.trim().toLowerCase();
-      if (normalized === 'archive') {
-        archiveOrder();
-      } else if (normalized === 'cancel') {
-        cancelOrder();
-      } else {
-        showAlert('أمر غير معروف', 'error');
-      }
-    }
-
-    async function archiveOrder() {
-      try {
-        const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}/archive`, {
-          method: 'POST'
-        });
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to archive order');
-        }
-
-        currentOrder = normalizeOrder(result.data);
-        renderOrder(currentOrder);
-        showAlert('تمت أرشفة الطلب', 'success');
-      } catch (error) {
-        showAlert(error.message || 'Failed to archive order', 'error');
-      }
-    }
-
-    async function cancelOrder() {
-      try {
-        const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}/cancel`, {
-          method: 'POST'
-        });
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to cancel order');
-        }
-
-        currentOrder = normalizeOrder(result.data);
-        renderOrder(currentOrder);
-        showAlert('تم إلغاء الطلب', 'success');
-      } catch (error) {
-        showAlert(error.message || 'Failed to cancel order', 'error');
-      }
-    }
-
-    function sendInvoice() {
-      if (!currentOrder?.customer_email) {
-        showAlert('No email available for this order', 'error');
-        return;
-      }
-      window.location.href = `mailto:${currentOrder.customer_email}?subject=${encodeURIComponent('Invoice ' + (currentOrder.order_number || ''))}`;
     }
 
     function setText(id, value) {
       const el = document.getElementById(id);
       if (el) el.textContent = value;
-    }
-
-    function setHTML(id, value) {
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = value;
     }
 
     function showAlert(message, type = 'success', duration = 3000) {
@@ -1784,12 +1100,10 @@
         if (!el) return;
         el.textContent = message;
         el.className = `alert active ${type}`;
-        setTimeout(() => el.classList.remove('active'), duration);
+        setTimeout(() => {
+          el.classList.remove('active');
+        }, duration);
       });
-    }
-
-    function nl2br(str) {
-      return escapeHtml(str).replace(/\n/g, '<br>');
     }
 
     function escapeHtml(value) {

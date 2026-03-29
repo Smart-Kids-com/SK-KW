@@ -1235,6 +1235,25 @@
       flex-wrap: wrap;
     }
 
+
+    .row-action-btn{
+      min-height:32px;
+      padding:0 12px;
+      border-radius:10px;
+      border:1px solid #d8d8da;
+      background:#fff;
+      cursor:pointer;
+      font-size:13px;
+      font-weight:800;
+      color:#303030;
+    }
+    .row-action-btn:hover{background:#f5f5f6}
+    .mobile-row-actions{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:10px;
+    }
+
     /* RESPONSIVE SWITCH */
     @media (min-width: 1100px) {
       .desktop-shell { display: block; }
@@ -2183,7 +2202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!tbody) return;
 
       if (!orders.length) {
-        tbody.innerHTML = `<tr><td colspan="9" style="padding:30px;text-align:center;color:#777;">No orders found</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" style="padding:30px;text-align:center;color:#777;">No orders found</td></tr>`;
         setText('desktopPaginationText', '1-0');
         return;
       }
@@ -2209,6 +2228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           </td>
           <td>${escapeHtml(getItemsLabel(order))}</td>
           <td class="table-note">${escapeHtml(getOrderNote(order))}</td>
+          <td><button class="row-action-btn" type="button" onclick="openQuickEditFromList(event, '${escapeJs(order.id)}')">Edit</button></td>
         </tr>
       `).join('');
 
@@ -2248,6 +2268,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
 
           <div class="mobile-order-note">${escapeHtml(getOrderNote(order))}</div>
+          <div class="mobile-row-actions">
+            <button class="row-action-btn" type="button" onclick="openQuickEditFromList(event, '${escapeJs(order.id)}')">Edit</button>
+          </div>
         </div>
       `).join('');
     }
@@ -2322,6 +2345,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       window.location.href = url;
     }
 
+    function openQuickEditFromList(event, orderId) {
+      event?.stopPropagation?.();
+      if (!orderId) {
+        showAlert('Unable to determine order id', 'error');
+        return;
+      }
+      editOrder(orderId);
+    }
+
+
     async function editOrder(orderId) {
       try {
         const response = await fetch(`${API_BASE}/${orderId}`);
@@ -2350,6 +2383,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
     const editOrderId = params.get('editOrder');
     const editOrderNumber = params.get('editOrderNumber');
+    const editMode = params.get('editMode') || 'quick';
 
     if (window.location.hash === '#orders') {
       setView('orders');
@@ -2359,6 +2393,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         block: 'start'
       });
     }
+
+    if (editMode !== 'quick') return;
 
     if (editOrderId) {
       await editOrder(editOrderId);

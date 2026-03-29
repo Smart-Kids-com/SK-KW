@@ -747,6 +747,234 @@
       font-weight:700;
     }
 
+
+    .icon-only-btn{
+      min-width:34px;
+      height:34px;
+      border:none;
+      background:transparent;
+      color:#4d5154;
+      cursor:pointer;
+      border-radius:10px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+    }
+    .icon-only-btn:hover{background:#f1f1f2}
+
+    .mobile-actions-wrap{position:relative}
+    .mobile-actions-menu{
+      position:absolute;
+      top:calc(100% + 8px);
+      right:0;
+      width:min(270px,78vw);
+      background:#fff;
+      border:1px solid #dcdcdf;
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      padding:8px;
+      display:none;
+      z-index:80;
+    }
+    .mobile-actions-menu.active{display:grid;gap:4px}
+    .mobile-menu-btn{
+      min-height:42px;
+      border:none;
+      background:#fff;
+      border-radius:12px;
+      text-align:left;
+      padding:0 12px;
+      font-size:14px;
+      font-weight:700;
+      color:#303030;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      direction:ltr;
+    }
+    .mobile-menu-btn:hover{background:#f3f3f4}
+    .mobile-menu-btn.danger{color:var(--danger)}
+
+    .modal{
+      display:none;
+      position:fixed;
+      inset:0;
+      z-index:120;
+      background:rgba(0,0,0,.48);
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+    .modal.active{display:flex}
+    .modal-content{
+      width:100%;
+      max-width:920px;
+      max-height:92vh;
+      overflow:auto;
+      background:#fff;
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    .modal-content.main-editor{max-width:1120px}
+    .modal-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+      direction:ltr;
+    }
+    .modal-header h2{
+      font-size:20px;
+      font-weight:800;
+      color:#303030;
+    }
+    .close-btn{
+      width:38px;
+      height:38px;
+      border-radius:10px;
+      border:none;
+      background:#f1f1f2;
+      cursor:pointer;
+      font-size:22px;
+      color:#44484c;
+    }
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+    .form-group{
+      margin-bottom:14px;
+      direction:ltr;
+    }
+    .form-group.full{grid-column:1/-1}
+    .form-group label{
+      display:block;
+      margin-bottom:8px;
+      font-size:14px;
+      font-weight:700;
+      color:#303030;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea{
+      width:100%;
+      min-height:42px;
+      border-radius:12px;
+      border:1px solid #d6d6d9;
+      background:#fff;
+      padding:10px 12px;
+      outline:none;
+      font-size:14px;
+      color:#303030;
+    }
+    .form-group textarea{
+      min-height:104px;
+      resize:vertical;
+    }
+    .editor-top-grid{
+      display:grid;
+      grid-template-columns:minmax(0,1.2fr) 320px;
+      gap:18px;
+      align-items:start;
+    }
+    .editor-box{
+      border:1px solid #e3e3e6;
+      background:#fafafb;
+      border-radius:16px;
+      padding:14px;
+    }
+    .editor-box h3{
+      font-size:15px;
+      font-weight:800;
+      margin-bottom:12px;
+      color:#303030;
+    }
+    .editor-items-list{
+      display:grid;
+      gap:12px;
+    }
+    .editor-item-card{
+      border:1px solid #e3e3e6;
+      background:#fff;
+      border-radius:14px;
+      padding:12px;
+      display:grid;
+      gap:12px;
+    }
+    .editor-item-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      direction:ltr;
+    }
+    .editor-item-title{
+      font-size:14px;
+      font-weight:800;
+      color:#303030;
+    }
+    .editor-remove-btn{
+      min-height:34px;
+      padding:0 12px;
+      border-radius:10px;
+      border:1px solid #ebc3bb;
+      background:#fff5f2;
+      color:#b42318;
+      font-size:13px;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .editor-item-grid{
+      display:grid;
+      grid-template-columns:1.5fr .7fr .7fr .9fr;
+      gap:10px;
+      direction:ltr;
+    }
+    .editor-add-btn{
+      min-height:40px;
+      padding:0 14px;
+      border-radius:12px;
+      border:1px dashed #bfc2c7;
+      background:#fff;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:800;
+      color:#303030;
+    }
+    .editor-summary-list{
+      display:grid;
+      gap:12px;
+    }
+    .editor-summary-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      font-size:14px;
+      direction:ltr;
+    }
+    .editor-summary-row strong{font-size:15px}
+    .modal-footer{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      margin-top:18px;
+      direction:ltr;
+      flex-wrap:wrap;
+    }
+
+    @media (max-width:900px){
+      .editor-top-grid{grid-template-columns:1fr}
+      .editor-item-grid{grid-template-columns:1fr 1fr}
+      .form-grid{grid-template-columns:1fr}
+    }
+
     @media (min-width:1100px){
       .desktop-shell{display:block}
       .mobile-shell{display:none}
@@ -840,7 +1068,7 @@
                 <div class="desktop-header-actions">
                   <button class="ghost-btn">Restock</button>
                   <button class="ghost-btn">Return</button>
-                  <button class="ghost-btn" onclick="editCurrentOrder()">Edit</button>
+                  <button class="ghost-btn" onclick="openMainOrderEdit()">Edit</button>
                   <button class="ghost-btn">Print ▾</button>
                   <button class="ghost-btn">More actions ▾</button>
                 </div>
@@ -948,7 +1176,7 @@
                     <div class="card-pad">
                       <div class="card-head">
                         <div class="card-title">Notes</div>
-                        <div>✎</div>
+                        <button class="icon-only-btn" type="button" onclick="openQuickEdit('notes')">✎</button>
                       </div>
                       <div id="desktopNotesText" class="sidebar-block muted">No notes from customer</div>
                     </div>
@@ -958,7 +1186,10 @@
                     <div class="card-pad">
                       <div class="card-head">
                         <div class="card-title">Customer</div>
-                        <div>✕</div>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                          <button class="icon-only-btn" type="button" onclick="openQuickEdit('contact')" title="Edit contact">✎</button>
+                          <button class="icon-only-btn" type="button" onclick="openQuickEdit('shipping')" title="Edit shipping">⌂</button>
+                        </div>
                       </div>
 
                       <div class="sidebar-block">
@@ -968,13 +1199,19 @@
                         </div>
 
                         <div>
-                          <div class="sidebar-section-title">Contact information</div>
+                          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;">
+                            <div class="sidebar-section-title" style="margin-bottom:0;">Contact information</div>
+                            <button class="icon-only-btn" type="button" onclick="openQuickEdit('contact')">✎</button>
+                          </div>
                           <div class="sidebar-link" id="desktopCustomerEmail">—</div>
                           <div id="desktopCustomerPhone" class="muted">—</div>
                         </div>
 
                         <div>
-                          <div class="sidebar-section-title">Shipping address</div>
+                          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;">
+                            <div class="sidebar-section-title" style="margin-bottom:0;">Shipping address</div>
+                            <button class="icon-only-btn" type="button" onclick="openQuickEdit('shipping')">✎</button>
+                          </div>
                           <div id="desktopAddressBlock">—</div>
                           <div class="sidebar-link" style="margin-top:6px;">View map</div>
                         </div>
@@ -1059,7 +1296,20 @@
                 <button class="round-icon" onclick="goBackToOrders()">‹</button>
                 <div style="display:flex;gap:8px;">
                   <button class="round-icon">🖨</button>
-                  <button class="round-icon">⋯</button>
+                  <div class="mobile-actions-wrap">
+                    <button class="round-icon" type="button" onclick="toggleMobileActionsMenu(event)">⋯</button>
+                    <div class="mobile-actions-menu" id="mobileActionsMenu">
+                      <button class="mobile-menu-btn" type="button" onclick="handleMobileAction('edit')"><span>Edit</span><span>✎</span></button>
+                      <button class="mobile-menu-btn" type="button" onclick="handleMobileAction('duplicate')"><span>Duplicate</span><span>⧉</span></button>
+                      <button class="mobile-menu-btn danger" type="button" onclick="handleMobileAction('cancel')"><span>Cancel</span><span>✕</span></button>
+                      <button class="mobile-menu-btn" type="button" onclick="handleMobileAction('restock')"><span>Restock</span><span>↺</span></button>
+                      <button class="mobile-menu-btn" type="button" onclick="handleMobileAction('archive')"><span>Archive</span><span>🗄</span></button>
+                      <button class="mobile-menu-btn" type="button" onclick="handleMobileAction('paid')"><span>Mark as paid</span><span>✓</span></button>
+                      <button class="mobile-menu-btn" type="button" onclick="handleMobileAction('note')"><span>Add note</span><span>📝</span></button>
+                      <button class="mobile-menu-btn" type="button" onclick="handleMobileAction('status')"><span>View order status</span><span>↗</span></button>
+                      <button class="mobile-menu-btn" type="button" onclick="handleMobileAction('share')"><span>Share order with staff</span><span>🔗</span></button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1124,7 +1374,10 @@
             <div class="mobile-section">
               <div class="mobile-section-head">
                 <div class="card-title">Customer</div>
-                <div>✎</div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <button class="icon-only-btn" type="button" onclick="openQuickEdit('contact')">✎</button>
+                  <button class="icon-only-btn" type="button" onclick="openQuickEdit('shipping')">⌂</button>
+                </div>
               </div>
 
               <div style="display:grid;gap:10px;font-size:14px;line-height:1.55;">
@@ -1137,12 +1390,18 @@
                 </div>
 
                 <div>
-                  <div class="sidebar-section-title">Shipping address</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;">
+                    <div class="sidebar-section-title" style="margin-bottom:0;">Shipping address</div>
+                    <button class="icon-only-btn" type="button" onclick="openQuickEdit('shipping')">✎</button>
+                  </div>
                   <div id="mobileAddressBlock">—</div>
                 </div>
 
                 <div>
-                  <div class="sidebar-section-title">Notes</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;">
+                    <div class="sidebar-section-title" style="margin-bottom:0;">Notes</div>
+                    <button class="icon-only-btn" type="button" onclick="openQuickEdit('notes')">✎</button>
+                  </div>
                   <div id="mobileNotesText" class="muted">No notes from customer</div>
                 </div>
               </div>
@@ -1157,6 +1416,124 @@
           </section>
         </div>
       </main>
+    </div>
+  </div>
+
+
+  <div class="modal" id="mainOrderEditModal">
+    <div class="modal-content main-editor">
+      <div class="modal-header">
+        <h2>Edit order</h2>
+        <button class="close-btn" type="button" onclick="closeModal('mainOrderEditModal')">&times;</button>
+      </div>
+
+      <form id="mainOrderEditForm" onsubmit="saveMainOrderChanges(event)">
+        <input type="hidden" id="mainEditOrderId">
+
+        <div class="editor-top-grid">
+          <div class="editor-box">
+            <h3>Line items</h3>
+            <div class="editor-items-list" id="mainEditItemsList"></div>
+            <button class="editor-add-btn" type="button" onclick="addMainEditItem()">+ Add product</button>
+          </div>
+
+          <div class="editor-box">
+            <h3>Summary</h3>
+
+            <div class="form-group">
+              <label for="mainEditStatus">Status</label>
+              <select id="mainEditStatus">
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="mainEditShippingCost">Shipping cost</label>
+              <input type="number" id="mainEditShippingCost" min="0" step="0.001" oninput="recalculateMainEditTotals()">
+            </div>
+
+            <div class="editor-summary-list">
+              <div class="editor-summary-row"><span>Subtotal</span><strong id="mainEditSubtotalText">KWD 0.000</strong></div>
+              <div class="editor-summary-row"><span>Shipping</span><strong id="mainEditShippingText">KWD 0.000</strong></div>
+              <div class="editor-summary-row"><span>Total</span><strong id="mainEditTotalText">KWD 0.000</strong></div>
+              <div class="editor-summary-row"><span>Paid</span><strong id="mainEditPaidText">KWD 0.000</strong></div>
+              <div class="editor-summary-row"><span>Balance</span><strong id="mainEditBalanceText">KWD 0.000</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="ghost-btn" type="button" onclick="closeModal('mainOrderEditModal')">Cancel</button>
+          <button class="dark-btn" type="submit">Save order</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="quickEditModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="quickEditTitle">Edit</h2>
+        <button class="close-btn" type="button" onclick="closeModal('quickEditModal')">&times;</button>
+      </div>
+
+      <form id="quickEditForm" onsubmit="saveQuickEdit(event)">
+        <input type="hidden" id="quickEditMode">
+
+        <div id="quickEditNotesFields" class="hidden">
+          <div class="form-group">
+            <label for="quickEditNotes">Notes</label>
+            <textarea id="quickEditNotes"></textarea>
+          </div>
+        </div>
+
+        <div id="quickEditContactFields" class="hidden">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="quickEditName">Customer name</label>
+              <input type="text" id="quickEditName">
+            </div>
+            <div class="form-group">
+              <label for="quickEditEmail">Email</label>
+              <input type="email" id="quickEditEmail">
+            </div>
+            <div class="form-group full">
+              <label for="quickEditPhone">Phone</label>
+              <input type="tel" id="quickEditPhone">
+            </div>
+          </div>
+        </div>
+
+        <div id="quickEditShippingFields" class="hidden">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="quickEditAddress">Address</label>
+              <textarea id="quickEditAddress"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="quickEditDistrict">District</label>
+              <input type="text" id="quickEditDistrict">
+            </div>
+            <div class="form-group">
+              <label for="quickEditCity">City</label>
+              <input type="text" id="quickEditCity">
+            </div>
+            <div class="form-group">
+              <label for="quickEditShippingCharge">Shipping cost</label>
+              <input type="number" id="quickEditShippingCharge" min="0" step="0.001">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="ghost-btn" type="button" onclick="closeModal('quickEditModal')">Cancel</button>
+          <button class="dark-btn" type="submit">Save changes</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -1185,6 +1562,17 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       loadOrder();
+      document.addEventListener('click', event => {
+        const wrap = event.target.closest('.mobile-actions-wrap');
+        if (!wrap) closeMobileActionsMenu();
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          closeMobileActionsMenu();
+          closeModal('mainOrderEditModal');
+          closeModal('quickEditModal');
+        }
+      });
     });
 
     async function loadOrder() {
@@ -1332,6 +1720,347 @@
       document.getElementById('mobileOrderContent').classList.remove('hidden');
       document.title = `${orderNumber} - Order Details`;
     }
+
+
+    function openMainOrderEdit() {
+      if (!currentOrder) {
+        showAlert('Order is not loaded yet', 'error');
+        return;
+      }
+
+      document.getElementById('mainEditOrderId').value = currentOrder.id || '';
+      document.getElementById('mainEditStatus').value = currentOrder.status || 'pending';
+      document.getElementById('mainEditShippingCost').value = Number(currentOrder.shipping_cost || 0).toFixed(3);
+
+      const list = document.getElementById('mainEditItemsList');
+      list.innerHTML = '';
+      (currentOrder.items || []).forEach((item, index) => {
+        list.insertAdjacentHTML('beforeend', getMainEditItemMarkup(item, index));
+      });
+
+      if (!list.children.length) {
+        addMainEditItem();
+      }
+
+      recalculateMainEditTotals();
+      closeMobileActionsMenu();
+      openModal('mainOrderEditModal');
+    }
+
+    function getMainEditItemMarkup(item = {}, index = 0) {
+      const name = escapeHtml(item.product_name || item.name || '');
+      const unitPrice = Number(item.unit_price ?? item.product_price ?? item.price ?? 0);
+      const quantity = Number(item.quantity ?? 1);
+      const lineTotal = Number(item.subtotal ?? (unitPrice * quantity));
+
+      return `
+        <div class="editor-item-card" data-item-index="${index}">
+          <div class="editor-item-head">
+            <div class="editor-item-title">Product ${index + 1}</div>
+            <button class="editor-remove-btn" type="button" onclick="removeMainEditItem(this)">Remove</button>
+          </div>
+          <div class="editor-item-grid">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Product title</label>
+              <input type="text" class="main-edit-name" value="${name}" oninput="syncMainEditTitles()">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Unit price</label>
+              <input type="number" class="main-edit-price" min="0" step="0.001" value="${unitPrice.toFixed(3)}" oninput="recalculateMainEditTotals()">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Quantity</label>
+              <input type="number" class="main-edit-qty" min="1" step="1" value="${Math.max(quantity,1)}" oninput="recalculateMainEditTotals()">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Line total</label>
+              <input type="text" class="main-edit-line-total" value="${H.formatCurrency(lineTotal)}" readonly>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function addMainEditItem() {
+      const list = document.getElementById('mainEditItemsList');
+      const index = list.children.length;
+      list.insertAdjacentHTML('beforeend', getMainEditItemMarkup({}, index));
+      syncMainEditTitles();
+      recalculateMainEditTotals();
+    }
+
+    function removeMainEditItem(button) {
+      button.closest('.editor-item-card')?.remove();
+      syncMainEditTitles();
+      recalculateMainEditTotals();
+    }
+
+    function syncMainEditTitles() {
+      document.querySelectorAll('#mainEditItemsList .editor-item-card').forEach((card, index) => {
+        const title = card.querySelector('.editor-item-title');
+        if (title) title.textContent = `Product ${index + 1}`;
+      });
+    }
+
+    function collectMainEditItems() {
+      return Array.from(document.querySelectorAll('#mainEditItemsList .editor-item-card')).map(card => {
+        const name = card.querySelector('.main-edit-name')?.value?.trim() || 'Order item';
+        const unitPrice = Number(card.querySelector('.main-edit-price')?.value || 0);
+        const quantity = Math.max(1, Number(card.querySelector('.main-edit-qty')?.value || 1));
+        const subtotal = Number((unitPrice * quantity).toFixed(3));
+        return {
+          product_name: name,
+          name,
+          product_price: unitPrice,
+          price: unitPrice,
+          unit_price: unitPrice,
+          quantity,
+          subtotal
+        };
+      }).filter(item => item.product_name);
+    }
+
+    function recalculateMainEditTotals() {
+      const items = collectMainEditItems();
+      const subtotal = Number(items.reduce((sum, item) => sum + Number(item.subtotal || 0), 0).toFixed(3));
+      const shipping = Number(document.getElementById('mainEditShippingCost').value || 0);
+      const status = document.getElementById('mainEditStatus').value || 'pending';
+      const total = Number((subtotal + shipping).toFixed(3));
+      const paid = status === 'completed' ? total : 0;
+      const balance = Math.max(Number((total - paid).toFixed(3)), 0);
+
+      document.querySelectorAll('#mainEditItemsList .editor-item-card').forEach(card => {
+        const price = Number(card.querySelector('.main-edit-price')?.value || 0);
+        const qty = Math.max(1, Number(card.querySelector('.main-edit-qty')?.value || 1));
+        const line = Number((price * qty).toFixed(3));
+        const lineField = card.querySelector('.main-edit-line-total');
+        if (lineField) lineField.value = H.formatCurrency(line);
+      });
+
+      setText('mainEditSubtotalText', H.formatCurrency(subtotal));
+      setText('mainEditShippingText', H.formatCurrency(shipping));
+      setText('mainEditTotalText', H.formatCurrency(total));
+      setText('mainEditPaidText', H.formatCurrency(paid));
+      setText('mainEditBalanceText', H.formatCurrency(balance));
+    }
+
+    async function saveMainOrderChanges(event) {
+      event.preventDefault();
+
+      if (!currentOrder?.id) {
+        showAlert('Unable to determine order id', 'error');
+        return;
+      }
+
+      try {
+        const items = collectMainEditItems();
+        if (!items.length) {
+          showAlert('Add at least one product', 'error');
+          return;
+        }
+
+        const shipping = Number(document.getElementById('mainEditShippingCost').value || 0);
+        const subtotal = Number(items.reduce((sum, item) => sum + Number(item.subtotal || 0), 0).toFixed(3));
+        const total = Number((subtotal + shipping).toFixed(3));
+        const status = document.getElementById('mainEditStatus').value || currentOrder.status || 'pending';
+        const paid = status === 'completed' ? total : 0;
+        const balance = Math.max(Number((total - paid).toFixed(3)), 0);
+
+        const updateData = {
+          status,
+          items,
+          subtotal,
+          shippingCost: shipping,
+          shipping_cost: shipping,
+          total,
+          paid,
+          balance
+        };
+
+        const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updateData)
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Failed to update order');
+        }
+
+        closeModal('mainOrderEditModal');
+        await loadOrder();
+        showAlert('Order updated', 'success');
+      } catch (error) {
+        showAlert(error.message || 'Failed to update order', 'error');
+      }
+    }
+
+    function openQuickEdit(mode) {
+      if (!currentOrder?.id) {
+        showAlert('Order is not loaded yet', 'error');
+        return;
+      }
+
+      document.getElementById('quickEditMode').value = mode;
+      ['quickEditNotesFields', 'quickEditContactFields', 'quickEditShippingFields'].forEach(id => {
+        document.getElementById(id)?.classList.add('hidden');
+      });
+
+      if (mode === 'notes') {
+        setText('quickEditTitle', 'Edit notes');
+        document.getElementById('quickEditNotesFields').classList.remove('hidden');
+        document.getElementById('quickEditNotes').value = currentOrder.notes || '';
+      } else if (mode === 'contact') {
+        setText('quickEditTitle', 'Edit contact information');
+        document.getElementById('quickEditContactFields').classList.remove('hidden');
+        document.getElementById('quickEditName').value = currentOrder.customer_name || '';
+        document.getElementById('quickEditEmail').value = currentOrder.customer_email || '';
+        document.getElementById('quickEditPhone').value = currentOrder.customer_phone || '';
+      } else if (mode === 'shipping') {
+        setText('quickEditTitle', 'Edit shipping address');
+        document.getElementById('quickEditShippingFields').classList.remove('hidden');
+        document.getElementById('quickEditAddress').value = currentOrder.customer_address || '';
+        document.getElementById('quickEditDistrict').value = currentOrder.customer_district || '';
+        document.getElementById('quickEditCity').value = currentOrder.customer_city || 'Kuwait';
+        document.getElementById('quickEditShippingCharge').value = Number(currentOrder.shipping_cost || 0).toFixed(3);
+      }
+
+      closeMobileActionsMenu();
+      openModal('quickEditModal');
+    }
+
+    async function saveQuickEdit(event) {
+      event.preventDefault();
+
+      if (!currentOrder?.id) {
+        showAlert('Unable to determine order id', 'error');
+        return;
+      }
+
+      try {
+        const mode = document.getElementById('quickEditMode').value;
+        const updateData = {};
+
+        if (mode === 'notes') {
+          updateData.notes = document.getElementById('quickEditNotes').value;
+        } else if (mode === 'contact') {
+          updateData.customerName = document.getElementById('quickEditName').value;
+          updateData.customerEmail = document.getElementById('quickEditEmail').value;
+          updateData.customerPhone = document.getElementById('quickEditPhone').value;
+        } else if (mode === 'shipping') {
+          const shipping = Number(document.getElementById('quickEditShippingCharge').value || 0);
+          updateData.customerAddress = document.getElementById('quickEditAddress').value;
+          updateData.customerDistrict = document.getElementById('quickEditDistrict').value;
+          updateData.customerCity = document.getElementById('quickEditCity').value;
+          updateData.shippingCost = shipping;
+          updateData.shipping_cost = shipping;
+          updateData.total = Number((Number(currentOrder.subtotal || 0) + shipping).toFixed(3));
+        }
+
+        const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updateData)
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Failed to update order');
+        }
+
+        closeModal('quickEditModal');
+        await loadOrder();
+        showAlert('Order updated', 'success');
+      } catch (error) {
+        showAlert(error.message || 'Failed to update order', 'error');
+      }
+    }
+
+    function toggleMobileActionsMenu(event) {
+      event?.stopPropagation?.();
+      const menu = document.getElementById('mobileActionsMenu');
+      if (!menu) return;
+      menu.classList.toggle('active');
+    }
+
+    function closeMobileActionsMenu() {
+      document.getElementById('mobileActionsMenu')?.classList.remove('active');
+    }
+
+    async function markAsPaid() {
+      if (!currentOrder?.id) {
+        showAlert('Order is not loaded yet', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'completed' })
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Failed to mark order as paid');
+        }
+
+        await loadOrder();
+        showAlert('Order marked as paid', 'success');
+      } catch (error) {
+        showAlert(error.message || 'Failed to mark order as paid', 'error');
+      }
+    }
+
+    function handleMobileAction(action) {
+      closeMobileActionsMenu();
+
+      if (action === 'edit') {
+        openMainOrderEdit();
+        return;
+      }
+      if (action === 'note') {
+        openQuickEdit('notes');
+        return;
+      }
+      if (action === 'paid') {
+        markAsPaid();
+        return;
+      }
+      if (action === 'status') {
+        showAlert(`Current status: ${getFulfillmentLabel(currentOrder || {})}`, 'success');
+        return;
+      }
+      if (action === 'share') {
+        const url = window.location.href;
+        if (navigator.share) {
+          navigator.share({ title: document.title, url }).catch(() => {});
+        } else if (navigator.clipboard) {
+          navigator.clipboard.writeText(url).then(() => showAlert('Order link copied', 'success'));
+        } else {
+          showAlert('Sharing is not supported on this device', 'error');
+        }
+        return;
+      }
+
+      const labels = {
+        duplicate: 'Duplicate action is ready for backend wiring.',
+        cancel: 'Cancel action is ready for backend wiring.',
+        restock: 'Restock action is ready for backend wiring.',
+        archive: 'Archive action is ready for backend wiring.'
+      };
+      showAlert(labels[action] || 'Action not available yet', action === 'cancel' ? 'error' : 'success');
+    }
+
+    function openModal(id) {
+      document.getElementById(id)?.classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id)?.classList.remove('active');
+    }
+
 
     function renderTimeline(order) {
       const events = buildTimeline(order);
@@ -1505,22 +2234,7 @@
     }
 
     function editCurrentOrder() {
-      if (!currentOrder) {
-        showAlert('Order is not loaded yet', 'error');
-        return;
-      }
-
-      if (currentOrder.id) {
-        window.location.href = `/admin-enhanced.html?editOrder=${encodeURIComponent(currentOrder.id)}#orders`;
-        return;
-      }
-
-      if (currentOrder.order_number) {
-        window.location.href = `/admin-enhanced.html?editOrderNumber=${encodeURIComponent(currentOrder.order_number)}#orders`;
-        return;
-      }
-
-      showAlert('Unable to determine order id', 'error');
+      openMainOrderEdit();
     }
 
     function sendInvoice() {
@@ -1531,9 +2245,7 @@
       window.location.href = `mailto:${currentOrder.customer_email}?subject=${encodeURIComponent('Invoice ' + (currentOrder.order_number || ''))}`;
     }
 
-    function markAsPaid() {
-      showAlert('زر شكلي الآن. نوصله بالـ backend بعدين.', 'success');
-    }
+
 
     function setText(id, value) {
       const el = document.getElementById(id);
