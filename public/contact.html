@@ -20,7 +20,6 @@
       --line:#e7deef;
       --shadow:0 10px 30px rgba(106,76,147,.12);
       --radius:24px;
-      --radius-sm:18px;
       --green:#25D366;
     }
 
@@ -34,6 +33,7 @@
 
     a{ text-decoration:none; color:inherit; }
     img{ max-width:100%; display:block; }
+    button{ font-family:inherit; }
 
     .topbar{
       background:#000;
@@ -115,10 +115,10 @@
       transform:translateY(-2px);
     }
 
-    .circle-btn img{
-      width:24px;
-      height:24px;
-      object-fit:contain;
+    .circle-btn svg{
+      width:26px;
+      height:26px;
+      stroke:#6a4c93;
     }
 
     .container{
@@ -224,15 +224,17 @@
       align-items:center;
       justify-content:center;
       flex:0 0 auto;
-      overflow:hidden;
       box-shadow:0 8px 18px rgba(106,76,147,.18);
     }
 
-    .contact-icon img{
+    .contact-icon svg{
       width:34px;
       height:34px;
-      object-fit:contain;
-      filter:brightness(0) invert(1);
+      stroke:#fff;
+      fill:none;
+      stroke-width:2.2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
     }
 
     .contact-text h3{
@@ -347,10 +349,9 @@
       transform:scale(1.06);
     }
 
-    .whatsapp-float img{
+    .whatsapp-float svg{
       width:34px;
       height:34px;
-      object-fit:contain;
     }
 
     @media (max-width:900px){
@@ -362,10 +363,6 @@
     @media (max-width:768px){
       .topbar{
         padding:14px 12px;
-      }
-
-      .topbar-inner{
-        align-items:center;
       }
 
       .brand-logo{
@@ -402,7 +399,6 @@
       }
 
       .contact-card{
-        flex-direction:row;
         padding:18px 16px;
       }
 
@@ -431,10 +427,6 @@
 
       .hero-sub{
         font-size:1rem;
-      }
-
-      .contact-card{
-        align-items:center;
       }
 
       .contact-text h3{
@@ -468,18 +460,29 @@
       </div>
 
       <div class="header-actions">
-        <a href="./profile.html" class="circle-btn" title="حسابي" id="profileIcon">
-          <img src="/account-icon.png" alt="حسابي">
+        <a href="./cart.html" class="circle-btn" title="السلة" id="cartIcon" aria-label="السلة">
+          <svg viewBox="0 0 24 24">
+            <circle cx="9" cy="20" r="1.6"></circle>
+            <circle cx="18" cy="20" r="1.6"></circle>
+            <path d="M3 4h2l2.2 10.2a1 1 0 0 0 1 .8h9.8a1 1 0 0 0 1-.8L21 7H7"></path>
+          </svg>
         </a>
-        <a href="./login.html" class="circle-btn" title="تسجيل الدخول" id="loginIcon">
-          <img src="/lock-icon.png" alt="تسجيل الدخول">
+
+        <a href="./profile.html" class="circle-btn" title="حسابي" id="profileIcon" aria-label="حسابي">
+          <svg viewBox="0 0 24 24">
+            <path d="M20 21a8 8 0 0 0-16 0"></path>
+            <circle cx="12" cy="8" r="4"></circle>
+          </svg>
         </a>
       </div>
     </div>
   </div>
 
-  <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="واتساب" rel="noopener">
-    <img src="/whatsapp.png" alt="WhatsApp">
+  <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="واتساب" rel="noopener" aria-label="واتساب">
+    <svg viewBox="0 0 32 32">
+      <path fill="#25D366" d="M19.11 17.21c-.27-.14-1.6-.79-1.85-.88-.25-.09-.43-.14-.61.14-.18.27-.7.88-.86 1.06-.16.18-.32.2-.59.07-.27-.14-1.15-.42-2.19-1.34-.81-.72-1.36-1.6-1.52-1.87-.16-.27-.02-.41.12-.55.12-.12.27-.32.41-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.01-.22-.53-.45-.46-.61-.47h-.52c-.18 0-.48.07-.73.34s-.95.93-.95 2.28.98 2.66 1.11 2.84c.14.18 1.92 2.93 4.66 4.11.65.28 1.16.45 1.56.58.66.21 1.27.18 1.75.11.53-.08 1.6-.65 1.83-1.28.23-.63.23-1.17.16-1.28-.07-.11-.25-.18-.52-.32Z"/>
+      <path fill="#25D366" d="M27.01 4.98A15.84 15.84 0 0 0 4.66 27.33L3 32l4.79-1.62A15.84 15.84 0 1 0 27.01 4.98ZM16.02 29.1c-2.48 0-4.91-.67-7.04-1.94l-.5-.3-2.84.96.96-2.77-.32-.52a13.08 13.08 0 1 1 9.74 4.57Z"/>
+    </svg>
   </a>
 
   <div class="container">
@@ -502,7 +505,10 @@
       <div class="contact-grid">
         <a class="contact-card" href="https://wa.me/96566635393" target="_blank" rel="noopener">
           <div class="contact-icon">
-            <img src="/whatsapp.png" alt="WhatsApp">
+            <svg viewBox="0 0 32 32">
+              <path d="M19.11 17.21c-.27-.14-1.6-.79-1.85-.88-.25-.09-.43-.14-.61.14-.18.27-.7.88-.86 1.06-.16.18-.32.2-.59.07-.27-.14-1.15-.42-2.19-1.34-.81-.72-1.36-1.6-1.52-1.87-.16-.27-.02-.41.12-.55.12-.12.27-.32.41-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.01-.22-.53-.45-.46-.61-.47h-.52c-.18 0-.48.07-.73.34s-.95.93-.95 2.28.98 2.66 1.11 2.84c.14.18 1.92 2.93 4.66 4.11.65.28 1.16.45 1.56.58.66.21 1.27.18 1.75.11.53-.08 1.6-.65 1.83-1.28.23-.63.23-1.17.16-1.28-.07-.11-.25-.18-.52-.32Z" fill="#fff" stroke="none"></path>
+              <path d="M27.01 4.98A15.84 15.84 0 0 0 4.66 27.33L3 32l4.79-1.62A15.84 15.84 0 1 0 27.01 4.98ZM16.02 29.1c-2.48 0-4.91-.67-7.04-1.94l-.5-.3-2.84.96.96-2.77-.32-.52a13.08 13.08 0 1 1 9.74 4.57Z" fill="#fff" stroke="none"></path>
+            </svg>
           </div>
           <div class="contact-text">
             <h3>واتساب</h3>
@@ -513,7 +519,9 @@
 
         <a class="contact-card" href="tel:+96566635393">
           <div class="contact-icon">
-            <img src="/phone-icon.png" alt="Phone">
+            <svg viewBox="0 0 24 24">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.63 2.62a2 2 0 0 1-.45 2.11L8 9.91a16 16 0 0 0 6.09 6.09l1.46-1.29a2 2 0 0 1 2.11-.45c.84.3 1.72.51 2.62.63A2 2 0 0 1 22 16.92z"></path>
+            </svg>
           </div>
           <div class="contact-text">
             <h3>الهاتف</h3>
@@ -524,7 +532,10 @@
 
         <a class="contact-card" href="mailto:info@smartkidskuwait.com">
           <div class="contact-icon">
-            <img src="/email-icon.png" alt="Email">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path>
+              <path d="M22 6l-10 7L2 6"></path>
+            </svg>
           </div>
           <div class="contact-text">
             <h3>البريد الإلكتروني</h3>
@@ -535,7 +546,11 @@
 
         <a class="contact-card" href="mailto:orders@smartkidskuwait.com">
           <div class="contact-icon">
-            <img src="/orders-icon.png" alt="Orders">
+            <svg viewBox="0 0 24 24">
+              <path d="M6 2l1.5 3H21a1 1 0 0 1 1 1l-1.6 7.2a2 2 0 0 1-2 1.6H9a2 2 0 0 1-2-1.5L4.2 4H2"></path>
+              <circle cx="10" cy="20" r="1.6"></circle>
+              <circle cx="18" cy="20" r="1.6"></circle>
+            </svg>
           </div>
           <div class="contact-text">
             <h3>الطلبات والمبيعات</h3>
@@ -631,38 +646,6 @@
         item.classList.toggle('open');
       });
     });
-
-    function updateUserIcons() {
-      const isLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
-      const loginIcon = document.getElementById('loginIcon');
-
-      if (!loginIcon) return;
-
-      if (isLoggedIn) {
-        loginIcon.href = '#';
-        loginIcon.title = 'تسجيل الخروج';
-        loginIcon.onclick = function (e) {
-          e.preventDefault();
-          logout();
-        };
-      } else {
-        loginIcon.href = './login.html';
-        loginIcon.title = 'تسجيل الدخول';
-        loginIcon.onclick = null;
-      }
-    }
-
-    function logout() {
-      if (confirm('هل تريد تسجيل الخروج؟')) {
-        localStorage.removeItem('userLoggedIn');
-        localStorage.removeItem('userEmail');
-        localStorage.removeItem('userName');
-        updateUserIcons();
-        alert('تم تسجيل الخروج بنجاح');
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', updateUserIcons);
   </script>
 </body>
 </html>
