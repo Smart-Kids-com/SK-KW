@@ -1,12 +1,61 @@
 // routes/orders.js - API endpoints لإدارة الطلبات
-// ⚠️ IMPORTANT: Route order matters in Express!
-// More specific routes MUST come before generic routes.
+// IMPORTANT: Route order matters in Express
 // ORDER: POST/PUT/DELETE → specific GET paths → generic GET :id → GET /
 
 const express = require('express');
 const router = express.Router();
 const db = require('../db/turso-manager');
 const { SYSTEM_CONFIG, HELPERS } = require('../config/system');
+
+const ORDERS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS;
+const ORDER_ITEMS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS;
+
+function toNumber(value, fallback = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function isValidOrderStatus(status) {
+  return Object.values(SYSTEM_CONFIG.ORDER_CONFIG.STATUSES).includes(status);
+}
+
+async function getOrderWithItems(id) {
+  const order = await db.get(
+    `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+    [id]
+  );
+
+  if (!order) return null;
+
+  const items = await db.all(
+    `SELECT * FROM ${ORDER_ITEMS_TABLE} WHERE order_id = ?`,
+    [id]
+  );
+
+  return {
+    ...order,
+    items
+  };
+}
+
+async function getOrderByNumberWithItems(orderNumber) {
+  const order = await db.get(
+    `SELECT * FROM ${ORDERS_TABLE} WHERE order_number = ?`,
+    [orderNumber]
+  );
+
+  if (!order) return null;
+
+  const items = await db.all(
+    `SELECT * FROM ${ORDER_ITEMS_TABLE} WHERE order_id = ?`,
+    [order.id]
+  );
+
+  return {
+    ...order,
+    items
+  };
+}
 
 /**
  * POST /api/orders - إنشاء طلب جديد
@@ -46,19 +95,16 @@ router.post('/', async (req, res) => {
     }
 
     let subtotal = 0;
-    items.forEach(item => {
-      subtotal += Number(item.price || 0) * Number(item.quantity || 1);
-    });
+    for (const item of items) {
+      subtotal += toNumber(item.price, 0) * toNumber(item.quantity, 1);
+    }
 
     const shippingCost = HELPERS.calculateShipping(subtotal);
     const total = subtotal + shippingCost;
-
-    // رقم مؤقت فقط لاستخراج السجل المحفوظ بأمان
     const tempOrderNumber = `TEMP-${Date.now()}`;
 
-    // 1) احفظ الطلب الرئيسي أولًا بدون الاعتماد على lastInsertRowid
     await db.run(
-      `INSERT INTO ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}
+      `INSERT INTO ${ORDERS_TABLE}
       (order_number, customer_name, customer_email, customer_phone, customer_address,
        customer_city, customer_district, subtotal, shipping_cost, total, status, notes)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -78,10 +124,9 @@ router.post('/', async (req, res) => {
       ]
     );
 
-    // 2) هات الـ id الحقيقي باستخدام الرقم المؤقت
     const savedOrder = await db.get(
       `SELECT id
-       FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}
+       FROM ${ORDERS_TABLE}
        WHERE order_number = ?
        ORDER BY id DESC
        LIMIT 1`,
@@ -96,53 +141,38 @@ router.post('/', async (req, res) => {
     }
 
     const savedOrderId = savedOrder.id;
-
-    // 3) توليد رقم الطلب النهائي بالتسلسل بعد آخر رقم Shopify = SK4060
     const SHOPIFY_LAST_ORDER = 4060;
     const nextOrderNumber = `SK${SHOPIFY_LAST_ORDER + savedOrderId}`;
 
     await db.run(
-      `UPDATE ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}
+      `UPDATE ${ORDERS_TABLE}
        SET order_number = ?
        WHERE id = ?`,
       [nextOrderNumber, savedOrderId]
     );
 
-    // 4) احفظ عناصر الطلب
     for (const item of items) {
       await db.run(
-        `INSERT INTO ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS}
-        (order_id, product_id, product_name, price, quantity)
-        VALUES (?, ?, ?, ?, ?)`,
+        `INSERT INTO ${ORDER_ITEMS_TABLE}
+        (order_id, product_id, product_name, product_image, price, quantity)
+        VALUES (?, ?, ?, ?, ?, ?)`,
         [
           savedOrderId,
           item.productId || `product_${Date.now()}`,
           item.name || 'منتج',
-          Number(item.price || 0),
-          Number(item.quantity || 1)
+          item.image || item.image_url || '',
+          toNumber(item.price, 0),
+          toNumber(item.quantity, 1)
         ]
       );
     }
 
-    // 5) نجاح مباشر
+    const createdOrder = await getOrderWithItems(savedOrderId);
+
     return res.status(201).json({
       success: true,
       message: 'تم إنشاء الطلب بنجاح',
-      data: {
-        id: savedOrderId,
-        order_number: nextOrderNumber,
-        customer_name: customerName,
-        customer_email: customerEmail,
-        customer_phone: customerPhone,
-        customer_address: customerAddress,
-        customer_city: customerCity || 'الكويت',
-        customer_district: customerDistrict || '',
-        subtotal,
-        shipping_cost: shippingCost,
-        total,
-        status: SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING,
-        notes: notes || ''
-      }
+      data: createdOrder
     });
 
   } catch (error) {
@@ -155,27 +185,27 @@ router.post('/', async (req, res) => {
 });
 
 /**
- * GET /api/orders/stats/summary - جلب الإحصائيات
- * ⚠️ MUST COME BEFORE GET /:id
+ * GET /api/orders/stats/summary
+ * MUST COME BEFORE GET /:id
  */
 router.get('/stats/summary', async (req, res) => {
   try {
     const totalOrders = await db.get(
-      `SELECT COUNT(*) as count FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}`
+      `SELECT COUNT(*) as count FROM ${ORDERS_TABLE}`
     );
 
     const ordersByStatus = await db.all(
       `SELECT status, COUNT(*) as count
-       FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}
+       FROM ${ORDERS_TABLE}
        GROUP BY status`
     );
 
     const totalRevenue = await db.get(
-      `SELECT SUM(total) as total FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}`
+      `SELECT SUM(total) as total FROM ${ORDERS_TABLE}`
     );
 
     const avgOrderValue = await db.get(
-      `SELECT AVG(total) as average FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}`
+      `SELECT AVG(total) as average FROM ${ORDERS_TABLE}`
     );
 
     return res.json({
@@ -200,18 +230,14 @@ router.get('/stats/summary', async (req, res) => {
 });
 
 /**
- * GET /api/orders/track/:orderNumber - تتبع الطلب برقمه
- * ⚠️ MUST COME BEFORE GET /:id
+ * GET /api/orders/track/:orderNumber
+ * MUST COME BEFORE GET /:id
  */
 router.get('/track/:orderNumber', async (req, res) => {
   try {
     const { orderNumber } = req.params;
 
-    const order = await db.get(
-      `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}
-       WHERE order_number = ?`,
-      [orderNumber]
-    );
+    const order = await getOrderByNumberWithItems(orderNumber);
 
     if (!order) {
       return res.status(404).json({
@@ -220,17 +246,10 @@ router.get('/track/:orderNumber', async (req, res) => {
       });
     }
 
-    const items = await db.all(
-      `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS}
-       WHERE order_id = ?`,
-      [order.id]
-    );
-
     return res.json({
       success: true,
       data: {
         ...order,
-        items,
         statusLabel: HELPERS.getStatusLabel(order.status),
         statusColor: HELPERS.getStatusColor(order.status)
       }
@@ -245,15 +264,20 @@ router.get('/track/:orderNumber', async (req, res) => {
 });
 
 /**
- * PUT /api/orders/:id - تحديث الطلب
+ * PUT /api/orders/:id/customer
+ * تعديل بيانات العميل
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id/customer', async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, notes, customerEmail, customerPhone, customerAddress } = req.body;
+    const {
+      customerName,
+      customerEmail,
+      customerPhone
+    } = req.body;
 
     const order = await db.get(
-      `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS} WHERE id = ?`,
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
       [id]
     );
 
@@ -264,11 +288,423 @@ router.put('/:id', async (req, res) => {
       });
     }
 
-    let updateFields = [];
-    let updateValues = [];
+    const updateFields = [];
+    const updateValues = [];
 
-    if (status) {
-      if (!Object.values(SYSTEM_CONFIG.ORDER_CONFIG.STATUSES).includes(status)) {
+    if (customerName !== undefined) {
+      const value = String(customerName || '').trim();
+      if (!value) {
+        return res.status(400).json({
+          success: false,
+          error: 'اسم العميل غير صحيح'
+        });
+      }
+      updateFields.push('customer_name = ?');
+      updateValues.push(value);
+    }
+
+    if (customerEmail !== undefined) {
+      const value = String(customerEmail || '').trim();
+      if (!HELPERS.validateEmail(value)) {
+        return res.status(400).json({
+          success: false,
+          error: 'البريد الإلكتروني غير صحيح'
+        });
+      }
+      updateFields.push('customer_email = ?');
+      updateValues.push(value);
+    }
+
+    if (customerPhone !== undefined) {
+      const value = String(customerPhone || '').trim();
+      if (!HELPERS.validateKuwaitiPhone(value)) {
+        return res.status(400).json({
+          success: false,
+          error: 'رقم الهاتف غير صحيح'
+        });
+      }
+      updateFields.push('customer_phone = ?');
+      updateValues.push(value);
+    }
+
+    if (!updateFields.length) {
+      return res.status(400).json({
+        success: false,
+        error: 'لا توجد بيانات لتحديث العميل'
+      });
+    }
+
+    updateFields.push('updated_at = CURRENT_TIMESTAMP');
+    updateValues.push(id);
+
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET ${updateFields.join(', ')}
+       WHERE id = ?`,
+      updateValues
+    );
+
+    const updatedOrder = await getOrderWithItems(id);
+
+    return res.json({
+      success: true,
+      message: 'تم تحديث بيانات العميل بنجاح',
+      data: updatedOrder
+    });
+  } catch (error) {
+    console.error('❌ خطأ في تحديث بيانات العميل:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'فشل في تحديث بيانات العميل'
+    });
+  }
+});
+
+/**
+ * PUT /api/orders/:id/shipping
+ * تعديل العنوان والشحن
+ */
+router.put('/:id/shipping', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      customerAddress,
+      customerCity,
+      customerDistrict,
+      shippingCost
+    } = req.body;
+
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'الطلب غير موجود'
+      });
+    }
+
+    const updateFields = [];
+    const updateValues = [];
+
+    if (customerAddress !== undefined) {
+      const value = String(customerAddress || '').trim();
+      if (!value) {
+        return res.status(400).json({
+          success: false,
+          error: 'العنوان غير صحيح'
+        });
+      }
+      updateFields.push('customer_address = ?');
+      updateValues.push(value);
+    }
+
+    if (customerCity !== undefined) {
+      updateFields.push('customer_city = ?');
+      updateValues.push(String(customerCity || '').trim());
+    }
+
+    if (customerDistrict !== undefined) {
+      updateFields.push('customer_district = ?');
+      updateValues.push(String(customerDistrict || '').trim());
+    }
+
+    if (shippingCost !== undefined) {
+      const finalShipping = toNumber(shippingCost, 0);
+      const subtotal = toNumber(order.subtotal, 0);
+      const newTotal = subtotal + finalShipping;
+
+      updateFields.push('shipping_cost = ?');
+      updateValues.push(finalShipping);
+
+      updateFields.push('total = ?');
+      updateValues.push(newTotal);
+    }
+
+    if (!updateFields.length) {
+      return res.status(400).json({
+        success: false,
+        error: 'لا توجد بيانات لتحديث الشحن'
+      });
+    }
+
+    updateFields.push('updated_at = CURRENT_TIMESTAMP');
+    updateValues.push(id);
+
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET ${updateFields.join(', ')}
+       WHERE id = ?`,
+      updateValues
+    );
+
+    const updatedOrder = await getOrderWithItems(id);
+
+    return res.json({
+      success: true,
+      message: 'تم تحديث بيانات الشحن بنجاح',
+      data: updatedOrder
+    });
+  } catch (error) {
+    console.error('❌ خطأ في تحديث الشحن:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'فشل في تحديث الشحن'
+    });
+  }
+});
+
+/**
+ * PUT /api/orders/:id/notes
+ * تعديل الملاحظات
+ */
+router.put('/:id/notes', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { notes } = req.body;
+
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'الطلب غير موجود'
+      });
+    }
+
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET notes = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [notes || '', id]
+    );
+
+    const updatedOrder = await getOrderWithItems(id);
+
+    return res.json({
+      success: true,
+      message: 'تم تحديث الملاحظات بنجاح',
+      data: updatedOrder
+    });
+  } catch (error) {
+    console.error('❌ خطأ في تحديث الملاحظات:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'فشل في تحديث الملاحظات'
+    });
+  }
+});
+
+/**
+ * POST /api/orders/:id/mark-paid
+ * تعليم الطلب كمدفوع
+ */
+router.post('/:id/mark-paid', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'الطلب غير موجود'
+      });
+    }
+
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET status = ?, completed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.COMPLETED, id]
+    );
+
+    const updatedOrder = await getOrderWithItems(id);
+
+    return res.json({
+      success: true,
+      message: 'تم تعليم الطلب كمدفوع',
+      data: updatedOrder
+    });
+  } catch (error) {
+    console.error('❌ خطأ في تعليم الطلب كمدفوع:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'فشل في تحديث حالة الدفع'
+    });
+  }
+});
+
+/**
+ * POST /api/orders/:id/fulfill
+ * تعليم الطلب كمنفذ / مشحون
+ */
+router.post('/:id/fulfill', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'الطلب غير موجود'
+      });
+    }
+
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET status = ?, shipped_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.SHIPPED, id]
+    );
+
+    const updatedOrder = await getOrderWithItems(id);
+
+    return res.json({
+      success: true,
+      message: 'تم تنفيذ الطلب بنجاح',
+      data: updatedOrder
+    });
+  } catch (error) {
+    console.error('❌ خطأ في تنفيذ الطلب:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'فشل في تنفيذ الطلب'
+    });
+  }
+});
+
+/**
+ * POST /api/orders/:id/archive
+ */
+router.post('/:id/archive', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'الطلب غير موجود'
+      });
+    }
+
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET status = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.CANCELLED, id]
+    );
+
+    const updatedOrder = await getOrderWithItems(id);
+
+    return res.json({
+      success: true,
+      message: 'تم أرشفة الطلب',
+      data: updatedOrder
+    });
+  } catch (error) {
+    console.error('❌ خطأ في أرشفة الطلب:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'فشل في أرشفة الطلب'
+    });
+  }
+});
+
+/**
+ * POST /api/orders/:id/cancel
+ */
+router.post('/:id/cancel', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'الطلب غير موجود'
+      });
+    }
+
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET status = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.CANCELLED, id]
+    );
+
+    const updatedOrder = await getOrderWithItems(id);
+
+    return res.json({
+      success: true,
+      message: 'تم إلغاء الطلب',
+      data: updatedOrder
+    });
+  } catch (error) {
+    console.error('❌ خطأ في إلغاء الطلب:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'فشل في إلغاء الطلب'
+    });
+  }
+});
+
+/**
+ * PUT /api/orders/:id - تحديث عام للطلب
+ */
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      status,
+      notes,
+      customerName,
+      customerEmail,
+      customerPhone,
+      customerAddress,
+      customerCity,
+      customerDistrict,
+      shippingCost
+    } = req.body;
+
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'الطلب غير موجود'
+      });
+    }
+
+    const updateFields = [];
+    const updateValues = [];
+
+    if (status !== undefined) {
+      if (!isValidOrderStatus(status)) {
         return res.status(400).json({
           success: false,
           error: 'حالة الطلب غير صحيحة'
@@ -278,82 +714,113 @@ router.put('/:id', async (req, res) => {
       updateFields.push('status = ?');
       updateValues.push(status);
 
-      if (status === SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.SHIPPED && !order.shipped_at) {
+      if (status === SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.SHIPPED) {
         updateFields.push('shipped_at = CURRENT_TIMESTAMP');
       }
 
-      if (status === SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.COMPLETED && !order.completed_at) {
+      if (status === SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.COMPLETED) {
         updateFields.push('completed_at = CURRENT_TIMESTAMP');
       }
     }
 
     if (notes !== undefined) {
       updateFields.push('notes = ?');
-      updateValues.push(notes);
+      updateValues.push(notes || '');
     }
 
-    if (customerEmail) {
-      if (!HELPERS.validateEmail(customerEmail)) {
+    if (customerName !== undefined) {
+      const value = String(customerName || '').trim();
+      if (!value) {
+        return res.status(400).json({
+          success: false,
+          error: 'اسم العميل غير صحيح'
+        });
+      }
+      updateFields.push('customer_name = ?');
+      updateValues.push(value);
+    }
+
+    if (customerEmail !== undefined) {
+      const value = String(customerEmail || '').trim();
+      if (!HELPERS.validateEmail(value)) {
         return res.status(400).json({
           success: false,
           error: 'البريد الإلكتروني غير صحيح'
         });
       }
       updateFields.push('customer_email = ?');
-      updateValues.push(customerEmail);
+      updateValues.push(value);
     }
 
-    if (customerPhone) {
-      if (!HELPERS.validateKuwaitiPhone(customerPhone)) {
+    if (customerPhone !== undefined) {
+      const value = String(customerPhone || '').trim();
+      if (!HELPERS.validateKuwaitiPhone(value)) {
         return res.status(400).json({
           success: false,
           error: 'رقم الهاتف غير صحيح'
         });
       }
       updateFields.push('customer_phone = ?');
-      updateValues.push(customerPhone);
+      updateValues.push(value);
     }
 
-    if (customerAddress) {
+    if (customerAddress !== undefined) {
+      const value = String(customerAddress || '').trim();
+      if (!value) {
+        return res.status(400).json({
+          success: false,
+          error: 'العنوان غير صحيح'
+        });
+      }
       updateFields.push('customer_address = ?');
-      updateValues.push(customerAddress);
+      updateValues.push(value);
     }
 
-    updateFields.push('updated_at = CURRENT_TIMESTAMP');
+    if (customerCity !== undefined) {
+      updateFields.push('customer_city = ?');
+      updateValues.push(String(customerCity || '').trim());
+    }
 
-    if (updateFields.length === 0) {
+    if (customerDistrict !== undefined) {
+      updateFields.push('customer_district = ?');
+      updateValues.push(String(customerDistrict || '').trim());
+    }
+
+    if (shippingCost !== undefined) {
+      const finalShipping = toNumber(shippingCost, 0);
+      const subtotal = toNumber(order.subtotal, 0);
+      const newTotal = subtotal + finalShipping;
+
+      updateFields.push('shipping_cost = ?');
+      updateValues.push(finalShipping);
+
+      updateFields.push('total = ?');
+      updateValues.push(newTotal);
+    }
+
+    if (!updateFields.length) {
       return res.status(400).json({
         success: false,
         error: 'لا توجد بيانات للتحديث'
       });
     }
 
+    updateFields.push('updated_at = CURRENT_TIMESTAMP');
     updateValues.push(id);
 
     await db.run(
-      `UPDATE ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}
+      `UPDATE ${ORDERS_TABLE}
        SET ${updateFields.join(', ')}
        WHERE id = ?`,
       updateValues
     );
 
-    const updatedOrder = await db.get(
-      `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS} WHERE id = ?`,
-      [id]
-    );
-
-    const items = await db.all(
-      `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS} WHERE order_id = ?`,
-      [id]
-    );
+    const updatedOrder = await getOrderWithItems(id);
 
     return res.json({
       success: true,
       message: 'تم تحديث الطلب بنجاح',
-      data: {
-        ...updatedOrder,
-        items
-      }
+      data: updatedOrder
     });
   } catch (error) {
     console.error('❌ خطأ في تحديث الطلب:', error);
@@ -372,7 +839,7 @@ router.delete('/:id', async (req, res) => {
     const { id } = req.params;
 
     const order = await db.get(
-      `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS} WHERE id = ?`,
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
       [id]
     );
 
@@ -384,7 +851,7 @@ router.delete('/:id', async (req, res) => {
     }
 
     await db.run(
-      `DELETE FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS} WHERE id = ?`,
+      `DELETE FROM ${ORDERS_TABLE} WHERE id = ?`,
       [id]
     );
 
@@ -412,10 +879,7 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const order = await db.get(
-      `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS} WHERE id = ?`,
-      [id]
-    );
+    const order = await getOrderWithItems(id);
 
     if (!order) {
       return res.status(404).json({
@@ -424,17 +888,9 @@ router.get('/:id', async (req, res) => {
       });
     }
 
-    const items = await db.all(
-      `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS} WHERE order_id = ?`,
-      [id]
-    );
-
     return res.json({
       success: true,
-      data: {
-        ...order,
-        items
-      }
+      data: order
     });
   } catch (error) {
     console.error('❌ خطأ في جلب الطلب:', error);
@@ -452,8 +908,8 @@ router.get('/', async (req, res) => {
   try {
     const { status, limit = 50, offset = 0, sort = 'created_at', order = 'DESC' } = req.query;
 
-    let sql = `SELECT * FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}`;
-    let params = [];
+    let sql = `SELECT * FROM ${ORDERS_TABLE}`;
+    const params = [];
 
     if (status) {
       sql += ` WHERE status = ?`;
@@ -463,15 +919,16 @@ router.get('/', async (req, res) => {
     const validSortColumns = ['created_at', 'updated_at', 'total', 'order_number', 'status'];
     const sortColumn = validSortColumns.includes(sort) ? sort : 'created_at';
     const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-    sql += ` ORDER BY ${sortColumn} ${sortOrder}`;
 
+    sql += ` ORDER BY ${sortColumn} ${sortOrder}`;
     sql += ` LIMIT ? OFFSET ?`;
     params.push(parseInt(limit, 10), parseInt(offset, 10));
 
     const orders = await db.all(sql, params);
 
-    let countSql = `SELECT COUNT(*) as total FROM ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}`;
-    let countParams = [];
+    let countSql = `SELECT COUNT(*) as total FROM ${ORDERS_TABLE}`;
+    const countParams = [];
+
     if (status) {
       countSql += ` WHERE status = ?`;
       countParams.push(status);
