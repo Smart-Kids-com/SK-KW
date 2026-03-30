@@ -152,7 +152,6 @@ npm start
 | `db/init.js` | قاعدة البيانات |
 | `routes/orders.js` | API endpoints |
 | `public/admin-enhanced.html` | لوحة الإدارة |
-| `public/track.html` | تتبع الطلب |
 | `config/system.js` | الإعدادات والـ helpers |
 
 ---

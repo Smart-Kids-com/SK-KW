@@ -321,7 +321,7 @@
         </div>
 
         <div class="actions">
-          <a id="trackBtn" class="btn primary" href="./track.html">تتبع الطلب</a>
+          <a id="indexBtn" class="btn primary" href="./index.html">تتبع الطلب</a>
           <a class="btn light" href="./index.html">العودة للمتجر</a>
         </div>
       </div>
@@ -407,52 +407,10 @@
       document.getElementById('shipping').textContent = H.formatCurrency(order.shipping_cost || 0);
       document.getElementById('total').textContent = H.formatCurrency(order.total || 0);
 
-      document.getElementById('trackBtn').href = `./track.html?order=${encodeURIComponent(order.order_number || '')}`;
-
       renderItems(order.items || []);
 
       document.getElementById('orderSection').classList.remove('hide');
     }
-
-    async function loadOrder() {
-      const params = new URLSearchParams(window.location.search);
-      const orderNumberFromUrl = params.get('order');
-
-      let orderNumber = orderNumberFromUrl;
-
-      if (!orderNumber) {
-        try {
-          const lastOrder = JSON.parse(localStorage.getItem('last_order') || 'null');
-          orderNumber = lastOrder?.order_number || lastOrder?.orderNumber || '';
-        } catch {
-          orderNumber = '';
-        }
-      }
-
-      if (!orderNumber) {
-        showLoading(false);
-        showAlert('لا يوجد رقم طلب لعرضه', 'error');
-        return;
-      }
-
-      try {
-        const response = await fetch(`/api/orders/track/${encodeURIComponent(orderNumber)}`);
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || 'تعذر تحميل بيانات الطلب');
-        }
-
-        renderOrder(data.data);
-      } catch (error) {
-        console.error('❌ Track fetch error:', error);
-        showAlert(error.message || 'تعذر تحميل بيانات الطلب', 'error');
-      } finally {
-        showLoading(false);
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', loadOrder);
   </script>
 </body>
 </html>
