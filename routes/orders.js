@@ -5,7 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db/turso-manager');
-const { SYSTEM_CONFIG, HELPERS } = require('../public/config/system');
+const { SYSTEM_CONFIG, HELPERS } = require('../config/system');
 
 const ORDERS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS;
 const ORDER_ITEMS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS;
