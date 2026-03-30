@@ -1804,6 +1804,11 @@
             <label for="editOrderAddress">Address</label>
             <textarea id="editOrderAddress"></textarea>
           </div>
+           
+          <div class="form-group">
+            <label for="editOrderShippingCost">Shipping cost (KWD)</label>
+            <input type="number" id="editOrderShippingCost" min="0" step="0.001" placeholder="0.000">
+         </div>
 
           <div class="modal-footer">
             <button type="button" class="ghost-btn" onclick="closeModal('editOrderModal')">Cancel</button>
@@ -2371,7 +2376,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('editOrderPhone').value = order.customer_phone || '';
         document.getElementById('editOrderEmail').value = order.customer_email || '';
         document.getElementById('editOrderAddress').value = order.customer_address || '';
-
+        document.getElementById('editOrderShippingCost').value = Number(order.shipping_cost || 0).toFixed(3);
         openModal('editOrderModal');
       } catch (error) {
         showAlert(error.message || 'Failed to load order', 'error');
@@ -2422,13 +2427,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         const orderId = document.getElementById('editOrderId').value;
         const updateData = {
-          status: document.getElementById('editOrderStatus').value,
-          notes: document.getElementById('editOrderNotes').value,
-          customerPhone: document.getElementById('editOrderPhone').value,
-          customerEmail: document.getElementById('editOrderEmail').value,
-          customerAddress: document.getElementById('editOrderAddress').value
-        };
-
+       status: document.getElementById('editOrderStatus').value,
+       notes: document.getElementById('editOrderNotes').value,
+       customerPhone: document.getElementById('editOrderPhone').value,
+       customerEmail: document.getElementById('editOrderEmail').value,
+       customerAddress: document.getElementById('editOrderAddress').value,
+      shippingCost: parseFloat(document.getElementById('editOrderShippingCost').value || '0')
+  };
         const response = await fetch(`${API_BASE}/${orderId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
