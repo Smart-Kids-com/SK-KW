@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Order Details - Smart Kids Kuwait</title>
-  <script src="/config/system.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
 
@@ -1539,10 +1538,17 @@
 
   <script>
     const API_BASE = '/api/orders';
+    
     const HELPERS_FALLBACK = {
       formatCurrency(value) {
         const num = Number(value || 0);
         return `KWD ${num.toFixed(3)}`;
+      },
+      formatDate(value) {
+        if (!value) return '-';
+        const d = new Date(value);
+        if (isNaN(d)) return value;
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
       },
       formatDateTime(value) {
         if (!value) return '-';

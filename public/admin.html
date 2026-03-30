@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>لوحة إدارة Smart Kids Store</title>
+  <title>دخول الإدارة | Smart Kids Store</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -14,537 +14,325 @@
       --warning:#ffc107;
       --danger:#dc3545;
       --info:#007bff;
+      --text:#2f2f35;
+      --muted:#6b7280;
+      --card:#ffffff;
+      --line:#ececf2;
+      --shadow:0 20px 50px rgba(24,24,39,.16);
     }
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
-      color: #333;
-    }
-
-    .admin-header {
-      background: rgba(255,255,255,0.95);
-      padding: 1rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      text-align: center;
-      margin-bottom: 2rem;
-      position: relative;
-    }
-
-    .admin-header h1 {
-      color: #667eea;
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .logout-btn{
-      position: absolute;
-      left: 20px;
-      top: 20px;
-      padding: 8px 16px;
-      background: var(--danger);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 700;
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 1rem 2rem;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .stat-card {
-      background: white;
-      border-radius: 15px;
-      padding: 1.5rem;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
-
-    .stat-number {
-      font-size: 2.3rem;
-      font-weight: bold;
-      color: #667eea;
-      margin-bottom: 0.5rem;
-    }
-
-    .stat-label {
-      font-size: 1rem;
-      color: #666;
-    }
-
-    .orders-section {
-      background: white;
-      border-radius: 20px;
-      padding: 2rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      margin-bottom: 2rem;
-    }
-
-    .section-title {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .toolbar{
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(255,255,255,.24), transparent 28%),
+        linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display:flex;
-      gap:10px;
-      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
     }
 
-    .export-btn {
-      padding: 10px 18px;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
+    .shell{
+      width:min(100%, 1120px);
+      display:grid;
+      grid-template-columns:1.08fr .92fr;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:28px;
+      overflow:hidden;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
     }
 
-    .btn-green{ background: var(--success); }
-    .btn-green:hover{ background:#218838; }
-    .btn-red{ background: var(--danger); }
-    .btn-red:hover{ background:#c82333; }
-
-    .orders-table-wrap{
-      overflow:auto;
-      width:100%;
+    .hero-side{
+      padding:48px 42px;
+      color:#fff;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      min-height:650px;
     }
 
-    .orders-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-      min-width: 850px;
+    .hero-badge{
+      width:max-content;
+      padding:10px 16px;
+      border-radius:999px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.18);
+      font-weight:800;
+      font-size:.95rem;
     }
 
-    .orders-table th,
-    .orders-table td {
-      padding: 12px;
-      text-align: right;
-      border-bottom: 1px solid #eee;
-      vertical-align: top;
+    .hero-content h1{
+      font-size:clamp(2rem, 4vw, 3.2rem);
+      line-height:1.12;
+      margin:22px 0 14px;
+      font-weight:900;
     }
 
-    .orders-table th {
-      background: #f8f9fa;
-      font-weight: bold;
-      color: #333;
-      position: sticky;
-      top: 0;
-      z-index: 1;
+    .hero-content p{
+      max-width:530px;
+      line-height:1.9;
+      color:rgba(255,255,255,.9);
+      font-size:1.02rem;
     }
 
-    .orders-table tr:hover {
-      background: #f8f9fa;
+    .feature-list{
+      display:grid;
+      gap:14px;
+      margin-top:28px;
     }
 
-    .status {
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: bold;
-      display:inline-block;
+    .feature{
+      padding:16px 18px;
+      border-radius:18px;
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.12);
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
     }
 
-    .status.new { background: #fff3cd; color: #856404; }
-    .status.processing { background: #cce5ff; color: #004085; }
-    .status.completed { background: #d4edda; color: #155724; }
-
-    .order-details {
-      background: #f8f9fa;
-      padding: 1rem;
-      border-radius: 10px;
-      margin: 1rem 0;
-      display: none;
+    .feature-icon{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,.16);
+      font-size:1.15rem;
+      flex:0 0 auto;
     }
 
-    .order-details h4{
-      margin-bottom: .75rem;
-      color: var(--primary);
+    .feature strong{
+      display:block;
+      margin-bottom:5px;
+      font-size:1rem;
     }
 
-    .order-details p{
-      margin-bottom: .5rem;
+    .feature span{
+      color:rgba(255,255,255,.84);
+      line-height:1.7;
+      font-size:.95rem;
     }
 
-    .order-details ul{
-      padding-right: 1.25rem;
-      margin-top: .5rem;
+    .hero-footer{
+      color:rgba(255,255,255,.8);
+      font-size:.92rem;
     }
 
-    .login-form {
-      max-width: 400px;
-      margin: 5rem auto;
-      background: white;
-      padding: 2rem;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    .login-side{
+      background:#fff;
+      padding:42px 34px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .login-card{
+      width:min(100%, 420px);
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:#f6f2fb;
+      color:var(--primary);
+      font-weight:800;
+      margin-bottom:18px;
+      font-size:.88rem;
+    }
+
+    .login-card h2{
+      font-size:2rem;
+      line-height:1.2;
+      margin-bottom:10px;
+      color:#27272f;
+    }
+
+    .login-card p{
+      color:var(--muted);
+      line-height:1.8;
+      margin-bottom:28px;
+    }
+
+    .error-box{
+      display:none;
+      margin-bottom:18px;
+      padding:14px 16px;
+      border-radius:14px;
+      background:#fff1f2;
+      border:1px solid #ffd6db;
+      color:#a61b34;
+      font-weight:700;
+      line-height:1.7;
+    }
+
+    .error-box.active{
+      display:block;
     }
 
     .form-group {
-      margin-bottom: 1rem;
+      margin-bottom: 16px;
     }
 
     .form-group label {
       display: block;
-      margin-bottom: 0.5rem;
-      font-weight: bold;
+      margin-bottom: 8px;
+      font-weight: 800;
+      color: #3a3a43;
+      font-size: .95rem;
     }
 
     .form-group input {
       width: 100%;
-      padding: 12px;
-      border: 2px solid #eee;
-      border-radius: 10px;
+      height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 0 16px;
       font-size: 1rem;
+      background:#fff;
+      transition:.2s border-color,.2s box-shadow;
     }
 
     .form-group input:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: #8f69be;
+      box-shadow:0 0 0 4px rgba(106,76,147,.10);
     }
 
     .login-btn {
       width: 100%;
-      padding: 15px;
+      height: 56px;
       background: linear-gradient(45deg, #667eea, #764ba2);
       color: white;
       border: none;
-      border-radius: 10px;
-      font-size: 1.1rem;
-      font-weight: bold;
+      border-radius: 16px;
+      font-size: 1rem;
+      font-weight: 900;
       cursor: pointer;
+      box-shadow:0 14px 28px rgba(106,76,147,.24);
+      transition:transform .15s ease, box-shadow .15s ease;
     }
 
-    .actions {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      flex-wrap: wrap;
+    .login-btn:hover {
+      transform:translateY(-1px);
+      box-shadow:0 18px 34px rgba(106,76,147,.28);
     }
 
-    .btn {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: bold;
-    }
-
-    .btn-view { background: var(--info); color: white; }
-    .btn-edit { background: var(--warning); color: #212529; }
-    .btn-delete { background: var(--danger); color: white; }
-
-    .no-orders {
-      text-align: center;
-      padding: 3rem;
-      color: #666;
-      font-size: 1.2rem;
-    }
-
-    .hint{
-      margin-top:1rem;
+    .helper{
+      margin-top:16px;
       text-align:center;
-      color:#666;
-      font-size:.95rem;
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.7;
     }
 
-    @media (max-width: 768px){
-      .admin-header h1{ font-size:1.5rem; }
-      .logout-btn{
-        position: static;
-        margin-top: 1rem;
+    @media (max-width: 900px){
+      .shell{
+        grid-template-columns:1fr;
       }
-      .section-title{
-        flex-direction:column;
-        align-items:flex-start;
+
+      .hero-side{
+        min-height:auto;
+        padding:32px 24px;
+      }
+
+      .login-side{
+        padding:30px 20px 34px;
       }
     }
   </style>
 </head>
 <body>
-  <div id="loginForm" class="login-form">
-    <h2 style="text-align: center; color: #667eea; margin-bottom: 2rem;">🔐 دخول الإدارة</h2>
-    <form onsubmit="login(event)">
-      <div class="form-group">
-        <label>كلمة المرور:</label>
-        <input type="password" id="password" required>
-      </div>
-      <button type="submit" class="login-btn">دخول</button>
-    </form>
-    <div class="hint">هذه الصفحة تقرأ الطلبات من نفس المتصفح عبر LocalStorage.</div>
-  </div>
+  <div class="shell">
+    <section class="hero-side">
+      <div>
+        <div class="hero-badge">🔐 Smart Kids Admin Access</div>
 
-  <div id="adminPanel" style="display:none;">
-    <div class="admin-header">
-      <h1>🏪 لوحة إدارة Smart Kids Store</h1>
-      <p>إدارة شاملة للطلبات والمبيعات</p>
-      <button onclick="logout()" class="logout-btn">خروج</button>
-    </div>
+        <div class="hero-content">
+          <h1>بوابة الإدارة الآمنة<br>للوحة التحكم المتقدمة</h1>
+          <p>
+            هذه الصفحة هي واجهة الدخول الرسمية قبل لوحة
+            <span dir="ltr">admin-enhanced</span>.
+            بعد إدخال كلمة المرور الصحيحة سيتم تحويلك مباشرة إلى لوحة الإدارة المتقدمة
+            المرتبطة بالطلبات والمنتجات والـ backend الحالي.
+          </p>
+        </div>
 
-    <div class="container">
-      <div class="stats">
-        <div class="stat-card">
-          <div class="stat-number" id="totalOrders">0</div>
-          <div class="stat-label">إجمالي الطلبات</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="todayOrders">0</div>
-          <div class="stat-label">طلبات اليوم</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="totalSales">0.000 د.ك</div>
-          <div class="stat-label">إجمالي المبيعات</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="avgOrder">0.000 د.ك</div>
-          <div class="stat-label">متوسط الطلب</div>
-        </div>
-      </div>
+        <div class="feature-list">
+          <div class="feature">
+            <div class="feature-icon">📦</div>
+            <div>
+              <strong>Orders + Products</strong>
+              <span>الدخول يفتح لك اللوحة المتقدمة الأساسية المتصلة ببيانات الطلبات والمنتجات الحالية.</span>
+            </div>
+          </div>
 
-      <div class="orders-section">
-        <div class="section-title">
-          <span>📋 الطلبات</span>
-          <div class="toolbar">
-            <button class="export-btn btn-green" onclick="exportToCSV()">📊 تصدير CSV</button>
-            <button class="export-btn btn-red" onclick="clearAllOrders()">🗑️ مسح الكل</button>
+          <div class="feature">
+            <div class="feature-icon">🛡️</div>
+            <div>
+              <strong>حماية قبل الدخول</strong>
+              <span>أي محاولة لفتح صفحة الإدارة المتقدمة مباشرة ستعود أولًا إلى صفحة تسجيل الدخول هذه.</span>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div id="ordersContainer">
-          <div class="no-orders">لا توجد طلبات حتى الآن</div>
+      <div class="hero-footer">
+        Smart Kids Store • Admin Gateway
+      </div>
+    </section>
+
+    <section class="login-side">
+      <div class="login-card">
+        <div class="eyebrow">✨ دخول الإدارة</div>
+        <h2>أدخل كلمة المرور</h2>
+        <p>بعد التحقق سيتم نقلك تلقائيًا إلى لوحة <span dir="ltr">admin-enhanced</span>.</p>
+
+        <div id="errorBox" class="error-box"></div>
+
+        <form method="POST" action="/admin-login">
+          <input type="hidden" name="next" id="nextInput" value="/admin-enhanced" />
+
+          <div class="form-group">
+            <label for="password">كلمة المرور</label>
+            <input type="password" id="password" name="password" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" class="login-btn">دخول إلى لوحة الإدارة</button>
+        </form>
+
+        <div class="helper">
+          بعد تسجيل الدخول الصحيح سيتم حفظ جلسة الإدارة مؤقتًا داخل المتصفح.
         </div>
       </div>
-    </div>
+    </section>
   </div>
 
   <script>
-    function getOrders() {
-      return JSON.parse(localStorage.getItem('orders') || '[]');
-    }
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const next = params.get('next');
+      const error = params.get('error');
 
-    function setOrders(orders) {
-      localStorage.setItem('orders', JSON.stringify(orders));
-    }
-
-    function login(event) {
-      event.preventDefault();
-      const password = document.getElementById('password').value;
-
-      if (password === 'admin123' || password === 'smartkids2024') {
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('adminPanel').style.display = 'block';
-        loadDashboard();
-      } else {
-        alert('كلمة مرور خاطئة!');
-      }
-    }
-
-    function logout() {
-      document.getElementById('loginForm').style.display = 'block';
-      document.getElementById('adminPanel').style.display = 'none';
-      document.getElementById('password').value = '';
-    }
-
-    function loadDashboard() {
-      const orders = getOrders();
-      updateStats(orders);
-      updateOrdersTable(orders);
-    }
-
-    function updateStats(orders) {
-      const today = new Date().toDateString();
-      const todayOrders = orders.filter(order => {
-        const d = new Date(order.date);
-        return !isNaN(d) && d.toDateString() === today;
-      });
-
-      const totalSales = orders.reduce((sum, order) => sum + Number(order.total || 0), 0);
-      const avgOrder = orders.length > 0 ? totalSales / orders.length : 0;
-
-      document.getElementById('totalOrders').textContent = orders.length;
-      document.getElementById('todayOrders').textContent = todayOrders.length;
-      document.getElementById('totalSales').textContent = totalSales.toFixed(3) + ' د.ك';
-      document.getElementById('avgOrder').textContent = avgOrder.toFixed(3) + ' د.ك';
-    }
-
-    function updateOrdersTable(orders) {
-      const container = document.getElementById('ordersContainer');
-
-      if (orders.length === 0) {
-        container.innerHTML = '<div class="no-orders">لا توجد طلبات حتى الآن</div>';
-        return;
+      if (next) {
+        document.getElementById('nextInput').value = next;
       }
 
-      const reversed = [...orders].reverse();
-
-      let tableHtml = `
-        <div class="orders-table-wrap">
-          <table class="orders-table">
-            <thead>
-              <tr>
-                <th>رقم الطلب</th>
-                <th>العميل</th>
-                <th>الهاتف</th>
-                <th>الإجمالي</th>
-                <th>التاريخ</th>
-                <th>الحالة</th>
-                <th>الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-
-      reversed.forEach((order, reversedIndex) => {
-        const originalIndex = orders.length - 1 - reversedIndex;
-        const status = order.status || 'new';
-        const statusText = {
-          new: 'جديد',
-          processing: 'قيد المعالجة',
-          completed: 'مكتمل'
-        };
-
-        const safeTotal = Number(order.total || 0).toFixed(3);
-        const safeDate = new Date(order.date);
-        const dateText = isNaN(safeDate) ? (order.date || '') : safeDate.toLocaleDateString('ar-EG');
-
-        tableHtml += `
-          <tr>
-            <td><strong>${escapeHtml(order.orderNumber || '')}</strong></td>
-            <td>${escapeHtml(order.customerName || '')}</td>
-            <td>${escapeHtml(order.customerPhone || '')}</td>
-            <td><strong>${safeTotal} د.ك</strong></td>
-            <td>${escapeHtml(dateText)}</td>
-            <td><span class="status ${status}">${statusText[status] || 'جديد'}</span></td>
-            <td class="actions">
-              <button class="btn btn-view" onclick="viewOrder(${originalIndex})">عرض</button>
-              <button class="btn btn-edit" onclick="changeStatus(${originalIndex})">تغيير الحالة</button>
-              <button class="btn btn-delete" onclick="deleteOrder(${originalIndex})">حذف</button>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="7">
-              <div class="order-details" id="details-${originalIndex}">
-                <h4>تفاصيل الطلب</h4>
-                <p><strong>العنوان:</strong> ${escapeHtml(order.customerAddress || '')}</p>
-                <p><strong>البريد الإلكتروني:</strong> ${escapeHtml(order.customerEmail || 'غير محدد')}</p>
-                <p><strong>المنتجات:</strong></p>
-                <ul>
-                  ${(order.items || []).map(item =>
-                    `<li>${escapeHtml(item.name || '')} - الكمية: ${Number(item.quantity || 0)} - السعر: ${Number(item.price || 0).toFixed(3)} د.ك</li>`
-                  ).join('')}
-                </ul>
-              </div>
-            </td>
-          </tr>
-        `;
-      });
-
-      tableHtml += '</tbody></table></div>';
-      container.innerHTML = tableHtml;
-    }
-
-    function viewOrder(index) {
-      const details = document.getElementById(`details-${index}`);
-      if (!details) return;
-      details.style.display = details.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function changeStatus(index) {
-      const orders = getOrders();
-      if (!orders[index]) return;
-
-      const newStatus = prompt(
-        'اختر الحالة الجديدة:\nnew - جديد\nprocessing - قيد المعالجة\ncompleted - مكتمل',
-        orders[index].status || 'new'
-      );
-
-      if (newStatus && ['new', 'processing', 'completed'].includes(newStatus)) {
-        orders[index].status = newStatus;
-        setOrders(orders);
-        loadDashboard();
+      if (error) {
+        const box = document.getElementById('errorBox');
+        box.textContent = decodeURIComponent(error);
+        box.classList.add('active');
       }
-    }
-
-    function deleteOrder(index) {
-      if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
-
-      const orders = getOrders();
-      if (!orders[index]) return;
-
-      orders.splice(index, 1);
-      setOrders(orders);
-      loadDashboard();
-    }
-
-    function clearAllOrders() {
-      if (!confirm('هل أنت متأكد من حذف جميع الطلبات؟ هذا الإجراء لا يمكن التراجع عنه!')) return;
-      localStorage.removeItem('orders');
-      loadDashboard();
-    }
-
-    function exportToCSV() {
-      const orders = getOrders();
-
-      if (orders.length === 0) {
-        alert('لا توجد طلبات لتصديرها');
-        return;
-      }
-
-      let csvContent = 'رقم الطلب,العميل,الهاتف,البريد الإلكتروني,العنوان,الإجمالي,التاريخ,الحالة,المنتجات\n';
-
-      orders.forEach(order => {
-        const items = (order.items || [])
-          .map(item => `${item.name} (${item.quantity}x${item.price})`)
-          .join('; ');
-
-        const status = order.status || 'new';
-        const statusText = {
-          new: 'جديد',
-          processing: 'قيد المعالجة',
-          completed: 'مكتمل'
-        }[status];
-
-        csvContent += `"${order.orderNumber || ''}","${order.customerName || ''}","${order.customerPhone || ''}","${order.customerEmail || ''}","${order.customerAddress || ''}","${Number(order.total || 0).toFixed(3)}","${order.date || ''}","${statusText || ''}","${items}"\n`;
-      });
-
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-
-      link.setAttribute('href', url);
-      link.setAttribute('download', `orders_${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    setInterval(() => {
-      if (document.getElementById('adminPanel').style.display !== 'none') {
-        loadDashboard();
-      }
-    }, 30000);
+    })();
   </script>
 </body>
 </html>

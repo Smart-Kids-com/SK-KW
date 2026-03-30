@@ -15,8 +15,61 @@ const { SYSTEM_CONFIG } = require('./config/system');
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
 
+const ADMIN_PASSWORDS = ['admin123', 'smartkids2024'];
+const ADMIN_COOKIE_NAME = 'smartkids_admin_auth';
+
 // إنشاء تطبيق Express
 const app = express();
+
+function parseCookies(req) {
+  const header = req.headers.cookie || '';
+  return header.split(';').reduce((acc, pair) => {
+    const index = pair.indexOf('=');
+    if (index === -1) return acc;
+
+    const key = pair.slice(0, index).trim();
+    const value = pair.slice(index + 1).trim();
+
+    if (key) {
+      acc[key] = decodeURIComponent(value);
+    }
+
+    return acc;
+  }, {});
+}
+
+function isAdminAuthenticated(req) {
+  const cookies = parseCookies(req);
+  return cookies[ADMIN_COOKIE_NAME] === '1';
+}
+
+function buildCookie(value, maxAgeSeconds) {
+  const parts = [
+    `${ADMIN_COOKIE_NAME}=${encodeURIComponent(value)}`,
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax'
+  ];
+
+  if (Number.isFinite(maxAgeSeconds)) {
+    parts.push(`Max-Age=${maxAgeSeconds}`);
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    parts.push('Secure');
+  }
+
+  return parts.join('; ');
+}
+
+function requireAdminAuth(req, res, next) {
+  if (isAdminAuthenticated(req)) {
+    return next();
+  }
+
+  const nextUrl = encodeURIComponent(req.originalUrl || '/admin-enhanced');
+  return res.redirect(`/admin?next=${nextUrl}`);
+}
 
 // Middleware
 app.use(cors());
@@ -55,7 +108,30 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-app.get('/admin-enhanced', (req, res) => {
+app.post('/admin-login', (req, res) => {
+  const password = String(req.body.password || '').trim();
+  const nextUrl = String(req.body.next || '/admin-enhanced').trim() || '/admin-enhanced';
+
+  if (!ADMIN_PASSWORDS.includes(password)) {
+    const safeNext = encodeURIComponent(nextUrl);
+    const error = encodeURIComponent('كلمة المرور غير صحيحة');
+    return res.redirect(`/admin?next=${safeNext}&error=${error}`);
+  }
+
+  res.setHeader('Set-Cookie', buildCookie('1', 60 * 60 * 12));
+  return res.redirect(nextUrl);
+});
+
+app.post('/admin-logout', (req, res) => {
+  res.setHeader('Set-Cookie', buildCookie('', 0));
+  return res.redirect('/admin');
+});
+
+app.get('/admin-enhanced', requireAdminAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin-enhanced.html'));
+});
+
+app.get('/admin-enhanced.html', requireAdminAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin-enhanced.html'));
 });
 
