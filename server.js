@@ -15,11 +15,19 @@ const { SYSTEM_CONFIG } = require('./config/system');
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
 
-const ADMIN_PASSWORDS = ['admin123', 'smartkids2024'];
+const ADMIN_PASSWORDS = [
+  process.env.ADMIN_PASSWORD_1 || 'admin123',
+  process.env.ADMIN_PASSWORD_2 || 'smartkids2024'
+].filter(Boolean);
+
 const ADMIN_COOKIE_NAME = 'smartkids_admin_auth';
 
 // إنشاء تطبيق Express
 const app = express();
+
+/* =========================================
+   أدوات المساعدة
+========================================= */
 
 function parseCookies(req) {
   const header = req.headers.cookie || '';
@@ -62,6 +70,14 @@ function buildCookie(value, maxAgeSeconds) {
   return parts.join('; ');
 }
 
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function requireAdminAuth(req, res, next) {
   if (isAdminAuthenticated(req)) {
     return next();
@@ -71,41 +87,267 @@ function requireAdminAuth(req, res, next) {
   return res.redirect(`/admin?next=${nextUrl}`);
 }
 
-// Middleware
+function renderAdminLoginPage({ next = '/admin-enhanced', error = '' } = {}) {
+  const safeNext = escapeHtml(next);
+  const safeError = escapeHtml(error);
+
+  return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>دخول الإدارة - Smart Kids Kuwait</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:Segoe UI,Tahoma,Arial,sans-serif;
+      background:linear-gradient(135deg,#f5f1fb 0%,#ebe3f7 100%);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      color:#2d2340;
+    }
+    .card{
+      width:100%;
+      max-width:420px;
+      background:#fff;
+      border:1px solid #e7ddf4;
+      border-radius:20px;
+      box-shadow:0 18px 48px rgba(106,76,147,.12);
+      padding:28px;
+    }
+    .brand{
+      text-align:center;
+      margin-bottom:22px;
+    }
+    .brand h1{
+      font-size:28px;
+      color:#6a4c93;
+      margin-bottom:8px;
+    }
+    .brand p{
+      color:#6e6680;
+      font-size:15px;
+    }
+    .error{
+      background:#ffe9ea;
+      color:#a9353f;
+      border:1px solid #f3c8cc;
+      padding:12px 14px;
+      border-radius:12px;
+      margin-bottom:16px;
+      font-size:14px;
+    }
+    .field{
+      margin-bottom:16px;
+    }
+    label{
+      display:block;
+      margin-bottom:8px;
+      font-weight:700;
+      color:#4e3a70;
+      font-size:14px;
+    }
+    input{
+      width:100%;
+      padding:14px 16px;
+      border:1px solid #d8c9ef;
+      border-radius:14px;
+      font-size:15px;
+      outline:none;
+    }
+    input:focus{
+      border-color:#8c63c9;
+      box-shadow:0 0 0 4px rgba(140,99,201,.12);
+    }
+    button{
+      width:100%;
+      border:none;
+      border-radius:14px;
+      background:#6a4c93;
+      color:#fff;
+      padding:14px 16px;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    button:hover{
+      background:#5e4485;
+    }
+    .hint{
+      margin-top:14px;
+      text-align:center;
+      font-size:13px;
+      color:#857a99;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <h1>دخول الإدارة</h1>
+      <p>Smart Kids Kuwait Admin</p>
+    </div>
+
+    ${safeError ? `<div class="error">${safeError}</div>` : ''}
+
+    <form method="POST" action="/admin-login">
+      <input type="hidden" name="next" value="${safeNext}" />
+      <div class="field">
+        <label for="password">كلمة المرور</label>
+        <input id="password" name="password" type="password" placeholder="أدخل كلمة مرور الإدارة" required />
+      </div>
+      <button type="submit">دخول</button>
+    </form>
+
+    <div class="hint">الصفحة محمية</div>
+  </div>
+</body>
+</html>`;
+}
+
+/* =========================================
+   تهيئة قاعدة البيانات مرة واحدة
+========================================= */
+
+let dbReadyPromise = null;
+
+async function ensureDbReady() {
+  if (!dbReadyPromise) {
+    dbReadyPromise = (async () => {
+      if (typeof db.open === 'function') {
+        await db.open();
+      }
+      if (typeof db.initializeTables === 'function') {
+        await db.initializeTables();
+      }
+    })().catch((error) => {
+      dbReadyPromise = null;
+      throw error;
+    });
+  }
+
+  return dbReadyPromise;
+}
+
+/* =========================================
+   Middleware عامة
+========================================= */
+
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-// خدمة الملفات الثابتة
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Headers مخصصة
 app.use((req, res, next) => {
   res.header('X-Content-Type-Options', 'nosniff');
   res.header('X-Frame-Options', 'DENY');
   next();
 });
 
-// Routes للـ API
-app.use('/api/orders', ordersRoutes);
-app.use('/api/products', productsRoutes);
+/* =========================================
+   صفحات الإدارة المحمية قبل static
+========================================= */
 
-// Route للـ Health Check
-app.get('/api/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'النظام يعمل بشكل صحيح',
-    timestamp: new Date().toISOString()
+app.use(
+  [
+    '/admin-enhanced',
+    '/admin-enhanced.html',
+    '/products-admin',
+    '/products-admin.html',
+    '/product-edit.html',
+    '/order-details.html'
+  ],
+  requireAdminAuth
+);
+
+/* =========================================
+   حماية API
+========================================= */
+
+function requireOrdersApiAuth(req, res, next) {
+  const method = req.method.toUpperCase();
+  const reqPath = req.path || '/';
+
+  // عام: إنشاء طلب جديد
+  if (method === 'POST' && reqPath === '/') {
+    return next();
+  }
+
+  // عام: تتبع الطلب
+  if (method === 'GET' && reqPath.startsWith('/track/')) {
+    return next();
+  }
+
+  // أي شيء آخر خاص بالإدارة
+  if (isAdminAuthenticated(req)) {
+    return next();
+  }
+
+  return res.status(401).json({
+    success: false,
+    error: 'غير مصرح بالوصول'
   });
+}
+
+function requireProductsApiAuth(req, res, next) {
+  const method = req.method.toUpperCase();
+  const reqPath = req.path || '/';
+
+  // عام: عرض المنتجات والمنتج بالمعرف أو السلاج
+  const isPublicGet =
+    method === 'GET' &&
+    !reqPath.startsWith('/stats');
+
+  if (isPublicGet) {
+    return next();
+  }
+
+  if (isAdminAuthenticated(req)) {
+    return next();
+  }
+
+  return res.status(401).json({
+    success: false,
+    error: 'غير مصرح بالوصول'
+  });
+}
+
+/* =========================================
+   Routes API
+========================================= */
+
+app.use('/api/orders', requireOrdersApiAuth, ordersRoutes);
+app.use('/api/products', requireProductsApiAuth, productsRoutes);
+
+// Health Check
+app.get('/api/health', async (req, res, next) => {
+  try {
+    await ensureDbReady();
+    return res.json({
+      success: true,
+      message: 'النظام يعمل بشكل صحيح',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    return next(error);
+  }
 });
 
-// Route للصفحات الرئيسية
+/* =========================================
+   صفحات عامة ومحمية
+========================================= */
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+  const nextUrl = String(req.query.next || '/admin-enhanced').trim() || '/admin-enhanced';
+  const error = String(req.query.error || '').trim();
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  return res.status(200).send(renderAdminLoginPage({ next: nextUrl, error }));
 });
 
 app.post('/admin-login', (req, res) => {
@@ -127,11 +369,11 @@ app.post('/admin-logout', (req, res) => {
   return res.redirect('/admin');
 });
 
-app.get('/admin-enhanced', requireAdminAuth, (req, res) => {
+app.get('/admin-enhanced', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin-enhanced.html'));
 });
 
-app.get('/admin-enhanced.html', requireAdminAuth, (req, res) => {
+app.get('/admin-enhanced.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin-enhanced.html'));
 });
 
@@ -139,25 +381,42 @@ app.get('/products-admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'products-admin.html'));
 });
 
+app.get('/products-admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'products-admin.html'));
+});
+
 app.get('/product-edit.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'product-edit.html'));
 });
 
-app.get('/track', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'track.html'));
+app.get('/order-details.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'order-details.html'));
 });
 
-// معالج الأخطاء العام
+/* =========================================
+   الملفات الثابتة
+========================================= */
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+/* =========================================
+   معالجات الأخطاء
+========================================= */
+
 app.use((err, req, res, next) => {
   console.error('❌ خطأ في التطبيق:', err);
-  res.status(500).json({
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  return res.status(500).json({
     success: false,
     error: 'حدث خطأ في الخادم',
     message: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
 
-// معالج الـ 404
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -165,18 +424,14 @@ app.use((req, res) => {
   });
 });
 
-/**
- * دالة بدء الخادم مع معالجة الأخطاء
- */
+/* =========================================
+   بدء السيرفر محليًا فقط
+========================================= */
+
 async function startServer() {
   try {
-    // فتح الاتصال بقاعدة البيانات
-    await db.open();
+    await ensureDbReady();
 
-    // تهيئة الجداول
-    await db.initializeTables();
-
-    // بدء الخادم
     const server = app.listen(PORT, HOST, () => {
       console.log('\n╔════════════════════════════════════════════════════════╗');
       console.log('║          🚀 نظام إدارة الطلبات - Smart Kids           ║');
@@ -187,41 +442,24 @@ async function startServer() {
       console.log('╠════════════════════════════════════════════════════════╣');
       console.log('║ الروابط المتاحة:');
       console.log(`║ 📍 الصفحة الرئيسية: http://${HOST}:${PORT}/`);
-      console.log(`║ 📊 لوحة الإدارة: http://${HOST}:${PORT}/admin`);
-      console.log(`║ 📈 لوحة متقدمة: http://${HOST}:${PORT}/admin-enhanced`);
+      console.log(`║ 📊 دخول الإدارة: http://${HOST}:${PORT}/admin`);
+      console.log(`║ 📈 لوحة الإدارة: http://${HOST}:${PORT}/admin-enhanced`);
       console.log(`║ 🏷️ إدارة المنتجات: http://${HOST}:${PORT}/products-admin`);
       console.log(`║ ✏️ تعديل/إضافة منتج: http://${HOST}:${PORT}/product-edit.html`);
-      console.log(`║ 🔍 تتبع الطلبات: http://${HOST}:${PORT}/track`);
-      console.log('║');
-      console.log('║ API Endpoints:');
-      console.log(`║ GET    http://${HOST}:${PORT}/api/orders`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/orders/:id`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/orders/track/:orderNumber`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/orders`);
-      console.log(`║ PUT    http://${HOST}:${PORT}/api/orders/:id`);
-      console.log(`║ DELETE http://${HOST}:${PORT}/api/orders/:id`);
-      console.log('║');
-      console.log(`║ GET    http://${HOST}:${PORT}/api/products`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/products/:id`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/products/slug/:slug`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/products/stats/summary`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/products`);
-      console.log(`║ PUT    http://${HOST}:${PORT}/api/products/:id`);
-      console.log(`║ DELETE http://${HOST}:${PORT}/api/products/:id`);
       console.log('╚════════════════════════════════════════════════════════╝\n');
     });
 
-    // معالجة إيقاف الخادم
     process.on('SIGINT', async () => {
       console.log('\n\n🛑 جاري إيقاف الخادم...');
       server.close(async () => {
-        await db.close();
+        if (typeof db.close === 'function') {
+          await db.close();
+        }
         console.log('✅ تم إيقاف الخادم بنجاح');
         process.exit(0);
       });
     });
 
-    // معالج الأخطاء التي لم يتم التعامل معها
     process.on('uncaughtException', (err) => {
       console.error('❌ خطأ غير متوقع:', err);
       process.exit(1);
@@ -233,7 +471,9 @@ async function startServer() {
   }
 }
 
-// بدء التطبيق
-startServer();
+// شغل listen محليًا فقط، وليس على Vercel
+if (require.main === module) {
+  startServer();
+}
 
 module.exports = app;
