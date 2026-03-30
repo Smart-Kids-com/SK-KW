@@ -57,10 +57,6 @@ app.get('/admin-enhanced', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin-enhanced.html'));
 });
 
-app.get('/track', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'track.html'));
-});
-
 // معالج الأخطاء العام
 app.use((err, req, res, next) => {
   console.error('❌ خطأ في التطبيق:', err);

@@ -75,13 +75,13 @@
   </url>
 
   <url>
-    <loc>https://smartkidskw.com/login.html</loc>
+    <loc>https://smartkidskw.com/collection.html?id=islamic-library</loc>
     <changefreq>monthly</changefreq>
     <priority>0.2</priority>
   </url>
 
   <url>
-    <loc>https://smartkidskw.com/profile.html</loc>
+    <loc>https://smartkidskw.com/collection.html?id=all-products</loc>
     <changefreq>monthly</changefreq>
     <priority>0.1</priority>
   </url>
