@@ -1615,7 +1615,7 @@
           unit_price: unitPrice,
           quantity,
           subtotal,
-          image: item.image || item.image_url || ''
+          image: item.product_image || item.image_url || ''
         };
       }) : [];
 
@@ -1988,30 +1988,80 @@
       document.getElementById('mobileActionsMenu')?.classList.remove('active');
     }
 
-    async function markAsPaid() {
-      if (!currentOrder?.id) {
-        showAlert('Order is not loaded yet', 'error');
-        return;
-      }
-
-      try {
-        const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'completed' })
-        });
-
-        const data = await response.json();
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || 'Failed to mark order as paid');
-        }
-
-        await loadOrder();
-        showAlert('Order marked as paid', 'success');
-      } catch (error) {
-        showAlert(error.message || 'Failed to mark order as paid', 'error');
-      }
+async function markAsPaid() {
+  try {
+    if (!currentOrder?.id) {
+      showAlert('Order id is missing', 'error');
+      return;
     }
+
+    const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}/mark-paid`, {
+      method: 'POST'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to mark order as paid');
+    }
+
+    currentOrder = normalizeOrder(data.data);
+    renderOrder(currentOrder);
+    showAlert('Order marked as paid', 'success');
+  } catch (error) {
+    showAlert(error.message || 'Failed to mark order as paid', 'error');
+  }
+}
+
+   async function archiveCurrentOrder() {
+  try {
+    if (!currentOrder?.id) {
+      showAlert('Order id is missing', 'error');
+      return;
+    }
+
+    const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}/archive`, {
+      method: 'POST'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to archive order');
+    }
+
+    currentOrder = normalizeOrder(data.data);
+    renderOrder(currentOrder);
+    showAlert('Order archived', 'success');
+  } catch (error) {
+    showAlert(error.message || 'Failed to archive order', 'error');
+  }
+}
+
+async function cancelCurrentOrder() {
+  try {
+    if (!currentOrder?.id) {
+      showAlert('Order id is missing', 'error');
+      return;
+    }
+
+    const response = await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}/cancel`, {
+      method: 'POST'
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to cancel order');
+    }
+
+    currentOrder = normalizeOrder(data.data);
+    renderOrder(currentOrder);
+    showAlert('Order cancelled', 'success');
+  } catch (error) {
+    showAlert(error.message || 'Failed to cancel order', 'error');
+  }
+}
 
     function handleMobileAction(action) {
       closeMobileActionsMenu();
@@ -2028,6 +2078,15 @@
         markAsPaid();
         return;
       }
+      if (action === 'cancel') {
+        cancelCurrentOrder();
+        return;
+     }
+
+       if (action === 'archive') {
+         archiveCurrentOrder();
+         return;
+     }   
       if (action === 'status') {
         showAlert(`Current status: ${getFulfillmentLabel(currentOrder || {})}`, 'success');
         return;
