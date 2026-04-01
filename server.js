@@ -10,7 +10,6 @@ const bodyParser = require('body-parser');
 const db = require('./db/turso-manager');
 const ordersRoutes = require('./routes/orders');
 const productsRoutes = require('./routes/products');
-const { SYSTEM_CONFIG } = require('./config/system');
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
@@ -70,12 +69,12 @@ function buildCookie(value, maxAgeSeconds) {
   return parts.join('; ');
 }
 
-function escapeHtml(value) {
-  return String(value || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+function sanitizeNextUrl(value) {
+  const nextUrl = String(value || '').trim();
+  if (!nextUrl || !nextUrl.startsWith('/')) {
+    return '/admin-enhanced';
+  }
+  return nextUrl;
 }
 
 function requireAdminAuth(req, res, next) {
@@ -85,6 +84,15 @@ function requireAdminAuth(req, res, next) {
 
   const nextUrl = encodeURIComponent(req.originalUrl || '/admin-enhanced');
   return res.redirect(`/admin?next=${nextUrl}`);
+}
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 function renderAdminLoginPage({ next = '/admin-enhanced', error = '' } = {}) {
@@ -263,80 +271,41 @@ app.use(
 );
 
 /* =========================================
-   حماية API
+   تهيئة قاعدة البيانات قبل الـ API
 ========================================= */
 
-function requireOrdersApiAuth(req, res, next) {
-  const method = req.method.toUpperCase();
-  const reqPath = req.path || '/';
-
-  // عام: إنشاء طلب جديد
-  if (method === 'POST' && reqPath === '/') {
-    return next();
+app.use('/api', async (req, res, next) => {
+  try {
+    await ensureDbReady();
+    next();
+  } catch (error) {
+    next(error);
   }
-
-  // عام: تتبع الطلب
-  if (method === 'GET' && reqPath.startsWith('/track/')) {
-    return next();
-  }
-
-  // أي شيء آخر خاص بالإدارة
-  if (isAdminAuthenticated(req)) {
-    return next();
-  }
-
-  return res.status(401).json({
-    success: false,
-    error: 'غير مصرح بالوصول'
-  });
-}
-
-function requireProductsApiAuth(req, res, next) {
-  const method = req.method.toUpperCase();
-  const reqPath = req.path || '/';
-
-  // عام: عرض المنتجات والمنتج بالمعرف أو السلاج
-  const isPublicGet =
-    method === 'GET' &&
-    !reqPath.startsWith('/stats');
-
-  if (isPublicGet) {
-    return next();
-  }
-
-  if (isAdminAuthenticated(req)) {
-    return next();
-  }
-
-  return res.status(401).json({
-    success: false,
-    error: 'غير مصرح بالوصول'
-  });
-}
+});
 
 /* =========================================
-   Routes API
+   Routes للـ API
 ========================================= */
 
-app.use('/api/orders', requireOrdersApiAuth, ordersRoutes);
-app.use('/api/products', requireProductsApiAuth, productsRoutes);
+app.use('/api/orders', ordersRoutes);
+app.use('/api/products', productsRoutes);
 
-// Health Check
+// Route للـ Health Check
 app.get('/api/health', async (req, res, next) => {
   try {
     await ensureDbReady();
-    return res.json({
+    res.json({
       success: true,
       message: 'النظام يعمل بشكل صحيح',
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 });
 
 /* =========================================
-   صفحات عامة ومحمية
+   الصفحات الرئيسية
 ========================================= */
 
 app.get('/', (req, res) => {
@@ -344,15 +313,25 @@ app.get('/', (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
-  const nextUrl = String(req.query.next || '/admin-enhanced').trim() || '/admin-enhanced';
+  const nextUrl = sanitizeNextUrl(req.query.next || '/admin-enhanced');
   const error = String(req.query.error || '').trim();
+
+  // لو الأدمن مسجل بالفعل وفتح /admin، حوله مباشرة
+  if (isAdminAuthenticated(req)) {
+    return res.redirect(nextUrl);
+  }
+
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   return res.status(200).send(renderAdminLoginPage({ next: nextUrl, error }));
 });
 
+app.get('/admin.html', (req, res) => {
+  return res.redirect('/admin');
+});
+
 app.post('/admin-login', (req, res) => {
   const password = String(req.body.password || '').trim();
-  const nextUrl = String(req.body.next || '/admin-enhanced').trim() || '/admin-enhanced';
+  const nextUrl = sanitizeNextUrl(req.body.next || '/admin-enhanced');
 
   if (!ADMIN_PASSWORDS.includes(password)) {
     const safeNext = encodeURIComponent(nextUrl);
@@ -394,13 +373,13 @@ app.get('/order-details.html', (req, res) => {
 });
 
 /* =========================================
-   الملفات الثابتة
+   خدمة الملفات الثابتة
 ========================================= */
 
 app.use(express.static(path.join(__dirname, 'public')));
 
 /* =========================================
-   معالجات الأخطاء
+   معالج الأخطاء العام
 ========================================= */
 
 app.use((err, req, res, next) => {
@@ -410,12 +389,16 @@ app.use((err, req, res, next) => {
     return next(err);
   }
 
-  return res.status(500).json({
+  res.status(500).json({
     success: false,
     error: 'حدث خطأ في الخادم',
     message: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
+
+/* =========================================
+   معالج الـ 404
+========================================= */
 
 app.use((req, res) => {
   res.status(404).json({
@@ -425,7 +408,7 @@ app.use((req, res) => {
 });
 
 /* =========================================
-   بدء السيرفر محليًا فقط
+   دالة بدء الخادم مع معالجة الأخطاء
 ========================================= */
 
 async function startServer() {
@@ -443,9 +426,25 @@ async function startServer() {
       console.log('║ الروابط المتاحة:');
       console.log(`║ 📍 الصفحة الرئيسية: http://${HOST}:${PORT}/`);
       console.log(`║ 📊 دخول الإدارة: http://${HOST}:${PORT}/admin`);
-      console.log(`║ 📈 لوحة الإدارة: http://${HOST}:${PORT}/admin-enhanced`);
+      console.log(`║ 📈 لوحة متقدمة: http://${HOST}:${PORT}/admin-enhanced`);
       console.log(`║ 🏷️ إدارة المنتجات: http://${HOST}:${PORT}/products-admin`);
       console.log(`║ ✏️ تعديل/إضافة منتج: http://${HOST}:${PORT}/product-edit.html`);
+      console.log('║');
+      console.log('║ API Endpoints:');
+      console.log(`║ GET    http://${HOST}:${PORT}/api/orders`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/orders/:id`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/orders/track/:orderNumber`);
+      console.log(`║ POST   http://${HOST}:${PORT}/api/orders`);
+      console.log(`║ PUT    http://${HOST}:${PORT}/api/orders/:id`);
+      console.log(`║ DELETE http://${HOST}:${PORT}/api/orders/:id`);
+      console.log('║');
+      console.log(`║ GET    http://${HOST}:${PORT}/api/products`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/products/:id`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/products/slug/:slug`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/products/stats/summary`);
+      console.log(`║ POST   http://${HOST}:${PORT}/api/products`);
+      console.log(`║ PUT    http://${HOST}:${PORT}/api/products/:id`);
+      console.log(`║ DELETE http://${HOST}:${PORT}/api/products/:id`);
       console.log('╚════════════════════════════════════════════════════════╝\n');
     });
 
@@ -471,7 +470,7 @@ async function startServer() {
   }
 }
 
-// شغل listen محليًا فقط، وليس على Vercel
+// شغل listen محليًا فقط
 if (require.main === module) {
   startServer();
 }
