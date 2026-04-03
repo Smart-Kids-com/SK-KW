@@ -730,9 +730,8 @@
     </div>
   </div>
 
-  <script src="./collections-manager.js"></script>
   <script>
-    let currentCollection = null;
+    let currentCategory = '';
     let allCollectionProducts = [];
     let filteredProducts = [];
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -747,28 +746,119 @@
         .replaceAll("'", '&#039;');
     }
 
+    function safeText(value, fallback = '') {
+      const text = String(value ?? '').trim();
+      return text || fallback;
+    }
+
+    function safeNumber(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function normalizeCategory(value) {
+      return String(value || 'عام').trim() || 'عام';
+    }
+
+    function getCollectionMeta(category) {
+      const value = normalizeCategory(category).toLowerCase();
+
+      if (value.includes('islam') || value.includes('إسلام') || value.includes('اسلام')) {
+        return {
+          icon: '🕌',
+          description: 'منتجات وكتب وقصص تعليمية ذات طابع إسلامي للأطفال.'
+        };
+      }
+
+      if (value.includes('book') || value.includes('قصص') || value.includes('كتب')) {
+        return {
+          icon: '📚',
+          description: 'قصص وكتب تعليمية وتفاعلية تناسب مختلف الأعمار.'
+        };
+      }
+
+      if (value.includes('audio') || value.includes('صوت')) {
+        return {
+          icon: '🎧',
+          description: 'منتجات صوتية تعليمية وترفيهية للأطفال.'
+        };
+      }
+
+      if (value.includes('montessori') || value.includes('مونتيسوري')) {
+        return {
+          icon: '🧩',
+          description: 'ألعاب وأنشطة تعليمية مستوحاة من منهج مونتيسوري.'
+        };
+      }
+
+      if (value.includes('baby') || value.includes('رضع') || value.includes('مواليد')) {
+        return {
+          icon: '🍼',
+          description: 'منتجات مناسبة للأطفال الصغار والرضع.'
+        };
+      }
+
+      if (value.includes('offer') || value.includes('عرض') || value.includes('خصم')) {
+        return {
+          icon: '🎁',
+          description: 'عروض ومنتجات مختارة بأسعار مميزة.'
+        };
+      }
+
+      return {
+        icon: '🧸',
+        description: 'مجموعة مميزة من المنتجات المناسبة للأطفال.'
+      };
+    }
+
     function getProductTitle(product) {
-      return product.name || product.title || 'منتج';
+      return safeText(product.product_name ?? product.name ?? product.title, 'منتج');
     }
 
     function getProductVendor(product) {
-      return product.vendor || 'الأطفال المبتكرون الكويت';
+      return safeText(product.vendor, 'الأطفال المبتكرون الكويت');
+    }
+
+    function extractPrice(product) {
+      return safeNumber(product.price ?? product.sale_price ?? product.regular_price, 0);
     }
 
     function getComparePrice(product) {
-      if (product.compare_at_price != null && !isNaN(parseFloat(product.compare_at_price))) {
-        return parseFloat(product.compare_at_price);
-      }
-      if (product.variants && product.variants.length > 0 && product.variants[0].compare_at_price && !isNaN(parseFloat(product.variants[0].compare_at_price))) {
-        return parseFloat(product.variants[0].compare_at_price);
-      }
-      return null;
+      const compare = product.sale_price && Number(product.sale_price) > Number(product.price)
+        ? Number(product.sale_price)
+        : null;
+      return Number.isFinite(compare) ? compare : null;
     }
 
     function hasDiscount(product) {
-      const price = extractPrice(product);
       const compare = getComparePrice(product);
+      const price = extractPrice(product);
       return compare !== null && compare > price;
+    }
+
+    function extractImage(product) {
+      const image =
+        product.image ??
+        product.image_url ??
+        product.primary_image ??
+        (Array.isArray(product.images) && product.images[0] && (product.images[0].image_url || product.images[0].url)) ??
+        '';
+
+      return safeText(
+        image,
+        `https://via.placeholder.com/400x400?text=${encodeURIComponent(getProductTitle(product))}`
+      );
+    }
+
+    function getProductUrl(product) {
+      const slug = safeText(product.slug);
+      const id = safeText(product.id);
+
+      if (slug) {
+        return `./product-page.html?slug=${encodeURIComponent(slug)}`;
+      }
+
+      return `./product-page.html?id=${encodeURIComponent(id)}`;
     }
 
     function showCartToast(product) {
@@ -796,23 +886,32 @@
     async function loadCollection() {
       try {
         const urlParams = new URLSearchParams(window.location.search);
-        const collectionId = urlParams.get('id');
+        const category = urlParams.get('category');
 
-        if (!collectionId) {
-          showError('معرف المجموعة غير موجود');
+        if (!category) {
+          showError('اسم المجموعة غير موجود');
           return;
         }
 
-        const manager = window.initCollectionsManager();
-        await manager.loadProducts();
-        currentCollection = manager.getCollectionByKey(collectionId);
+        currentCategory = normalizeCategory(category);
 
-        if (!currentCollection) {
-          showError('المجموعة غير موجودة');
-          return;
+        const response = await fetch('/api/products?status=active&limit=1000', {
+          cache: 'no-store',
+          headers: { Accept: 'application/json' }
+        });
+
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok || !result || !result.success) {
+          throw new Error(result?.error || `HTTP ${response.status}`);
         }
 
-        allCollectionProducts = currentCollection.products || [];
+        const allProducts = Array.isArray(result.data) ? result.data : [];
+
+        allCollectionProducts = allProducts.filter(product =>
+          normalizeCategory(product.category ?? product.category_name ?? product.product_type) === currentCategory
+        );
+
         filteredProducts = [...allCollectionProducts];
 
         updateCollectionInfo();
@@ -825,20 +924,16 @@
     }
 
     function updateCollectionInfo() {
-      if (!currentCollection) return;
+      const meta = getCollectionMeta(currentCategory);
 
-      document.getElementById('collectionIcon').textContent = currentCollection.icon || '📦';
-      document.getElementById('collectionTitle').textContent = currentCollection.name || 'المجموعة';
-      document.getElementById('collectionDescription').textContent = currentCollection.description || 'تصفح منتجات هذه المجموعة';
-      document.getElementById('productCount').textContent = `${currentCollection.productCount || 0} منتج`;
+      document.getElementById('collectionIcon').textContent = meta.icon;
+      document.getElementById('collectionTitle').textContent = currentCategory || 'المجموعة';
+      document.getElementById('collectionDescription').textContent = meta.description;
+      document.getElementById('productCount').textContent = `${allCollectionProducts.length || 0} منتج`;
 
-      document.getElementById('pageTitle').textContent = `${currentCollection.name} - Smart Kids Kuwait`;
-      document.title = `${currentCollection.name} - Smart Kids Kuwait`;
-    }
-
-    function getProductUrl(product) {
-      const id = encodeURIComponent(product.handle || product.id || '');
-      return `./product-details.html?id=${id}&collection=${encodeURIComponent(currentCollection.key)}`;
+      document.getElementById('pageTitle').textContent = `${currentCategory} - Smart Kids Kuwait`;
+      document.getElementById('pageDescription').setAttribute('content', meta.description);
+      document.title = `${currentCategory} - Smart Kids Kuwait`;
     }
 
     function renderProducts() {
@@ -861,7 +956,7 @@
         const title = getProductTitle(product);
         const vendor = getProductVendor(product);
         const url = getProductUrl(product);
-        const id = product.id || product.handle || '';
+        const id = product.id || product.slug || title;
 
         return `
           <article class="product">
@@ -911,7 +1006,7 @@
           e.stopPropagation();
 
           const id = btn.dataset.productId;
-          const product = filteredProducts.find(p => String(p.id || p.handle || '') === String(id));
+          const product = filteredProducts.find(p => String(p.id || p.slug || getProductTitle(p)) === String(id));
           if (product) addToCart(product);
         });
       });
@@ -923,45 +1018,29 @@
       } else {
         const searchQuery = query.toLowerCase();
         filteredProducts = allCollectionProducts.filter(product =>
-          (product.title || product.name || '').toLowerCase().includes(searchQuery) ||
-          (product.body_html && product.body_html.toLowerCase().includes(searchQuery)) ||
-          (product.description && product.description.toLowerCase().includes(searchQuery)) ||
-          (product.type && product.type.toLowerCase().includes(searchQuery)) ||
-          (product.category && product.category.toLowerCase().includes(searchQuery)) ||
-          (product.vendor && product.vendor.toLowerCase().includes(searchQuery))
+          getProductTitle(product).toLowerCase().includes(searchQuery) ||
+          safeText(product.description).toLowerCase().includes(searchQuery) ||
+          safeText(product.category).toLowerCase().includes(searchQuery) ||
+          safeText(product.vendor).toLowerCase().includes(searchQuery)
         );
       }
       renderProducts();
     }
 
-    function extractPrice(product) {
-      if (product.price != null && !isNaN(parseFloat(product.price))) return parseFloat(product.price);
-      if (product.variants && product.variants.length > 0 && product.variants[0].price) return parseFloat(product.variants[0].price);
-      return 0;
-    }
-
-    function extractImage(product) {
-      if (product.image) return product.image;
-      if (product.images && product.images.length > 0) {
-        if (typeof product.images[0] === 'string') return product.images[0];
-        if (product.images[0] && product.images[0].src) return product.images[0].src;
-      }
-      return `https://via.placeholder.com/400x400?text=${encodeURIComponent(getProductTitle(product))}`;
-    }
-
     function addToCart(product) {
       const title = getProductTitle(product);
       const price = extractPrice(product);
-      const productId = product.id || product.handle || title;
+      const productId = product.id || product.slug || title;
       const productImage = extractImage(product);
 
-      const existingItem = cart.find(item => item.id === productId || item.name === title);
+      const existingItem = cart.find(item => String(item.id) === String(productId) || item.name === title);
 
       if (existingItem) {
         existingItem.quantity += 1;
       } else {
         cart.push({
           id: productId,
+          slug: safeText(product.slug),
           name: title,
           price: Number(price) || 0,
           quantity: 1,
@@ -1012,6 +1091,6 @@
   </script>
 
   <div id="site-footer"></div>
-<script src="./footer.js"></script>
+  <script src="./footer.js"></script>
 </body>
 </html>
