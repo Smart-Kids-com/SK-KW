@@ -457,12 +457,9 @@
       <nav class="side-menu__nav">
         <a href="./index.html">الصفحة الرئيسية</a>
         <a href="./collections.html">جميع المجموعات</a>
-        <a href="./collection.html?id=islamic-library">المجموعات الإسلامية المميزة</a>
-        <a href="./collection.html?id=audio-stories">القصص الصوتية التعليمية للأطفال</a>
-        <a href="./collection.html?id=interactive-books">القصص التعليمية التفاعلية</a>
-        <a href="./collection.html?id=interactive-offers">عروض الأطفال المبتكرون</a>
         <a href="./products-full.html">المتجر</a>
         <a href="./cart.html">عربة التسوق</a>
+        <a href="./checkout.html">إتمام الطلب</a>
       </nav>
     </div>
 
@@ -496,17 +493,120 @@
     </div>
   </div>
 
-  <script src="./collections-manager.js"></script>
   <script>
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function normalizeCategory(value) {
+      return String(value || 'عام').trim() || 'عام';
+    }
+
+    function getCategoryMeta(category) {
+      const value = normalizeCategory(category).toLowerCase();
+
+      if (value.includes('islam') || value.includes('إسلام') || value.includes('اسلام')) {
+        return {
+          icon: '🕌',
+          description: 'منتجات وكتب وقصص تعليمية ذات طابع إسلامي للأطفال.'
+        };
+      }
+
+      if (value.includes('book') || value.includes('قصص') || value.includes('كتب')) {
+        return {
+          icon: '📚',
+          description: 'قصص وكتب تعليمية وتفاعلية تناسب مختلف الأعمار.'
+        };
+      }
+
+      if (value.includes('audio') || value.includes('صوت')) {
+        return {
+          icon: '🎧',
+          description: 'منتجات صوتية تعليمية وترفيهية للأطفال.'
+        };
+      }
+
+      if (value.includes('montessori') || value.includes('مونتيسوري')) {
+        return {
+          icon: '🧩',
+          description: 'ألعاب وأنشطة تعليمية مستوحاة من منهج مونتيسوري.'
+        };
+      }
+
+      if (value.includes('baby') || value.includes('رضع') || value.includes('مواليد')) {
+        return {
+          icon: '🍼',
+          description: 'منتجات مناسبة للأطفال الصغار والرضع.'
+        };
+      }
+
+      if (value.includes('offer') || value.includes('عرض') || value.includes('خصم')) {
+        return {
+          icon: '🎁',
+          description: 'عروض ومنتجات مختارة بأسعار مميزة.'
+        };
+      }
+
+      return {
+        icon: '🧸',
+        description: 'مجموعة مميزة من المنتجات المناسبة للأطفال.'
+      };
+    }
+
+    async function fetchCollectionsFromApi() {
+      const response = await fetch('/api/products?status=active&limit=1000', {
+        cache: 'no-store',
+        headers: { Accept: 'application/json' }
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result || !result.success) {
+        throw new Error(result?.error || `HTTP ${response.status}`);
+      }
+
+      const products = Array.isArray(result.data) ? result.data : [];
+      const map = new Map();
+
+      for (const product of products) {
+        const category = normalizeCategory(
+          product.category ?? product.category_name ?? product.product_type
+        );
+
+        const item = map.get(category) || {
+          key: category,
+          name: category,
+          productCount: 0
+        };
+
+        item.productCount += 1;
+        map.set(category, item);
+      }
+
+      return Array.from(map.values())
+        .sort((a, b) => b.productCount - a.productCount)
+        .map((item) => {
+          const meta = getCategoryMeta(item.name);
+          return {
+            ...item,
+            icon: meta.icon,
+            description: meta.description
+          };
+        });
+    }
+
     async function loadCollections() {
       try {
-        const manager = window.initCollectionsManager();
-        await manager.loadProducts();
-        const collections = manager.getAllCollections();
+        const collections = await fetchCollectionsFromApi();
         renderCollections(collections);
       } catch (error) {
         console.error('خطأ في تحميل المجموعات:', error);
-        showError();
+        showError(error?.message || '');
       }
     }
 
@@ -523,26 +623,27 @@
       }
 
       grid.innerHTML = collections.map(collection => `
-        <div class="collection-card" onclick="openCollection('${collection.key}')">
+        <div class="collection-card" onclick="openCollection(${JSON.stringify(collection.name)})">
           <span class="collection-icon">${collection.icon}</span>
-          <h3 class="collection-title">${collection.name}</h3>
-          <p class="collection-description">${collection.description}</p>
+          <h3 class="collection-title">${escapeHtml(collection.name)}</h3>
+          <p class="collection-description">${escapeHtml(collection.description)}</p>
           <div class="collection-count">${collection.productCount || 0} منتج</div>
-          <a href="./collection.html?id=${encodeURIComponent(collection.key)}" class="browse-btn" onclick="event.stopPropagation()">تصفح المجموعة</a>
+          <a href="./collection.html?category=${encodeURIComponent(collection.name)}" class="browse-btn" onclick="event.stopPropagation()">تصفح المجموعة</a>
         </div>
       `).join('');
     }
 
-    function openCollection(collectionKey) {
-      window.location.href = `./collection.html?id=${encodeURIComponent(collectionKey)}`;
+    function openCollection(categoryName) {
+      window.location.href = `./collection.html?category=${encodeURIComponent(categoryName)}`;
     }
 
-    function showError() {
+    function showError(message = '') {
       const grid = document.getElementById('collectionsGrid');
       grid.innerHTML = `
         <div style="text-align:center; grid-column:1 / -1; padding:3rem; color:#fff;">
           <h3>⚠️ خطأ في تحميل المجموعات</h3>
-          <p style="margin-top:.5rem;">تأكد من وجود collections-manager.js وملف المنتجات</p>
+          <p style="margin-top:.5rem;">تأكد أن API المنتجات تعمل بشكل صحيح</p>
+          ${message ? `<p style="margin-top:.5rem; opacity:.9;">${escapeHtml(message)}</p>` : ''}
         </div>
       `;
     }
@@ -573,6 +674,6 @@
   </script>
 
   <div id="site-footer"></div>
-<script src="./footer.js"></script>>
+  <script src="./footer.js"></script>
 </body>
-</html> 
+</html>

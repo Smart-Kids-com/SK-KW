@@ -184,6 +184,7 @@
       background:#fff;
       direction:rtl;
       text-align:right;
+      white-space:pre-line;
     }
 
     .alert.active{display:block}
@@ -624,8 +625,7 @@
       .app{
         grid-template-columns:1fr;
         grid-template-rows:auto 1fr;
-        grid-template-areas:
-          "main";
+        grid-template-areas:"main";
       }
       .topbar,.sidebar{display:none}
       .mobile-top{display:block}
@@ -787,7 +787,7 @@
             <div class="tools">
               <div id="selectionCount" class="selection-pill">0 selected</div>
               <button class="icon-btn" title="Toggle filters" onclick="toggleFilters()">☰</button>
-              <button class="icon-btn" title="Sort" onclick="cycleSort()">⇅</button>
+              <button class="icon-btn" title="Sort" onclick="cycleSort()">⇄</button>
               <button class="icon-btn" title="Refresh" onclick="refreshPageData()">↻</button>
 
               <div id="actionsDropdown" class="dropdown">
@@ -896,7 +896,7 @@
       el.className = `alert active ${type}`;
       setTimeout(() => {
         el.classList.remove('active');
-      }, 3500);
+      }, 4500);
     }
 
     function formatPrice(value) {
@@ -917,14 +917,16 @@
       const top = document.getElementById('desktopSearchTop');
 
       const val = desktop.value.trim();
-      mobile.value = val;
-      top.value = val;
+      if (mobile) mobile.value = val;
+      if (top) top.value = val;
     }
 
     function syncIncomingSearch(sourceValue) {
       document.getElementById('searchInput').value = sourceValue;
-      document.getElementById('mobileSearchInput').value = sourceValue;
-      document.getElementById('desktopSearchTop').value = sourceValue;
+      const mobile = document.getElementById('mobileSearchInput');
+      const top = document.getElementById('desktopSearchTop');
+      if (mobile) mobile.value = sourceValue;
+      if (top) top.value = sourceValue;
     }
 
     function goToCreateProduct() {
@@ -983,7 +985,7 @@
     }
 
     function noopPager() {
-      showAlert('Pagination UI جاهزة، والآن القائمة تجلب حتى 200 منتج في الصفحة.', 'warning');
+      showAlert('واجهة Pagination جاهزة، والقائمة الآن تجلب حتى 200 منتج في الصفحة.', 'warning');
     }
 
     async function loadOrdersCount() {
@@ -1052,12 +1054,12 @@
       }
     }
 
-    async function refreshPageData() {
+    async function refreshPageData(showMessage = true) {
       closeActionsMenu();
       await loadOrdersCount();
       await loadSummary();
       await loadProducts();
-      showAlert('تم تحديث البيانات', 'success');
+      if (showMessage) showAlert('تم تحديث البيانات', 'success');
     }
 
     function updatePagination(products) {
@@ -1139,7 +1141,7 @@
         description: product.description || '',
         price: Number(product.price || 0),
         salePrice: Number(product.sale_price || 0),
-        imageUrl: product.image_url || '',
+        imageUrl: product.image_url || product.primary_image || '',
         stock: Number(product.stock || 0),
         status: 'draft',
         productType: product.product_type || '',
@@ -1163,21 +1165,21 @@
 
         const result = await response.json();
         if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Duplicate failed');
+          throw new Error(result.error || 'Failed to duplicate product');
         }
 
-        await loadSummary();
-        await loadProducts();
-        showAlert('تم نسخ المنتج', 'success');
+        showAlert('Product duplicated successfully', 'success');
+        await refreshPageData(false);
       } catch (error) {
-        alert(error.message || 'Duplicate failed');
+        console.error(error);
+        showAlert(error.message || 'Failed to duplicate product', 'error');
       }
     }
 
     async function bulkSetStatus(status) {
       closeActionsMenu();
       if (!selectedIds.length) {
-        showAlert('اختر منتجًا واحدًا على الأقل', 'warning');
+        showAlert('اختر منتجات أولًا', 'warning');
         return;
       }
 
@@ -1191,15 +1193,15 @@
 
           const result = await response.json();
           if (!response.ok || !result.success) {
-            throw new Error(result.error || `Failed on product ${id}`);
+            throw new Error(result.error || `Failed updating product ${id}`);
           }
         }
 
-        await refreshPageData();
-        showAlert(`تم تحديث حالة ${selectedIds.length} منتج`, 'success');
+        showAlert('تم تحديث حالة المنتجات المحددة', 'success');
         selectedIds = [];
-        updateSelectionUi();
+        await refreshPageData(false);
       } catch (error) {
+        console.error(error);
         showAlert(error.message || 'Bulk status update failed', 'error');
       }
     }
@@ -1207,30 +1209,27 @@
     async function bulkDeleteSelected() {
       closeActionsMenu();
       if (!selectedIds.length) {
-        showAlert('اختر منتجًا واحدًا على الأقل', 'warning');
+        showAlert('اختر منتجات أولًا', 'warning');
         return;
       }
 
-      if (!confirm(`هل أنت متأكد من حذف ${selectedIds.length} منتج؟`)) {
-        return;
-      }
+      if (!confirm(`Delete ${selectedIds.length} selected products?`)) return;
 
       try {
         for (const id of selectedIds) {
-          const response = await fetch(`${API_BASE}/${id}`, {
-            method: 'DELETE'
-          });
-
+          const response = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
           const result = await response.json();
+
           if (!response.ok || !result.success) {
-            throw new Error(result.error || `Failed on product ${id}`);
+            throw new Error(result.error || `Failed deleting product ${id}`);
           }
         }
 
-        selectedIds = [];
-        await refreshPageData();
         showAlert('تم حذف المنتجات المحددة', 'success');
+        selectedIds = [];
+        await refreshPageData(false);
       } catch (error) {
+        console.error(error);
         showAlert(error.message || 'Bulk delete failed', 'error');
       }
     }
@@ -1238,52 +1237,20 @@
     async function bulkDuplicateSelected() {
       closeActionsMenu();
       if (!selectedIds.length) {
-        showAlert('اختر منتجًا واحدًا على الأقل', 'warning');
+        showAlert('اختر منتجات أولًا', 'warning');
         return;
       }
 
       try {
-        for (const id of selectedIds) {
-          const product = currentProducts.find(p => Number(p.id) === Number(id));
-          if (!product) continue;
-
-          const payload = {
-            productName: `${product.product_name} - Copy`,
-            slug: '',
-            sku: '',
-            description: product.description || '',
-            price: Number(product.price || 0),
-            salePrice: Number(product.sale_price || 0),
-            imageUrl: product.image_url || '',
-            stock: Number(product.stock || 0),
-            status: 'draft',
-            productType: product.product_type || '',
-            vendor: product.vendor || '',
-            category: product.category || '',
-            tags: product.tags_list || [],
-            seoTitle: product.seo_title || '',
-            seoDescription: product.seo_description || '',
-            images: Array.isArray(product.images) ? product.images.map(img => ({
-              image_url: img.image_url,
-              sort_order: img.sort_order
-            })) : []
-          };
-
-          const response = await fetch(API_BASE, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-
-          const result = await response.json();
-          if (!response.ok || !result.success) {
-            throw new Error(result.error || `Duplicate failed on product ${id}`);
-          }
+        const ids = [...selectedIds];
+        for (const id of ids) {
+          await duplicateProduct(id);
         }
-
-        await refreshPageData();
+        selectedIds = [];
+        await refreshPageData(false);
         showAlert('تم نسخ المنتجات المحددة', 'success');
       } catch (error) {
+        console.error(error);
         showAlert(error.message || 'Bulk duplicate failed', 'error');
       }
     }
@@ -1313,115 +1280,101 @@
         'image_url'
       ];
 
+      const escapeCsv = (value) => {
+        const str = String(value ?? '');
+        return `"${str.replace(/"/g, '""')}"`;
+      };
+
       const rows = currentProducts.map(product => [
-        product.id || '',
-        product.product_name || '',
-        product.slug || '',
-        product.sku || '',
-        product.description || '',
-        product.price || 0,
-        product.sale_price || 0,
-        product.stock || 0,
-        product.status || '',
-        product.product_type || '',
-        product.vendor || '',
-        product.category || '',
+        product.id,
+        product.product_name,
+        product.slug,
+        product.sku,
+        product.description,
+        product.price,
+        product.sale_price,
+        product.stock,
+        product.status,
+        product.product_type,
+        product.vendor,
+        product.category,
         Array.isArray(product.tags_list) ? product.tags_list.join(', ') : (product.tags || ''),
-        product.seo_title || '',
-        product.seo_description || '',
+        product.seo_title,
+        product.seo_description,
         product.primary_image || product.image_url || ''
-      ]);
+      ].map(escapeCsv).join(','));
 
-      let csv = headers.join(',') + '\n';
-      rows.forEach(row => {
-        csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n';
-      });
-
+      const bom = '\uFEFF';
+      const csv = bom + [headers.join(','), ...rows].join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `products_${new Date().toISOString().split('T')[0]}.csv`;
-      link.click();
+      const url = URL.createObjectURL(blob);
 
-      showAlert('تم تصدير CSV بنجاح', 'success');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'products-export.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      URL.revokeObjectURL(url);
+      showAlert('تم تصدير الملف بنجاح', 'success');
     }
 
     function triggerImport() {
       document.getElementById('importFileInput').click();
     }
 
-    function parseCsvLine(line) {
-      const result = [];
-      let current = '';
-      let inQuotes = false;
-
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        const next = line[i + 1];
-
-        if (char === '"' && inQuotes && next === '"') {
-          current += '"';
-          i++;
-        } else if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-          result.push(current);
-          current = '';
-        } else {
-          current += char;
-        }
-      }
-
-      result.push(current);
-      return result;
+    function normalizeHeaderName(name) {
+      return String(name || '')
+        .replace(/^\uFEFF/, '')
+        .trim();
     }
 
-    function csvToObjects(text) {
-      const lines = text.split(/\r?\n/).filter(Boolean);
-      if (lines.length < 2) return [];
+    function buildImportPayload(raw) {
+      const row = raw || {};
 
-      const headers = parseCsvLine(lines[0]).map(h => h.trim());
-      return lines.slice(1).map(line => {
-        const values = parseCsvLine(line);
-        const obj = {};
-        headers.forEach((header, index) => {
-          obj[header] = (values[index] || '').trim();
-        });
-        return obj;
-      });
+      const imageValue = row.imageUrl || row.image_url || row.image || '';
+
+      return {
+        productName: row.productName || row.product_name || row.name || row.title || '',
+        slug: row.slug || '',
+        sku: row.sku || '',
+        description: row.description || row.body_html || '',
+        price: Number(row.price || 0),
+        salePrice: Number(row.salePrice || row.sale_price || row.compare_at_price || 0),
+        imageUrl: imageValue,
+        stock: Number(row.stock || row.inventory || 0),
+        status: row.status || 'draft',
+        productType: row.productType || row.product_type || row.type || '',
+        vendor: row.vendor || '',
+        category: row.category || row.collection || '',
+        tags: Array.isArray(row.tags)
+          ? row.tags
+          : String(row.tags || '').split(',').map(v => v.trim()).filter(Boolean),
+        seoTitle: row.seoTitle || row.seo_title || '',
+        seoDescription: row.seoDescription || row.seo_description || '',
+        images: imageValue
+          ? [{ image_url: imageValue, sort_order: 0 }]
+          : (Array.isArray(row.images) ? row.images : [])
+      };
     }
 
-    async function importProductsFromObjects(items) {
-      if (!Array.isArray(items) || !items.length) {
-        showAlert('الملف فارغ أو غير صالح', 'warning');
-        return;
+    async function importProductsFromJson(jsonArray) {
+      if (!Array.isArray(jsonArray)) {
+        throw new Error('JSON file must contain an array');
       }
 
-      let successCount = 0;
-      let failCount = 0;
+      let imported = 0;
+      let skipped = 0;
+      let failed = 0;
+      const failedRows = [];
 
-      for (const item of items) {
-        const payload = {
-          productName: item.productName || item.product_name || '',
-          slug: item.slug || '',
-          sku: item.sku || '',
-          description: item.description || '',
-          price: Number(item.price || 0),
-          salePrice: Number(item.salePrice || item.sale_price || 0),
-          imageUrl: item.imageUrl || item.image_url || '',
-          stock: Number(item.stock || 0),
-          status: item.status || 'active',
-          productType: item.productType || item.product_type || '',
-          vendor: item.vendor || '',
-          category: item.category || '',
-          tags: typeof item.tags === 'string' ? item.tags.split(',').map(v => v.trim()).filter(Boolean) : (item.tags || []),
-          seoTitle: item.seoTitle || item.seo_title || '',
-          seoDescription: item.seoDescription || item.seo_description || '',
-          images: []
-        };
+      for (let i = 0; i < jsonArray.length; i++) {
+        const payload = buildImportPayload(jsonArray[i]);
 
         if (!payload.productName) {
-          failCount++;
+          skipped++;
+          failedRows.push(`Item ${i + 1}: missing product name`);
           continue;
         }
 
@@ -1433,49 +1386,137 @@
           });
 
           const result = await response.json();
+
           if (!response.ok || !result.success) {
-            failCount++;
-          } else {
-            successCount++;
+            failed++;
+            failedRows.push(`Item ${i + 1}: ${result.error || 'Import failed'}`);
+            continue;
           }
-        } catch (_) {
-          failCount++;
+
+          imported++;
+        } catch (error) {
+          failed++;
+          failedRows.push(`Item ${i + 1}: ${error.message}`);
         }
       }
 
-      await refreshPageData();
-      showAlert(`تم الاستيراد. نجح: ${successCount} | فشل: ${failCount}`, failCount ? 'warning' : 'success');
+      return { imported, skipped, failed, failedRows };
     }
 
-    function setupImport() {
-      document.getElementById('importFileInput').addEventListener('change', async (event) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
+    async function importProductsFromCsv(text) {
+      const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+      if (lines.length < 2) throw new Error('CSV file is empty');
+
+      const parseLine = (line) => {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          const next = line[i + 1];
+
+          if (char === '"' && inQuotes && next === '"') {
+            current += '"';
+            i++;
+          } else if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            result.push(current);
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+
+        result.push(current);
+        return result;
+      };
+
+      const headers = parseLine(lines[0]).map(normalizeHeaderName);
+
+      let imported = 0;
+      let skipped = 0;
+      let failed = 0;
+      const failedRows = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = parseLine(lines[i]);
+        const row = {};
+
+        headers.forEach((header, index) => {
+          row[header] = (values[index] || '').trim();
+        });
+
+        const payload = buildImportPayload(row);
+
+        if (!payload.productName) {
+          skipped++;
+          failedRows.push(`Row ${i + 1}: missing product name`);
+          continue;
+        }
 
         try {
-          const text = await file.text();
-          let data = [];
+          const response = await fetch(API_BASE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
 
-          if (file.name.toLowerCase().endsWith('.json')) {
-            data = JSON.parse(text);
-          } else if (file.name.toLowerCase().endsWith('.csv')) {
-            data = csvToObjects(text);
-          } else {
-            showAlert('صيغة الملف غير مدعومة', 'error');
-            return;
+          const result = await response.json();
+
+          if (!response.ok || !result.success) {
+            failed++;
+            failedRows.push(`Row ${i + 1}: ${result.error || 'Import failed'}`);
+            continue;
           }
 
-          await importProductsFromObjects(data);
+          imported++;
         } catch (error) {
-          console.error(error);
-          showAlert('فشل في قراءة ملف الاستيراد', 'error');
-        } finally {
-          event.target.value = '';
+          failed++;
+          failedRows.push(`Row ${i + 1}: ${error.message}`);
         }
-      });
+      }
+
+      return { imported, skipped, failed, failedRows };
     }
 
-    function setupTabs() {
+    async function handleImportFile(file) {
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const result = file.name.toLowerCase().endsWith('.json')
+          ? await importProductsFromJson(JSON.parse(text))
+          : await importProductsFromCsv(text);
+
+        const message =
+          `تم الاستيراد: ${result.imported}\n` +
+          `تم التخطي: ${result.skipped}\n` +
+          `فشل: ${result.failed}`;
+
+        showAlert(message, result.failed ? 'warning' : 'success');
+
+        if (result.failedRows?.length) {
+          console.warn('Import issues:', result.failedRows);
+        }
+
+        await refreshPageData(false);
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Import failed', 'error');
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      const actionsBtn = e.target.closest('.page-actions .btn:nth-child(2)');
+      const dropdown = document.getElementById('actionsDropdown');
+      if (!actionsBtn && dropdown && !dropdown.contains(e.target)) {
+        closeActionsMenu();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
       document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
           document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1485,50 +1526,38 @@
           loadProducts();
         });
       });
-    }
 
-    function setupSearchSync() {
-      const desktop = document.getElementById('searchInput');
-      const mobile = document.getElementById('mobileSearchInput');
-      const top = document.getElementById('desktopSearchTop');
-
-      mobile.addEventListener('input', () => syncIncomingSearch(mobile.value));
-      top.addEventListener('input', () => syncIncomingSearch(top.value));
-      desktop.addEventListener('input', () => syncIncomingSearch(desktop.value));
-
-      mobile.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') loadProducts();
-      });
-
-      top.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') loadProducts();
-      });
-
-      desktop.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') loadProducts();
-      });
-    }
-
-    document.addEventListener('click', (event) => {
-      const dropdown = document.getElementById('actionsDropdown');
-      const trigger = event.target.closest('.page-actions .btn:nth-child(2), .tools');
-      if (!dropdown.contains(event.target) && !trigger) {
-        closeActionsMenu();
-      }
-    });
-
-    document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('selectAllCheckbox').addEventListener('change', function() {
         toggleSelectAll(this.checked);
       });
 
-      setupTabs();
-      setupSearchSync();
-      setupImport();
+      document.getElementById('searchInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') loadProducts();
+      });
 
-      await loadOrdersCount();
-      await loadSummary();
-      await loadProducts();
+      document.getElementById('mobileSearchInput').addEventListener('input', (e) => {
+        syncIncomingSearch(e.target.value);
+      });
+
+      document.getElementById('mobileSearchInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') loadProducts();
+      });
+
+      document.getElementById('desktopSearchTop').addEventListener('input', (e) => {
+        syncIncomingSearch(e.target.value);
+      });
+
+      document.getElementById('desktopSearchTop').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') loadProducts();
+      });
+
+      document.getElementById('importFileInput').addEventListener('change', async function() {
+        const file = this.files?.[0];
+        await handleImportFile(file);
+        this.value = '';
+      });
+
+      await refreshPageData(false);
     });
   </script>
 </body>

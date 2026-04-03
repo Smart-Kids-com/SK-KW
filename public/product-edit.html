@@ -836,7 +836,7 @@
 
   <script>
     const API_BASE = '/api/products';
-    const SITE_BASE = `${location.origin}/products/`;
+    const SITE_BASE = `${location.origin}/product-page.html`;
     const params = new URLSearchParams(window.location.search);
     const productId = params.get('id');
 
@@ -1015,7 +1015,7 @@
 
       document.getElementById('seoTitlePreview').textContent = previewTitle;
       document.getElementById('seoDescPreview').textContent = previewDesc;
-      document.getElementById('seoSiteText').textContent = `${SITE_BASE}${handle}`;
+      document.getElementById('seoSiteText').textContent = `${location.origin}/product-page.html?slug=${handle}`;
     }
 
     function fillMeta(product) {
@@ -1116,12 +1116,13 @@
 
       if (!payload.productName) {
         showAlert('اسم المنتج مطلوب', 'error');
-        return;
+        return null;
       }
 
       try {
-        const isEdit = !!productId;
-        const url = isEdit ? `${API_BASE}/${productId}` : API_BASE;
+        const isEdit = !!currentProduct?.id;
+        const targetId = currentProduct?.id || productId;
+        const url = isEdit ? `${API_BASE}/${targetId}` : API_BASE;
         const method = isEdit ? 'PUT' : 'POST';
 
         const response = await fetch(url, {
@@ -1142,25 +1143,27 @@
         showAlert(isEdit ? 'تم تحديث المنتج بنجاح' : 'تم إنشاء المنتج بنجاح', 'success');
 
         if (!isEdit && currentProduct?.id) {
-          window.location.href = `/product-edit.html?id=${currentProduct.id}`;
-          return;
+          window.history.replaceState({}, '', `/product-edit.html?id=${currentProduct.id}`);
         }
 
         populateForm(currentProduct);
+        return currentProduct;
       } catch (error) {
         console.error(error);
         showAlert(error.message || 'Failed to save product', 'error');
+        return null;
       }
     }
 
     async function deleteCurrentProduct() {
-      if (!productId) return;
+      if (!currentProduct?.id) return;
       if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
 
       try {
-        const response = await fetch(`${API_BASE}/${productId}`, {
+        const response = await fetch(`${API_BASE}/${currentProduct.id}`, {
           method: 'DELETE'
         });
+
         const result = await response.json();
 
         if (!response.ok || !result.success) {
@@ -1170,7 +1173,7 @@
         showAlert('تم حذف المنتج بنجاح', 'success');
         setTimeout(() => {
           window.location.href = '/products-admin';
-        }, 700);
+        }, 800);
       } catch (error) {
         console.error(error);
         showAlert(error.message || 'Failed to delete product', 'error');
@@ -1179,7 +1182,7 @@
 
     async function duplicateCurrentProduct() {
       if (!currentProduct) {
-        showAlert('احفظ المنتج أولًا أو افتح منتج موجود', 'error');
+        showAlert('احفظ المنتج أولًا قبل التكرار', 'error');
         return;
       }
 
@@ -1227,11 +1230,55 @@
       }
     }
 
-    function previewProduct() {
-      const payload = collectPayload();
-      const title = payload.seoTitle || payload.productName || 'Product title';
-      const desc = payload.seoDescription || payload.description || 'No description';
-      alert(`${title}\n\n${desc}`);
+    async function previewProduct() {
+      try {
+        let targetProduct = currentProduct;
+
+        if (!targetProduct) {
+          targetProduct = await saveProduct();
+          if (!targetProduct) return;
+        } else {
+          const payload = collectPayload();
+          const hasUnsavedChanges =
+            payload.productName !== (currentProduct.product_name || '') ||
+            payload.description !== (currentProduct.description || '') ||
+            payload.slug !== (currentProduct.slug || '') ||
+            payload.seoTitle !== (currentProduct.seo_title || '') ||
+            payload.seoDescription !== (currentProduct.seo_description || '') ||
+            Number(payload.price) !== Number(currentProduct.price || 0) ||
+            Number(payload.salePrice) !== Number(currentProduct.sale_price || 0) ||
+            Number(payload.stock) !== Number(currentProduct.stock || 0) ||
+            payload.sku !== (currentProduct.sku || '') ||
+            payload.status !== (currentProduct.status || 'active') ||
+            payload.productType !== (currentProduct.product_type || '') ||
+            payload.vendor !== (currentProduct.vendor || '') ||
+            payload.category !== (currentProduct.category || '') ||
+            payload.tags.join(',') !== (Array.isArray(currentProduct.tags_list) ? currentProduct.tags_list.join(',') : String(currentProduct.tags || '').split(',').map(v => v.trim()).filter(Boolean).join(','));
+
+          if (hasUnsavedChanges) {
+            targetProduct = await saveProduct();
+            if (!targetProduct) return;
+          }
+        }
+
+        const slug = String(targetProduct?.slug || '').trim();
+        const id = String(targetProduct?.id || '').trim();
+
+        if (slug) {
+          window.open(`/product-page.html?slug=${encodeURIComponent(slug)}`, '_blank');
+          return;
+        }
+
+        if (id) {
+          window.open(`/product-page.html?id=${encodeURIComponent(id)}`, '_blank');
+          return;
+        }
+
+        showAlert('لا يمكن فتح المعاينة: لا يوجد slug أو id', 'error');
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to open preview', 'error');
+      }
     }
 
     document.addEventListener('DOMContentLoaded', async () => {

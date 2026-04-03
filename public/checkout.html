@@ -513,30 +513,22 @@
 </head>
 <body>
   <div class="page">
-  <header class="checkout-header">
-    <a href="./cart.html" class="header-cart" aria-label="السلة">
-      <img
-        src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/icon-cart.webp?v=1774965805"
-        alt="Cart"
-        style="width:24px;height:24px;object-fit:contain;display:block;"
-      />
-    </a>
+    <header class="checkout-header">
+      <a href="./cart.html" class="header-cart" aria-label="السلة">
+        <img
+          src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/icon-cart.webp?v=1774965805"
+          alt="Cart"
+          style="width:24px;height:24px;object-fit:contain;display:block;"
+        />
+      </a>
 
-    <a href="./index.html" aria-label="الصفحة الرئيسية" style="display:inline-flex;align-items:center;">
-      <img
-        class="checkout-logo"
-        src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543"
-        alt="Smart Kids Kuwait"
-      />
-    </a>
-
-    <a href="./index.html" aria-label="الصفحة الرئيسية">
-      <img
-        class="checkout-logo"
-        src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543"
-        alt="Smart Kids Kuwait"
-      />
-    </a>
+      <a href="./index.html" aria-label="الصفحة الرئيسية" style="display:inline-flex;align-items:center;">
+        <img
+          class="checkout-logo"
+          src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543"
+          alt="Smart Kids Kuwait"
+        />
+      </a>
     </header>
 
     <div class="summary-toggle" id="summaryToggle">
@@ -552,16 +544,18 @@
 
       <div class="totals">
         <div class="totals-line">
-          <span class="muted" id="subtotalLabel">المجموع الفرعي</span>
+          <span class="muted">المجموع الفرعي</span>
           <strong id="subtotalValue">KWD 0.000</strong>
         </div>
 
         <div class="totals-line">
-          <span>
-            التوصيل
-            <span style="font-size:.9rem;">❔</span>
-          </span>
+          <span>التوصيل</span>
           <span class="muted" id="shippingValue">أضف المحافظة</span>
+        </div>
+
+        <div class="totals-line">
+          <span>الخصم</span>
+          <span class="muted" id="discountValue">KWD 0.000</span>
         </div>
 
         <div class="totals-line totals-grand">
@@ -576,7 +570,7 @@
 
     <section class="section">
       <div class="inline-title">
-        <h2>( البريد  أو رقم الهاتف )</h2>
+        <h2>( البريد أو رقم الهاتف )</h2>
         <a href="./cart.html" class="cart-link">السلة</a>
       </div>
 
@@ -726,6 +720,13 @@
     </section>
 
     <section class="section">
+      <h2>ملاحظات الطلب</h2>
+      <div class="field">
+        <textarea id="orderNotes" placeholder="أضف أي ملاحظات تخص الطلب أو التوصيل"></textarea>
+      </div>
+    </section>
+
+    <section class="section">
       <h2>خصم</h2>
       <div class="coupon-row">
         <input type="text" id="discountField" placeholder="كود الخصم">
@@ -770,14 +771,24 @@
       return `KWD ${Number(value || 0).toFixed(3)}`;
     }
 
+    function safeText(value, fallback = '') {
+      const text = String(value ?? '').trim();
+      return text || fallback;
+    }
+
+    function safeNumber(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
     function getSubtotal() {
       return cart.reduce((sum, item) => {
-        return sum + (Number(item.price || 0) * Number(item.quantity || 0));
+        return sum + (safeNumber(item.price, 0) * safeNumber(item.quantity, 0));
       }, 0);
     }
 
     function hasGovernorate() {
-      return String(document.getElementById('governorate')?.value || '').trim() !== '';
+      return safeText(document.getElementById('governorate')?.value) !== '';
     }
 
     function getShipping() {
@@ -838,20 +849,28 @@
       const summaryItems = document.getElementById('summaryItems');
       const subtotal = getSubtotal();
       const shipping = getShipping();
-      const totalQty = cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+      const totalQty = cart.reduce((sum, item) => sum + safeNumber(item.quantity, 0), 0);
 
-      summaryItems.innerHTML = cart.map(item => `
-        <div class="summary-item">
-          <div class="summary-thumb">
-            <img src="${escapeHtml(item.image || 'https://via.placeholder.com/120x120?text=Product')}" alt="${escapeHtml(item.name || 'منتج')}">
-            <span class="summary-qty">${Number(item.quantity || 0)}</span>
+      summaryItems.innerHTML = cart.map(item => {
+        const quantity = safeNumber(item.quantity, 0);
+        const linePrice = safeNumber(item.price, 0) * quantity;
+        const image = safeText(item.image, 'https://via.placeholder.com/120x120?text=Product');
+        const name = safeText(item.name, 'منتج');
+
+        return `
+          <div class="summary-item">
+            <div class="summary-thumb">
+              <img src="${escapeHtml(image)}" alt="${escapeHtml(name)}">
+              <span class="summary-qty">${quantity}</span>
+            </div>
+            <div class="summary-name">${escapeHtml(name)}</div>
+            <div class="summary-price">${formatKWD(linePrice)}</div>
           </div>
-          <div class="summary-name">${escapeHtml(item.name || 'منتج')}</div>
-          <div class="summary-price">${formatKWD(Number(item.price || 0) * Number(item.quantity || 0))}</div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
 
       document.getElementById('subtotalValue').textContent = formatKWD(subtotal);
+      document.getElementById('discountValue').textContent = formatKWD(discountAmount);
       document.getElementById('summaryToggleTotal').textContent = formatKWD(getGrandTotal());
       document.getElementById('grandTotalValue').textContent = formatKWD(getGrandTotal());
 
@@ -864,7 +883,8 @@
       }
 
       const firstItem = cart[0];
-      document.getElementById('finalSummaryImage').src = firstItem.image || 'https://via.placeholder.com/120x120?text=Product';
+      document.getElementById('finalSummaryImage').src =
+        safeText(firstItem?.image, 'https://via.placeholder.com/120x120?text=Product');
       document.getElementById('finalSummaryQty').textContent = totalQty;
       document.getElementById('finalSummaryItemsText').textContent = `${totalQty} item`;
       document.getElementById('finalSummaryTotal').textContent = formatKWD(getGrandTotal());
@@ -917,7 +937,7 @@
     }
 
     function applyDiscountCode() {
-      const code = (document.getElementById('discountField').value || '').trim().toUpperCase();
+      const code = safeText(document.getElementById('discountField').value).toUpperCase();
 
       if (!code) {
         discountAmount = 0;
@@ -931,8 +951,8 @@
         discountAmount = 0.5;
       } else {
         discountAmount = 0;
-        showError('كود الخصم غير صحيح');
         renderSummary();
+        showError('كود الخصم غير صحيح');
         return;
       }
 
@@ -953,7 +973,7 @@
 
       for (const id of requiredIds) {
         const el = document.getElementById(id);
-        if (!el || !String(el.value || '').trim()) {
+        if (!el || !safeText(el.value)) {
           el?.focus();
           showError('يرجى تعبئة جميع الحقول المطلوبة');
           return false;
@@ -974,7 +994,7 @@
 
         for (const id of billingRequired) {
           const el = document.getElementById(id);
-          if (!el || !String(el.value || '').trim()) {
+          if (!el || !safeText(el.value)) {
             el?.focus();
             showError('يرجى تعبئة عنوان الفاتورة بالكامل');
             return false;
@@ -986,8 +1006,8 @@
     }
 
     function buildCustomerEmail() {
-      const contactValue = String(document.getElementById('contactField')?.value || '').trim();
-      const phoneValue = String(document.getElementById('phone')?.value || '').trim();
+      const contactValue = safeText(document.getElementById('contactField')?.value);
+      const phoneValue = safeText(document.getElementById('phone')?.value);
 
       if (contactValue.includes('@')) return contactValue;
 
@@ -995,6 +1015,21 @@
       if (digits) return `phone-${digits}@smartkids.local`;
 
       return 'guest@smartkids.local';
+    }
+
+    function buildOrderNotes(paymentMethod, billingMode) {
+      const parts = [];
+
+      const cartNote = safeText(localStorage.getItem('cart_note'));
+      const orderNote = safeText(document.getElementById('orderNotes')?.value);
+
+      if (cartNote) parts.push(`Cart note: ${cartNote}`);
+      if (orderNote) parts.push(`Checkout note: ${orderNote}`);
+
+      parts.push(`Payment: ${paymentMethod}`);
+      parts.push(`Billing: ${billingMode}`);
+
+      return parts.join(' | ');
     }
 
     async function completeOrder() {
@@ -1014,24 +1049,30 @@
       const billingMode = document.querySelector('input[name="billingAddress"]:checked')?.value || 'same';
 
       const orderPayload = {
-        customerName: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`.trim(),
+        customerName: `${safeText(document.getElementById('firstName').value)} ${safeText(document.getElementById('lastName').value)}`.trim(),
         customerEmail: buildCustomerEmail(),
-        customerPhone: document.getElementById('phone').value.trim(),
+        customerPhone: safeText(document.getElementById('phone').value),
         customerAddress: [
-          document.getElementById('address1').value.trim(),
-          document.getElementById('address2').value.trim(),
-          document.getElementById('city').value.trim(),
-          document.getElementById('governorate').value.trim(),
-          document.getElementById('country').value.trim()
+          safeText(document.getElementById('address1').value),
+          safeText(document.getElementById('address2').value),
+          safeText(document.getElementById('city').value),
+          safeText(document.getElementById('governorate').value),
+          safeText(document.getElementById('country').value)
         ].filter(Boolean).join(' - '),
-        customerCity: document.getElementById('city').value.trim(),
-        customerDistrict: document.getElementById('governorate').value.trim(),
-        notes: `Payment: ${paymentMethod} | Billing: ${billingMode}`,
+        customerCity: safeText(document.getElementById('city').value),
+        customerDistrict: safeText(document.getElementById('governorate').value),
+        notes: buildOrderNotes(paymentMethod, billingMode),
+        shippingCost: getShipping() === null ? 0 : getShipping(),
+        discountAmount: discountAmount,
+        subtotal: getSubtotal(),
+        total: getGrandTotal(),
         items: cart.map(item => ({
           productId: item.id || '',
+          slug: item.slug || '',
           name: item.name || 'منتج',
-          price: Number(item.price || 0),
-          quantity: Number(item.quantity || 1)
+          price: safeNumber(item.price, 0),
+          quantity: safeNumber(item.quantity, 1),
+          image: safeText(item.image)
         }))
       };
 
@@ -1044,40 +1085,30 @@
           body: JSON.stringify(orderPayload)
         });
 
-        console.log('📡 Response Status:', response.status);
-        console.log('📡 Response OK:', response.ok);
-
         const result = await response.json().catch(() => null);
-        console.log('📡 Response JSON:', result);
 
-        // إذا كان الطلب ناجح (statusOK و success جاهز)
         if (response.ok && result && result.success === true) {
-          // احفظ last_order وامسح السلة
-          localStorage.setItem('last_order', JSON.stringify(result.data));
+          localStorage.setItem('last_order', JSON.stringify(result.data || {}));
           localStorage.removeItem('cart');
+          localStorage.removeItem('cart_note');
 
-          // استخرج رقم الطلب
           const orderNumber = result.data?.order_number || '';
           showSuccess(`تم إرسال الطلب بنجاح ✅ رقم الطلب: ${orderNumber}`);
 
           setTimeout(() => {
             if (orderNumber) {
-              window.location.href = `./thank-you.html?order=${encodeURIComponent(orderNumber)}`; 
+              window.location.href = `./thank-you.html?order=${encodeURIComponent(orderNumber)}`;
             } else {
               window.location.href = './thank-you.html';
             }
           }, 1500);
         } else if (!response.ok) {
-          // Server error
           throw new Error(result?.error || `خطأ أثناء الطلب (${response.status})`);
         } else if (!result) {
-          // JSON parse failed
           throw new Error('فشل الاتصال مع السيرفر');
         } else {
-          // API returned error
           throw new Error(result?.error || 'فشل في إنشاء الطلب');
         }
-
       } catch (error) {
         console.error('Order submit error:', error);
         showError(error.message || 'حدث خطأ أثناء إرسال الطلب');
@@ -1112,6 +1143,17 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      if (!cart.length) {
+        window.location.href = './cart.html';
+        return;
+      }
+
+      const existingCartNote = localStorage.getItem('cart_note') || '';
+      const orderNotes = document.getElementById('orderNotes');
+      if (orderNotes && existingCartNote) {
+        orderNotes.value = existingCartNote;
+      }
+
       initSummaryToggle();
 
       bindRadioCards('payment');
