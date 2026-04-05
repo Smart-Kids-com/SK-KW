@@ -338,7 +338,6 @@
       font-weight:700;
     }
 
-    .product-items-list{display:grid;gap:12px;}
     .product-row{
       display:grid;
       grid-template-columns:54px minmax(0,1fr) auto auto;
@@ -649,7 +648,6 @@
       white-space:nowrap;
     }
 
-    .mobile-product-list{display:grid;gap:12px;}
     .mobile-product-card{
       display:grid;
       grid-template-columns:64px minmax(0,1fr) auto;
@@ -1067,15 +1065,11 @@
                 </div>
 
                 <div class="desktop-header-actions">
-                  <button class="ghost-btn" onclick="restockCurrentOrder()">Restock</button>
-                  <button class="ghost-btn" onclick="returnCurrentOrder()">Return</button>
+                  <button class="ghost-btn">Restock</button>
+                  <button class="ghost-btn">Return</button>
                   <button class="ghost-btn" onclick="openMainOrderEdit()">Edit</button>
-                  <div class="mobile-actions-wrap"><button class="ghost-btn" onclick="toggleDesktopPrintMenu(event)">Print ▾</button><div class="mobile-actions-menu" id="desktopPrintMenu"><button class="mobile-menu-btn" type="button" onclick="printOrderDocument('Order Printer Pro')"><span>Order Printer Pro</span><span>🖨</span></button><button class="mobile-menu-btn" type="button" onclick="printOrderDocument('Order Printer')"><span>Order Printer</span><span>🖨</span></button><button class="mobile-menu-btn" type="button" onclick="printOrderDocument('Packing slips')"><span>Print packing slips</span><span>🧾</span></button></div></div>
-                  <div class="mobile-actions-wrap"><button class="ghost-btn" onclick="toggleDesktopMoreMenu(event)">More actions ▾</button><div class="mobile-actions-menu" id="desktopMoreMenu"><button class="mobile-menu-btn" type="button" onclick="duplicateCurrentOrder()"><span>Duplicate</span><span>⧉</span></button><button class="mobile-menu-btn" type="button" onclick="cancelCurrentOrder()"><span>Cancel order</span><span>✕</span></button><button class="mobile-menu-btn" type="button" onclick="archiveCurrentOrder()"><span>Archive</span><span>🗂</span></button><button class="mobile-menu-btn" type="button" onclick="copyOrderLink()"><span>Copy order link</span><span>🔗</span></button></div></div>
-                  <div style="display:flex;gap:8px;align-items:center;">
-                    <button class="ghost-btn" onclick="goToSiblingOrder(-1)">↑</button>
-                    <button class="ghost-btn" onclick="goToSiblingOrder(1)">↓</button>
-                  </div>
+                  <button class="ghost-btn">Print ▾</button>
+                  <button class="ghost-btn">More actions ▾</button>
                 </div>
               </div>
 
@@ -1093,7 +1087,16 @@
                         <div>⋯</div>
                       </div>
 
-                      <div class="product-items-list" id="desktopProductsList"></div>
+                      <div class="product-row">
+                        <div class="product-thumb" id="desktopProductThumb">📦</div>
+                        <div class="product-title" id="desktopProductTitle">—</div>
+                        <div style="display:flex;align-items:center;gap:8px;justify-self:end;">
+                          <div class="product-price" id="desktopProductUnitPrice">KWD 0.000</div>
+                          <div>×</div>
+                          <div class="qty-chip" id="desktopProductQty">1</div>
+                        </div>
+                        <div class="product-price" id="desktopProductLineTotal">KWD 0.000</div>
+                      </div>
 
                       <div style="display:flex;justify-content:flex-end;margin-top:14px;">
                         <button class="dark-btn">Add tracking</button>
@@ -1323,7 +1326,14 @@
                 <div>⋯</div>
               </div>
 
-              <div class="mobile-product-list" id="mobileProductsList"></div>
+              <div class="mobile-product-card">
+                <div class="mobile-product-thumb" id="mobileProductThumb">📦</div>
+                <div>
+                  <div class="mobile-product-title" id="mobileProductTitle">—</div>
+                  <div class="mobile-product-price" id="mobileProductUnitPrice">KWD 0.000 × <span id="mobileProductQty">1</span></div>
+                </div>
+                <div class="mobile-product-price" id="mobileProductLineTotal">KWD 0.000</div>
+              </div>
 
               <div style="display:flex;justify-content:flex-end;margin-top:14px;">
                 <button class="dark-btn">Add tracking</button>
@@ -1560,12 +1570,11 @@
       loadOrder();
       document.addEventListener('click', event => {
         const wrap = event.target.closest('.mobile-actions-wrap');
-        if (!wrap) { closeMobileActionsMenu(); closeDesktopMenus(); }
+        if (!wrap) closeMobileActionsMenu();
       });
       document.addEventListener('keydown', event => {
         if (event.key === 'Escape') {
           closeMobileActionsMenu();
-          closeDesktopMenus();
           closeModal('mainOrderEditModal');
           closeModal('quickEditModal');
         }
@@ -1594,10 +1603,6 @@
 
         currentOrder = normalizeOrder(data.data);
         renderOrder(currentOrder);
-        const autoEdit = params.get('edit');
-        if (autoEdit === '1' || autoEdit === 'true') {
-          setTimeout(() => openMainOrderEdit(), 50);
-        }
       } catch (error) {
         showAlert(error.message || 'Failed to load order', 'error');
       } finally {
@@ -1647,37 +1652,6 @@
       };
     }
 
-
-    function renderProducts(order){
-      const desktopWrap = document.getElementById('desktopProductsList');
-      const mobileWrap = document.getElementById('mobileProductsList');
-      const items = Array.isArray(order.items) && order.items.length ? order.items : [order.firstItem];
-      if (desktopWrap) {
-        desktopWrap.innerHTML = items.map(item => `
-          <div class="product-row">
-            <div class="product-thumb">${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.product_name)}">` : '📦'}</div>
-            <div class="product-title">${escapeHtml(item.product_name || 'Order item')}</div>
-            <div style="display:flex;align-items:center;gap:8px;justify-self:end;">
-              <div class="product-price">${escapeHtml(H.formatCurrency(item.unit_price || 0))}</div>
-              <div>×</div>
-              <div class="qty-chip">${escapeHtml(String(item.quantity || 1))}</div>
-            </div>
-            <div class="product-price">${escapeHtml(H.formatCurrency(item.subtotal || 0))}</div>
-          </div>`).join('');
-      }
-      if (mobileWrap) {
-        mobileWrap.innerHTML = items.map(item => `
-          <div class="mobile-product-card">
-            <div class="mobile-product-thumb">${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.product_name)}">` : '📦'}</div>
-            <div>
-              <div class="mobile-product-title">${escapeHtml(item.product_name || 'Order item')}</div>
-              <div class="mobile-product-price">${escapeHtml(H.formatCurrency(item.unit_price || 0))} × ${escapeHtml(String(item.quantity || 1))}</div>
-            </div>
-            <div class="mobile-product-price">${escapeHtml(H.formatCurrency(item.subtotal || 0))}</div>
-          </div>`).join('');
-      }
-    }
-
     function renderOrder(order) {
       const orderNumber = order.order_number || `#${order.id || ''}`;
       const paymentLabel = getPaymentLabel(order);
@@ -1694,7 +1668,12 @@
       setStatusChip('desktopFulfillmentChipCard', fulfillmentLabel, 'fulfillment');
       setText('desktopFulfillmentRef', orderNumber);
       setText('desktopFulfilledDate', formatDetailDate(order.updated_at || order.created_at));
-      renderProducts(order);
+
+      renderProductThumb('desktopProductThumb', order.firstItem.image);
+      setText('desktopProductTitle', order.firstItem.product_name);
+      setText('desktopProductUnitPrice', H.formatCurrency(order.firstItem.unit_price));
+      setText('desktopProductQty', String(order.firstItem.quantity));
+      setText('desktopProductLineTotal', H.formatCurrency(order.firstItem.subtotal));
 
       setText('desktopSubtotal', H.formatCurrency(order.subtotal));
       setText('desktopShippingCost', H.formatCurrency(order.shipping_cost));
@@ -1718,7 +1697,12 @@
       setStatusChip('mobilePaymentChipCard', paymentLabel, 'payment');
       setStatusChip('mobileFulfillmentChipTop', fulfillmentLabel, 'fulfillment');
       setStatusChip('mobileFulfillmentChipCard', fulfillmentLabel, 'fulfillment');
-      renderProducts(order);
+
+      renderProductThumb('mobileProductThumb', order.firstItem.image);
+      setText('mobileProductTitle', order.firstItem.product_name);
+      setText('mobileProductUnitPrice', `${H.formatCurrency(order.firstItem.unit_price)} × ${order.firstItem.quantity}`);
+      setText('mobileProductQty', String(order.firstItem.quantity));
+      setText('mobileProductLineTotal', H.formatCurrency(order.firstItem.subtotal));
 
       setText('mobileSubtotal', H.formatCurrency(order.subtotal));
       setText('mobileShippingCost', H.formatCurrency(order.shipping_cost));
@@ -2010,76 +1994,6 @@
       document.getElementById('mobileActionsMenu')?.classList.remove('active');
     }
 
-
-async function loadAllOrdersForNavigation() {
-  try {
-    const response = await fetch(`${API_BASE}?limit=300&offset=0&sort=created_at&order=DESC`);
-    const data = await response.json();
-    if (!response.ok || !data.success) throw new Error(data.error || 'Failed to load orders list');
-    return Array.isArray(data.data) ? data.data.map(normalizeOrder) : [];
-  } catch (error) {
-    showAlert(error.message || 'Failed to load orders list', 'error');
-    return [];
-  }
-}
-
-async function goToSiblingOrder(step) {
-  if (!currentOrder?.id) return;
-  const orders = await loadAllOrdersForNavigation();
-  const index = orders.findIndex(order => String(order.id) === String(currentOrder.id));
-  if (index === -1) {
-    showAlert('Unable to determine current order position', 'error');
-    return;
-  }
-  const nextIndex = index + step;
-  if (nextIndex < 0 || nextIndex >= orders.length) {
-    showAlert('No more orders in this direction', 'warning');
-    return;
-  }
-  const nextOrder = orders[nextIndex];
-  window.location.href = `/order-details.html?id=${encodeURIComponent(nextOrder.id)}`;
-}
-
-function toggleDesktopPrintMenu(event){ event.stopPropagation(); closeMobileActionsMenu(); document.getElementById('desktopMoreMenu')?.classList.remove('active'); document.getElementById('desktopPrintMenu')?.classList.toggle('active'); }
-function toggleDesktopMoreMenu(event){ event.stopPropagation(); closeMobileActionsMenu(); document.getElementById('desktopPrintMenu')?.classList.remove('active'); document.getElementById('desktopMoreMenu')?.classList.toggle('active'); }
-function closeDesktopMenus(){ document.getElementById('desktopPrintMenu')?.classList.remove('active'); document.getElementById('desktopMoreMenu')?.classList.remove('active'); }
-function printOrderDocument(mode){ closeDesktopMenus(); window.print(); showAlert(`${mode} opened`, 'success'); }
-function copyOrderLink(){ const url = window.location.href; if (navigator.clipboard) { navigator.clipboard.writeText(url).then(()=>showAlert('Order link copied', 'success')); } else { showAlert(url, 'success'); } closeDesktopMenus(); }
-async function duplicateCurrentOrder(){
-  try {
-    if (!currentOrder) throw new Error('Order is not loaded yet');
-    const payload = {
-      customerName: currentOrder.customer_name || '',
-      customerEmail: currentOrder.customer_email || '',
-      customerPhone: currentOrder.customer_phone || '',
-      customerAddress: currentOrder.customer_address || '',
-      customerDistrict: currentOrder.customer_district || '',
-      customerCity: currentOrder.customer_city || '',
-      notes: currentOrder.notes || '',
-      items: (currentOrder.items || []).map(item => ({
-        product_name: item.product_name || item.name || 'Order item',
-        product_price: Number(item.unit_price ?? item.product_price ?? item.price ?? 0),
-        quantity: Number(item.quantity || 1),
-        subtotal: Number(item.subtotal || 0),
-        image: item.image || ''
-      })),
-      shippingCost: Number(currentOrder.shipping_cost || 0),
-      shipping_cost: Number(currentOrder.shipping_cost || 0),
-      subtotal: Number(currentOrder.subtotal || 0),
-      total: Number(currentOrder.total || 0),
-      status: 'pending'
-    };
-    const response = await fetch(API_BASE, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-    const data = await response.json();
-    if (!response.ok || !data.success) throw new Error(data.error || 'Failed to duplicate order');
-    closeDesktopMenus();
-    showAlert('Order duplicated', 'success');
-    window.location.href = `/order-details.html?id=${encodeURIComponent(data.data.id)}`;
-  } catch (error) { showAlert(error.message || 'Failed to duplicate order', 'error'); }
-}
-function restockCurrentOrder(){ openMainOrderEdit(); closeDesktopMenus(); }
-function returnCurrentOrder(){ openQuickEdit('notes'); closeDesktopMenus(); }
-
 async function markAsPaid() {
   try {
     if (!currentOrder?.id) {
@@ -2195,10 +2109,13 @@ async function cancelCurrentOrder() {
         return;
       }
 
-      if (action === 'duplicate') { duplicateCurrentOrder(); return; }
-      if (action === 'restock') { restockCurrentOrder(); return; }
-      if (action === 'return') { returnCurrentOrder(); return; }
-      showAlert('Action not available yet', 'warning');
+      const labels = {
+        duplicate: 'Duplicate action is ready for backend wiring.',
+        cancel: 'Cancel action is ready for backend wiring.',
+        restock: 'Restock action is ready for backend wiring.',
+        archive: 'Archive action is ready for backend wiring.'
+      };
+      showAlert(labels[action] || 'Action not available yet', action === 'cancel' ? 'error' : 'success');
     }
 
     function openModal(id) {
