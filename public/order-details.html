@@ -1212,11 +1212,28 @@
                 </div>
 
                 <div class="desktop-header-actions">
-                  <button class="ghost-btn">Restock</button>
-                  <button class="ghost-btn">Return</button>
+                  <button class="ghost-btn" onclick="handleDesktopAction('restock')">Restock</button>
+                  <button class="ghost-btn" onclick="handleDesktopAction('return')">Return</button>
                   <button class="ghost-btn" onclick="openMainOrderEdit()">Edit</button>
-                  <button class="ghost-btn">Print ▾</button>
-                  <button class="ghost-btn">More actions ▾</button>
+                  <div class="mobile-actions-wrap">
+                    <button class="ghost-btn" type="button" onclick="toggleDesktopPrintMenu(event)">Print ▾</button>
+                    <div class="mobile-actions-menu" id="desktopPrintMenu">
+                      <button class="mobile-menu-btn" type="button" onclick="printCurrentOrder('default')"><span>Print order</span><span>🖨</span></button>
+                      <button class="mobile-menu-btn" type="button" onclick="printCurrentOrder('packing')"><span>Print packing slip</span><span>📄</span></button>
+                      <button class="mobile-menu-btn" type="button" onclick="printCurrentOrder('pdf')"><span>Export PDF</span><span>⬇</span></button>
+                    </div>
+                  </div>
+                  <div class="mobile-actions-wrap">
+                    <button class="ghost-btn" type="button" onclick="toggleDesktopActionsMenu(event)">More actions ▾</button>
+                    <div class="mobile-actions-menu" id="desktopActionsMenu">
+                      <button class="mobile-menu-btn" type="button" onclick="duplicateCurrentOrder()"><span>Duplicate</span><span>⧉</span></button>
+                      <button class="mobile-menu-btn danger" type="button" onclick="cancelCurrentOrder()"><span>Cancel order</span><span>✕</span></button>
+                      <button class="mobile-menu-btn" type="button" onclick="archiveCurrentOrder()"><span>Archive</span><span>🗄</span></button>
+                      <button class="mobile-menu-btn" type="button" onclick="viewOrderStatusPage()"><span>View order status page</span><span>↗</span></button>
+                    </div>
+                  </div>
+                  <button class="icon-only-btn" id="desktopPrevOrderBtn" type="button" onclick="goToPrevOrder()" title="Previous order">‹</button>
+                  <button class="icon-only-btn" id="desktopNextOrderBtn" type="button" onclick="goToNextOrder()" title="Next order">›</button>
                 </div>
               </div>
 
@@ -1234,16 +1251,7 @@
                         <div>⋯</div>
                       </div>
 
-                      <div class="product-row">
-                        <div class="product-thumb" id="desktopProductThumb">📦</div>
-                        <div class="product-title" id="desktopProductTitle">—</div>
-                        <div style="display:flex;align-items:center;gap:8px;justify-self:end;">
-                          <div class="product-price" id="desktopProductUnitPrice">KWD 0.000</div>
-                          <div>×</div>
-                          <div class="qty-chip" id="desktopProductQty">1</div>
-                        </div>
-                        <div class="product-price" id="desktopProductLineTotal">KWD 0.000</div>
-                      </div>
+                      <div id="desktopProductsList"></div>
 
                       <div style="display:flex;justify-content:flex-end;margin-top:14px;">
                         <button class="dark-btn">Add tracking</button>
@@ -1441,7 +1449,7 @@
               <div class="mobile-order-nav">
                 <button class="round-icon" onclick="goBackToOrders()">‹</button>
                 <div style="display:flex;gap:8px;">
-                  <button class="round-icon">🖨</button>
+                  <button class="round-icon" type="button" onclick="toggleMobilePrintMenu(event)">🖨</button>
                   <div class="mobile-actions-wrap">
                     <button class="round-icon" type="button" onclick="toggleMobileActionsMenu(event)">⋯</button>
                     <div class="mobile-actions-menu" id="mobileActionsMenu">
@@ -1455,7 +1463,14 @@
                       <button class="mobile-menu-btn" type="button" onclick="handleMobileAction('status')"><span>View order status</span><span>↗</span></button>
                       <button class="mobile-menu-btn" type="button" onclick="handleMobileAction('share')"><span>Share order with staff</span><span>🔗</span></button>
                     </div>
+                    <div class="mobile-actions-menu" id="mobilePrintMenu">
+                      <button class="mobile-menu-btn" type="button" onclick="printCurrentOrder('default')"><span>Print order</span><span>🖨</span></button>
+                      <button class="mobile-menu-btn" type="button" onclick="printCurrentOrder('packing')"><span>Print packing slip</span><span>📄</span></button>
+                      <button class="mobile-menu-btn" type="button" onclick="printCurrentOrder('pdf')"><span>Export PDF</span><span>⬇</span></button>
+                    </div>
                   </div>
+                  <button class="round-icon" type="button" onclick="goToPrevOrder()">˄</button>
+                  <button class="round-icon" type="button" onclick="goToNextOrder()">˅</button>
                 </div>
               </div>
 
@@ -1473,14 +1488,7 @@
                 <div>⋯</div>
               </div>
 
-              <div class="mobile-product-card">
-                <div class="mobile-product-thumb" id="mobileProductThumb">📦</div>
-                <div>
-                  <div class="mobile-product-title" id="mobileProductTitle">—</div>
-                  <div class="mobile-product-price" id="mobileProductUnitPrice">KWD 0.000 × <span id="mobileProductQty">1</span></div>
-                </div>
-                <div class="mobile-product-price" id="mobileProductLineTotal">KWD 0.000</div>
-              </div>
+              <div id="mobileProductsList"></div>
 
               <div style="display:flex;justify-content:flex-end;margin-top:14px;">
                 <button class="dark-btn">Add tracking</button>
@@ -1836,16 +1844,23 @@
     };
     const H = (typeof HELPERS !== 'undefined' && HELPERS) ? HELPERS : HELPERS_FALLBACK;
     let currentOrder = null;
+    let orderNavigationList = [];
+    let currentOrderNavIndex = -1;
 
     document.addEventListener('DOMContentLoaded', () => {
       loadOrder();
+      loadOrderNavigation();
       document.addEventListener('click', event => {
         const wrap = event.target.closest('.mobile-actions-wrap');
-        if (!wrap) closeMobileActionsMenu();
+        if (!wrap) {
+          closeMobileActionsMenu();
+          closeDesktopActionsMenu();
+        }
       });
       document.addEventListener('keydown', event => {
         if (event.key === 'Escape') {
           closeMobileActionsMenu();
+          closeDesktopActionsMenu();
           closeModal('mainOrderEditModal');
           closeModal('quickEditModal');
         }
@@ -1874,6 +1889,14 @@
 
         currentOrder = normalizeOrder(data.data);
         renderOrder(currentOrder);
+        updateCurrentOrderNavIndex();
+        const paramsNow = new URLSearchParams(window.location.search);
+        if (paramsNow.get('edit') === '1') {
+          openMainOrderEdit();
+          paramsNow.delete('edit');
+          const query = paramsNow.toString();
+          window.history.replaceState({}, '', query ? `${window.location.pathname}?${query}` : window.location.pathname);
+        }
       } catch (error) {
         showAlert(error.message || 'Failed to load order', 'error');
       } finally {
@@ -1940,11 +1963,7 @@
       setText('desktopFulfillmentRef', orderNumber);
       setText('desktopFulfilledDate', formatDetailDate(order.updated_at || order.created_at));
 
-      renderProductThumb('desktopProductThumb', order.firstItem.image);
-      setText('desktopProductTitle', order.firstItem.product_name);
-      setText('desktopProductUnitPrice', H.formatCurrency(order.firstItem.unit_price));
-      setText('desktopProductQty', String(order.firstItem.quantity));
-      setText('desktopProductLineTotal', H.formatCurrency(order.firstItem.subtotal));
+      renderOrderItems('desktopProductsList', order.items || [], false);
 
       setText('desktopSubtotal', H.formatCurrency(order.subtotal));
       setText('desktopShippingCost', H.formatCurrency(order.shipping_cost));
@@ -1969,11 +1988,7 @@
       setStatusChip('mobileFulfillmentChipTop', fulfillmentLabel, 'fulfillment');
       setStatusChip('mobileFulfillmentChipCard', fulfillmentLabel, 'fulfillment');
 
-      renderProductThumb('mobileProductThumb', order.firstItem.image);
-      setText('mobileProductTitle', order.firstItem.product_name);
-      setText('mobileProductUnitPrice', `${H.formatCurrency(order.firstItem.unit_price)} × ${order.firstItem.quantity}`);
-      setText('mobileProductQty', String(order.firstItem.quantity));
-      setText('mobileProductLineTotal', H.formatCurrency(order.firstItem.subtotal));
+      renderOrderItems('mobileProductsList', order.items || [], true);
 
       setText('mobileSubtotal', H.formatCurrency(order.subtotal));
       setText('mobileShippingCost', H.formatCurrency(order.shipping_cost));
@@ -1999,7 +2014,119 @@
     }
 
 
-    function openMainOrderEdit() {
+    
+    async function loadOrderNavigation() {
+      try {
+        const response = await fetch(`${API_BASE}?limit=300&offset=0&sort=created_at&order=DESC`, { cache: 'no-store' });
+        const data = await response.json();
+        if (!response.ok || !data.success) return;
+        orderNavigationList = Array.isArray(data.data) ? data.data.map(item => ({ id: item.id, order_number: item.order_number })) : [];
+        updateCurrentOrderNavIndex();
+      } catch (error) {
+        console.error('Failed to load order navigation', error);
+      }
+    }
+
+    function updateCurrentOrderNavIndex() {
+      if (!currentOrder?.id) {
+        currentOrderNavIndex = -1;
+      } else {
+        currentOrderNavIndex = orderNavigationList.findIndex(item => String(item.id) === String(currentOrder.id));
+      }
+      const prevBtn = document.getElementById('desktopPrevOrderBtn');
+      const nextBtn = document.getElementById('desktopNextOrderBtn');
+      const prevDisabled = currentOrderNavIndex <= 0;
+      const nextDisabled = currentOrderNavIndex < 0 || currentOrderNavIndex >= orderNavigationList.length - 1;
+      if (prevBtn) prevBtn.style.opacity = prevDisabled ? '.45' : '1';
+      if (nextBtn) nextBtn.style.opacity = nextDisabled ? '.45' : '1';
+    }
+
+    function goToPrevOrder() {
+      if (currentOrderNavIndex <= 0) return;
+      const target = orderNavigationList[currentOrderNavIndex - 1];
+      if (target?.id) window.location.href = `/order-details.html?id=${encodeURIComponent(target.id)}`;
+    }
+
+    function goToNextOrder() {
+      if (currentOrderNavIndex < 0 || currentOrderNavIndex >= orderNavigationList.length - 1) return;
+      const target = orderNavigationList[currentOrderNavIndex + 1];
+      if (target?.id) window.location.href = `/order-details.html?id=${encodeURIComponent(target.id)}`;
+    }
+
+    function renderOrderItems(targetId, items, isMobile = false) {
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      const safeItems = Array.isArray(items) && items.length ? items : [currentOrder?.firstItem].filter(Boolean);
+      target.innerHTML = safeItems.map(item => {
+        const image = escapeHtml(item.image || item.product_image || item.image_url || '');
+        const title = escapeHtml(item.product_name || item.name || 'Order item');
+        const unit = H.formatCurrency(Number(item.unit_price ?? item.product_price ?? item.price ?? 0));
+        const qty = Math.max(1, Number(item.quantity || 1));
+        const line = H.formatCurrency(Number(item.subtotal || ((Number(item.unit_price ?? item.product_price ?? item.price ?? 0)) * qty)));
+        if (isMobile) {
+          return `<div class="mobile-product-card" style="margin-bottom:12px;"><div class="mobile-product-thumb">${image ? `<img src="${image}" alt="">` : '📦'}</div><div><div class="mobile-product-title">${title}</div><div class="mobile-product-price">${unit} × ${qty}</div></div><div class="mobile-product-price">${line}</div></div>`;
+        }
+        return `<div class="product-row" style="margin-bottom:12px;"><div class="product-thumb">${image ? `<img src="${image}" alt="">` : '📦'}</div><div class="product-title">${title}</div><div style="display:flex;align-items:center;gap:8px;justify-self:end;"><div class="product-price">${unit}</div><div>×</div><div class="qty-chip">${qty}</div></div><div class="product-price">${line}</div></div>`;
+      }).join('');
+    }
+
+    function closeDesktopActionsMenu() {
+      document.getElementById('desktopActionsMenu')?.classList.remove('active');
+      document.getElementById('desktopPrintMenu')?.classList.remove('active');
+      document.getElementById('mobilePrintMenu')?.classList.remove('active');
+    }
+
+    function toggleDesktopActionsMenu(event) {
+      event?.stopPropagation?.();
+      document.getElementById('desktopPrintMenu')?.classList.remove('active');
+      document.getElementById('desktopActionsMenu')?.classList.toggle('active');
+    }
+
+    function toggleDesktopPrintMenu(event) {
+      event?.stopPropagation?.();
+      document.getElementById('desktopActionsMenu')?.classList.remove('active');
+      document.getElementById('desktopPrintMenu')?.classList.toggle('active');
+    }
+
+    function toggleMobilePrintMenu(event) {
+      event?.stopPropagation?.();
+      document.getElementById('mobileActionsMenu')?.classList.remove('active');
+      document.getElementById('mobilePrintMenu')?.classList.toggle('active');
+    }
+
+    function printCurrentOrder(mode = 'default') {
+      closeDesktopActionsMenu();
+      closeMobileActionsMenu();
+      window.print();
+    }
+
+    function viewOrderStatusPage() {
+      showAlert(`Current status: ${getFulfillmentLabel(currentOrder || {})}`, 'success');
+      closeDesktopActionsMenu();
+    }
+
+    function duplicateCurrentOrder() {
+      if (!currentOrder?.id) {
+        showAlert('Order id is missing', 'error');
+        return;
+      }
+      window.location.href = `/order-details.html?id=${encodeURIComponent(currentOrder.id)}&edit=1`;
+      closeDesktopActionsMenu();
+      closeMobileActionsMenu();
+    }
+
+    function handleDesktopAction(action) {
+      if (action === 'restock') {
+        showAlert('Restock action is ready for this order', 'success');
+        return;
+      }
+      if (action === 'return') {
+        showAlert('Return action is ready for this order', 'success');
+        return;
+      }
+    }
+
+function openMainOrderEdit() {
       if (!currentOrder) {
         showAlert('Order is not loaded yet', 'error');
         return;
