@@ -990,153 +990,6 @@
       .mobile-product-thumb{width:56px;height:56px}
       .mobile-customer-actions{grid-template-columns:1fr}
     }
-  
-    .editor-actions-row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:12px;
-      direction:ltr;
-    }
-    .editor-sub-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:12px;
-      direction:ltr;
-    }
-    .editor-price-btn{
-      width:100%;
-      min-height:42px;
-      border-radius:12px;
-      border:1px solid #d6d6d9;
-      background:#fff;
-      padding:0 12px;
-      outline:none;
-      font-size:14px;
-      color:#303030;
-      text-align:left;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .editor-price-meta{
-      font-size:12px;
-      color:#6d7175;
-      margin-top:6px;
-      line-height:1.45;
-    }
-    .picker-search{
-      position:relative;
-      margin-bottom:14px;
-    }
-    .picker-search input{
-      width:100%;
-      min-height:44px;
-      border-radius:12px;
-      border:1px solid #d6d6d9;
-      padding:0 14px 0 40px;
-      outline:none;
-      font-size:14px;
-    }
-    .picker-search .icon{
-      position:absolute;
-      left:14px;
-      top:50%;
-      transform:translateY(-50%);
-      color:#7b7e82;
-      font-size:15px;
-    }
-    .picker-list{
-      display:grid;
-      gap:10px;
-      max-height:52vh;
-      overflow:auto;
-    }
-    .picker-item{
-      border:1px solid #e3e3e6;
-      background:#fafafb;
-      border-radius:14px;
-      padding:12px;
-      display:grid;
-      grid-template-columns:58px minmax(0,1fr) auto;
-      gap:12px;
-      align-items:center;
-      direction:ltr;
-    }
-    .picker-thumb{
-      width:58px;
-      height:58px;
-      border-radius:12px;
-      overflow:hidden;
-      background:#f3f3f4;
-      border:1px solid #ececee;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:24px;
-    }
-    .picker-thumb img{width:100%;height:100%;object-fit:cover}
-    .picker-title{
-      font-size:14px;
-      font-weight:800;
-      color:#303030;
-      line-height:1.45;
-    }
-    .picker-sub{
-      font-size:12px;
-      color:#6d7175;
-      margin-top:4px;
-    }
-    .toggle-row{
-      display:flex;
-      gap:14px;
-      flex-wrap:wrap;
-      direction:ltr;
-    }
-    .toggle-chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      min-height:38px;
-      padding:0 12px;
-      border-radius:999px;
-      border:1px solid #d6d6d9;
-      background:#fff;
-      font-size:14px;
-      font-weight:700;
-    }
-    .discount-switch{
-      display:flex;
-      gap:10px;
-      margin-bottom:14px;
-      direction:ltr;
-      flex-wrap:wrap;
-    }
-    .discount-switch button{
-      min-height:38px;
-      padding:0 14px;
-      border-radius:12px;
-      border:1px solid #d6d6d9;
-      background:#fff;
-      font-size:14px;
-      font-weight:800;
-      cursor:pointer;
-    }
-    .discount-switch button.active{
-      background:#2a2a2c;
-      color:#fff;
-      border-color:#2a2a2c;
-    }
-    .helper-text{
-      font-size:12px;
-      color:#6d7175;
-      line-height:1.5;
-      margin-top:6px;
-    }
-
   </style>
 </head>
 <body>
@@ -1146,7 +999,7 @@
         <div class="desktop-topbar-left">
           <div class="shopify-mark">
             <span style="font-size:28px;">🛍️</span>
-            <span>Smartkidsfy</span>
+            <span>shopify</span>
           </div>
 
           <div class="desktop-search">
@@ -1173,7 +1026,7 @@
               <div class="side-link-left"><span>⌂</span><span>Home</span></div>
             </a>
 
-            <a class="side-link active" href="/orders-admin.html">
+            <a class="side-link active" href="/admin-enhanced.html#orders">
               <div class="side-link-left"><span>🧾</span><span>Orders</span></div>
               <small id="desktopOrdersCountBadge">0</small>
             </a>
@@ -1566,7 +1419,6 @@
   </div>
 
 
-  
   <div class="modal" id="mainOrderEditModal">
     <div class="modal-content main-editor">
       <div class="modal-header">
@@ -1581,10 +1433,7 @@
           <div class="editor-box">
             <h3>Line items</h3>
             <div class="editor-items-list" id="mainEditItemsList"></div>
-            <div class="editor-actions-row">
-              <button class="editor-add-btn" type="button" onclick="openAddProductModal()">+ Add product</button>
-              <button class="editor-add-btn" type="button" onclick="openCustomItemModal()">+ Add custom item</button>
-            </div>
+            <button class="editor-add-btn" type="button" onclick="addMainEditItem()">+ Add product</button>
           </div>
 
           <div class="editor-box">
@@ -1594,9 +1443,8 @@
               <label for="mainEditStatus">Status</label>
               <select id="mainEditStatus">
                 <option value="pending">Pending</option>
-                <option value="processing">In progress</option>
-                <option value="on_hold">On hold</option>
-                <option value="shipped">Fulfilled</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
               </select>
@@ -1605,9 +1453,6 @@
             <div class="form-group">
               <label for="mainEditShippingCost">Shipping cost</label>
               <input type="number" id="mainEditShippingCost" min="0" step="0.001" oninput="recalculateMainEditTotals()">
-              <div class="editor-sub-actions">
-                <button class="ghost-btn" type="button" onclick="openShippingFeeModal()">Edit shipping fees</button>
-              </div>
             </div>
 
             <div class="editor-summary-list">
@@ -1628,123 +1473,7 @@
     </div>
   </div>
 
-  <div class="modal" id="addProductModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Add product</h2>
-        <button class="close-btn" type="button" onclick="closeModal('addProductModal')">&times;</button>
-      </div>
-      <div class="picker-search">
-        <span class="icon">⌕</span>
-        <input type="text" id="addProductSearch" placeholder="Search products by name" oninput="renderAddProductResults(this.value)">
-      </div>
-      <div class="picker-list" id="addProductResults"></div>
-      <div class="modal-footer">
-        <button class="ghost-btn" type="button" onclick="closeModal('addProductModal')">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal" id="customItemModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Add custom item</h2>
-        <button class="close-btn" type="button" onclick="closeModal('customItemModal')">&times;</button>
-      </div>
-      <form id="customItemForm" onsubmit="saveCustomItem(event)">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="customItemName">Item name</label>
-            <input type="text" id="customItemName" required>
-          </div>
-          <div class="form-group">
-            <label for="customItemPrice">Price</label>
-            <input type="number" id="customItemPrice" min="0" step="0.001" required>
-          </div>
-          <div class="form-group">
-            <label for="customItemQty">Quantity</label>
-            <input type="number" id="customItemQty" min="1" step="1" value="1" required>
-          </div>
-          <div class="form-group">
-            <label for="customItemSku">SKU / note</label>
-            <input type="text" id="customItemSku">
-          </div>
-          <div class="form-group full">
-            <label>Options</label>
-            <div class="toggle-row">
-              <label class="toggle-chip"><input type="checkbox" id="customItemTaxable"> Item is taxable</label>
-              <label class="toggle-chip"><input type="checkbox" id="customItemPhysical" checked> Item is a physical product</label>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="ghost-btn" type="button" onclick="closeModal('customItemModal')">Cancel</button>
-          <button class="dark-btn" type="submit">Add custom item</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="modal" id="discountModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Edit discount</h2>
-        <button class="close-btn" type="button" onclick="closeModal('discountModal')">&times;</button>
-      </div>
-      <form id="discountForm" onsubmit="saveDiscountEdit(event)">
-        <input type="hidden" id="discountTargetIndex">
-        <div class="discount-switch">
-          <button type="button" id="discountAmountBtn" class="active" onclick="setDiscountType('amount')">Discount by amount</button>
-          <button type="button" id="discountPercentageBtn" onclick="setDiscountType('percentage')">Discount by percentage</button>
-        </div>
-        <input type="hidden" id="discountTypeInput" value="amount">
-
-        <div class="form-group">
-          <label for="discountValueInput">Value per unit</label>
-          <input type="number" id="discountValueInput" min="0" step="0.001" value="0">
-          <div class="helper-text" id="discountValueHelp">Enter discount amount per unit.</div>
-        </div>
-
-        <div class="form-group">
-          <label for="discountReasonInput">Reason for discount</label>
-          <input type="text" id="discountReasonInput" placeholder="Reason for discount">
-        </div>
-
-        <div class="modal-footer">
-          <button class="ghost-btn" type="button" onclick="clearDiscountEdit()">Remove discount</button>
-          <button class="dark-btn" type="submit">Save discount</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="modal" id="shippingFeeModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Edit shipping fees</h2>
-        <button class="close-btn" type="button" onclick="closeModal('shippingFeeModal')">&times;</button>
-      </div>
-      <form id="shippingFeeForm" onsubmit="saveShippingFeeEdit(event)">
-        <div class="form-group">
-          <label for="shippingFeeInput">Shipping fee</label>
-          <input type="number" id="shippingFeeInput" min="0" step="0.001">
-          <div class="helper-text">Set the shipping fee, make it free, or remove it completely.</div>
-        </div>
-        <div class="modal-footer" style="justify-content:space-between;">
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="ghost-btn" type="button" onclick="setShippingFree()">Free shipping</button>
-            <button class="ghost-btn" type="button" onclick="removeShippingFee()">Remove shipping fee</button>
-          </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="ghost-btn" type="button" onclick="closeModal('shippingFeeModal')">Cancel</button>
-            <button class="dark-btn" type="submit">Save shipping</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-
-<div class="modal" id="quickEditModal">
+  <div class="modal" id="quickEditModal">
     <div class="modal-content">
       <div class="modal-header">
         <h2 id="quickEditTitle">Edit</h2>
@@ -2024,56 +1753,14 @@
       openModal('mainOrderEditModal');
     }
 
-    
-    let productsCatalogCache = [];
-    let currentDiscountTargetIndex = null;
-
-    async function loadProductsCatalog() {
-      if (productsCatalogCache.length) return productsCatalogCache;
-      const response = await fetch('/api/products?status=active&limit=1000', { cache: 'no-store' });
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to load products');
-      }
-      productsCatalogCache = Array.isArray(data.data) ? data.data : [];
-      return productsCatalogCache;
-    }
-
-    function getEditorDiscountedUnitPrice(base, type, value) {
-      const unit = Number(base || 0);
-      const numericValue = Number(value || 0);
-      if (!type || !numericValue) return Number(unit.toFixed(3));
-      if (type === 'percentage') {
-        return Number(Math.max(unit - (unit * numericValue / 100), 0).toFixed(3));
-      }
-      return Number(Math.max(unit - numericValue, 0).toFixed(3));
-    }
-
-    function getDiscountMetaText(type, value, reason) {
-      const numericValue = Number(value || 0);
-      const textReason = String(reason || '').trim();
-      if (!type || !numericValue) return 'No discount';
-      const label = type === 'percentage' ? `${numericValue}% off` : `KWD ${numericValue.toFixed(3)} off`;
-      return textReason ? `${label} · ${textReason}` : label;
-    }
-
     function getMainEditItemMarkup(item = {}, index = 0) {
       const name = escapeHtml(item.product_name || item.name || '');
-      const image = escapeHtml(item.image || item.product_image || item.image_url || '');
       const unitPrice = Number(item.unit_price ?? item.product_price ?? item.price ?? 0);
       const quantity = Number(item.quantity ?? 1);
-      const discountType = String(item.discount_type || '').trim();
-      const discountValue = Number(item.discount_value || 0);
-      const discountReason = String(item.discount_reason || '').trim();
-      const custom = item.custom_item ? '1' : '0';
-      const taxable = item.taxable ? '1' : '0';
-      const physical = item.physical_product === false ? '0' : '1';
-      const sku = escapeHtml(String(item.sku || item.note || ''));
-      const discountedUnit = getEditorDiscountedUnitPrice(unitPrice, discountType, discountValue);
-      const lineTotal = Number((discountedUnit * quantity).toFixed(3));
+      const lineTotal = Number(item.subtotal ?? (unitPrice * quantity));
 
       return `
-        <div class="editor-item-card" data-item-index="${index}" data-discount-type="${escapeHtml(discountType)}" data-discount-value="${discountValue}" data-discount-reason="${escapeHtml(discountReason)}" data-custom-item="${custom}" data-taxable="${taxable}" data-physical-product="${physical}" data-sku="${sku}" data-image="${image}">
+        <div class="editor-item-card" data-item-index="${index}">
           <div class="editor-item-head">
             <div class="editor-item-title">Product ${index + 1}</div>
             <button class="editor-remove-btn" type="button" onclick="removeMainEditItem(this)">Remove</button>
@@ -2084,13 +1771,8 @@
               <input type="text" class="main-edit-name" value="${name}" oninput="syncMainEditTitles()">
             </div>
             <div class="form-group" style="margin-bottom:0;">
-              <label>Price</label>
-              <button type="button" class="editor-price-btn" onclick="openDiscountEditor(this)">
-                <span class="price-label">${H.formatCurrency(unitPrice)}</span>
-                <span>Discount ▾</span>
-              </button>
-              <div class="editor-price-meta">${escapeHtml(getDiscountMetaText(discountType, discountValue, discountReason))}</div>
-              <input type="hidden" class="main-edit-price" value="${unitPrice.toFixed(3)}">
+              <label>Unit price</label>
+              <input type="number" class="main-edit-price" min="0" step="0.001" value="${unitPrice.toFixed(3)}" oninput="recalculateMainEditTotals()">
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label>Quantity</label>
@@ -2105,18 +1787,10 @@
       `;
     }
 
-    function syncMainEditTitles() {
-      document.querySelectorAll('#mainEditItemsList .editor-item-card').forEach((card, index) => {
-        card.dataset.itemIndex = String(index);
-        const title = card.querySelector('.editor-item-title');
-        if (title) title.textContent = `Product ${index + 1}`;
-      });
-    }
-
-    function addMainEditItem(item = {}) {
+    function addMainEditItem() {
       const list = document.getElementById('mainEditItemsList');
       const index = list.children.length;
-      list.insertAdjacentHTML('beforeend', getMainEditItemMarkup(item, index));
+      list.insertAdjacentHTML('beforeend', getMainEditItemMarkup({}, index));
       syncMainEditTitles();
       recalculateMainEditTotals();
     }
@@ -2127,227 +1801,27 @@
       recalculateMainEditTotals();
     }
 
-    async function openAddProductModal() {
-      openModal('addProductModal');
-      document.getElementById('addProductSearch').value = '';
-      await renderAddProductResults('');
-    }
-
-    async function renderAddProductResults(query = '') {
-      const container = document.getElementById('addProductResults');
-      if (!container) return;
-      try {
-        container.innerHTML = '<div class="loading">Loading products...</div>';
-        const products = await loadProductsCatalog();
-        const q = String(query || '').trim().toLowerCase();
-        const filtered = products.filter(product => {
-          const name = String(product.product_name || product.name || product.title || '').toLowerCase();
-          const sku = String(product.sku || '').toLowerCase();
-          const category = String(product.category || product.product_type || '').toLowerCase();
-          return !q || name.includes(q) || sku.includes(q) || category.includes(q);
-        }).slice(0, 40);
-
-        if (!filtered.length) {
-          container.innerHTML = '<div class="loading">No products found</div>';
-          return;
-        }
-
-        container.innerHTML = filtered.map((product, index) => {
-          const payload = encodeURIComponent(JSON.stringify({
-            product_name: product.product_name || product.name || product.title || `Product ${index + 1}`,
-            name: product.product_name || product.name || product.title || `Product ${index + 1}`,
-            product_price: Number(product.price ?? product.sale_price ?? 0),
-            price: Number(product.price ?? product.sale_price ?? 0),
-            unit_price: Number(product.price ?? product.sale_price ?? 0),
-            quantity: 1,
-            image: product.primary_image || product.image_url || (Array.isArray(product.images) && product.images[0] && product.images[0].image_url) || '',
-            sku: product.sku || '',
-            custom_item: false
-          }));
-          const title = escapeHtml(product.product_name || product.name || product.title || `Product ${index + 1}`);
-          const image = escapeHtml(product.primary_image || product.image_url || (Array.isArray(product.images) && product.images[0] && product.images[0].image_url) || '');
-          const price = Number(product.price ?? product.sale_price ?? 0);
-          const category = escapeHtml(product.category || product.product_type || 'General');
-          const sku = escapeHtml(product.sku || '');
-          return `
-            <div class="picker-item">
-              <div class="picker-thumb">${image ? `<img src="${image}" alt="${title}">` : '📦'}</div>
-              <div>
-                <div class="picker-title">${title}</div>
-                <div class="picker-sub">${category}${sku ? ` · ${sku}` : ''}</div>
-                <div class="picker-sub">${H.formatCurrency(price)}</div>
-              </div>
-              <button class="dark-btn" type="button" onclick="addSelectedProduct('${payload}')">Add</button>
-            </div>
-          `;
-        }).join('');
-      } catch (error) {
-        console.error(error);
-        container.innerHTML = `<div class="loading">${escapeHtml(error.message || 'Failed to load products')}</div>`;
-      }
-    }
-
-    function addSelectedProduct(encodedPayload) {
-      try {
-        const item = JSON.parse(decodeURIComponent(encodedPayload));
-        addMainEditItem(item);
-        closeModal('addProductModal');
-      } catch (error) {
-        console.error(error);
-        showAlert('Failed to add product', 'error');
-      }
-    }
-
-    function openCustomItemModal() {
-      document.getElementById('customItemForm').reset();
-      document.getElementById('customItemQty').value = '1';
-      document.getElementById('customItemPhysical').checked = true;
-      openModal('customItemModal');
-    }
-
-    function saveCustomItem(event) {
-      event.preventDefault();
-      const item = {
-        product_name: document.getElementById('customItemName').value.trim(),
-        name: document.getElementById('customItemName').value.trim(),
-        product_price: Number(document.getElementById('customItemPrice').value || 0),
-        price: Number(document.getElementById('customItemPrice').value || 0),
-        unit_price: Number(document.getElementById('customItemPrice').value || 0),
-        quantity: Math.max(1, Number(document.getElementById('customItemQty').value || 1)),
-        sku: document.getElementById('customItemSku').value.trim(),
-        note: document.getElementById('customItemSku').value.trim(),
-        taxable: document.getElementById('customItemTaxable').checked,
-        physical_product: document.getElementById('customItemPhysical').checked,
-        custom_item: true
-      };
-
-      if (!item.product_name) {
-        showAlert('Item name is required', 'error');
-        return;
-      }
-
-      addMainEditItem(item);
-      closeModal('customItemModal');
-    }
-
-    function openDiscountEditor(button) {
-      const card = button.closest('.editor-item-card');
-      if (!card) return;
-      currentDiscountTargetIndex = card.dataset.itemIndex || '0';
-      document.getElementById('discountTargetIndex').value = currentDiscountTargetIndex;
-      const type = card.dataset.discountType || 'amount';
-      const value = Number(card.dataset.discountValue || 0);
-      const reason = card.dataset.discountReason || '';
-      setDiscountType(type || 'amount');
-      document.getElementById('discountValueInput').value = String(value || 0);
-      document.getElementById('discountReasonInput').value = reason;
-      openModal('discountModal');
-    }
-
-    function setDiscountType(type) {
-      document.getElementById('discountTypeInput').value = type;
-      document.getElementById('discountAmountBtn').classList.toggle('active', type === 'amount');
-      document.getElementById('discountPercentageBtn').classList.toggle('active', type === 'percentage');
-      const valueInput = document.getElementById('discountValueInput');
-      const help = document.getElementById('discountValueHelp');
-      if (type === 'percentage') {
-        valueInput.step = '0.01';
-        valueInput.max = '100';
-        help.textContent = 'Enter discount percentage per unit.';
-      } else {
-        valueInput.step = '0.001';
-        valueInput.removeAttribute('max');
-        help.textContent = 'Enter discount amount per unit.';
-      }
-    }
-
-    function saveDiscountEdit(event) {
-      event.preventDefault();
-      const index = document.getElementById('discountTargetIndex').value;
-      const card = document.querySelector(`#mainEditItemsList .editor-item-card[data-item-index="${index}"]`);
-      if (!card) return;
-
-      const type = document.getElementById('discountTypeInput').value || 'amount';
-      const value = Number(document.getElementById('discountValueInput').value || 0);
-      const reason = document.getElementById('discountReasonInput').value.trim();
-
-      card.dataset.discountType = value > 0 ? type : '';
-      card.dataset.discountValue = value > 0 ? String(value) : '0';
-      card.dataset.discountReason = value > 0 ? reason : '';
-
-      const meta = card.querySelector('.editor-price-meta');
-      if (meta) meta.textContent = getDiscountMetaText(value > 0 ? type : '', value, reason);
-
-      recalculateMainEditTotals();
-      closeModal('discountModal');
-    }
-
-    function clearDiscountEdit() {
-      document.getElementById('discountValueInput').value = '0';
-      document.getElementById('discountReasonInput').value = '';
-
-      const index = document.getElementById('discountTargetIndex').value;
-      const card = document.querySelector(`#mainEditItemsList .editor-item-card[data-item-index="${index}"]`);
-      if (!card) return;
-      card.dataset.discountType = '';
-      card.dataset.discountValue = '0';
-      card.dataset.discountReason = '';
-      const meta = card.querySelector('.editor-price-meta');
-      if (meta) meta.textContent = 'No discount';
-      recalculateMainEditTotals();
-      closeModal('discountModal');
-    }
-
-    function openShippingFeeModal() {
-      document.getElementById('shippingFeeInput').value = Number(document.getElementById('mainEditShippingCost').value || 0).toFixed(3);
-      openModal('shippingFeeModal');
-    }
-
-    function setShippingFree() {
-      document.getElementById('shippingFeeInput').value = '0.000';
-    }
-
-    function removeShippingFee() {
-      document.getElementById('shippingFeeInput').value = '0.000';
-    }
-
-    function saveShippingFeeEdit(event) {
-      event.preventDefault();
-      document.getElementById('mainEditShippingCost').value = Number(document.getElementById('shippingFeeInput').value || 0).toFixed(3);
-      recalculateMainEditTotals();
-      closeModal('shippingFeeModal');
+    function syncMainEditTitles() {
+      document.querySelectorAll('#mainEditItemsList .editor-item-card').forEach((card, index) => {
+        const title = card.querySelector('.editor-item-title');
+        if (title) title.textContent = `Product ${index + 1}`;
+      });
     }
 
     function collectMainEditItems() {
       return Array.from(document.querySelectorAll('#mainEditItemsList .editor-item-card')).map(card => {
         const name = card.querySelector('.main-edit-name')?.value?.trim() || 'Order item';
-        const basePrice = Number(card.querySelector('.main-edit-price')?.value || 0);
+        const unitPrice = Number(card.querySelector('.main-edit-price')?.value || 0);
         const quantity = Math.max(1, Number(card.querySelector('.main-edit-qty')?.value || 1));
-        const discountType = String(card.dataset.discountType || '').trim();
-        const discountValue = Number(card.dataset.discountValue || 0);
-        const discountReason = String(card.dataset.discountReason || '').trim();
-        const discountedUnit = getEditorDiscountedUnitPrice(basePrice, discountType, discountValue);
-        const subtotal = Number((discountedUnit * quantity).toFixed(3));
-
+        const subtotal = Number((unitPrice * quantity).toFixed(3));
         return {
           product_name: name,
           name,
-          product_price: basePrice,
-          price: basePrice,
-          unit_price: basePrice,
-          discounted_unit_price: discountedUnit,
+          product_price: unitPrice,
+          price: unitPrice,
+          unit_price: unitPrice,
           quantity,
-          subtotal,
-          discount_type: discountType || null,
-          discount_value: discountValue || 0,
-          discount_reason: discountReason || '',
-          custom_item: card.dataset.customItem === '1',
-          taxable: card.dataset.taxable === '1',
-          physical_product: card.dataset.physicalProduct !== '0',
-          sku: card.dataset.sku || '',
-          note: card.dataset.sku || '',
-          product_image: card.dataset.image || '',
-          image: card.dataset.image || ''
+          subtotal
         };
       }).filter(item => item.product_name);
     }
@@ -2362,19 +1836,11 @@
       const balance = Math.max(Number((total - paid).toFixed(3)), 0);
 
       document.querySelectorAll('#mainEditItemsList .editor-item-card').forEach(card => {
-        const basePrice = Number(card.querySelector('.main-edit-price')?.value || 0);
+        const price = Number(card.querySelector('.main-edit-price')?.value || 0);
         const qty = Math.max(1, Number(card.querySelector('.main-edit-qty')?.value || 1));
-        const discountType = String(card.dataset.discountType || '').trim();
-        const discountValue = Number(card.dataset.discountValue || 0);
-        const discountReason = String(card.dataset.discountReason || '').trim();
-        const discountedUnit = getEditorDiscountedUnitPrice(basePrice, discountType, discountValue);
-        const line = Number((discountedUnit * qty).toFixed(3));
+        const line = Number((price * qty).toFixed(3));
         const lineField = card.querySelector('.main-edit-line-total');
         if (lineField) lineField.value = H.formatCurrency(line);
-        const priceLabel = card.querySelector('.price-label');
-        if (priceLabel) priceLabel.textContent = H.formatCurrency(basePrice);
-        const meta = card.querySelector('.editor-price-meta');
-        if (meta) meta.textContent = getDiscountMetaText(discountType, discountValue, discountReason);
       });
 
       setText('mainEditSubtotalText', H.formatCurrency(subtotal));
@@ -2436,7 +1902,7 @@
       }
     }
 
-function openQuickEdit(mode) {
+    function openQuickEdit(mode) {
       if (!currentOrder?.id) {
         showAlert('Order is not loaded yet', 'error');
         return;
@@ -2829,7 +2295,7 @@ async function cancelCurrentOrder() {
     }
 
     function goBackToOrders() {
-      window.location.href = '/orders-admin.html';
+      window.location.href = '/admin-enhanced.html#orders';
     }
 
     function editCurrentOrder() {
