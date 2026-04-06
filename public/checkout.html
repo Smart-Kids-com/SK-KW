@@ -1088,21 +1088,19 @@
         const result = await response.json().catch(() => null);
 
         if (response.ok && result && result.success === true) {
-          const savedOrder = result.data || {};
-          localStorage.setItem('last_order', JSON.stringify(savedOrder));
+          localStorage.setItem('last_order', JSON.stringify(result.data || {}));
           localStorage.removeItem('cart');
           localStorage.removeItem('cart_note');
 
-          const orderNumber = savedOrder?.order_number || '';
-          const orderId = savedOrder?.id || '';
-          showSuccess(`تم إرسال الطلب بنجاح ✅ رقم الطلب: ${orderNumber || orderId || ''}`);
+          const orderNumber = result.data?.order_number || '';
+          showSuccess(`تم إرسال الطلب بنجاح ✅ رقم الطلب: ${orderNumber}`);
 
           setTimeout(() => {
-            const params = new URLSearchParams();
-            if (orderNumber) params.set('order', orderNumber);
-            if (orderId) params.set('id', orderId);
-            const query = params.toString();
-            window.location.href = query ? `./thank-you.html?${query}` : './thank-you.html';
+            if (orderNumber) {
+              window.location.href = `./thank-you.html?order=${encodeURIComponent(orderNumber)}`;
+            } else {
+              window.location.href = './thank-you.html';
+            }
           }, 1500);
         } else if (!response.ok) {
           throw new Error(result?.error || `خطأ أثناء الطلب (${response.status})`);
