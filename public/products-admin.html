@@ -1324,39 +1324,201 @@
       document.getElementById('importFileInput').click();
     }
 
+    
     function normalizeHeaderName(name) {
       return String(name || '')
         .replace(/^\uFEFF/, '')
         .trim();
     }
 
+    function parseImportNumber(value, fallback = 0) {
+      if (value === null || value === undefined || value === '') return fallback;
+      const cleaned = String(value).replace(/,/g, '').trim();
+      const n = Number(cleaned);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function parseImportTags(value) {
+      if (Array.isArray(value)) return value.map(v => String(v).trim()).filter(Boolean);
+      return String(value || '')
+        .split(/[|,]/)
+        .map(v => v.trim())
+        .filter(Boolean);
+    }
+
+    function parseImportStatus(row) {
+      const raw = String(
+        row.status ??
+        row.product_status ??
+        row.published ??
+        'draft'
+      ).trim().toLowerCase();
+
+      if (['active', 'published', 'true', '1', 'yes'].includes(raw)) return 'active';
+      if (['archived'].includes(raw)) return 'archived';
+      if (['draft', 'false', '0', 'no', 'unpublished', 'inactive'].includes(raw)) return 'draft';
+      return 'draft';
+    }
+
     function buildImportPayload(raw) {
       const row = raw || {};
 
-      const imageValue = row.imageUrl || row.image_url || row.image || '';
+      const imageValue =
+        row.imageUrl ||
+        row.image_url ||
+        row.image ||
+        row.primary_image ||
+        row.src ||
+        row['Image Src'] ||
+        '';
+
+      const compareAt = parseImportNumber(
+        row.compare_at_price ?? row.compareAtPrice ?? 0,
+        0
+      );
+      const sale = parseImportNumber(
+        row.salePrice ?? row.sale_price ?? 0,
+        0
+      );
+      const regular = parseImportNumber(
+        row.price ?? row.regular_price ?? row['Variant Price'] ?? 0,
+        0
+      );
 
       return {
-        productName: row.productName || row.product_name || row.name || row.title || '',
-        slug: row.slug || '',
-        sku: row.sku || '',
-        description: row.description || row.body_html || '',
-        price: Number(row.price || 0),
-        salePrice: Number(row.salePrice || row.sale_price || row.compare_at_price || 0),
+        id: String(row.id || '').trim(),
+        productName:
+          row.productName ||
+          row.product_name ||
+          row.name ||
+          row.title ||
+          row['Title'] ||
+          '',
+        slug:
+          row.slug ||
+          row.handle ||
+          row['Handle'] ||
+          '',
+        sku:
+          row.sku ||
+          row['Variant SKU'] ||
+          '',
+        description:
+          row.description ||
+          row.body_html ||
+          row['Body (HTML)'] ||
+          '',
+        price: regular,
+        salePrice: sale || compareAt || 0,
         imageUrl: imageValue,
-        stock: Number(row.stock || row.inventory || 0),
-        status: row.status || 'draft',
-        productType: row.productType || row.product_type || row.type || '',
-        vendor: row.vendor || '',
-        category: row.category || row.collection || '',
-        tags: Array.isArray(row.tags)
-          ? row.tags
-          : String(row.tags || '').split(',').map(v => v.trim()).filter(Boolean),
-        seoTitle: row.seoTitle || row.seo_title || '',
-        seoDescription: row.seoDescription || row.seo_description || '',
+        stock: parseImportNumber(
+          row.stock ??
+          row.inventory ??
+          row.inventory_quantity ??
+          row['Variant Inventory Qty'] ??
+          0,
+          0
+        ),
+        status: parseImportStatus(row),
+        productType:
+          row.productType ||
+          row.product_type ||
+          row.type ||
+          row['Type'] ||
+          '',
+        vendor:
+          row.vendor ||
+          row['Vendor'] ||
+          '',
+        category:
+          row.category ||
+          row.collection ||
+          row.product_category ||
+          row['Collection'] ||
+          '',
+        tags: parseImportTags(row.tags || row['Tags'] || ''),
+        seoTitle:
+          row.seoTitle ||
+          row.seo_title ||
+          row['SEO Title'] ||
+          '',
+        seoDescription:
+          row.seoDescription ||
+          row.seo_description ||
+          row['SEO Description'] ||
+          '',
         images: imageValue
           ? [{ image_url: imageValue, sort_order: 0 }]
           : (Array.isArray(row.images) ? row.images : [])
       };
+    }
+
+    async function fetchImportLookup() {
+      const response = await fetch(`${API_BASE}?limit=1000&offset=0&sort=created_at&order=DESC`, {
+        cache: 'no-store'
+      });
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result || !result.success) {
+        throw new Error(result?.error || 'Failed to prepare products import lookup');
+      }
+
+      const rows = Array.isArray(result.data) ? result.data : [];
+      return {
+        byId: new Map(rows.map(p => [String(p.id), p])),
+        bySlug: new Map(rows.filter(p => p.slug).map(p => [String(p.slug).trim().toLowerCase(), p])),
+        bySku: new Map(rows.filter(p => p.sku).map(p => [String(p.sku).trim().toLowerCase(), p]))
+      };
+    }
+
+    async function saveImportedPayload(payload, lookup) {
+      const idKey = String(payload.id || '').trim();
+      const slugKey = String(payload.slug || '').trim().toLowerCase();
+      const skuKey = String(payload.sku || '').trim().toLowerCase();
+
+      let existing = null;
+      if (idKey && lookup.byId.has(idKey)) existing = lookup.byId.get(idKey);
+      if (!existing && slugKey && lookup.bySlug.has(slugKey)) existing = lookup.bySlug.get(slugKey);
+      if (!existing && skuKey && lookup.bySku.has(skuKey)) existing = lookup.bySku.get(skuKey);
+
+      const body = { ...payload };
+      delete body.id;
+
+      if (existing?.id) {
+        const response = await fetch(`${API_BASE}/${existing.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok || !result || !result.success) {
+          throw new Error(result?.error || `Failed updating ${payload.productName}`);
+        }
+
+        const updated = result.data || existing;
+        lookup.byId.set(String(updated.id), updated);
+        if (updated.slug) lookup.bySlug.set(String(updated.slug).trim().toLowerCase(), updated);
+        if (updated.sku) lookup.bySku.set(String(updated.sku).trim().toLowerCase(), updated);
+        return 'updated';
+      }
+
+      const response = await fetch(API_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result || !result.success) {
+        throw new Error(result?.error || `Failed importing ${payload.productName}`);
+      }
+
+      const created = result.data || {};
+      if (created.id) lookup.byId.set(String(created.id), created);
+      if (created.slug) lookup.bySlug.set(String(created.slug).trim().toLowerCase(), created);
+      if (created.sku) lookup.bySku.set(String(created.sku).trim().toLowerCase(), created);
+      return 'created';
     }
 
     async function importProductsFromJson(jsonArray) {
@@ -1364,7 +1526,9 @@
         throw new Error('JSON file must contain an array');
       }
 
-      let imported = 0;
+      const lookup = await fetchImportLookup();
+      let created = 0;
+      let updated = 0;
       let skipped = 0;
       let failed = 0;
       const failedRows = [];
@@ -1379,28 +1543,16 @@
         }
 
         try {
-          const response = await fetch(API_BASE, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-
-          const result = await response.json();
-
-          if (!response.ok || !result.success) {
-            failed++;
-            failedRows.push(`Item ${i + 1}: ${result.error || 'Import failed'}`);
-            continue;
-          }
-
-          imported++;
+          const mode = await saveImportedPayload(payload, lookup);
+          if (mode === 'updated') updated++;
+          else created++;
         } catch (error) {
           failed++;
           failedRows.push(`Item ${i + 1}: ${error.message}`);
         }
       }
 
-      return { imported, skipped, failed, failedRows };
+      return { created, updated, skipped, failed, failedRows };
     }
 
     async function importProductsFromCsv(text) {
@@ -1434,8 +1586,10 @@
       };
 
       const headers = parseLine(lines[0]).map(normalizeHeaderName);
+      const lookup = await fetchImportLookup();
 
-      let imported = 0;
+      let created = 0;
+      let updated = 0;
       let skipped = 0;
       let failed = 0;
       const failedRows = [];
@@ -1457,28 +1611,16 @@
         }
 
         try {
-          const response = await fetch(API_BASE, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-
-          const result = await response.json();
-
-          if (!response.ok || !result.success) {
-            failed++;
-            failedRows.push(`Row ${i + 1}: ${result.error || 'Import failed'}`);
-            continue;
-          }
-
-          imported++;
+          const mode = await saveImportedPayload(payload, lookup);
+          if (mode === 'updated') updated++;
+          else created++;
         } catch (error) {
           failed++;
           failedRows.push(`Row ${i + 1}: ${error.message}`);
         }
       }
 
-      return { imported, skipped, failed, failedRows };
+      return { created, updated, skipped, failed, failedRows };
     }
 
     async function handleImportFile(file) {
@@ -1491,7 +1633,8 @@
           : await importProductsFromCsv(text);
 
         const message =
-          `تم الاستيراد: ${result.imported}\n` +
+          `تمت الإضافة: ${result.created}\n` +
+          `تم التحديث: ${result.updated}\n` +
           `تم التخطي: ${result.skipped}\n` +
           `فشل: ${result.failed}`;
 
@@ -1507,6 +1650,7 @@
         showAlert(error.message || 'Import failed', 'error');
       }
     }
+
 
     document.addEventListener('click', (e) => {
       const actionsBtn = e.target.closest('.page-actions .btn:nth-child(2)');
