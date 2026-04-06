@@ -6,7 +6,6 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/turso-manager');
 const { SYSTEM_CONFIG, HELPERS } = require('../config/system');
-const { app, requireAdminAuth } = require('../server');
 
 const ORDERS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS;
 const ORDER_ITEMS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS;
@@ -1058,18 +1057,3 @@ router.get('/', async (req, res) => {
 });
 
 module.exports = router;
-/* =========================================
-   صفحات الإدارة المحمية قبل static
-========================================= */
-app.use(
-  [
-    '/admin-enhanced',
-    '/admin-enhanced.html',
-    '/products-admin',
-    '/products-admin.html',
-    '/product-edit.html',
-    '/order-details.html',
-    '/orders-admin.html'
-  ],
-  requireAdminAuth
-);
