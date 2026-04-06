@@ -19,7 +19,7 @@
     .desktop-body{display:grid;grid-template-columns:var(--sidebar-w) minmax(0,1fr);min-height:calc(100vh - var(--topbar-h))}.desktop-sidebar{border-right:1px solid var(--line);background:#efefef;padding:14px 12px 18px;position:sticky;top:var(--topbar-h);height:calc(100vh - var(--topbar-h));overflow:auto}
     .side-group{margin-bottom:14px}.side-link{min-height:40px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 10px;border-radius:10px;color:#303030;font-weight:600;font-size:14px}.side-link:hover{background:#e9e9ea}.side-link.active{background:#fff;box-shadow:inset 0 0 0 1px #e1e1e3}.side-link-left{display:flex;align-items:center;gap:12px;min-width:0}.side-link small{color:#6f7377;font-weight:700;background:#e4e4e5;padding:3px 10px;border-radius:999px}
     .desktop-main{padding:16px 14px 22px;overflow:auto}.desktop-content-wrap{max-width:1320px}
-    .alert{display:none;margin-bottom:12px;padding:12px 14px;border-radius:12px;font-size:14px;font-weight:700}.alert.active{display:block}.alert.success{background:#e3f1df;color:#0b6b42;border:1px solid #bfdcb9}.alert.error{background:#ffe9e5;color:#9d240d;border:1px solid #f1c7bf}.alert.warning{background:#fff4d6;color:#856404;border:1px solid #edd89a}
+    .alert{display:none;margin-bottom:12px;padding:12px 14px;border-radius:12px;font-size:14px;font-weight:700}.alert.active{display:block}.alert.success{background:#e3f1df;color:#0b6b42;border:1px solid #bfdcb9}.alert.error{background:#ffe9e5;color:#9d240d;border:1px solid #f1c7bf}
     .dashboard-toolbar,.quick-actions-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;direction:ltr}
     .filter-pill,.report-pill,.quick-action-pill,.ghost-btn,.primary-btn{min-height:36px;padding:0 14px;border:1px solid #d4d4d6;background:#fff;border-radius:12px;display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#303030;font-weight:600}
     .primary-btn{background:#2a2a2c;color:#fff;border-color:#2a2a2c;cursor:pointer}
@@ -61,21 +61,14 @@
           <div class="desktop-content-wrap">
             <div class="alert" id="desktopAlert"></div>
             <section>
-              <div class="dashboard-toolbar">
-                <div class="filter-pill">Last 90 days</div>
-                <a class="report-pill" href="/orders-admin.html">Open Orders</a>
-                <button class="ghost-btn" onclick="loadHomeData(true)">Refresh dashboard</button>
-              </div>
-
+              <div class="dashboard-toolbar"><div class="filter-pill">Last 90 days</div><a class="report-pill" href="/orders-admin.html">Open Orders</a></div>
               <div class="metric-strip"><div class="metric-strip-inner">
                 <div class="metric-box"><div class="metric-title">Total sales</div><div class="metric-value" id="desktopTotalSalesValue">KWD 0.000</div><div class="metric-change">Live</div></div>
                 <div class="metric-box"><div class="metric-title">Orders</div><div class="metric-value" id="desktopOrdersValue">0</div><div class="metric-change">Live</div></div>
                 <div class="metric-box"><div class="metric-title">Pending orders</div><div class="metric-value" id="desktopPendingValue">0</div><div class="metric-change">Live</div></div>
                 <div class="metric-box"><div class="metric-title">Unpaid orders</div><div class="metric-value" id="desktopUnpaidValue">0</div><div class="metric-change">Live</div></div>
               </div></div>
-
               <div class="quick-actions-row"><a class="quick-action-pill" href="/orders-admin.html">Open orders page</a><a class="quick-action-pill" href="/products-admin.html">Open products page</a><a class="quick-action-pill" href="/product-edit.html">Add product</a></div>
-
               <div class="marketing-stack">
                 <div class="marketing-card"><div><h3>Orders are now a separate page</h3><p>تم فصل صفحة Orders عن Home بشكل مستقل. الدخول على Orders الآن يفتح صفحة مستقلة بدل النزول داخل نفس الصفحة.</p><div class="marketing-actions"><a class="primary-btn" href="/orders-admin.html">Go to Orders</a><a class="ghost-btn" href="/products-admin.html">Go to Products</a></div></div><div class="marketing-visual">🧾</div></div>
                 <div class="marketing-card"><div><h3>Dashboard home</h3><p>هذه الصفحة الآن للـ Home / Dashboard فقط، من غير خلط مع جدول الأوردرز.</p></div><div class="marketing-visual">⌂</div></div>
@@ -85,126 +78,20 @@
         </main>
       </div>
     </div>
-
     <div class="mobile-shell">
       <header class="mobile-header"><div class="mobile-header-row"><div class="mobile-header-brand"><div class="mobile-avatar"><img src="https://smartkidskw.com/logo-sk-smart-kids.png" alt="Smart Kids Kuwait"></div><div class="mobile-brand-text"><h1>Smart Kids Kuwait</h1><p>Admin Home</p></div></div><div class="mobile-bell">🔔</div></div></header>
-      <main class="mobile-main">
-        <section class="mobile-surface">
-          <div class="mobile-dashboard">
-            <div class="alert" id="mobileAlert"></div>
-
-            <div class="mobile-top-pills">
-              <a class="mobile-pill" href="/orders-admin.html"><span class="dot"></span><span>Orders</span></a>
-              <a class="mobile-pill" href="/products-admin.html"><span class="dot"></span><span>Products</span></a>
-            </div>
-
-            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;direction:ltr;">
-              <button class="ghost-btn" onclick="loadHomeData(true)">Refresh dashboard</button>
-            </div>
-
-            <div class="mobile-stats-grid">
-              <div class="mobile-stat"><div class="label">Sales</div><div class="value" id="mobileTotalSalesValue">KWD 0.000</div><div class="change">Live</div></div>
-              <div class="mobile-stat"><div class="label">Orders</div><div class="value" id="mobileOrdersValue">0</div><div class="change">Live</div></div>
-              <div class="mobile-stat"><div class="label">Pending</div><div class="value" id="mobilePendingValue">0</div><div class="change">Live</div></div>
-            </div>
-
-            <div class="mobile-quick-grid">
-              <a class="mobile-quick-card" href="/orders-admin.html"><div class="mobile-quick-head"><div class="mobile-quick-value" id="mobileOrdersCountCard">0</div><div class="mobile-quick-icon">🧾</div></div><div class="mobile-quick-title">Orders</div><div class="mobile-quick-sub">افتح صفحة الطلبات المستقلة</div></a>
-              <a class="mobile-quick-card" href="/products-admin.html"><div class="mobile-quick-head"><div class="mobile-quick-value">→</div><div class="mobile-quick-icon">🏷️</div></div><div class="mobile-quick-title">Products</div><div class="mobile-quick-sub">الدخول إلى المنتجات</div></a>
-            </div>
-          </div>
-        </section>
-      </main>
+      <main class="mobile-main"><section class="mobile-surface"><div class="mobile-dashboard"><div class="alert" id="mobileAlert"></div><div class="mobile-top-pills"><a class="mobile-pill" href="/orders-admin.html"><span class="dot"></span><span>Orders</span></a><a class="mobile-pill" href="/products-admin.html"><span class="dot"></span><span>Products</span></a></div><div class="mobile-stats-grid"><div class="mobile-stat"><div class="label">Sales</div><div class="value" id="mobileTotalSalesValue">KWD 0.000</div><div class="change">Live</div></div><div class="mobile-stat"><div class="label">Orders</div><div class="value" id="mobileOrdersValue">0</div><div class="change">Live</div></div><div class="mobile-stat"><div class="label">Pending</div><div class="value" id="mobilePendingValue">0</div><div class="change">Live</div></div></div><div class="mobile-quick-grid"><a class="mobile-quick-card" href="/orders-admin.html"><div class="mobile-quick-head"><div class="mobile-quick-value" id="mobileOrdersCountCard">0</div><div class="mobile-quick-icon">🧾</div></div><div class="mobile-quick-title">Orders</div><div class="mobile-quick-sub">افتح صفحة الطلبات المستقلة</div></a><a class="mobile-quick-card" href="/products-admin.html"><div class="mobile-quick-head"><div class="mobile-quick-value">→</div><div class="mobile-quick-icon">🏷️</div></div><div class="mobile-quick-title">Products</div><div class="mobile-quick-sub">الدخول إلى المنتجات</div></a></div></div></section></main>
       <nav class="mobile-bottom-nav"><a class="mobile-bottom-link active" href="/admin-enhanced.html"><span>⌂</span><span>Home</span></a><a class="mobile-bottom-link" href="/orders-admin.html"><span>🧾</span><span>Orders</span></a><a class="mobile-bottom-link" href="/products-admin.html"><span>🏷️</span><span>Products</span></a></nav>
     </div>
   </div>
-
   <script>
-    const API_BASE = '/api/orders';
-    const FETCH_LIMIT = 50;
-    const REQUEST_TIMEOUT_MS = 12000;
-    let activeController = null;
-
-    function setText(id, v) {
-      const e = document.getElementById(id);
-      if (e) e.textContent = v;
-    }
-
-    function formatCurrency(v) {
-      const n = Number(v || 0);
-      return `KWD ${n.toFixed(3)}`;
-    }
-
-    function showAlert(msg, type = 'success') {
-      ['desktopAlert','mobileAlert'].forEach(id => {
-        const e = document.getElementById(id);
-        if (!e) return;
-        e.textContent = msg;
-        e.className = `alert active ${type}`;
-        setTimeout(() => e.classList.remove('active'), 3500);
-      });
-    }
-
-    function isPending(o) {
-      return String(o.status || '').toLowerCase() === 'pending';
-    }
-
-    async function fetchDashboardOrders() {
-      if (activeController) activeController.abort();
-
-      activeController = new AbortController();
-      const timeoutId = setTimeout(() => {
-        activeController.abort();
-      }, REQUEST_TIMEOUT_MS);
-
-      try {
-        const r = await fetch(`${API_BASE}?limit=${FETCH_LIMIT}&offset=0&sort=created_at&order=DESC`, {
-          signal: activeController.signal,
-          cache: 'no-store'
-        });
-        const d = await r.json();
-        if (!r.ok || !d.success) throw new Error(d.error || 'Failed to load orders');
-        return d;
-      } finally {
-        clearTimeout(timeoutId);
-        activeController = null;
-      }
-    }
-
-    async function loadHomeData(showMessage = false) {
-      try {
-        const d = await fetchDashboardOrders();
-        const orders = Array.isArray(d.data) ? d.data : [];
-        const sales = orders.reduce((s, o) => s + Number(o.total || 0), 0);
-        const count = orders.length;
-        const pending = orders.filter(isPending).length;
-        const unpaid = orders.filter(o => String(o.status || '').toLowerCase() !== 'completed').length;
-
-        setText('desktopTotalSalesValue', formatCurrency(sales));
-        setText('desktopOrdersValue', String(count));
-        setText('desktopPendingValue', String(pending));
-        setText('desktopUnpaidValue', String(unpaid));
-        setText('desktopOrdersCountBadge', String(count));
-
-        setText('mobileTotalSalesValue', formatCurrency(sales));
-        setText('mobileOrdersValue', String(count));
-        setText('mobilePendingValue', String(pending));
-        setText('mobileOrdersCountCard', String(count));
-
-        if (showMessage) showAlert('تم تحديث بيانات الهوم', 'success');
-      } catch (err) {
-        console.error(err);
-        if (err.name === 'AbortError') {
-          showAlert('تحميل بيانات الهوم استغرق وقتًا طويلًا. جرّب Refresh مرة أخرى.', 'warning');
-          return;
-        }
-        showAlert(err.message || 'Failed to load dashboard data', 'error');
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      loadHomeData(false);
-    });
+    const API_BASE='/api/orders';
+    function setText(id,v){const e=document.getElementById(id);if(e)e.textContent=v}
+    function formatCurrency(v){const n=Number(v||0);return `KWD ${n.toFixed(3)}`}
+    function showAlert(msg,type='success'){['desktopAlert','mobileAlert'].forEach(id=>{const e=document.getElementById(id);if(!e)return;e.textContent=msg;e.className=`alert active ${type}`;setTimeout(()=>e.classList.remove('active'),3500)})}
+    function isPending(o){return String(o.status||'').toLowerCase()==='pending'}
+    async function loadHomeData(){try{const r=await fetch(`${API_BASE}?limit=300&offset=0&sort=created_at&order=DESC`);const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||'Failed to load orders');const orders=Array.isArray(d.data)?d.data:[];const sales=orders.reduce((s,o)=>s+Number(o.total||0),0);const count=orders.length;const pending=orders.filter(isPending).length;const unpaid=orders.filter(o=>String(o.status||'').toLowerCase()!=='completed').length;setText('desktopTotalSalesValue',formatCurrency(sales));setText('desktopOrdersValue',String(count));setText('desktopPendingValue',String(pending));setText('desktopUnpaidValue',String(unpaid));setText('desktopOrdersCountBadge',String(count));setText('mobileTotalSalesValue',formatCurrency(sales));setText('mobileOrdersValue',String(count));setText('mobilePendingValue',String(pending));setText('mobileOrdersCountCard',String(count))}catch(err){console.error(err);showAlert(err.message||'Failed to load dashboard data','error')}}
+    document.addEventListener('DOMContentLoaded',()=>{loadHomeData();setInterval(loadHomeData,30000)})
   </script>
 </body>
 </html>

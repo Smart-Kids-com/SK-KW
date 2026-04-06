@@ -112,45 +112,6 @@ async function enrichProduct(product) {
   };
 }
 
-
-async function makeUniqueSlug(baseText = '', excludeId = null) {
-  const base = slugify(baseText) || `product-${Date.now()}`;
-  let candidate = base;
-  let index = 2;
-
-  while (true) {
-    const existing = excludeId
-      ? await db.get(`SELECT id FROM products WHERE slug = ? AND id != ?`, [candidate, excludeId])
-      : await db.get(`SELECT id FROM products WHERE slug = ?`, [candidate]);
-
-    if (!existing) return candidate;
-
-    candidate = `${base}-${index}`;
-    index += 1;
-  }
-}
-
-function normalizeIncomingProductBody(body = {}) {
-  return {
-    productName: body.productName ?? body.product_name ?? body.name ?? body.title ?? '',
-    slug: body.slug ?? body.handle ?? '',
-    sku: body.sku ?? body.sku_code ?? '',
-    description: body.description ?? body.body_html ?? '',
-    price: body.price ?? body.regular_price ?? 0,
-    salePrice: body.salePrice ?? body.sale_price ?? body.compare_at_price ?? 0,
-    imageUrl: body.imageUrl ?? body.image_url ?? body.image ?? '',
-    stock: body.stock ?? body.inventory ?? body.inventory_quantity ?? 0,
-    status: body.status ?? body.published ?? 'draft',
-    productType: body.productType ?? body.product_type ?? body.type ?? '',
-    vendor: body.vendor ?? '',
-    category: body.category ?? body.collection ?? '',
-    tags: body.tags ?? '',
-    seoTitle: body.seoTitle ?? body.seo_title ?? '',
-    seoDescription: body.seoDescription ?? body.seo_description ?? '',
-    images: body.images
-  };
-}
-
 async function enrichProducts(products = []) {
   const enriched = [];
 
@@ -247,7 +208,7 @@ router.post('/', async (req, res) => {
       seoTitle,
       seoDescription,
       images
-    } = normalizeIncomingProductBody(req.body);
+    } = req.body;
 
     if (!productName || normalizeText(productName) === '') {
       return res.status(400).json({
@@ -266,7 +227,7 @@ router.post('/', async (req, res) => {
 
     const finalSalePrice = toNumber(salePrice, 0);
     const finalStock = toInteger(stock, 0);
-    const finalSlug = await makeUniqueSlug(slug || productName);
+    const finalSlug = slugify(slug || productName);
     const finalSku = normalizeText(sku) || null;
     const finalStatus = normalizeStatus(status);
     const finalImages = normalizeImages(images, imageUrl);
@@ -391,7 +352,7 @@ router.put('/:id', async (req, res) => {
       seoTitle,
       seoDescription,
       images
-    } = normalizeIncomingProductBody(req.body);
+    } = req.body;
 
     const product = await db.get(
       `SELECT * FROM products WHERE id = ?`,
@@ -421,7 +382,7 @@ router.put('/:id', async (req, res) => {
     }
 
     if (slug !== undefined) {
-      const finalSlug = await makeUniqueSlug(slug, id);
+      const finalSlug = slugify(slug);
       if (!finalSlug) {
         return res.status(400).json({
           success: false,
