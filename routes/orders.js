@@ -10,68 +10,26 @@ const { SYSTEM_CONFIG, HELPERS } = require('../config/system');
 const ORDERS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS;
 const ORDER_ITEMS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS;
 
-const MAX_LIST_LIMIT = 50;
-const QUERY_TIMEOUT_MS = 10000;
-
 function toNumber(value, fallback = 0) {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
-}
-
-function toSafeInt(value, fallback = 0) {
-  const n = parseInt(value, 10);
-  return Number.isFinite(n) ? n : fallback;
-}
-
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
-}
-
-function parseListParams(query = {}) {
-  const rawLimit = toSafeInt(query.limit, 50);
-  const rawOffset = toSafeInt(query.offset, 0);
-
-  return {
-    status: query.status,
-    sort: query.sort || 'created_at',
-    order: query.order || 'DESC',
-    limit: clamp(rawLimit, 1, MAX_LIST_LIMIT),
-    offset: Math.max(rawOffset, 0)
-  };
 }
 
 function isValidOrderStatus(status) {
   return Object.values(SYSTEM_CONFIG.ORDER_CONFIG.STATUSES).includes(status);
 }
 
-function withTimeout(promise, label = 'query', timeoutMs = QUERY_TIMEOUT_MS) {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error(`${label} timed out after ${timeoutMs}ms`));
-      }, timeoutMs);
-    })
-  ]);
-}
-
 async function getOrderWithItems(id) {
-  const order = await withTimeout(
-    db.get(
-      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
-      [id]
-    ),
-    'getOrderWithItems:order'
+  const order = await db.get(
+    `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+    [id]
   );
 
   if (!order) return null;
 
-  const items = await withTimeout(
-    db.all(
-      `SELECT * FROM ${ORDER_ITEMS_TABLE} WHERE order_id = ?`,
-      [id]
-    ),
-    'getOrderWithItems:items'
+  const items = await db.all(
+    `SELECT * FROM ${ORDER_ITEMS_TABLE} WHERE order_id = ?`,
+    [id]
   );
 
   return {
@@ -81,22 +39,16 @@ async function getOrderWithItems(id) {
 }
 
 async function getOrderByNumberWithItems(orderNumber) {
-  const order = await withTimeout(
-    db.get(
-      `SELECT * FROM ${ORDERS_TABLE} WHERE order_number = ?`,
-      [orderNumber]
-    ),
-    'getOrderByNumberWithItems:order'
+  const order = await db.get(
+    `SELECT * FROM ${ORDERS_TABLE} WHERE order_number = ?`,
+    [orderNumber]
   );
 
   if (!order) return null;
 
-  const items = await withTimeout(
-    db.all(
-      `SELECT * FROM ${ORDER_ITEMS_TABLE} WHERE order_id = ?`,
-      [order.id]
-    ),
-    'getOrderByNumberWithItems:items'
+  const items = await db.all(
+    `SELECT * FROM ${ORDER_ITEMS_TABLE} WHERE order_id = ?`,
+    [order.id]
   );
 
   return {
@@ -151,30 +103,24 @@ function calculateSubtotal(items) {
 }
 
 async function replaceOrderItems(orderId, items) {
-  await withTimeout(
-    db.run(
-      `DELETE FROM ${ORDER_ITEMS_TABLE} WHERE order_id = ?`,
-      [orderId]
-    ),
-    'replaceOrderItems:delete'
+  await db.run(
+    `DELETE FROM ${ORDER_ITEMS_TABLE} WHERE order_id = ?`,
+    [orderId]
   );
 
   for (const item of items) {
-    await withTimeout(
-      db.run(
-        `INSERT INTO ${ORDER_ITEMS_TABLE}
-        (order_id, product_id, product_name, product_image, price, quantity)
-        VALUES (?, ?, ?, ?, ?, ?)`,
-        [
-          orderId,
-          item.product_id,
-          item.product_name,
-          item.product_image,
-          toNumber(item.price, 0),
-          toNumber(item.quantity, 1)
-        ]
-      ),
-      'replaceOrderItems:insert'
+    await db.run(
+      `INSERT INTO ${ORDER_ITEMS_TABLE}
+      (order_id, product_id, product_name, product_image, price, quantity)
+      VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        orderId,
+        item.product_id,
+        item.product_name,
+        item.product_image,
+        toNumber(item.price, 0),
+        toNumber(item.quantity, 1)
+      ]
     );
   }
 }
@@ -225,40 +171,34 @@ router.post('/', async (req, res) => {
     const total = subtotal + shippingCost;
     const tempOrderNumber = `TEMP-${Date.now()}`;
 
-    await withTimeout(
-      db.run(
-        `INSERT INTO ${ORDERS_TABLE}
-        (order_number, customer_name, customer_email, customer_phone, customer_address,
-         customer_city, customer_district, subtotal, shipping_cost, total, status, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          tempOrderNumber,
-          customerName,
-          customerEmail,
-          customerPhone,
-          customerAddress,
-          customerCity || 'الكويت',
-          customerDistrict || '',
-          subtotal,
-          shippingCost,
-          total,
-          SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING,
-          notes || ''
-        ]
-      ),
-      'createOrder:insertOrder'
+    await db.run(
+      `INSERT INTO ${ORDERS_TABLE}
+      (order_number, customer_name, customer_email, customer_phone, customer_address,
+       customer_city, customer_district, subtotal, shipping_cost, total, status, notes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        tempOrderNumber,
+        customerName,
+        customerEmail,
+        customerPhone,
+        customerAddress,
+        customerCity || 'الكويت',
+        customerDistrict || '',
+        subtotal,
+        shippingCost,
+        total,
+        SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING,
+        notes || ''
+      ]
     );
 
-    const savedOrder = await withTimeout(
-      db.get(
-        `SELECT id
-         FROM ${ORDERS_TABLE}
-         WHERE order_number = ?
-         ORDER BY id DESC
-         LIMIT 1`,
-        [tempOrderNumber]
-      ),
-      'createOrder:getSavedOrder'
+    const savedOrder = await db.get(
+      `SELECT id
+       FROM ${ORDERS_TABLE}
+       WHERE order_number = ?
+       ORDER BY id DESC
+       LIMIT 1`,
+      [tempOrderNumber]
     );
 
     if (!savedOrder || !savedOrder.id) {
@@ -272,32 +212,26 @@ router.post('/', async (req, res) => {
     const SHOPIFY_LAST_ORDER = 4060;
     const nextOrderNumber = `SK${SHOPIFY_LAST_ORDER + savedOrderId}`;
 
-    await withTimeout(
-      db.run(
-        `UPDATE ${ORDERS_TABLE}
-         SET order_number = ?
-         WHERE id = ?`,
-        [nextOrderNumber, savedOrderId]
-      ),
-      'createOrder:updateOrderNumber'
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET order_number = ?
+       WHERE id = ?`,
+      [nextOrderNumber, savedOrderId]
     );
 
     for (const item of items) {
-      await withTimeout(
-        db.run(
-          `INSERT INTO ${ORDER_ITEMS_TABLE}
-          (order_id, product_id, product_name, product_image, price, quantity)
-          VALUES (?, ?, ?, ?, ?, ?)`,
-          [
-            savedOrderId,
-            item.productId || `product_${Date.now()}`,
-            item.name || 'منتج',
-            item.image || item.image_url || '',
-            toNumber(item.price, 0),
-            toNumber(item.quantity, 1)
-          ]
-        ),
-        'createOrder:insertItem'
+      await db.run(
+        `INSERT INTO ${ORDER_ITEMS_TABLE}
+        (order_id, product_id, product_name, product_image, price, quantity)
+        VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          savedOrderId,
+          item.productId || `product_${Date.now()}`,
+          item.name || 'منتج',
+          item.image || item.image_url || '',
+          toNumber(item.price, 0),
+          toNumber(item.quantity, 1)
+        ]
       );
     }
 
@@ -324,28 +258,22 @@ router.post('/', async (req, res) => {
  */
 router.get('/stats/summary', async (req, res) => {
   try {
-    const totalOrders = await withTimeout(
-      db.get(`SELECT COUNT(*) as count FROM ${ORDERS_TABLE}`),
-      'stats:totalOrders'
+    const totalOrders = await db.get(
+      `SELECT COUNT(*) as count FROM ${ORDERS_TABLE}`
     );
 
-    const ordersByStatus = await withTimeout(
-      db.all(
-        `SELECT status, COUNT(*) as count
-         FROM ${ORDERS_TABLE}
-         GROUP BY status`
-      ),
-      'stats:ordersByStatus'
+    const ordersByStatus = await db.all(
+      `SELECT status, COUNT(*) as count
+       FROM ${ORDERS_TABLE}
+       GROUP BY status`
     );
 
-    const totalRevenue = await withTimeout(
-      db.get(`SELECT SUM(total) as total FROM ${ORDERS_TABLE}`),
-      'stats:totalRevenue'
+    const totalRevenue = await db.get(
+      `SELECT SUM(total) as total FROM ${ORDERS_TABLE}`
     );
 
-    const avgOrderValue = await withTimeout(
-      db.get(`SELECT AVG(total) as average FROM ${ORDERS_TABLE}`),
-      'stats:avgOrderValue'
+    const avgOrderValue = await db.get(
+      `SELECT AVG(total) as average FROM ${ORDERS_TABLE}`
     );
 
     return res.json({
@@ -416,12 +344,9 @@ router.put('/:id/customer', async (req, res) => {
       customerPhone
     } = req.body;
 
-    const order = await withTimeout(
-      db.get(
-        `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
-        [id]
-      ),
-      'updateCustomer:getOrder'
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
     );
 
     if (!order) {
@@ -480,14 +405,11 @@ router.put('/:id/customer', async (req, res) => {
     updateFields.push('updated_at = CURRENT_TIMESTAMP');
     updateValues.push(id);
 
-    await withTimeout(
-      db.run(
-        `UPDATE ${ORDERS_TABLE}
-         SET ${updateFields.join(', ')}
-         WHERE id = ?`,
-        updateValues
-      ),
-      'updateCustomer:updateOrder'
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET ${updateFields.join(', ')}
+       WHERE id = ?`,
+      updateValues
     );
 
     const updatedOrder = await getOrderWithItems(id);
@@ -520,12 +442,9 @@ router.put('/:id/shipping', async (req, res) => {
       shippingCost
     } = req.body;
 
-    const order = await withTimeout(
-      db.get(
-        `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
-        [id]
-      ),
-      'updateShipping:getOrder'
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
     );
 
     if (!order) {
@@ -582,14 +501,11 @@ router.put('/:id/shipping', async (req, res) => {
     updateFields.push('updated_at = CURRENT_TIMESTAMP');
     updateValues.push(id);
 
-    await withTimeout(
-      db.run(
-        `UPDATE ${ORDERS_TABLE}
-         SET ${updateFields.join(', ')}
-         WHERE id = ?`,
-        updateValues
-      ),
-      'updateShipping:updateOrder'
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET ${updateFields.join(', ')}
+       WHERE id = ?`,
+      updateValues
     );
 
     const updatedOrder = await getOrderWithItems(id);
@@ -617,12 +533,9 @@ router.put('/:id/notes', async (req, res) => {
     const { id } = req.params;
     const { notes } = req.body;
 
-    const order = await withTimeout(
-      db.get(
-        `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
-        [id]
-      ),
-      'updateNotes:getOrder'
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
     );
 
     if (!order) {
@@ -632,14 +545,11 @@ router.put('/:id/notes', async (req, res) => {
       });
     }
 
-    await withTimeout(
-      db.run(
-        `UPDATE ${ORDERS_TABLE}
-         SET notes = ?, updated_at = CURRENT_TIMESTAMP
-         WHERE id = ?`,
-        [notes || '', id]
-      ),
-      'updateNotes:updateOrder'
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET notes = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [notes || '', id]
     );
 
     const updatedOrder = await getOrderWithItems(id);
@@ -666,12 +576,9 @@ router.post('/:id/mark-paid', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const order = await withTimeout(
-      db.get(
-        `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
-        [id]
-      ),
-      'markPaid:getOrder'
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
     );
 
     if (!order) {
@@ -681,14 +588,11 @@ router.post('/:id/mark-paid', async (req, res) => {
       });
     }
 
-    await withTimeout(
-      db.run(
-        `UPDATE ${ORDERS_TABLE}
-         SET status = ?, completed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-         WHERE id = ?`,
-        [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.COMPLETED, id]
-      ),
-      'markPaid:updateOrder'
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET status = ?, completed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.COMPLETED, id]
     );
 
     const updatedOrder = await getOrderWithItems(id);
@@ -715,12 +619,9 @@ router.post('/:id/fulfill', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const order = await withTimeout(
-      db.get(
-        `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
-        [id]
-      ),
-      'fulfill:getOrder'
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
     );
 
     if (!order) {
@@ -730,14 +631,11 @@ router.post('/:id/fulfill', async (req, res) => {
       });
     }
 
-    await withTimeout(
-      db.run(
-        `UPDATE ${ORDERS_TABLE}
-         SET status = ?, shipped_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-         WHERE id = ?`,
-        [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.SHIPPED, id]
-      ),
-      'fulfill:updateOrder'
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET status = ?, shipped_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.SHIPPED, id]
     );
 
     const updatedOrder = await getOrderWithItems(id);
@@ -763,12 +661,9 @@ router.post('/:id/archive', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const order = await withTimeout(
-      db.get(
-        `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
-        [id]
-      ),
-      'archive:getOrder'
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
     );
 
     if (!order) {
@@ -778,14 +673,11 @@ router.post('/:id/archive', async (req, res) => {
       });
     }
 
-    await withTimeout(
-      db.run(
-        `UPDATE ${ORDERS_TABLE}
-         SET status = ?, updated_at = CURRENT_TIMESTAMP
-         WHERE id = ?`,
-        [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.CANCELLED, id]
-      ),
-      'archive:updateOrder'
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET status = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.CANCELLED, id]
     );
 
     const updatedOrder = await getOrderWithItems(id);
@@ -811,12 +703,9 @@ router.post('/:id/cancel', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const order = await withTimeout(
-      db.get(
-        `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
-        [id]
-      ),
-      'cancel:getOrder'
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
     );
 
     if (!order) {
@@ -826,14 +715,11 @@ router.post('/:id/cancel', async (req, res) => {
       });
     }
 
-    await withTimeout(
-      db.run(
-        `UPDATE ${ORDERS_TABLE}
-         SET status = ?, updated_at = CURRENT_TIMESTAMP
-         WHERE id = ?`,
-        [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.CANCELLED, id]
-      ),
-      'cancel:updateOrder'
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET status = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.CANCELLED, id]
     );
 
     const updatedOrder = await getOrderWithItems(id);
@@ -878,12 +764,9 @@ router.put('/:id', async (req, res) => {
       items
     } = req.body;
 
-    const order = await withTimeout(
-      db.get(
-        `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
-        [id]
-      ),
-      'updateOrder:getOrder'
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
     );
 
     if (!order) {
@@ -1022,14 +905,11 @@ router.put('/:id', async (req, res) => {
     updateFields.push('updated_at = CURRENT_TIMESTAMP');
     updateValues.push(id);
 
-    await withTimeout(
-      db.run(
-        `UPDATE ${ORDERS_TABLE}
-         SET ${updateFields.join(', ')}
-         WHERE id = ?`,
-        updateValues
-      ),
-      'updateOrder:updateMainOrder'
+    await db.run(
+      `UPDATE ${ORDERS_TABLE}
+       SET ${updateFields.join(', ')}
+       WHERE id = ?`,
+      updateValues
     );
 
     if (shouldReplaceItems) {
@@ -1059,12 +939,9 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const order = await withTimeout(
-      db.get(
-        `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
-        [id]
-      ),
-      'deleteOrder:getOrder'
+    const order = await db.get(
+      `SELECT * FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
     );
 
     if (!order) {
@@ -1074,17 +951,9 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
-    await withTimeout(
-      db.run(`DELETE FROM ${ORDER_ITEMS_TABLE} WHERE order_id = ?`, [id]),
-      'deleteOrder:deleteItems'
-    );
-
-    await withTimeout(
-      db.run(
-        `DELETE FROM ${ORDERS_TABLE} WHERE id = ?`,
-        [id]
-      ),
-      'deleteOrder:deleteOrder'
+    await db.run(
+      `DELETE FROM ${ORDERS_TABLE} WHERE id = ?`,
+      [id]
     );
 
     return res.json({
@@ -1137,16 +1006,8 @@ router.get('/:id', async (req, res) => {
  * GET /api/orders - جلب جميع الطلبات مع التصفية والترتيب
  */
 router.get('/', async (req, res) => {
-  const startedAt = Date.now();
-
   try {
-    const {
-      status,
-      sort,
-      order,
-      limit,
-      offset
-    } = parseListParams(req.query);
+    const { status, limit = 50, offset = 0, sort = 'created_at', order = 'DESC' } = req.query;
 
     let sql = `SELECT * FROM ${ORDERS_TABLE}`;
     const params = [];
@@ -1162,26 +1023,9 @@ router.get('/', async (req, res) => {
 
     sql += ` ORDER BY ${sortColumn} ${sortOrder}`;
     sql += ` LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
+    params.push(parseInt(limit, 10), parseInt(offset, 10));
 
-    console.log('[orders:list] before db.all', {
-      ms: Date.now() - startedAt,
-      sortColumn,
-      sortOrder,
-      limit,
-      offset,
-      hasStatusFilter: !!status
-    });
-
-    const orders = await withTimeout(
-      db.all(sql, params),
-      'orders:list:db.all'
-    );
-
-    console.log('[orders:list] after db.all', {
-      ms: Date.now() - startedAt,
-      rows: Array.isArray(orders) ? orders.length : 0
-    });
+    const orders = await db.all(sql, params);
 
     let countSql = `SELECT COUNT(*) as total FROM ${ORDERS_TABLE}`;
     const countParams = [];
@@ -1191,37 +1035,20 @@ router.get('/', async (req, res) => {
       countParams.push(status);
     }
 
-    console.log('[orders:list] before db.get(count)', {
-      ms: Date.now() - startedAt
-    });
-
-    const countResult = await withTimeout(
-      db.get(countSql, countParams),
-      'orders:list:count'
-    );
-
-    console.log('[orders:list] after db.get(count)', {
-      ms: Date.now() - startedAt,
-      total: Number(countResult?.total || 0)
-    });
+    const countResult = await db.get(countSql, countParams);
 
     return res.json({
       success: true,
       data: orders,
       pagination: {
         total: Number(countResult?.total || 0),
-        limit,
-        offset,
-        totalPages: Math.ceil(Number(countResult?.total || 0) / limit)
+        limit: parseInt(limit, 10),
+        offset: parseInt(offset, 10),
+        totalPages: Math.ceil(Number(countResult?.total || 0) / parseInt(limit, 10))
       }
     });
   } catch (error) {
-    console.error('❌ خطأ في جلب الطلبات:', {
-      message: error?.message,
-      stack: error?.stack,
-      ms: Date.now() - startedAt
-    });
-
+    console.error('❌ خطأ في جلب الطلبات:', error);
     return res.status(500).json({
       success: false,
       error: 'فشل في جلب الطلبات'
