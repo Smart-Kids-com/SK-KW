@@ -411,6 +411,121 @@
 
       document.getElementById('orderSection').classList.remove('hide');
     }
+
+    function hideAlert() {
+      const alert = document.getElementById('alert');
+      alert.className = 'alert';
+      alert.textContent = '';
+    }
+
+    function getQueryParam(name) {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        return (params.get(name) || '').trim();
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function getLastOrder() {
+      try {
+        return JSON.parse(localStorage.getItem('last_order') || 'null');
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function setTrackLink(order) {
+      const btn = document.getElementById('indexBtn');
+      if (!btn) return;
+      const orderNumber = String(order?.order_number || '').trim();
+      if (orderNumber) {
+        btn.href = `./order-details.html?order=${encodeURIComponent(orderNumber)}`;
+        btn.textContent = 'عرض تفاصيل الطلب';
+      } else {
+        btn.href = './index.html';
+        btn.textContent = 'العودة للمتجر';
+      }
+    }
+
+    async function fetchOrderByNumber(orderNumber) {
+      const response = await fetch('/api/orders?limit=300&offset=0&sort=created_at&order=DESC', {
+        cache: 'no-store'
+      });
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result || result.success !== true) {
+        throw new Error(result?.error || 'تعذر تحميل الطلب من السيرفر');
+      }
+
+      const orders = Array.isArray(result.data) ? result.data : [];
+      return orders.find(order => String(order.order_number || '') === String(orderNumber)) || null;
+    }
+
+    async function fetchOrderById(orderId) {
+      const response = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
+        cache: 'no-store'
+      });
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result || result.success !== true) {
+        throw new Error(result?.error || 'تعذر تحميل الطلب من السيرفر');
+      }
+
+      return result.data || null;
+    }
+
+    async function loadOrderDetails() {
+      hideAlert();
+      showLoading(true);
+
+      try {
+        const orderNumberFromUrl = getQueryParam('order');
+        const orderIdFromUrl = getQueryParam('id');
+        const lastOrder = getLastOrder();
+
+        let order = null;
+
+        if (orderIdFromUrl) {
+          order = await fetchOrderById(orderIdFromUrl);
+        }
+
+        if (!order && orderNumberFromUrl) {
+          order = await fetchOrderByNumber(orderNumberFromUrl);
+        }
+
+        if (!order && lastOrder?.id) {
+          try {
+            order = await fetchOrderById(lastOrder.id);
+          } catch (e) {}
+        }
+
+        if (!order && lastOrder?.order_number) {
+          try {
+            order = await fetchOrderByNumber(lastOrder.order_number);
+          } catch (e) {}
+        }
+
+        if (!order && lastOrder) {
+          order = lastOrder;
+        }
+
+        if (!order) {
+          throw new Error('لم يتم العثور على بيانات الطلب. افتح الصفحة بعد إتمام الطلب مباشرة.');
+        }
+
+        renderOrder(order);
+        setTrackLink(order);
+      } catch (error) {
+        console.error('Thank you load error:', error);
+        showAlert(error.message || 'تعذر تحميل تفاصيل الطلب', 'error');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+
+    document.addEventListener('DOMContentLoaded', loadOrderDetails);
   </script>
 </body>
 </html>
