@@ -51,39 +51,384 @@
     </div>
   </div>
   <script>
-    const API_BASE='/api/orders';let allOrders=[],filteredOrders=[],currentTab='all',currentSortDirection='DESC',selectedIds=new Set(),selectAllStoreMode=false;
-    function setText(id,v){const e=document.getElementById(id);if(e)e.textContent=v}
-    function formatCurrency(v){const n=Number(v||0);return `KWD ${n.toFixed(3)}`}
-    function formatDate(v){if(!v)return '-';const d=new Date(v);if(isNaN(d))return '-';return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
-    function normalizeOrder(o){const total=Number(o.total||0),shipping=Number(o.shipping_cost||0),subtotal=Number(o.subtotal||Math.max(total-shipping,0)),paid=String(o.status||'').toLowerCase()==='completed'?total:0,balance=Math.max(total-paid,0);return {...o,total,shipping_cost:shipping,subtotal,paid,balance}}
-    function showAlert(msg,type='success'){['desktopAlert','mobileAlert'].forEach(id=>{const e=document.getElementById(id);if(!e)return;e.textContent=msg;e.className=`alert active ${type}`;setTimeout(()=>e.classList.remove('active'),3500)})}
-    function paymentBadge(o){return Number(o.balance||0)>0?'<span class="status-badge payment"><span class="dot"></span>Payment pending</span>':'<span class="status-badge payment"><span class="dot"></span>Paid</span>'}
-    function fulfillmentText(o){const s=String(o.status||'').toLowerCase();if(s==='processing')return 'In progress';if(s==='shipped'||s==='completed')return 'Fulfilled';if(s==='on_hold')return 'On hold';if(s==='cancelled')return 'Cancelled';return 'Unfulfilled'}
-    function fulfillmentBadge(o){return `<span class="status-badge fulfillment"><span class="dot"></span>${fulfillmentText(o)}</span>`}
-    function getOrderNote(o){if(Number(o.shipping_cost||0)===0)return 'The order qualifies for free shipping';return `Delivery fee : ${Number(o.shipping_cost||0).toFixed(3)} KWD`}
-    function orderDetailsUrl(o){if(o?.id)return `/order-details.html?id=${encodeURIComponent(o.id)}`;if(o?.order_number)return `/order-details.html?order=${encodeURIComponent(o.order_number)}`;return '#'}
-    function openOrderDetails(url){if(!url||url==='#')return;window.location.href=url}
-    function isToday(o){const d=new Date(o.created_at||0);if(isNaN(d))return false;const n=new Date();return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate()}
-    function updateStats(){const total=allOrders.length,pending=allOrders.filter(o=>Number(o.balance||0)>0).length,open=allOrders.filter(o=>['pending','processing','shipped','on_hold'].includes(String(o.status||'').toLowerCase())).length,cancelled=allOrders.filter(o=>String(o.status||'').toLowerCase()==='cancelled').length,today=allOrders.filter(isToday).length;setText('desktopOrdersCountBadge',String(total));setText('desktopOrdersValue',String(total));setText('desktopPendingPaymentValue',String(pending));setText('desktopOpenValue',String(open));setText('desktopCancelledValue',String(cancelled));setText('desktopTodayValue',String(today))}
-    function applyFilters(){const ds=(document.getElementById('desktopSearchInput')?.value||'').trim().toLowerCase(),ms=(document.getElementById('mobileSearchInput')?.value||'').trim().toLowerCase(),gs=(document.getElementById('globalDesktopSearch')?.value||'').trim().toLowerCase(),search=ds||ms||gs;let result=[...allOrders];if(search){result=result.filter(o=>String(o.order_number||'').toLowerCase().includes(search)||String(o.customer_name||'').toLowerCase().includes(search)||String(o.customer_email||'').toLowerCase().includes(search)||String(o.customer_phone||'').toLowerCase().includes(search))}if(currentTab==='payment_pending')result=result.filter(o=>Number(o.balance||0)>0);else if(currentTab==='open')result=result.filter(o=>['pending','processing','shipped','on_hold'].includes(String(o.status||'').toLowerCase()));else if(currentTab==='cancelled')result=result.filter(o=>String(o.status||'').toLowerCase()==='cancelled');else if(currentTab==='today')result=result.filter(isToday);result.sort((a,b)=>{const at=new Date(a.created_at||0).getTime(),bt=new Date(b.created_at||0).getTime();return currentSortDirection==='DESC'?bt-at:at-bt});filteredOrders=result;renderDesktopOrders(result);renderMobileOrders(result);updateSelectionUI()}
-    function renderDesktopOrders(orders){const tbody=document.getElementById('desktopOrdersTableBody');if(!tbody)return;if(!orders.length){tbody.innerHTML='<tr><td colspan="9" style="padding:30px;text-align:center;color:#777;">No orders found</td></tr>';setText('desktopPaginationText','1-0');return}tbody.innerHTML=orders.map(o=>{const checked=selectedIds.has(String(o.id))?'checked':'';return `<tr onclick="openOrderDetails('${orderDetailsUrl(o)}')"><td class="check-col" onclick="event.stopPropagation()"><input class="checkbox" type="checkbox" ${checked} onchange="toggleSelectOrder('${String(o.id)}', this.checked)"></td><td>#${String(o.order_number||o.id||'-')}</td><td>${formatDate(o.created_at)}</td><td>${String(o.customer_name||'-')}</td><td>${paymentBadge(o)}</td><td>${fulfillmentBadge(o)}</td><td>${formatCurrency(o.total)}</td><td class="table-note">${getOrderNote(o)}</td><td onclick="event.stopPropagation()"><div class="row-actions"><button class="row-action-btn" onclick="openOrderDetails('${orderDetailsUrl(o)}')">Open</button><button class="row-action-btn" onclick="fakeAction('Quick edit order #${String(o.order_number||o.id||'')}')">Edit</button></div></td></tr>`}).join('');setText('desktopPaginationText',`1-${orders.length}`)}
-    function renderMobileOrders(orders){const c=document.getElementById('mobileOrdersList');if(!c)return;if(!orders.length){c.innerHTML='<div style="padding:20px;text-align:center;color:#777;">No orders found</div>';return}c.innerHTML=orders.map(o=>{const checked=selectedIds.has(String(o.id))?'checked':'',selectedClass=selectedIds.has(String(o.id))?'selected':'';return `<div class="mobile-order-row ${selectedClass}" onclick="openOrderDetails('${orderDetailsUrl(o)}')"><div class="mobile-order-top"><div><div class="mobile-order-number">#${String(o.order_number||o.id||'-')}</div><div class="mobile-order-meta">${formatDate(o.created_at)} · ${String(o.customer_name||'-')}</div></div><div class="mobile-order-price">${formatCurrency(o.total)}</div></div><div class="mobile-order-badges">${paymentBadge(o)} ${fulfillmentBadge(o)}</div><div class="mobile-order-note">${getOrderNote(o)}</div><div class="mobile-row-actions" onclick="event.stopPropagation()"><label style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;"><input type="checkbox" class="checkbox" ${checked} onchange="toggleSelectOrder('${String(o.id)}', this.checked)"><span>Select</span></label><button class="row-action-btn" onclick="openOrderDetails('${orderDetailsUrl(o)}')">Open</button></div></div>`}).join('')}
-    function updateSelectionUI(){const count=selectAllStoreMode?allOrders.length:selectedIds.size,show=count>0,desktopPage=document.getElementById('desktopSelectPage');if(desktopPage){const allVisibleChecked=filteredOrders.length>0&&filteredOrders.every(o=>selectedIds.has(String(o.id)));desktopPage.checked=allVisibleChecked&&!selectAllStoreMode}setText('desktopSelectionText',`${count} selected`);setText('mobileSelectionText',`${count} selected`);['desktopSelectionPill','desktopPrintWrap','desktopMarkAsWrap','desktopCaptureBtn','desktopMoreWrap','mobileSelectionPill','mobilePrintWrap','mobileMarkAsWrap','mobileCaptureBtn','mobileMoreWrap'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.toggle('hidden',!show)})}
-    function toggleSelectOrder(id,checked){const v=String(id);if(checked)selectedIds.add(v);else{selectedIds.delete(v);selectAllStoreMode=false}updateSelectionUI();renderDesktopOrders(filteredOrders);renderMobileOrders(filteredOrders)}
-    function toggleSelectCurrentPage(checked){if(checked)filteredOrders.forEach(o=>selectedIds.add(String(o.id)));else{filteredOrders.forEach(o=>selectedIds.delete(String(o.id)));selectAllStoreMode=false}updateSelectionUI();renderDesktopOrders(filteredOrders);renderMobileOrders(filteredOrders)}
-    function selectAllInStore(){selectedIds=new Set(allOrders.map(o=>String(o.id)));selectAllStoreMode=true;updateSelectionUI();renderDesktopOrders(filteredOrders);renderMobileOrders(filteredOrders);closeAllDropdowns()}
-    function unselectAll(){selectedIds=new Set();selectAllStoreMode=false;updateSelectionUI();renderDesktopOrders(filteredOrders);renderMobileOrders(filteredOrders);closeAllDropdowns()}
-    function toggleDropdown(id){const w=document.getElementById(id);if(!w)return;const open=w.classList.contains('open');closeAllDropdowns();if(!open)w.classList.add('open')}
-    function closeAllDropdowns(){document.querySelectorAll('.dropdown-wrap.open').forEach(e=>e.classList.remove('open'))}
-    function setTab(tab){currentTab=tab;document.querySelectorAll('.tab-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===currentTab));applyFilters()}
-    function clearFilters(){currentTab='all';document.querySelectorAll('.tab-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.tab===currentTab));['desktopSearchInput','mobileSearchInput','globalDesktopSearch'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='' });currentSortDirection='DESC';applyFilters()}
-    function toggleSort(){currentSortDirection=currentSortDirection==='DESC'?'ASC':'DESC';applyFilters()}
-    function noopPager(){showAlert('الصفحة الحالية تعرض النتائج كلها مؤقتًا.','warning')}
-    function fakeAction(name){if(!(selectAllStoreMode||selectedIds.size)){showAlert('اختر Order واحد أو أكثر أولًا','warning');return}showAlert(`${name} ready`,'success');closeAllDropdowns()}
-    async function bulkUpdateStatus(status){const ids=Array.from(selectedIds);if(!ids.length){showAlert('اختر Order واحد أو أكثر أولًا','warning');return}try{for(const id of ids){const r=await fetch(`${API_BASE}/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||'Failed to update order')}showAlert('تم تحديث حالة الطلبات المحددة','success');closeAllDropdowns();await refreshData(false)}catch(err){console.error(err);showAlert(err.message||'Failed to update orders','error')}}
-    function goFirstOrder(){if(!filteredOrders.length){showAlert('No orders found','warning');return}openOrderDetails(orderDetailsUrl(filteredOrders[0]))}
-    async function refreshData(showMessage=true){try{const r=await fetch(`${API_BASE}?limit=300&offset=0&sort=created_at&order=DESC`);const d=await r.json();if(!r.ok||!d.success)throw new Error(d.error||'Failed to load orders');allOrders=(d.data||[]).map(normalizeOrder);updateStats();applyFilters();if(showMessage)showAlert('تم تحديث الطلبات','success')}catch(err){console.error(err);showAlert(err.message||'Failed to load orders','error')}}
-    document.addEventListener('click',e=>{if(!e.target.closest('.dropdown-wrap'))closeAllDropdowns()});document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>setTab(btn.dataset.tab||'all')));document.getElementById('desktopSelectPage')?.addEventListener('change',function(){toggleSelectCurrentPage(this.checked)});['desktopSearchInput','mobileSearchInput','globalDesktopSearch'].forEach(id=>{const e=document.getElementById(id);if(e)e.addEventListener('input',applyFilters)});refreshData(false);setInterval(()=>refreshData(false),30000)})
+    const API_BASE = '/api/orders';
+    const FETCH_LIMIT = 50;
+    const REQUEST_TIMEOUT_MS = 12000;
+
+    let allOrders = [];
+    let filteredOrders = [];
+    let currentTab = 'all';
+    let currentSortDirection = 'DESC';
+    let selectedIds = new Set();
+    let selectAllStoreMode = false;
+    let activeRefreshController = null;
+
+    function setText(id, v) {
+      const e = document.getElementById(id);
+      if (e) e.textContent = v;
+    }
+
+    function formatCurrency(v) {
+      const n = Number(v || 0);
+      return `KWD ${n.toFixed(3)}`;
+    }
+
+    function formatDate(v) {
+      if (!v) return '-';
+      const d = new Date(v);
+      if (isNaN(d)) return '-';
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function normalizeOrder(o) {
+      const total = Number(o.total || 0);
+      const shipping = Number(o.shipping_cost || 0);
+      const subtotal = Number(o.subtotal || Math.max(total - shipping, 0));
+      const paid = String(o.status || '').toLowerCase() === 'completed' ? total : 0;
+      const balance = Math.max(total - paid, 0);
+      return { ...o, total, shipping_cost: shipping, subtotal, paid, balance };
+    }
+
+    function showAlert(msg, type = 'success') {
+      ['desktopAlert', 'mobileAlert'].forEach(id => {
+        const e = document.getElementById(id);
+        if (!e) return;
+        e.textContent = msg;
+        e.className = `alert active ${type}`;
+        setTimeout(() => e.classList.remove('active'), 3500);
+      });
+    }
+
+    function paymentBadge(o) {
+      return Number(o.balance || 0) > 0
+        ? '<span class="status-badge payment"><span class="dot"></span>Payment pending</span>'
+        : '<span class="status-badge payment"><span class="dot"></span>Paid</span>';
+    }
+
+    function fulfillmentText(o) {
+      const s = String(o.status || '').toLowerCase();
+      if (s === 'processing') return 'In progress';
+      if (s === 'shipped' || s === 'completed') return 'Fulfilled';
+      if (s === 'on_hold') return 'On hold';
+      if (s === 'cancelled') return 'Cancelled';
+      return 'Unfulfilled';
+    }
+
+    function fulfillmentBadge(o) {
+      return `<span class="status-badge fulfillment"><span class="dot"></span>${fulfillmentText(o)}</span>`;
+    }
+
+    function getOrderNote(o) {
+      if (Number(o.shipping_cost || 0) === 0) return 'The order qualifies for free shipping';
+      return `Delivery fee : ${Number(o.shipping_cost || 0).toFixed(3)} KWD`;
+    }
+
+    function orderDetailsUrl(o) {
+      if (o?.id) return `/order-details.html?id=${encodeURIComponent(o.id)}`;
+      if (o?.order_number) return `/order-details.html?order=${encodeURIComponent(o.order_number)}`;
+      return '#';
+    }
+
+    function openOrderDetails(url) {
+      if (!url || url === '#') return;
+      window.location.href = url;
+    }
+
+    function isToday(o) {
+      const d = new Date(o.created_at || 0);
+      if (isNaN(d)) return false;
+      const n = new Date();
+      return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
+    }
+
+    function updateStats() {
+      const total = allOrders.length;
+      const pending = allOrders.filter(o => Number(o.balance || 0) > 0).length;
+      const open = allOrders.filter(o => ['pending', 'processing', 'shipped', 'on_hold'].includes(String(o.status || '').toLowerCase())).length;
+      const cancelled = allOrders.filter(o => String(o.status || '').toLowerCase() === 'cancelled').length;
+      const today = allOrders.filter(isToday).length;
+
+      setText('desktopOrdersCountBadge', String(total));
+      setText('desktopOrdersValue', String(total));
+      setText('desktopPendingPaymentValue', String(pending));
+      setText('desktopOpenValue', String(open));
+      setText('desktopCancelledValue', String(cancelled));
+      setText('desktopTodayValue', String(today));
+    }
+
+    function applyFilters() {
+      const ds = (document.getElementById('desktopSearchInput')?.value || '').trim().toLowerCase();
+      const ms = (document.getElementById('mobileSearchInput')?.value || '').trim().toLowerCase();
+      const gs = (document.getElementById('globalDesktopSearch')?.value || '').trim().toLowerCase();
+      const search = ds || ms || gs;
+
+      let result = [...allOrders];
+
+      if (search) {
+        result = result.filter(o =>
+          String(o.order_number || '').toLowerCase().includes(search) ||
+          String(o.customer_name || '').toLowerCase().includes(search) ||
+          String(o.customer_email || '').toLowerCase().includes(search) ||
+          String(o.customer_phone || '').toLowerCase().includes(search)
+        );
+      }
+
+      if (currentTab === 'payment_pending') {
+        result = result.filter(o => Number(o.balance || 0) > 0);
+      } else if (currentTab === 'open') {
+        result = result.filter(o => ['pending', 'processing', 'shipped', 'on_hold'].includes(String(o.status || '').toLowerCase()));
+      } else if (currentTab === 'cancelled') {
+        result = result.filter(o => String(o.status || '').toLowerCase() === 'cancelled');
+      } else if (currentTab === 'today') {
+        result = result.filter(isToday);
+      }
+
+      result.sort((a, b) => {
+        const at = new Date(a.created_at || 0).getTime();
+        const bt = new Date(b.created_at || 0).getTime();
+        return currentSortDirection === 'DESC' ? bt - at : at - bt;
+      });
+
+      filteredOrders = result;
+      renderDesktopOrders(result);
+      renderMobileOrders(result);
+      updateSelectionUI();
+    }
+
+    function renderDesktopOrders(orders) {
+      const tbody = document.getElementById('desktopOrdersTableBody');
+      if (!tbody) return;
+
+      if (!orders.length) {
+        tbody.innerHTML = '<tr><td colspan="9" style="padding:30px;text-align:center;color:#777;">No orders found</td></tr>';
+        setText('desktopPaginationText', '1-0');
+        return;
+      }
+
+      tbody.innerHTML = orders.map(o => {
+        const checked = selectedIds.has(String(o.id)) ? 'checked' : '';
+        return `<tr onclick="openOrderDetails('${orderDetailsUrl(o)}')"><td class="check-col" onclick="event.stopPropagation()"><input class="checkbox" type="checkbox" ${checked} onchange="toggleSelectOrder('${String(o.id)}', this.checked)"></td><td>#${String(o.order_number || o.id || '-')}</td><td>${formatDate(o.created_at)}</td><td>${String(o.customer_name || '-')}</td><td>${paymentBadge(o)}</td><td>${fulfillmentBadge(o)}</td><td>${formatCurrency(o.total)}</td><td class="table-note">${getOrderNote(o)}</td><td onclick="event.stopPropagation()"><div class="row-actions"><button class="row-action-btn" onclick="openOrderDetails('${orderDetailsUrl(o)}')">Open</button><button class="row-action-btn" onclick="fakeAction('Quick edit order #${String(o.order_number || o.id || '')}')">Edit</button></div></td></tr>`;
+      }).join('');
+
+      setText('desktopPaginationText', `1-${orders.length}`);
+    }
+
+    function renderMobileOrders(orders) {
+      const c = document.getElementById('mobileOrdersList');
+      if (!c) return;
+
+      if (!orders.length) {
+        c.innerHTML = '<div style="padding:20px;text-align:center;color:#777;">No orders found</div>';
+        return;
+      }
+
+      c.innerHTML = orders.map(o => {
+        const checked = selectedIds.has(String(o.id)) ? 'checked' : '';
+        const selectedClass = selectedIds.has(String(o.id)) ? 'selected' : '';
+        return `<div class="mobile-order-row ${selectedClass}" onclick="openOrderDetails('${orderDetailsUrl(o)}')"><div class="mobile-order-top"><div><div class="mobile-order-number">#${String(o.order_number || o.id || '-')}</div><div class="mobile-order-meta">${formatDate(o.created_at)} · ${String(o.customer_name || '-')}</div></div><div class="mobile-order-price">${formatCurrency(o.total)}</div></div><div class="mobile-order-badges">${paymentBadge(o)} ${fulfillmentBadge(o)}</div><div class="mobile-order-note">${getOrderNote(o)}</div><div class="mobile-row-actions" onclick="event.stopPropagation()"><label style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;"><input type="checkbox" class="checkbox" ${checked} onchange="toggleSelectOrder('${String(o.id)}', this.checked)"><span>Select</span></label><button class="row-action-btn" onclick="openOrderDetails('${orderDetailsUrl(o)}')">Open</button></div></div>`;
+      }).join('');
+    }
+
+    function updateSelectionUI() {
+      const count = selectAllStoreMode ? allOrders.length : selectedIds.size;
+      const show = count > 0;
+      const desktopPage = document.getElementById('desktopSelectPage');
+
+      if (desktopPage) {
+        const allVisibleChecked = filteredOrders.length > 0 && filteredOrders.every(o => selectedIds.has(String(o.id)));
+        desktopPage.checked = allVisibleChecked && !selectAllStoreMode;
+      }
+
+      setText('desktopSelectionText', `${count} selected`);
+      setText('mobileSelectionText', `${count} selected`);
+
+      ['desktopSelectionPill','desktopPrintWrap','desktopMarkAsWrap','desktopCaptureBtn','desktopMoreWrap','mobileSelectionPill','mobilePrintWrap','mobileMarkAsWrap','mobileCaptureBtn','mobileMoreWrap'].forEach(id => {
+        const e = document.getElementById(id);
+        if (e) e.classList.toggle('hidden', !show);
+      });
+    }
+
+    function toggleSelectOrder(id, checked) {
+      const v = String(id);
+      if (checked) selectedIds.add(v);
+      else {
+        selectedIds.delete(v);
+        selectAllStoreMode = false;
+      }
+      updateSelectionUI();
+      renderDesktopOrders(filteredOrders);
+      renderMobileOrders(filteredOrders);
+    }
+
+    function toggleSelectCurrentPage(checked) {
+      if (checked) filteredOrders.forEach(o => selectedIds.add(String(o.id)));
+      else {
+        filteredOrders.forEach(o => selectedIds.delete(String(o.id)));
+        selectAllStoreMode = false;
+      }
+      updateSelectionUI();
+      renderDesktopOrders(filteredOrders);
+      renderMobileOrders(filteredOrders);
+    }
+
+    function selectAllInStore() {
+      selectedIds = new Set(allOrders.map(o => String(o.id)));
+      selectAllStoreMode = true;
+      updateSelectionUI();
+      renderDesktopOrders(filteredOrders);
+      renderMobileOrders(filteredOrders);
+      closeAllDropdowns();
+    }
+
+    function unselectAll() {
+      selectedIds = new Set();
+      selectAllStoreMode = false;
+      updateSelectionUI();
+      renderDesktopOrders(filteredOrders);
+      renderMobileOrders(filteredOrders);
+      closeAllDropdowns();
+    }
+
+    function toggleDropdown(id) {
+      const w = document.getElementById(id);
+      if (!w) return;
+      const open = w.classList.contains('open');
+      closeAllDropdowns();
+      if (!open) w.classList.add('open');
+    }
+
+    function closeAllDropdowns() {
+      document.querySelectorAll('.dropdown-wrap.open').forEach(e => e.classList.remove('open'));
+    }
+
+    function setTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === currentTab));
+      applyFilters();
+    }
+
+    function clearFilters() {
+      currentTab = 'all';
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === currentTab));
+      ['desktopSearchInput','mobileSearchInput','globalDesktopSearch'].forEach(id => {
+        const e = document.getElementById(id);
+        if (e) e.value = '';
+      });
+      currentSortDirection = 'DESC';
+      applyFilters();
+    }
+
+    function toggleSort() {
+      currentSortDirection = currentSortDirection === 'DESC' ? 'ASC' : 'DESC';
+      applyFilters();
+    }
+
+    function noopPager() {
+      showAlert('الصفحة الحالية تعرض النتائج كلها مؤقتًا.', 'warning');
+    }
+
+    function fakeAction(name) {
+      if (!(selectAllStoreMode || selectedIds.size)) {
+        showAlert('اختر Order واحد أو أكثر أولًا', 'warning');
+        return;
+      }
+      showAlert(`${name} ready`, 'success');
+      closeAllDropdowns();
+    }
+
+    async function bulkUpdateStatus(status) {
+      const ids = Array.from(selectedIds);
+      if (!ids.length) {
+        showAlert('اختر Order واحد أو أكثر أولًا', 'warning');
+        return;
+      }
+
+      try {
+        for (const id of ids) {
+          const r = await fetch(`${API_BASE}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+          });
+          const d = await r.json();
+          if (!r.ok || !d.success) throw new Error(d.error || 'Failed to update order');
+        }
+        showAlert('تم تحديث حالة الطلبات المحددة', 'success');
+        closeAllDropdowns();
+        await refreshData(false);
+      } catch (err) {
+        console.error(err);
+        showAlert(err.message || 'Failed to update orders', 'error');
+      }
+    }
+
+    function goFirstOrder() {
+      if (!filteredOrders.length) {
+        showAlert('No orders found', 'warning');
+        return;
+      }
+      openOrderDetails(orderDetailsUrl(filteredOrders[0]));
+    }
+
+    async function fetchOrders() {
+      if (activeRefreshController) {
+        activeRefreshController.abort();
+      }
+
+      activeRefreshController = new AbortController();
+      const timeoutId = setTimeout(() => {
+        activeRefreshController.abort();
+      }, REQUEST_TIMEOUT_MS);
+
+      try {
+        const r = await fetch(`${API_BASE}?limit=${FETCH_LIMIT}&offset=0&sort=created_at&order=DESC`, {
+          signal: activeRefreshController.signal,
+          cache: 'no-store'
+        });
+
+        const d = await r.json();
+        if (!r.ok || !d.success) throw new Error(d.error || 'Failed to load orders');
+        return d;
+      } finally {
+        clearTimeout(timeoutId);
+        activeRefreshController = null;
+      }
+    }
+
+    async function refreshData(showMessage = true) {
+      try {
+        const d = await fetchOrders();
+        allOrders = (d.data || []).map(normalizeOrder);
+        updateStats();
+        applyFilters();
+        if (showMessage) showAlert('تم تحديث الطلبات', 'success');
+      } catch (err) {
+        console.error(err);
+        if (err.name === 'AbortError') {
+          showAlert('تحميل الطلبات استغرق وقتًا طويلًا. جرّب Refresh مرة أخرى.', 'warning');
+          return;
+        }
+        showAlert(err.message || 'Failed to load orders', 'error');
+      }
+    }
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.dropdown-wrap')) closeAllDropdowns();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => setTab(btn.dataset.tab || 'all')));
+      document.getElementById('desktopSelectPage')?.addEventListener('change', function () {
+        toggleSelectCurrentPage(this.checked);
+      });
+
+      ['desktopSearchInput','mobileSearchInput','globalDesktopSearch'].forEach(id => {
+        const e = document.getElementById(id);
+        if (e) e.addEventListener('input', applyFilters);
+      });
+
+      refreshData(false);
+    });
   </script>
 </body>
 </html>

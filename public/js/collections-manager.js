@@ -291,6 +291,8 @@ class CollectionsManager {
 
   async loadProducts() {
     const urls = [
+      '/api/products?limit=1000&offset=0&sort=created_at&order=DESC',
+      '/api/products',
       '/products.json',
       './products.json',
       '/data/products.json',
@@ -303,13 +305,77 @@ class CollectionsManager {
 
     let data = null;
 
+    function normalizeApiRows(rows) {
+      if (!Array.isArray(rows)) return [];
+
+      return rows
+        .filter(item => item && typeof item === 'object')
+        .map(item => {
+          const rawImages = Array.isArray(item.images) ? item.images : [];
+          const firstImage =
+            item.image_url ||
+            item.imageUrl ||
+            item.image ||
+            item.thumbnail ||
+            (rawImages[0] && (rawImages[0].image_url || rawImages[0].src)) ||
+            '';
+
+          const tagsArray = Array.isArray(item.tags)
+            ? item.tags
+            : String(item.tags || '')
+                .split(',')
+                .map(v => v.trim())
+                .filter(Boolean);
+
+          return {
+            ...item,
+            handle: item.handle || item.slug || String(item.id || ''),
+            slug: item.slug || item.handle || String(item.id || ''),
+            title: item.title || item.productName || item.product_name || item.name || 'منتج بدون اسم',
+            name: item.name || item.productName || item.product_name || item.title || 'منتج بدون اسم',
+            body_html: item.body_html || item.description || '',
+            description: item.description || item.body_html || '',
+            type: item.type || item.productType || item.product_type || item.category || '',
+            vendor: item.vendor || '',
+            tags: Array.isArray(item.tags) ? item.tags : tagsArray,
+            images: rawImages.length
+              ? rawImages.map((img, index) => ({
+                  ...img,
+                  src: img.src || img.image_url || '',
+                  image_url: img.image_url || img.src || '',
+                  position: img.position || index + 1
+                }))
+              : (firstImage ? [{ src: firstImage, image_url: firstImage, position: 1 }] : []),
+            variants: Array.isArray(item.variants) && item.variants.length
+              ? item.variants
+              : [{
+                  id: item.id,
+                  price: Number(item.price || item.regular_price || 0) || 0,
+                  compare_at_price: Number(item.salePrice || item.sale_price || 0) || null
+                }]
+          };
+        });
+    }
+
     for (const url of urls) {
       try {
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) continue;
+
         const json = await res.json();
+
         if (Array.isArray(json)) {
-          data = json;
+          data = url.indexOf('/api/products') === 0 ? normalizeApiRows(json) : json;
+          break;
+        }
+
+        if (json && Array.isArray(json.data)) {
+          data = url.indexOf('/api/products') === 0 ? normalizeApiRows(json.data) : json.data;
+          break;
+        }
+
+        if (json && Array.isArray(json.products)) {
+          data = url.indexOf('/api/products') === 0 ? normalizeApiRows(json.products) : json.products;
           break;
         }
       } catch (e) {}
