@@ -189,16 +189,16 @@ function getCollectionKeyForProduct(product) {
   ) return 'audio-stories';
 
   if (
-    hay.includes('اسلام') ||
-    hay.includes('إسلام') ||
     hay.includes('اسلامية') ||
     hay.includes('إسلامية') ||
-    hay.includes('عروض كتب إسلامية') ||
+    hay.includes('تربوية') ||
+    hay.includes('تربوي') ||
+    hay.includes('عروض الكتب الإسلامية') ||
     hay.includes('قصص أطفال اسلامية') ||
     hay.includes('قصص الأنبياء') ||
     hay.includes('الله وربي') ||
-    hay.includes('نتعلم من آية') ||
-    hay.includes('الصحبة الصالحة')
+    hay.includes('يوميات طفل مسلم') ||
+    hay.includes('الحمدلله على نعمه ')
   ) return 'islamic-library';
 
   if (
@@ -210,7 +210,7 @@ function getCollectionKeyForProduct(product) {
   if (
     hay.includes('القراءة المتدرجة') ||
     hay.includes('أنا أقرأ بنفسي') ||
-    hay.includes('قراءة مستقلة')
+    hay.includes('حقيبة ناطقة')
   ) return 'self-reading';
 
   if (
@@ -242,16 +242,16 @@ function getCollectionKeyForProduct(product) {
   ) return 'interactive-offers';
 
   if (
-    hay.includes('موسوعات التاريخ') ||
+    hay.includes('موسوعات التاريخ المصور') ||
     hay.includes('تاريخ مصور') ||
     hay.includes('موسوعات')
   ) return 'history-encyclopedia';
 
   if (
-    hay.includes('مكتبتي عربي') ||
-    hay.includes('كتب تعليمية') ||
-    hay.includes('محببة') ||
-    hay.includes('المفضلة')
+    hay.includes('مكتبتي الأولى الصوتية عربي') ||
+    hay.includes('الكتب المحببة') ||
+    hay.includes('للأطفال') ||
+    hay.includes('تعليمي صوتي')
   ) return 'favorite-books';
 
   for (const key of COLLECTION_PRIORITY) {
@@ -430,20 +430,20 @@ class CollectionsManager {
       {
         id: 'default-1',
         handle: 'default-1',
-        title: 'ألعاب الألغاز الذكية',
-        body_html: '<p>مجموعة ألغاز تطور التفكير النقدي والإبداع</p>',
-        type: 'ألعاب تعليمية',
-        tags: ['تعليمي', 'ذكاء'],
+        title: 'الكتب التفاعلية',
+        body_html: '<p>قصص تفاعلية حركية </p>',
+        type: 'قصص خيالية تعليمية',
+        tags: ['تعليمي', 'خيالي تربوي'],
         images: [],
         variants: [{ price: 18.0 }]
       },
       {
         id: 'default-2',
         handle: 'default-2',
-        title: 'روبوت تعليمي',
-        body_html: '<p>روبوت ذكي لتعلم البرمجة والتحكم</p>',
-        type: 'تكنولوجيا',
-        tags: ['روبوت', 'برمجة'],
+        title: 'مستويات تدريجية تعليمية',
+        body_html: '<p>قلم ذكي يقرأ المجموعة كاملة لتعلم القراءة بإسلوب ممتع</p>',
+        type: 'القلم الذكي الناطق',
+        tags: ['كتب ناطقة', 'بالقلم'],
         images: [],
         variants: [{ price: 45.0 }]
       }
