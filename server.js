@@ -10,6 +10,7 @@ const bodyParser = require('body-parser');
 const db = require('./db/turso-manager');
 const ordersRoutes = require('./routes/orders');
 const productsRoutes = require('./routes/products');
+const collectionsRoutes = require('./routes/collections');
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
@@ -265,7 +266,10 @@ app.use(
     '/products-admin',
     '/products-admin.html',
     '/product-edit.html',
-    '/order-details.html'
+    '/order-details.html',
+    '/collections-admin',
+    '/collections-admin.html',
+    '/collection-edit.html'
   ],
   requireAdminAuth
 );
@@ -289,6 +293,7 @@ app.use('/api', async (req, res, next) => {
 
 app.use('/api/orders', ordersRoutes);
 app.use('/api/products', productsRoutes);
+app.use('/api/collections', collectionsRoutes);
 
 // Route للـ Health Check
 app.get('/api/health', async (req, res, next) => {
@@ -316,7 +321,6 @@ app.get('/admin', (req, res) => {
   const nextUrl = sanitizeNextUrl(req.query.next || '/admin-enhanced');
   const error = String(req.query.error || '').trim();
 
-  // لو الأدمن مسجل بالفعل وفتح /admin، حوله مباشرة
   if (isAdminAuthenticated(req)) {
     return res.redirect(nextUrl);
   }
@@ -362,6 +366,18 @@ app.get('/products-admin', (req, res) => {
 
 app.get('/products-admin.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'products-admin.html'));
+});
+
+app.get('/collections-admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'collections-admin.html'));
+});
+
+app.get('/collections-admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'collections-admin.html'));
+});
+
+app.get('/collection-edit.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'collection-edit.html'));
 });
 
 app.get('/product-edit.html', (req, res) => {
@@ -428,7 +444,9 @@ async function startServer() {
       console.log(`║ 📊 دخول الإدارة: http://${HOST}:${PORT}/admin`);
       console.log(`║ 📈 لوحة متقدمة: http://${HOST}:${PORT}/admin-enhanced`);
       console.log(`║ 🏷️ إدارة المنتجات: http://${HOST}:${PORT}/products-admin`);
+      console.log(`║ 🗂️ إدارة المجموعات: http://${HOST}:${PORT}/collections-admin`);
       console.log(`║ ✏️ تعديل/إضافة منتج: http://${HOST}:${PORT}/product-edit.html`);
+      console.log(`║ 🧩 تعديل/إضافة مجموعة: http://${HOST}:${PORT}/collection-edit.html`);
       console.log('║');
       console.log('║ API Endpoints:');
       console.log(`║ GET    http://${HOST}:${PORT}/api/orders`);
@@ -445,6 +463,20 @@ async function startServer() {
       console.log(`║ POST   http://${HOST}:${PORT}/api/products`);
       console.log(`║ PUT    http://${HOST}:${PORT}/api/products/:id`);
       console.log(`║ DELETE http://${HOST}:${PORT}/api/products/:id`);
+      console.log('║');
+      console.log(`║ GET    http://${HOST}:${PORT}/api/collections`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/collections/:id`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/collections/slug/:slug`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/collections/stats/summary`);
+      console.log(`║ POST   http://${HOST}:${PORT}/api/collections`);
+      console.log(`║ PUT    http://${HOST}:${PORT}/api/collections/:id`);
+      console.log(`║ DELETE http://${HOST}:${PORT}/api/collections/:id`);
+      console.log(`║ POST   http://${HOST}:${PORT}/api/collections/:id/duplicate`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/collections/:id/products`);
+      console.log(`║ POST   http://${HOST}:${PORT}/api/collections/:id/products/add`);
+      console.log(`║ POST   http://${HOST}:${PORT}/api/collections/:id/products/remove`);
+      console.log(`║ POST   http://${HOST}:${PORT}/api/collections/:id/products/reorder`);
+      console.log(`║ POST   http://${HOST}:${PORT}/api/collections/:id/products/move`);
       console.log('╚════════════════════════════════════════════════════════╝\n');
     });
 

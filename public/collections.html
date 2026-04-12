@@ -481,21 +481,23 @@
 
   <div class="container">
     <div class="page-title">
-      <h1>جميع المجموعات</h1>
-      <p>اختر المجموعة المناسبة لطفلك</p>
+      <h1>🏷️ جميع المجموعات</h1>
+      <p>تصفح المجموعات الحقيقية القادمة من نظام الـ Collections في الموقع</p>
     </div>
 
     <div class="collections-grid" id="collectionsGrid">
       <div class="loading">
         <h3>📦 جاري تحميل المجموعات...</h3>
-        <p>يرجى الانتظار</p>
+        <p>يرجى الانتظار قليلاً</p>
       </div>
     </div>
   </div>
 
   <script>
+    const COLLECTIONS_API = '/api/collections';
+
     function escapeHtml(str) {
-      return String(str ?? '')
+      return String(str || '')
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
@@ -503,12 +505,13 @@
         .replaceAll("'", '&#039;');
     }
 
-    function normalizeCategory(value) {
-      return String(value || 'عام').trim() || 'عام';
+    function safeText(value, fallback = '') {
+      const text = String(value ?? '').trim();
+      return text || fallback;
     }
 
-    function getCategoryMeta(category) {
-      const value = normalizeCategory(category).toLowerCase();
+    function getCollectionMeta(title) {
+      const value = safeText(title).toLowerCase();
 
       if (value.includes('islam') || value.includes('إسلام') || value.includes('اسلام')) {
         return {
@@ -558,8 +561,19 @@
       };
     }
 
+    function getCollectionUrl(collection) {
+      const slug = safeText(collection.slug);
+      const id = safeText(collection.id);
+
+      if (slug) {
+        return `./collection.html?slug=${encodeURIComponent(slug)}`;
+      }
+
+      return `./collection.html?id=${encodeURIComponent(id)}`;
+    }
+
     async function fetchCollectionsFromApi() {
-      const response = await fetch('/api/products?status=active&limit=1000', {
+      const response = await fetch(`${COLLECTIONS_API}?limit=1000&offset=0&sort=created_at&order=DESC`, {
         cache: 'no-store',
         headers: { Accept: 'application/json' }
       });
@@ -570,32 +584,17 @@
         throw new Error(result?.error || `HTTP ${response.status}`);
       }
 
-      const products = Array.isArray(result.data) ? result.data : [];
-      const map = new Map();
+      const collections = Array.isArray(result.data) ? result.data : [];
 
-      for (const product of products) {
-        const category = normalizeCategory(
-          product.category ?? product.category_name ?? product.product_type
-        );
-
-        const item = map.get(category) || {
-          key: category,
-          name: category,
-          productCount: 0
-        };
-
-        item.productCount += 1;
-        map.set(category, item);
-      }
-
-      return Array.from(map.values())
-        .sort((a, b) => b.productCount - a.productCount)
+      return collections
+        .filter(item => String(item.status || 'active').toLowerCase() !== 'archived')
         .map((item) => {
-          const meta = getCategoryMeta(item.name);
+          const meta = getCollectionMeta(item.title);
           return {
             ...item,
             icon: meta.icon,
-            description: meta.description
+            description: safeText(item.description, meta.description),
+            product_count: Number(item.product_count || 0)
           };
         });
     }
@@ -622,19 +621,27 @@
         return;
       }
 
-      grid.innerHTML = collections.map(collection => `
-        <div class="collection-card" onclick="openCollection(${JSON.stringify(collection.name)})">
-          <span class="collection-icon">${collection.icon}</span>
-          <h3 class="collection-title">${escapeHtml(collection.name)}</h3>
-          <p class="collection-description">${escapeHtml(collection.description)}</p>
-          <div class="collection-count">${collection.productCount || 0} منتج</div>
-          <a href="./collection.html?category=${encodeURIComponent(collection.name)}" class="browse-btn" onclick="event.stopPropagation()">تصفح المجموعة</a>
-        </div>
-      `).join('');
+      grid.innerHTML = collections.map(collection => {
+        const url = getCollectionUrl(collection);
+        return `
+          <div class="collection-card" onclick="openCollection(${JSON.stringify(collection.slug || '')}, ${JSON.stringify(String(collection.id || ''))})">
+            <span class="collection-icon">${collection.icon}</span>
+            <h3 class="collection-title">${escapeHtml(collection.title)}</h3>
+            <p class="collection-description">${escapeHtml(collection.description)}</p>
+            <div class="collection-count">${collection.product_count || 0} منتج</div>
+            <a href="${url}" class="browse-btn" onclick="event.stopPropagation()">تصفح المجموعة</a>
+          </div>
+        `;
+      }).join('');
     }
 
-    function openCollection(categoryName) {
-      window.location.href = `./collection.html?category=${encodeURIComponent(categoryName)}`;
+    function openCollection(slug, id) {
+      if (slug) {
+        window.location.href = `./collection.html?slug=${encodeURIComponent(slug)}`;
+        return;
+      }
+
+      window.location.href = `./collection.html?id=${encodeURIComponent(id)}`;
     }
 
     function showError(message = '') {
@@ -642,7 +649,7 @@
       grid.innerHTML = `
         <div style="text-align:center; grid-column:1 / -1; padding:3rem; color:#fff;">
           <h3>⚠️ خطأ في تحميل المجموعات</h3>
-          <p style="margin-top:.5rem;">تأكد أن API المنتجات تعمل بشكل صحيح</p>
+          <p style="margin-top:.5rem;">تأكد أن API المجموعات تعمل بشكل صحيح</p>
           ${message ? `<p style="margin-top:.5rem; opacity:.9;">${escapeHtml(message)}</p>` : ''}
         </div>
       `;

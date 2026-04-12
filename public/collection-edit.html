@@ -1,0 +1,2241 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collection editor - Smart Kids Kuwait</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f3f3f3;
+      --card:#ffffff;
+      --line:#e5e7eb;
+      --text:#202223;
+      --muted:#6d7175;
+      --top:#111213;
+      --side:#f6f6f7;
+      --green:#16a34a;
+      --green-bg:#dcfce7;
+      --yellow:#f59e0b;
+      --yellow-bg:#fef3c7;
+      --red:#b91c1c;
+      --red-bg:#fee2e2;
+      --blue:#2563eb;
+      --blue-bg:#dbeafe;
+      --shadow:0 1px 2px rgba(0,0,0,.08);
+      --radius:14px;
+    }
+
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      direction:ltr;
+    }
+
+    a{text-decoration:none;color:inherit}
+    button,input,select,textarea{font-family:inherit}
+
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:290px 1fr;
+      grid-template-rows:72px 1fr;
+      grid-template-areas:
+        "top top"
+        "side main";
+    }
+
+    .topbar{
+      grid-area:top;
+      background:var(--top);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:0 18px;
+      position:sticky;
+      top:0;
+      z-index:80;
+    }
+
+    .top-left{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .brand{
+      font-size:20px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .search-wrap{
+      flex:1;
+      max-width:720px;
+      margin:0 auto;
+      width:100%;
+    }
+
+    .top-search{
+      width:100%;
+      height:42px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:#2a2b2d;
+      color:#fff;
+      padding:0 16px;
+      outline:none;
+      font-size:15px;
+    }
+
+    .top-right{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      white-space:nowrap;
+    }
+
+    .avatar{
+      width:34px;
+      height:34px;
+      border-radius:999px;
+      background:#2a2b2d;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+    }
+
+    .sidebar{
+      grid-area:side;
+      background:var(--side);
+      border-right:1px solid #ddd;
+      padding:14px 14px 20px;
+      overflow:auto;
+    }
+
+    .side-group{margin-bottom:18px}
+    .side-title{
+      font-size:13px;
+      color:var(--muted);
+      margin:10px 10px 8px;
+      font-weight:700;
+      direction:ltr;
+      text-align:left;
+    }
+
+    .nav-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:11px 12px;
+      border-radius:12px;
+      color:#111;
+      font-weight:600;
+      margin-bottom:4px;
+      direction:ltr;
+      text-align:left;
+    }
+
+    .nav-item.active{
+      background:#e9eaeb;
+    }
+
+    .nav-sub{
+      padding-left:42px;
+      color:#444;
+      font-weight:500;
+    }
+
+    .main{
+      grid-area:main;
+      padding:20px;
+      overflow:auto;
+    }
+
+    .page{
+      max-width:1460px;
+      margin:0 auto;
+    }
+
+    .alert{
+      display:none;
+      margin-bottom:14px;
+      padding:14px 16px;
+      border-radius:14px;
+      font-weight:700;
+      border:1px solid transparent;
+      background:#fff;
+      direction:rtl;
+      text-align:right;
+      white-space:pre-line;
+    }
+
+    .alert.active{display:block}
+    .alert.success{background:#dcfce7;border-color:#86efac;color:#166534}
+    .alert.error{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+    .alert.warning{background:#fef3c7;border-color:#fcd34d;color:#92400e}
+    .alert.info{background:#dbeafe;border-color:#93c5fd;color:#1d4ed8}
+
+    .page-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    }
+
+    .page-head-left{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      color:#4b5563;
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .page-title{
+      font-size:24px;
+      font-weight:900;
+      line-height:1.2;
+    }
+
+    .page-sub{
+      font-size:13px;
+      color:#6b7280;
+      font-weight:600;
+    }
+
+    .page-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .btn{
+      height:38px;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      color:#111;
+      padding:0 14px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+    }
+
+    .btn.primary{
+      background:#111;
+      color:#fff;
+      border-color:#111;
+    }
+
+    .btn.blue{
+      background:#2563eb;
+      color:#fff;
+      border-color:#2563eb;
+    }
+
+    .btn.danger{
+      color:#b91c1c;
+      border-color:#fca5a5;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 360px;
+      gap:18px;
+      align-items:start;
+    }
+
+    .stack{
+      display:grid;
+      gap:18px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .card-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:16px 18px;
+      border-bottom:1px solid var(--line);
+      flex-wrap:wrap;
+    }
+
+    .card-title{
+      font-size:16px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .card-body{
+      padding:18px;
+    }
+
+    .field{
+      margin-bottom:16px;
+    }
+
+    .field:last-child{
+      margin-bottom:0;
+    }
+
+    .field label{
+      display:block;
+      margin-bottom:8px;
+      font-size:13px;
+      font-weight:800;
+      color:#374151;
+      direction:ltr;
+      text-align:left;
+    }
+
+    .field input,
+    .field select,
+    .field textarea{
+      width:100%;
+      border:1px solid #d1d5db;
+      border-radius:12px;
+      background:#fff;
+      padding:12px 14px;
+      font-size:14px;
+      outline:none;
+      color:#111827;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus{
+      border-color:#9ca3af;
+      box-shadow:0 0 0 4px rgba(156,163,175,.12);
+    }
+
+    .field textarea{
+      min-height:120px;
+      resize:vertical;
+      line-height:1.6;
+    }
+
+    .field-help{
+      margin-top:8px;
+      font-size:12px;
+      color:#6b7280;
+      line-height:1.6;
+    }
+
+    .inline-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .image-preview{
+      width:100%;
+      aspect-ratio:16/9;
+      border:1px dashed #d1d5db;
+      border-radius:16px;
+      background:#f9fafb;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      margin-bottom:14px;
+    }
+
+    .image-preview img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .image-preview.empty{
+      color:#9ca3af;
+      font-size:15px;
+      font-weight:700;
+    }
+
+    .status-row{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:30px;
+      padding:0 12px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .chip.active{
+      color:#166534;
+      background:var(--green-bg);
+    }
+
+    .chip.draft{
+      color:#92400e;
+      background:var(--yellow-bg);
+    }
+
+    .chip.archived{
+      color:#374151;
+      background:#e5e7eb;
+    }
+
+    .tools{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      position:relative;
+    }
+
+    .dropdown{
+      position:absolute;
+      top:44px;
+      right:0;
+      min-width:220px;
+      background:#fff;
+      border:1px solid #d1d5db;
+      border-radius:14px;
+      box-shadow:0 12px 30px rgba(0,0,0,.12);
+      display:none;
+      z-index:60;
+      overflow:hidden;
+    }
+
+    .dropdown.active{
+      display:block;
+    }
+
+    .dropdown button{
+      width:100%;
+      text-align:left;
+      padding:12px 14px;
+      border:none;
+      background:#fff;
+      cursor:pointer;
+      font-weight:700;
+      border-bottom:1px solid #f1f5f9;
+    }
+
+    .dropdown button:last-child{
+      border-bottom:none;
+    }
+
+    .dropdown button:hover{
+      background:#f8fafc;
+    }
+
+    .dropdown .danger{
+      color:#b91c1c;
+    }
+
+    .products-toolbar{
+      display:grid;
+      grid-template-columns:1fr auto auto auto;
+      gap:10px;
+      align-items:center;
+      margin-bottom:14px;
+    }
+
+    .products-toolbar input,
+    .products-toolbar select{
+      height:40px;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      padding:0 14px;
+      font-size:14px;
+      outline:none;
+    }
+
+    .products-toolbar input:focus,
+    .products-toolbar select:focus{
+      border-color:#9ca3af;
+    }
+
+    .selection-bar{
+      display:none;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 14px;
+      border:1px solid #d1d5db;
+      border-radius:14px;
+      margin-bottom:12px;
+      background:#f9fafb;
+      flex-wrap:wrap;
+    }
+
+    .selection-bar.active{
+      display:flex;
+    }
+
+    .selection-left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      font-weight:800;
+    }
+
+    .selection-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:16px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:1100px;
+      direction:ltr;
+    }
+
+    th,td{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      vertical-align:middle;
+      background:#fff;
+    }
+
+    th{
+      font-size:13px;
+      color:#4b5563;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    tr:hover td{
+      background:#fafafa;
+    }
+
+    tr.dragging td{
+      background:#eef2ff !important;
+    }
+
+    .check{
+      width:20px;
+      height:20px;
+    }
+
+    .drag-handle{
+      width:32px;
+      height:32px;
+      border:none;
+      background:#f3f4f6;
+      border-radius:10px;
+      cursor:grab;
+      font-size:15px;
+    }
+
+    .product-cell{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:320px;
+      direction:rtl;
+      text-align:right;
+    }
+
+    .thumb{
+      width:56px;
+      height:56px;
+      border-radius:12px;
+      object-fit:cover;
+      background:#eee;
+      border:1px solid #e5e7eb;
+      flex-shrink:0;
+    }
+
+    .thumb-placeholder{
+      width:56px;
+      height:56px;
+      border-radius:12px;
+      background:#f3f4f6;
+      border:1px solid #e5e7eb;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#9ca3af;
+      font-size:20px;
+      flex-shrink:0;
+    }
+
+    .product-name{
+      font-weight:800;
+      line-height:1.45;
+      margin-bottom:4px;
+    }
+
+    .product-sub{
+      font-size:13px;
+      color:var(--muted);
+      direction:rtl;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:28px;
+      padding:0 12px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      background:#eef2ff;
+      color:#3730a3;
+    }
+
+    .mini-btn{
+      border:none;
+      background:#f3f4f6;
+      color:#111;
+      border-radius:10px;
+      height:34px;
+      padding:0 12px;
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .mini-btn.danger{
+      color:#b91c1c;
+      background:#fef2f2;
+    }
+
+    .empty{
+      padding:38px 20px;
+      text-align:center;
+      color:#6b7280;
+      font-weight:700;
+      line-height:1.7;
+    }
+
+    .seo-preview{
+      border:1px solid #e5e7eb;
+      background:#f9fafb;
+      border-radius:14px;
+      padding:14px;
+      margin-bottom:14px;
+    }
+
+    .seo-preview-title{
+      color:#1a0dab;
+      font-size:18px;
+      line-height:1.3;
+      margin-bottom:4px;
+      font-weight:500;
+    }
+
+    .seo-preview-url{
+      color:#006621;
+      font-size:14px;
+      margin-bottom:6px;
+      word-break:break-all;
+    }
+
+    .seo-preview-desc{
+      color:#4d5156;
+      font-size:14px;
+      line-height:1.5;
+    }
+
+    .sidebar-card + .sidebar-card{
+      margin-top:18px;
+    }
+
+    .sidebar-actions{
+      display:grid;
+      gap:10px;
+    }
+
+    .meta-list{
+      display:grid;
+      gap:10px;
+      font-size:14px;
+      color:#4b5563;
+    }
+
+    .meta-list strong{
+      color:#111827;
+    }
+
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.42);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:120;
+      padding:18px;
+    }
+
+    .modal-backdrop.active{
+      display:flex;
+    }
+
+    .modal{
+      width:min(1180px,100%);
+      max-height:90vh;
+      overflow:hidden;
+      background:#fff;
+      border-radius:20px;
+      box-shadow:0 30px 70px rgba(0,0,0,.22);
+      display:grid;
+      grid-template-rows:auto auto 1fr auto;
+    }
+
+    .modal-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:18px 20px;
+      border-bottom:1px solid #e5e7eb;
+    }
+
+    .modal-title{
+      font-size:18px;
+      font-weight:900;
+    }
+
+    .modal-close{
+      width:38px;
+      height:38px;
+      border:none;
+      background:#f3f4f6;
+      border-radius:12px;
+      cursor:pointer;
+      font-size:20px;
+    }
+
+    .modal-toolbar{
+      padding:14px 20px;
+      border-bottom:1px solid #e5e7eb;
+      display:grid;
+      grid-template-columns:1fr 170px 170px auto auto;
+      gap:10px;
+      align-items:center;
+    }
+
+    .modal-toolbar input,
+    .modal-toolbar select{
+      height:40px;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      padding:0 14px;
+      font-size:14px;
+      outline:none;
+    }
+
+    .modal-body{
+      overflow:auto;
+      padding:0;
+    }
+
+    .modal-table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:980px;
+    }
+
+    .modal-table th,
+    .modal-table td{
+      padding:14px 16px;
+      border-bottom:1px solid #e5e7eb;
+      text-align:left;
+      background:#fff;
+    }
+
+    .modal-table th{
+      font-size:13px;
+      color:#4b5563;
+      font-weight:800;
+      white-space:nowrap;
+      position:sticky;
+      top:0;
+      z-index:2;
+    }
+
+    .modal-foot{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:16px 20px;
+      border-top:1px solid #e5e7eb;
+      flex-wrap:wrap;
+    }
+
+    .browse-count{
+      font-weight:800;
+      color:#374151;
+    }
+
+    .mobile-top{
+      display:none;
+      background:#111;
+      color:#fff;
+      padding:14px 14px 12px;
+      position:sticky;
+      top:0;
+      z-index:90;
+    }
+
+    .mobile-top-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .mobile-title{
+      font-size:22px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    @media (max-width: 1180px){
+      .layout{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 1100px){
+      .app{
+        grid-template-columns:1fr;
+        grid-template-rows:auto 1fr;
+        grid-template-areas:"main";
+      }
+      .topbar,.sidebar{display:none}
+      .mobile-top{display:block}
+      .main{padding:14px}
+      .page{max-width:100%}
+    }
+
+    @media (max-width: 900px){
+      .products-toolbar{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .modal-toolbar{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    @media (max-width: 700px){
+      .inline-grid{
+        grid-template-columns:1fr;
+      }
+
+      .page-actions{
+        width:100%;
+      }
+
+      .page-actions .btn{
+        flex:1;
+      }
+
+      .products-toolbar{
+        grid-template-columns:1fr;
+      }
+
+      .selection-bar{
+        align-items:flex-start;
+      }
+
+      table,
+      .modal-table{
+        min-width:900px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-top">
+    <div class="mobile-top-row">
+      <div class="mobile-title" id="mobileTopTitle">Collection</div>
+      <button class="btn primary" onclick="saveCollection()">Save</button>
+    </div>
+  </div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="top-left">
+        <div class="brand">Smartkidsfy</div>
+      </div>
+
+      <div class="search-wrap">
+        <input class="top-search" type="text" placeholder="Search">
+      </div>
+
+      <div class="top-right">
+        <div class="avatar">🛍️</div>
+        <div class="avatar">🔔</div>
+        <div style="font-weight:800">الأطفال المبتكرون الكويت</div>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <div class="side-group">
+        <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
+        <a class="nav-item" href="/admin-enhanced.html"><span>📦 Orders</span></a>
+        <a class="nav-item" href="/products-admin"><span>🏷️ Products</span></a>
+        <a class="nav-item active" href="/collections-admin"><span>🗂️ Collections</span></a>
+        <div class="nav-item nav-sub"><span>Inventory</span></div>
+        <div class="nav-item nav-sub"><span>Purchase orders</span></div>
+        <div class="nav-item nav-sub"><span>Transfers</span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page">
+        <div id="alertBox" class="alert"></div>
+
+        <div class="page-head">
+          <div class="page-head-left">
+            <a href="/collections-admin" class="back-link">← Back to collections</a>
+            <div class="page-title" id="pageTitle">Create collection</div>
+            <div class="page-sub" id="pageSub">Manual collection editor</div>
+          </div>
+
+          <div class="page-actions">
+            <button class="btn" type="button" id="duplicateBtn" onclick="duplicateCurrentCollection()" disabled>Duplicate</button>
+            <button class="btn" type="button" id="viewBtn" onclick="viewCurrentCollection()" disabled>View</button>
+
+            <div class="tools">
+              <button class="btn" type="button" onclick="toggleMoreMenu()">More actions</button>
+              <div id="moreMenu" class="dropdown">
+                <button type="button" onclick="duplicateCurrentCollection()">Duplicate collection</button>
+                <button type="button" onclick="viewCurrentCollection()">View collection</button>
+                <button class="danger" type="button" onclick="deleteCurrentCollection()">Delete collection</button>
+              </div>
+            </div>
+
+            <button class="btn primary" type="button" onclick="saveCollection()">Save</button>
+          </div>
+        </div>
+
+        <div class="layout">
+          <div class="stack">
+            <section class="card">
+              <div class="card-head">
+                <div class="card-title">📝 Basic information</div>
+              </div>
+              <div class="card-body">
+                <div class="field">
+                  <label for="titleInput">Title</label>
+                  <input id="titleInput" type="text" placeholder="e.g. Summer stories collection" oninput="syncTitleState()">
+                </div>
+
+                <div class="field">
+                  <label for="descriptionInput">Description</label>
+                  <textarea id="descriptionInput" placeholder="Write a short description for this collection"></textarea>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <div class="card-title">🖼️ Collection image</div>
+              </div>
+              <div class="card-body">
+                <div id="imagePreview" class="image-preview empty">No collection image</div>
+
+                <div class="field">
+                  <label for="imageUrlInput">Image URL</label>
+                  <input id="imageUrlInput" type="text" placeholder="https://..." oninput="updateImagePreview()">
+                  <div class="field-help">You can paste a direct image URL. The image is saved with the collection.</div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <div class="card-title">📦 Products</div>
+              </div>
+              <div class="card-body">
+                <div class="products-toolbar">
+                  <input id="productSearchInput" type="text" placeholder="Search inside collection..." oninput="filterCollectionProducts()">
+
+                  <select id="sortModeSelect" onchange="handleSortModeChange()">
+                    <option value="manual">Manually</option>
+                    <option value="best_selling">Best selling</option>
+                    <option value="title_asc">Product title A-Z</option>
+                    <option value="title_desc">Product title Z-A</option>
+                    <option value="price_desc">Highest price</option>
+                    <option value="price_asc">Lowest price</option>
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                  </select>
+
+                  <button class="btn blue" type="button" onclick="openBrowseModal()">Browse</button>
+                  <button class="btn" type="button" onclick="refreshCollectionProducts()">Refresh</button>
+                </div>
+
+                <div id="selectionBar" class="selection-bar">
+                  <div class="selection-left">
+                    <span id="selectionCountText">0 selected</span>
+                    <button class="mini-btn" type="button" onclick="clearProductSelection()">Deselect all</button>
+                  </div>
+
+                  <div class="selection-actions">
+                    <button class="mini-btn" type="button" onclick="moveSelectedProducts('top')">Move to top</button>
+                    <button class="mini-btn" type="button" onclick="moveSelectedProducts('bottom')">Move to bottom</button>
+                    <button class="mini-btn" type="button" onclick="moveSelectedProducts('position')">Move to position</button>
+                    <button class="mini-btn danger" type="button" onclick="removeSelectedProducts()">Remove selected</button>
+                  </div>
+                </div>
+
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th><input id="selectAllProductsCheckbox" class="check" type="checkbox" onchange="toggleSelectAllProducts(this.checked)"></th>
+                        <th>Move</th>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Inventory</th>
+                        <th>Status</th>
+                        <th>Position</th>
+                        <th>Remove</th>
+                      </tr>
+                    </thead>
+                    <tbody id="collectionProductsBody">
+                      <tr>
+                        <td colspan="8" class="empty">Save the collection first or add products using Browse</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <div class="card-title">🔎 Search engine listing</div>
+              </div>
+              <div class="card-body">
+                <div class="seo-preview">
+                  <div class="seo-preview-title" id="seoPreviewTitle">Collection title</div>
+                  <div class="seo-preview-url" id="seoPreviewUrl">https://smartkidskw.com/collections/collection-handle</div>
+                  <div class="seo-preview-desc" id="seoPreviewDesc">Add a description to see how it could appear in search results.</div>
+                </div>
+
+                <div class="field">
+                  <label for="seoTitleInput">Page title</label>
+                  <input id="seoTitleInput" type="text" maxlength="70" oninput="updateSeoPreview()">
+                </div>
+
+                <div class="field">
+                  <label for="seoDescriptionInput">Meta description</label>
+                  <textarea id="seoDescriptionInput" maxlength="320" oninput="updateSeoPreview()"></textarea>
+                </div>
+
+                <div class="field">
+                  <label for="slugInput">URL handle</label>
+                  <input id="slugInput" type="text" placeholder="collection-handle" oninput="updateSeoPreview()">
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <aside class="stack">
+            <section class="card sidebar-card">
+              <div class="card-head">
+                <div class="card-title">📤 Publishing</div>
+              </div>
+              <div class="card-body">
+                <div class="field">
+                  <label for="statusSelect">Status</label>
+                  <select id="statusSelect" onchange="updateStatusChip()">
+                    <option value="active">Active</option>
+                    <option value="draft">Draft</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+
+                <div class="status-row">
+                  <span id="statusChip" class="chip active">Active</span>
+                </div>
+
+                <div class="field" style="margin-top:16px;">
+                  <label for="themeTemplateInput">Theme template</label>
+                  <input id="themeTemplateInput" type="text" value="default-collection">
+                </div>
+
+                <div class="inline-grid" style="margin-top:16px;">
+                  <div class="field">
+                    <label for="onlineStoreSelect">Online store</label>
+                    <select id="onlineStoreSelect">
+                      <option value="1">Visible</option>
+                      <option value="0">Hidden</option>
+                    </select>
+                  </div>
+
+                  <div class="field">
+                    <label for="posExcludedSelect">POS excluded</label>
+                    <select id="posExcludedSelect">
+                      <option value="1">Excluded</option>
+                      <option value="0">Included</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card sidebar-card">
+              <div class="card-head">
+                <div class="card-title">ℹ️ Collection info</div>
+              </div>
+              <div class="card-body">
+                <div class="meta-list">
+                  <div><strong>ID:</strong> <span id="metaIdValue">New</span></div>
+                  <div><strong>Products:</strong> <span id="metaProductsValue">0</span></div>
+                  <div><strong>Sort mode:</strong> <span id="metaSortValue">Manual</span></div>
+                  <div><strong>Created:</strong> <span id="metaCreatedValue">—</span></div>
+                  <div><strong>Updated:</strong> <span id="metaUpdatedValue">—</span></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card sidebar-card">
+              <div class="card-head">
+                <div class="card-title">⚡ Quick actions</div>
+              </div>
+              <div class="card-body">
+                <div class="sidebar-actions">
+                  <button class="btn" type="button" onclick="openBrowseModal()">Browse products</button>
+                  <button class="btn" type="button" onclick="viewCurrentCollection()">View collection</button>
+                  <button class="btn" type="button" onclick="duplicateCurrentCollection()">Duplicate</button>
+                  <button class="btn danger" type="button" onclick="deleteCurrentCollection()">Delete</button>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="browseModalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title">Browse products</div>
+        <button class="modal-close" type="button" onclick="closeBrowseModal()">×</button>
+      </div>
+
+      <div class="modal-toolbar">
+        <input id="browseSearchInput" type="text" placeholder="Search products..." oninput="debouncedBrowseSearch()">
+
+        <select id="browseSearchFieldSelect" onchange="loadBrowseProducts(true)">
+          <option value="all">All</option>
+          <option value="title">Product title</option>
+          <option value="id">Product ID</option>
+          <option value="sku">SKU</option>
+          <option value="barcode">Barcode</option>
+        </select>
+
+        <select id="browseStatusSelect" onchange="loadBrowseProducts(true)">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="draft">Draft</option>
+          <option value="archived">Archived</option>
+        </select>
+
+        <select id="browsePositionSelect">
+          <option value="bottom">Add to bottom</option>
+          <option value="top">Add to top</option>
+        </select>
+
+        <button class="btn blue" type="button" onclick="loadBrowseProducts(true)">Search</button>
+      </div>
+
+      <div class="modal-body">
+        <table class="modal-table">
+          <thead>
+            <tr>
+              <th><input id="selectAllBrowseCheckbox" class="check" type="checkbox" onchange="toggleSelectAllBrowse(this.checked)"></th>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Inventory</th>
+              <th>Status</th>
+              <th>SKU</th>
+            </tr>
+          </thead>
+          <tbody id="browseProductsBody">
+            <tr>
+              <td colspan="6" class="empty">Loading products...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-foot">
+        <div class="browse-count" id="browseCountText">0 selected</div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn" type="button" onclick="closeBrowseModal()">Cancel</button>
+          <button class="btn primary" type="button" onclick="addSelectedBrowseProducts()">Add products</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const COLLECTIONS_API = '/api/collections';
+    const PRODUCTS_API = '/api/products';
+
+    let currentCollectionId = null;
+    let currentCollection = null;
+    let collectionProducts = [];
+    let filteredCollectionProducts = [];
+    let selectedCollectionProductIds = new Set();
+
+    let browseProducts = [];
+    let selectedBrowseProductIds = new Set();
+    let browseOffset = 0;
+    let browseLimit = 50;
+    let browseTimer = null;
+
+    function qs(id) {
+      return document.getElementById(id);
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function safeText(value, fallback = '') {
+      const text = String(value ?? '').trim();
+      return text || fallback;
+    }
+
+    function safeNumber(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function formatDate(value) {
+      if (!value) return '—';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '—';
+      return date.toLocaleString('en-GB', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit'
+      });
+    }
+
+    function slugify(text = '') {
+      return String(text)
+        .trim()
+        .toLowerCase()
+        .replace(/[^\w\u0600-\u06FF\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+    }
+
+    function getStatusChipHtml(status) {
+      const normalized = String(status || 'active').toLowerCase();
+      const cls = normalized === 'draft' ? 'draft' : normalized === 'archived' ? 'archived' : 'active';
+      const label = normalized === 'draft' ? 'Draft' : normalized === 'archived' ? 'Archived' : 'Active';
+      return { cls, label };
+    }
+
+    function getSortLabel(sortMode) {
+      const map = {
+        manual: 'Manual',
+        best_selling: 'Best selling',
+        title_asc: 'Product title A-Z',
+        title_desc: 'Product title Z-A',
+        price_desc: 'Highest price',
+        price_asc: 'Lowest price',
+        newest: 'Newest',
+        oldest: 'Oldest'
+      };
+      return map[sortMode] || 'Manual';
+    }
+
+    function getProductImage(product) {
+      return safeText(
+        product.image_url || product.primary_image || product.image,
+        ''
+      );
+    }
+
+    function getProductThumb(product) {
+      const image = getProductImage(product);
+      if (!image) return '<div class="thumb-placeholder">📦</div>';
+      return `<img class="thumb" src="${image}" alt="${escapeHtml(product.product_name || product.name || 'Product')}" loading="lazy">`;
+    }
+
+    function getProductStatusBadge(status) {
+      const normalized = String(status || 'active').toLowerCase();
+      const cls = normalized === 'draft' ? 'draft' : normalized === 'archived' ? 'archived' : 'active';
+      const label = normalized === 'draft' ? 'Draft' : normalized === 'archived' ? 'Archived' : 'Active';
+      return `<span class="pill ${cls}">${label}</span>`;
+    }
+
+    function showAlert(message, type = 'success') {
+      const box = qs('alertBox');
+      box.textContent = message;
+      box.className = `alert active ${type}`;
+
+      clearTimeout(window.__alertTimer);
+      window.__alertTimer = setTimeout(() => {
+        box.className = 'alert';
+        box.textContent = '';
+      }, 3400);
+    }
+
+    function toggleMoreMenu() {
+      qs('moreMenu').classList.toggle('active');
+    }
+
+    function closeMenus() {
+      qs('moreMenu').classList.remove('active');
+    }
+
+    function updateStatusChip() {
+      const status = qs('statusSelect').value;
+      const chip = qs('statusChip');
+      const meta = getStatusChipHtml(status);
+      chip.className = `chip ${meta.cls}`;
+      chip.textContent = meta.label;
+    }
+
+    function syncTitleState() {
+      const title = safeText(qs('titleInput').value);
+      const currentSlug = safeText(qs('slugInput').value);
+
+      if (!currentCollectionId && (!currentSlug || currentSlug === slugify(currentCollection?.title || ''))) {
+        qs('slugInput').value = slugify(title);
+      }
+
+      updateSeoPreview();
+
+      const pageTitle = title || (currentCollectionId ? 'Edit collection' : 'Create collection');
+      qs('pageTitle').textContent = pageTitle;
+      qs('mobileTopTitle').textContent = pageTitle;
+    }
+
+    function updateImagePreview() {
+      const preview = qs('imagePreview');
+      const imageUrl = safeText(qs('imageUrlInput').value);
+
+      if (!imageUrl) {
+        preview.className = 'image-preview empty';
+        preview.innerHTML = 'No collection image';
+        return;
+      }
+
+      preview.className = 'image-preview';
+      preview.innerHTML = `<img src="${imageUrl}" alt="Collection image preview">`;
+    }
+
+    function updateSeoPreview() {
+      const title = safeText(qs('seoTitleInput').value) || safeText(qs('titleInput').value) || 'Collection title';
+      const slug = safeText(qs('slugInput').value) || 'collection-handle';
+      const description = safeText(qs('seoDescriptionInput').value) || safeText(qs('descriptionInput').value) || 'Add a description to see how it could appear in search results.';
+
+      qs('seoPreviewTitle').textContent = title;
+      qs('seoPreviewUrl').textContent = `https://smartkidskw.com/collections/${slug}`;
+      qs('seoPreviewDesc').textContent = description;
+    }
+
+    function updateMetaSidebar() {
+      qs('metaIdValue').textContent = currentCollectionId || 'New';
+      qs('metaProductsValue').textContent = collectionProducts.length;
+      qs('metaSortValue').textContent = getSortLabel(qs('sortModeSelect').value);
+      qs('metaCreatedValue').textContent = formatDate(currentCollection?.created_at);
+      qs('metaUpdatedValue').textContent = formatDate(currentCollection?.updated_at);
+
+      qs('duplicateBtn').disabled = !currentCollectionId;
+      qs('viewBtn').disabled = !currentCollectionId;
+    }
+
+    function fillForm(collection) {
+      currentCollection = collection || null;
+      currentCollectionId = collection?.id || null;
+
+      qs('titleInput').value = collection?.title || '';
+      qs('descriptionInput').value = collection?.description || '';
+      qs('imageUrlInput').value = collection?.image_url || '';
+      qs('sortModeSelect').value = collection?.sort_mode || 'manual';
+      qs('statusSelect').value = collection?.status || 'active';
+      qs('themeTemplateInput').value = collection?.theme_template || 'default-collection';
+      qs('seoTitleInput').value = collection?.seo_title || '';
+      qs('seoDescriptionInput').value = collection?.seo_description || '';
+      qs('slugInput').value = collection?.slug || '';
+      qs('onlineStoreSelect').value = String(collection?.online_store ?? 1);
+      qs('posExcludedSelect').value = String(collection?.pos_excluded ?? 1);
+
+      updateStatusChip();
+      updateImagePreview();
+      updateSeoPreview();
+      updateMetaSidebar();
+
+      const title = safeText(collection?.title) || (currentCollectionId ? 'Edit collection' : 'Create collection');
+      qs('pageTitle').textContent = title;
+      qs('mobileTopTitle').textContent = title;
+      qs('pageSub').textContent = currentCollectionId
+        ? `Collection #${currentCollectionId}`
+        : 'Create a new manual collection';
+    }
+
+    function collectFormData() {
+      return {
+        title: safeText(qs('titleInput').value),
+        description: qs('descriptionInput').value || '',
+        imageUrl: safeText(qs('imageUrlInput').value),
+        sortMode: qs('sortModeSelect').value,
+        status: qs('statusSelect').value,
+        themeTemplate: safeText(qs('themeTemplateInput').value) || 'default-collection',
+        seoTitle: safeText(qs('seoTitleInput').value),
+        seoDescription: qs('seoDescriptionInput').value || '',
+        slug: safeText(qs('slugInput').value) || slugify(qs('titleInput').value),
+        onlineStore: Number(qs('onlineStoreSelect').value) === 1,
+        posExcluded: Number(qs('posExcludedSelect').value) === 1,
+        productIds: collectionProducts.map(item => Number(item.product_id || item.id)).filter(Boolean)
+      };
+    }
+
+    async function saveCollection() {
+      try {
+        const payload = collectFormData();
+
+        if (!payload.title) {
+          showAlert('Collection title is required', 'error');
+          qs('titleInput').focus();
+          return;
+        }
+
+        if (!payload.slug) {
+          payload.slug = slugify(payload.title);
+          qs('slugInput').value = payload.slug;
+        }
+
+        const url = currentCollectionId
+          ? `${COLLECTIONS_API}/${encodeURIComponent(currentCollectionId)}`
+          : COLLECTIONS_API;
+
+        const method = currentCollectionId ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to save collection');
+        }
+
+        currentCollection = result.data;
+        currentCollectionId = result.data.id;
+        collectionProducts = Array.isArray(result.data.products) ? result.data.products : collectionProducts;
+        filteredCollectionProducts = [...collectionProducts];
+        fillForm(result.data);
+        renderCollectionProducts();
+        showAlert(currentCollectionId ? 'Collection saved successfully' : 'Collection created successfully', 'success');
+
+        const targetUrl = `/collection-edit.html?id=${encodeURIComponent(currentCollectionId)}`;
+        if (window.location.pathname + window.location.search !== targetUrl) {
+          window.history.replaceState({}, '', targetUrl);
+        }
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to save collection', 'error');
+      }
+    }
+
+    async function loadCollection() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+        if (!id) {
+          fillForm(null);
+          collectionProducts = [];
+          filteredCollectionProducts = [];
+          renderCollectionProducts();
+          return;
+        }
+
+        const response = await fetch(`${COLLECTIONS_API}/${encodeURIComponent(id)}`, { cache: 'no-store' });
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to load collection');
+        }
+
+        currentCollection = result.data;
+        currentCollectionId = result.data.id;
+        collectionProducts = Array.isArray(result.data.products) ? result.data.products : [];
+        filteredCollectionProducts = [...collectionProducts];
+
+        fillForm(result.data);
+        renderCollectionProducts();
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to load collection', 'error');
+      }
+    }
+
+    function renderCollectionProducts() {
+      const tbody = qs('collectionProductsBody');
+
+      if (!filteredCollectionProducts.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty">
+              No products in this collection yet.<br>
+              Use Browse to add products.
+            </td>
+          </tr>
+        `;
+        updateMetaSidebar();
+        updateProductSelectionUi();
+        return;
+      }
+
+      const manualMode = qs('sortModeSelect').value === 'manual';
+
+      tbody.innerHTML = filteredCollectionProducts.map((product, index) => {
+        const productId = Number(product.product_id || product.id);
+        const selected = selectedCollectionProductIds.has(productId);
+
+        return `
+          <tr
+            draggable="${manualMode ? 'true' : 'false'}"
+            data-product-id="${productId}"
+            ondragstart="handleDragStart(event)"
+            ondragover="handleDragOver(event)"
+            ondrop="handleDrop(event)"
+            ondragend="handleDragEnd(event)"
+          >
+            <td>
+              <input
+                class="check"
+                type="checkbox"
+                ${selected ? 'checked' : ''}
+                onchange="toggleCollectionProductSelection(${productId}, this.checked)"
+              >
+            </td>
+
+            <td>
+              <button
+                class="drag-handle"
+                type="button"
+                title="${manualMode ? 'Drag to reorder' : 'Switch to manual sorting to reorder'}"
+                ${manualMode ? '' : 'disabled'}
+              >↕</button>
+            </td>
+
+            <td>
+              <div class="product-cell">
+                ${getProductThumb(product)}
+                <div>
+                  <div class="product-name">${escapeHtml(product.product_name || product.name || 'Product')}</div>
+                  <div class="product-sub">${escapeHtml(product.vendor || product.category || product.product_type || '—')}</div>
+                </div>
+              </div>
+            </td>
+
+            <td>KWD ${safeNumber(product.price, 0).toFixed(3)}</td>
+            <td>${safeNumber(product.stock, 0)}</td>
+            <td>${getProductStatusBadge(product.status)}</td>
+            <td>${index + 1}</td>
+
+            <td>
+              <button class="mini-btn danger" type="button" onclick="removeSingleProduct(${productId})">✕</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      updateMetaSidebar();
+      updateProductSelectionUi();
+    }
+
+    function filterCollectionProducts() {
+      const query = safeText(qs('productSearchInput').value).toLowerCase();
+
+      if (!query) {
+        filteredCollectionProducts = [...collectionProducts];
+        renderCollectionProducts();
+        return;
+      }
+
+      filteredCollectionProducts = collectionProducts.filter(product => {
+        const haystack = [
+          product.product_name,
+          product.name,
+          product.slug,
+          product.sku,
+          product.vendor,
+          product.category,
+          product.product_type
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+        return haystack.includes(query);
+      });
+
+      renderCollectionProducts();
+    }
+
+    function handleSortModeChange() {
+      updateMetaSidebar();
+
+      if (qs('sortModeSelect').value !== 'manual') {
+        showAlert('Non-manual sort mode is saved with the collection. Manual drag and move actions work only in Manual mode.', 'info');
+      }
+
+      if (currentCollectionId) {
+        saveCollection();
+      }
+
+      renderCollectionProducts();
+    }
+
+    function toggleCollectionProductSelection(productId, checked) {
+      const id = Number(productId);
+      if (checked) {
+        selectedCollectionProductIds.add(id);
+      } else {
+        selectedCollectionProductIds.delete(id);
+      }
+      updateProductSelectionUi();
+    }
+
+    function toggleSelectAllProducts(checked) {
+      const ids = filteredCollectionProducts.map(item => Number(item.product_id || item.id));
+      if (checked) {
+        ids.forEach(id => selectedCollectionProductIds.add(id));
+      } else {
+        ids.forEach(id => selectedCollectionProductIds.delete(id));
+      }
+      renderCollectionProducts();
+      updateProductSelectionUi();
+    }
+
+    function clearProductSelection() {
+      selectedCollectionProductIds.clear();
+      renderCollectionProducts();
+      updateProductSelectionUi();
+    }
+
+    function updateProductSelectionUi() {
+      const count = selectedCollectionProductIds.size;
+      qs('selectionBar').classList.toggle('active', count > 0);
+      qs('selectionCountText').textContent = `${count} selected`;
+
+      const filteredIds = filteredCollectionProducts.map(item => Number(item.product_id || item.id));
+      const allSelected = filteredIds.length > 0 && filteredIds.every(id => selectedCollectionProductIds.has(id));
+      qs('selectAllProductsCheckbox').checked = allSelected;
+    }
+
+    async function refreshCollectionProducts() {
+      if (!currentCollectionId) {
+        renderCollectionProducts();
+        return;
+      }
+
+      try {
+        const response = await fetch(`${COLLECTIONS_API}/${encodeURIComponent(currentCollectionId)}/products`, { cache: 'no-store' });
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to refresh products');
+        }
+
+        collectionProducts = Array.isArray(result.data) ? result.data : [];
+        filterCollectionProducts();
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to refresh collection products', 'error');
+      }
+    }
+
+    async function ensureCollectionExists() {
+      if (currentCollectionId) return true;
+
+      const payload = collectFormData();
+      if (!payload.title) {
+        showAlert('Save the collection title first', 'warning');
+        qs('titleInput').focus();
+        return false;
+      }
+
+      await saveCollection();
+      return Boolean(currentCollectionId);
+    }
+
+    function openBrowseModal() {
+      ensureCollectionExists().then((ok) => {
+        if (!ok) return;
+
+        selectedBrowseProductIds.clear();
+        qs('selectAllBrowseCheckbox').checked = false;
+        qs('browseModalBackdrop').classList.add('active');
+        loadBrowseProducts(true);
+      });
+    }
+
+    function closeBrowseModal() {
+      qs('browseModalBackdrop').classList.remove('active');
+    }
+
+    function debouncedBrowseSearch() {
+      clearTimeout(browseTimer);
+      browseTimer = setTimeout(() => {
+        loadBrowseProducts(true);
+      }, 300);
+    }
+
+    function buildBrowseSearchValue(rawValue, field) {
+      const value = safeText(rawValue);
+      if (!value) return '';
+
+      if (field === 'id') {
+        return value;
+      }
+
+      if (field === 'sku') {
+        return value;
+      }
+
+      if (field === 'barcode') {
+        return value;
+      }
+
+      if (field === 'title') {
+        return value;
+      }
+
+      return value;
+    }
+
+    async function loadBrowseProducts(resetOffset = false) {
+      try {
+        if (resetOffset) browseOffset = 0;
+
+        const search = safeText(qs('browseSearchInput').value);
+        const searchField = qs('browseSearchFieldSelect').value;
+        const status = qs('browseStatusSelect').value;
+
+        const params = new URLSearchParams();
+        params.set('limit', String(browseLimit));
+        params.set('offset', String(browseOffset));
+        params.set('sort', 'created_at');
+        params.set('order', 'DESC');
+
+        if (status) {
+          params.set('status', status);
+        }
+
+        const searchValue = buildBrowseSearchValue(search, searchField);
+        if (searchValue) {
+          params.set('search', searchValue);
+        }
+
+        const response = await fetch(`${PRODUCTS_API}?${params.toString()}`, { cache: 'no-store' });
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to load products');
+        }
+
+        let rows = Array.isArray(result.data) ? result.data : [];
+
+        if (searchField === 'title' && searchValue) {
+          rows = rows.filter(item =>
+            safeText(item.product_name).toLowerCase().includes(searchValue.toLowerCase())
+          );
+        }
+
+        if (searchField === 'id' && searchValue) {
+          rows = rows.filter(item => String(item.id) === searchValue);
+        }
+
+        if (searchField === 'sku' && searchValue) {
+          rows = rows.filter(item => safeText(item.sku).toLowerCase().includes(searchValue.toLowerCase()));
+        }
+
+        if (searchField === 'barcode' && searchValue) {
+          rows = rows.filter(item => safeText(item.sku).toLowerCase().includes(searchValue.toLowerCase()));
+        }
+
+        browseProducts = rows;
+        renderBrowseProducts();
+      } catch (error) {
+        console.error(error);
+        qs('browseProductsBody').innerHTML = `
+          <tr>
+            <td colspan="6" class="empty">Failed to load products</td>
+          </tr>
+        `;
+        showAlert(error.message || 'Failed to load products', 'error');
+      }
+    }
+
+    function renderBrowseProducts() {
+      const tbody = qs('browseProductsBody');
+
+      if (!browseProducts.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="empty">No products found</td>
+          </tr>
+        `;
+        updateBrowseSelectionUi();
+        return;
+      }
+
+      tbody.innerHTML = browseProducts.map(product => {
+        const productId = Number(product.id);
+        const selected = selectedBrowseProductIds.has(productId);
+
+        return `
+          <tr>
+            <td>
+              <input
+                class="check"
+                type="checkbox"
+                ${selected ? 'checked' : ''}
+                onchange="toggleBrowseSelection(${productId}, this.checked)"
+              >
+            </td>
+
+            <td>
+              <div class="product-cell">
+                ${getProductThumb(product)}
+                <div>
+                  <div class="product-name">${escapeHtml(product.product_name || 'Product')}</div>
+                  <div class="product-sub">${escapeHtml(product.vendor || product.category || product.product_type || '—')}</div>
+                </div>
+              </div>
+            </td>
+
+            <td>KWD ${safeNumber(product.price, 0).toFixed(3)}</td>
+            <td>${safeNumber(product.stock, 0)}</td>
+            <td>${getProductStatusBadge(product.status)}</td>
+            <td>${escapeHtml(product.sku || '—')}</td>
+          </tr>
+        `;
+      }).join('');
+
+      updateBrowseSelectionUi();
+    }
+
+    function toggleBrowseSelection(productId, checked) {
+      const id = Number(productId);
+      if (checked) {
+        selectedBrowseProductIds.add(id);
+      } else {
+        selectedBrowseProductIds.delete(id);
+      }
+      updateBrowseSelectionUi();
+    }
+
+    function toggleSelectAllBrowse(checked) {
+      const ids = browseProducts.map(item => Number(item.id));
+      if (checked) {
+        ids.forEach(id => selectedBrowseProductIds.add(id));
+      } else {
+        ids.forEach(id => selectedBrowseProductIds.delete(id));
+      }
+      renderBrowseProducts();
+      updateBrowseSelectionUi();
+    }
+
+    function updateBrowseSelectionUi() {
+      const count = selectedBrowseProductIds.size;
+      qs('browseCountText').textContent = `${count} selected`;
+
+      const allIds = browseProducts.map(item => Number(item.id));
+      const allSelected = allIds.length > 0 && allIds.every(id => selectedBrowseProductIds.has(id));
+      qs('selectAllBrowseCheckbox').checked = allSelected;
+    }
+
+    async function addSelectedBrowseProducts() {
+      try {
+        const ids = Array.from(selectedBrowseProductIds);
+        if (!ids.length) {
+          showAlert('No products selected', 'warning');
+          return;
+        }
+
+        if (!currentCollectionId) {
+          showAlert('Save the collection first', 'warning');
+          return;
+        }
+
+        const position = qs('browsePositionSelect').value || 'bottom';
+
+        const response = await fetch(`${COLLECTIONS_API}/${encodeURIComponent(currentCollectionId)}/products/add`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            productIds: ids,
+            position
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to add products');
+        }
+
+        closeBrowseModal();
+        selectedBrowseProductIds.clear();
+        await refreshCollectionProducts();
+        showAlert('Products added to collection successfully', 'success');
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to add products', 'error');
+      }
+    }
+
+    async function removeSingleProduct(productId) {
+      try {
+        if (!currentCollectionId) return;
+
+        const response = await fetch(`${COLLECTIONS_API}/${encodeURIComponent(currentCollectionId)}/products/remove`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            productIds: [Number(productId)]
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to remove product');
+        }
+
+        selectedCollectionProductIds.delete(Number(productId));
+        await refreshCollectionProducts();
+        showAlert('Product removed from collection', 'success');
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to remove product', 'error');
+      }
+    }
+
+    async function removeSelectedProducts() {
+      try {
+        const ids = Array.from(selectedCollectionProductIds);
+        if (!ids.length) {
+          showAlert('No products selected', 'warning');
+          return;
+        }
+
+        const response = await fetch(`${COLLECTIONS_API}/${encodeURIComponent(currentCollectionId)}/products/remove`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            productIds: ids
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to remove selected products');
+        }
+
+        clearProductSelection();
+        await refreshCollectionProducts();
+        showAlert('Selected products removed from collection', 'success');
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to remove selected products', 'error');
+      }
+    }
+
+    async function moveSelectedProducts(destination) {
+      try {
+        const ids = Array.from(selectedCollectionProductIds);
+        if (!ids.length) {
+          showAlert('No products selected', 'warning');
+          return;
+        }
+
+        if (qs('sortModeSelect').value !== 'manual') {
+          showAlert('Switch sort mode to Manual first', 'warning');
+          return;
+        }
+
+        let position = 1;
+
+        if (destination === 'position') {
+          const input = window.prompt('Enter target position number', '1');
+          if (input === null) return;
+          position = Math.max(1, parseInt(input, 10) || 1);
+        }
+
+        const response = await fetch(`${COLLECTIONS_API}/${encodeURIComponent(currentCollectionId)}/products/move`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            productIds: ids,
+            destination,
+            position
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to move products');
+        }
+
+        clearProductSelection();
+        collectionProducts = Array.isArray(result.data) ? result.data : collectionProducts;
+        filterCollectionProducts();
+        showAlert('Products moved successfully', 'success');
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to move products', 'error');
+      }
+    }
+
+    let draggedProductId = null;
+
+    function handleDragStart(event) {
+      if (qs('sortModeSelect').value !== 'manual') {
+        event.preventDefault();
+        return;
+      }
+
+      const row = event.currentTarget;
+      draggedProductId = Number(row.dataset.productId);
+      row.classList.add('dragging');
+      event.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragOver(event) {
+      if (qs('sortModeSelect').value !== 'manual') return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+    }
+
+    async function handleDrop(event) {
+      if (qs('sortModeSelect').value !== 'manual') return;
+      event.preventDefault();
+
+      const targetRow = event.currentTarget;
+      const targetProductId = Number(targetRow.dataset.productId);
+
+      if (!draggedProductId || !targetProductId || draggedProductId === targetProductId) return;
+
+      const orderedIds = collectionProducts.map(item => Number(item.product_id || item.id));
+      const fromIndex = orderedIds.indexOf(draggedProductId);
+      const toIndex = orderedIds.indexOf(targetProductId);
+
+      if (fromIndex === -1 || toIndex === -1) return;
+
+      const moved = [...collectionProducts];
+      const [draggedItem] = moved.splice(fromIndex, 1);
+      moved.splice(toIndex, 0, draggedItem);
+
+      collectionProducts = moved;
+      filteredCollectionProducts = [...collectionProducts];
+      renderCollectionProducts();
+
+      const payloadItems = collectionProducts.map((item, index) => ({
+        productId: Number(item.product_id || item.id),
+        sortOrder: index + 1
+      }));
+
+      try {
+        const response = await fetch(`${COLLECTIONS_API}/${encodeURIComponent(currentCollectionId)}/products/reorder`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ items: payloadItems })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to reorder products');
+        }
+
+        await refreshCollectionProducts();
+        showAlert('Manual order updated', 'success');
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to reorder products', 'error');
+      }
+    }
+
+    function handleDragEnd(event) {
+      draggedProductId = null;
+      document.querySelectorAll('tr.dragging').forEach(row => row.classList.remove('dragging'));
+    }
+
+    function viewCurrentCollection() {
+      if (!currentCollectionId || !safeText(qs('slugInput').value)) {
+        showAlert('Save the collection first', 'warning');
+        return;
+      }
+
+      window.open(`/collection.html?slug=${encodeURIComponent(qs('slugInput').value)}`, '_blank');
+    }
+
+    async function duplicateCurrentCollection() {
+      try {
+        if (!currentCollectionId) {
+          showAlert('Save the collection first', 'warning');
+          return;
+        }
+
+        const response = await fetch(`${COLLECTIONS_API}/${encodeURIComponent(currentCollectionId)}/duplicate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to duplicate collection');
+        }
+
+        showAlert('Collection duplicated successfully', 'success');
+
+        if (result.data?.id) {
+          window.location.href = `/collection-edit.html?id=${encodeURIComponent(result.data.id)}`;
+        }
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to duplicate collection', 'error');
+      }
+    }
+
+    async function deleteCurrentCollection() {
+      try {
+        if (!currentCollectionId) {
+          showAlert('This collection is not saved yet', 'warning');
+          return;
+        }
+
+        closeMenus();
+
+        const confirmed = window.confirm(`Delete collection "${safeText(qs('titleInput').value)}"?`);
+        if (!confirmed) return;
+
+        const response = await fetch(`${COLLECTIONS_API}/${encodeURIComponent(currentCollectionId)}`, {
+          method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to delete collection');
+        }
+
+        showAlert('Collection deleted successfully', 'success');
+        setTimeout(() => {
+          window.location.href = '/collections-admin';
+        }, 500);
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to delete collection', 'error');
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.tools')) {
+        closeMenus();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeBrowseModal();
+        closeMenus();
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        saveCollection();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      fillForm(null);
+      await loadCollection();
+    });
+  </script>
+</body>
+</html>

@@ -654,7 +654,9 @@
     <a href="./collections.html" class="header-back" aria-label="العودة">←</a>
 
     <div class="header-logo">
-      <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" />
+      <a href="./index.html" aria-label="الصفحة الرئيسية">
+        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" />
+      </a>
     </div>
 
     <div class="header-icons">
@@ -698,6 +700,7 @@
 
     <div class="collection-stats">
       <div class="stat-badge" id="productCount">جاري التحميل...</div>
+      <div class="stat-badge" id="collectionSortBadge">Manual</div>
     </div>
   </div>
 
@@ -731,7 +734,12 @@
   </div>
 
   <script>
-    let currentCategory = '';
+    const COLLECTIONS_API = '/api/collections';
+    const PRODUCTS_API = '/api/products';
+
+    let currentCollection = null;
+    let currentCollectionSlug = '';
+    let currentCollectionTitle = '';
     let allCollectionProducts = [];
     let filteredProducts = [];
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -760,8 +768,8 @@
       return String(value || 'عام').trim() || 'عام';
     }
 
-    function getCollectionMeta(category) {
-      const value = normalizeCategory(category).toLowerCase();
+    function getCollectionMeta(title) {
+      const value = normalizeCategory(title).toLowerCase();
 
       if (value.includes('islam') || value.includes('إسلام') || value.includes('اسلام')) {
         return {
@@ -824,10 +832,9 @@
     }
 
     function getComparePrice(product) {
-      const compare = product.sale_price && Number(product.sale_price) > Number(product.price)
-        ? Number(product.sale_price)
-        : null;
-      return Number.isFinite(compare) ? compare : null;
+      const sale = safeNumber(product.sale_price, 0);
+      const price = extractPrice(product);
+      return sale > price ? sale : null;
     }
 
     function hasDiscount(product) {
@@ -841,7 +848,7 @@
         product.image ??
         product.image_url ??
         product.primary_image ??
-        (Array.isArray(product.images) && product.images[0] && (product.images[0].image_url || product.images[0].url)) ??
+        (Array.isArray(product.images) && product.images[0] && (product.images[0].image_url || product.images[0].url || product.images[0].src)) ??
         '';
 
       return safeText(
@@ -859,6 +866,21 @@
       }
 
       return `./product-page.html?id=${encodeURIComponent(id)}`;
+    }
+
+    function getSortLabel(sortMode) {
+      const map = {
+        manual: 'Manual',
+        best_selling: 'Best selling',
+        title_asc: 'A → Z',
+        title_desc: 'Z → A',
+        price_desc: 'Highest price',
+        price_asc: 'Lowest price',
+        newest: 'Newest',
+        oldest: 'Oldest'
+      };
+
+      return map[sortMode] || 'Manual';
     }
 
     function showCartToast(product) {
@@ -883,35 +905,89 @@
       clearTimeout(toastTimer);
     }
 
+    async function fetchCollectionBySlug(slug) {
+      const response = await fetch(`${COLLECTIONS_API}/slug/${encodeURIComponent(slug)}`, {
+        cache: 'no-store',
+        headers: { Accept: 'application/json' }
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result || !result.success) {
+        throw new Error(result?.error || `HTTP ${response.status}`);
+      }
+
+      return result.data;
+    }
+
+    async function fetchCollectionById(id) {
+      const response = await fetch(`${COLLECTIONS_API}/${encodeURIComponent(id)}`, {
+        cache: 'no-store',
+        headers: { Accept: 'application/json' }
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result || !result.success) {
+        throw new Error(result?.error || `HTTP ${response.status}`);
+      }
+
+      return result.data;
+    }
+
+    async function fetchLegacyCategoryProducts(category) {
+      const response = await fetch(`${PRODUCTS_API}?status=active&limit=1000`, {
+        cache: 'no-store',
+        headers: { Accept: 'application/json' }
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result || !result.success) {
+        throw new Error(result?.error || `HTTP ${response.status}`);
+      }
+
+      const products = Array.isArray(result.data) ? result.data : [];
+      const normalizedCategory = normalizeCategory(category);
+
+      return {
+        id: null,
+        slug: '',
+        title: normalizedCategory,
+        description: getCollectionMeta(normalizedCategory).description,
+        sort_mode: 'manual',
+        products: products.filter(product =>
+          normalizeCategory(product.category ?? product.category_name ?? product.product_type) === normalizedCategory
+        )
+      };
+    }
+
     async function loadCollection() {
       try {
         const urlParams = new URLSearchParams(window.location.search);
-        const category = urlParams.get('category');
+        const slug = safeText(urlParams.get('slug'));
+        const id = safeText(urlParams.get('id'));
+        const legacyCategory = safeText(urlParams.get('category'));
 
-        if (!category) {
+        if (!slug && !id && !legacyCategory) {
           showError('اسم المجموعة غير موجود');
           return;
         }
 
-        currentCategory = normalizeCategory(category);
+        let collectionData = null;
 
-        const response = await fetch('/api/products?status=active&limit=1000', {
-          cache: 'no-store',
-          headers: { Accept: 'application/json' }
-        });
-
-        const result = await response.json().catch(() => null);
-
-        if (!response.ok || !result || !result.success) {
-          throw new Error(result?.error || `HTTP ${response.status}`);
+        if (slug) {
+          collectionData = await fetchCollectionBySlug(slug);
+        } else if (id) {
+          collectionData = await fetchCollectionById(id);
+        } else {
+          collectionData = await fetchLegacyCategoryProducts(legacyCategory);
         }
 
-        const allProducts = Array.isArray(result.data) ? result.data : [];
-
-        allCollectionProducts = allProducts.filter(product =>
-          normalizeCategory(product.category ?? product.category_name ?? product.product_type) === currentCategory
-        );
-
+        currentCollection = collectionData;
+        currentCollectionSlug = safeText(collectionData.slug);
+        currentCollectionTitle = safeText(collectionData.title || legacyCategory || 'المجموعة');
+        allCollectionProducts = Array.isArray(collectionData.products) ? collectionData.products : [];
         filteredProducts = [...allCollectionProducts];
 
         updateCollectionInfo();
@@ -924,16 +1000,20 @@
     }
 
     function updateCollectionInfo() {
-      const meta = getCollectionMeta(currentCategory);
+      const title = currentCollectionTitle || 'المجموعة';
+      const meta = getCollectionMeta(title);
+      const description = safeText(currentCollection?.description, meta.description);
+      const sortMode = safeText(currentCollection?.sort_mode, 'manual');
 
       document.getElementById('collectionIcon').textContent = meta.icon;
-      document.getElementById('collectionTitle').textContent = currentCategory || 'المجموعة';
-      document.getElementById('collectionDescription').textContent = meta.description;
+      document.getElementById('collectionTitle').textContent = title;
+      document.getElementById('collectionDescription').textContent = description;
       document.getElementById('productCount').textContent = `${allCollectionProducts.length || 0} منتج`;
+      document.getElementById('collectionSortBadge').textContent = getSortLabel(sortMode);
 
-      document.getElementById('pageTitle').textContent = `${currentCategory} - Smart Kids Kuwait`;
-      document.getElementById('pageDescription').setAttribute('content', meta.description);
-      document.title = `${currentCategory} - Smart Kids Kuwait`;
+      document.getElementById('pageTitle').textContent = `${title} - Smart Kids Kuwait`;
+      document.getElementById('pageDescription').setAttribute('content', description);
+      document.title = `${title} - Smart Kids Kuwait`;
     }
 
     function renderProducts() {
@@ -1021,7 +1101,8 @@
           getProductTitle(product).toLowerCase().includes(searchQuery) ||
           safeText(product.description).toLowerCase().includes(searchQuery) ||
           safeText(product.category).toLowerCase().includes(searchQuery) ||
-          safeText(product.vendor).toLowerCase().includes(searchQuery)
+          safeText(product.vendor).toLowerCase().includes(searchQuery) ||
+          safeText(product.sku).toLowerCase().includes(searchQuery)
         );
       }
       renderProducts();
