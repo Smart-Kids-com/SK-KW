@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collections - Smart Kids Kuwait</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f3f3f3;
+      --card:#ffffff;
+      --line:#e5e7eb;
+      --text:#202223;
+      --muted:#6d7175;
+      --top:#111213;
+      --side:#f6f6f7;
+      --green:#16a34a;
+      --green-bg:#bbf7d0;
+      --yellow:#f59e0b;
+      --yellow-bg:#fde68a;
+      --gray-bg:#e5e7eb;
+      --red:#b91c1c;
+      --red-bg:#fee2e2;
+      --shadow:0 1px 2px rgba(0,0,0,.08);
+      --radius:14px;
+    }
+
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      direction:ltr;
+    }
+
+    a{text-decoration:none;color:inherit}
+    button,input,select{font-family:inherit}
+
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:290px 1fr;
+      grid-template-rows:72px 1fr;
+      grid-template-areas:
+        "top top"
+        "side main";
+    }
+
+    .topbar{
+      grid-area:top;
+      background:var(--top);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:0 18px;
+      position:sticky;
+      top:0;
+      z-index:50;
+    }
+
+    .top-left{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .brand{
+      font-size:20px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .search-wrap{
+      flex:1;
+      max-width:720px;
+      margin:0 auto;
+      width:100%;
+    }
+
+    .top-search{
+      width:100%;
+      height:42px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:#2a2b2d;
+      color:#fff;
+      padding:0 16px;
+      outline:none;
+      font-size:15px;
+    }
+
+    .top-right{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      white-space:nowrap;
+    }
+
+    .avatar{
+      width:34px;
+      height:34px;
+      border-radius:999px;
+      background:#2a2b2d;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+    }
+
+    .sidebar{
+      grid-area:side;
+      background:var(--side);
+      border-right:1px solid #ddd;
+      padding:14px 14px 20px;
+      overflow:auto;
+    }
+
+    .side-group{margin-bottom:18px}
+    .side-title{
+      font-size:13px;
+      color:var(--muted);
+      margin:10px 10px 8px;
+      font-weight:700;
+      direction:ltr;
+      text-align:left;
+    }
+
+    .nav-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:11px 12px;
+      border-radius:12px;
+      color:#111;
+      font-weight:600;
+      margin-bottom:4px;
+      direction:ltr;
+      text-align:left;
+    }
+
+    .nav-item.active{
+      background:#e9eaeb;
+    }
+
+    .nav-sub{
+      padding-left:42px;
+      color:#444;
+      font-weight:500;
+    }
+
+    .badge-count{
+      background:#e5e7eb;
+      min-width:34px;
+      height:24px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13px;
+      color:#444;
+      padding:0 8px;
+    }
+
+    .main{
+      grid-area:main;
+      padding:20px;
+      overflow:auto;
+    }
+
+    .page{
+      max-width:1460px;
+      margin:0 auto;
+    }
+
+    .alert{
+      display:none;
+      margin-bottom:14px;
+      padding:14px 16px;
+      border-radius:14px;
+      font-weight:700;
+      border:1px solid transparent;
+      background:#fff;
+      direction:rtl;
+      text-align:right;
+      white-space:pre-line;
+    }
+
+    .alert.active{display:block}
+    .alert.success{background:#dcfce7;border-color:#86efac;color:#166534}
+    .alert.error{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+    .alert.warning{background:#fef3c7;border-color:#fcd34d;color:#92400e}
+
+    .page-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:16px;
+      flex-wrap:wrap;
+    }
+
+    .page-title{
+      font-size:20px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      direction:ltr;
+    }
+
+    .page-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      height:38px;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      color:#111;
+      padding:0 14px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+    }
+
+    .btn.primary{
+      background:#111;
+      color:#fff;
+      border-color:#111;
+    }
+
+    .btn.danger{
+      background:#fff;
+      color:var(--red);
+      border-color:#fca5a5;
+    }
+
+    .summary{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      margin-bottom:16px;
+    }
+
+    .summary-grid{
+      display:grid;
+      grid-template-columns:180px repeat(4,1fr);
+      direction:ltr;
+    }
+
+    .summary-cell{
+      padding:16px 18px;
+      border-right:1px solid var(--line);
+      min-height:86px;
+      text-align:left;
+    }
+
+    .summary-cell:first-child{border-right:none}
+    .summary-label{
+      color:#444;
+      font-size:13px;
+      margin-bottom:8px;
+      font-weight:700;
+    }
+    .summary-value{
+      font-size:17px;
+      font-weight:800;
+    }
+    .summary-sub{
+      font-size:13px;
+      color:#6b7280;
+      margin-top:6px;
+    }
+
+    .collections-card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+
+    .tabs-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 14px;
+      border-bottom:1px solid var(--line);
+      flex-wrap:wrap;
+    }
+
+    .tabs{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      direction:ltr;
+    }
+
+    .tab{
+      height:36px;
+      border:none;
+      background:transparent;
+      border-radius:12px;
+      padding:0 14px;
+      font-weight:700;
+      color:#444;
+      cursor:pointer;
+    }
+
+    .tab.active{
+      background:#ededee;
+      color:#111;
+    }
+
+    .tools{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      position:relative;
+    }
+
+    .icon-btn{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      cursor:pointer;
+      font-size:16px;
+    }
+
+    .selection-pill{
+      min-height:38px;
+      padding:0 12px;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      border:1px solid #d1d5db;
+      border-radius:12px;
+      background:#f9fafb;
+      font-weight:800;
+      color:#111;
+    }
+
+    .selection-pill.active{
+      display:inline-flex;
+    }
+
+    .filters-row{
+      display:grid;
+      grid-template-columns:1.3fr 220px 220px 120px;
+      gap:12px;
+      padding:14px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .filters-row.hidden{
+      display:none;
+    }
+
+    .field input,
+    .field select{
+      width:100%;
+      height:42px;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      padding:0 14px;
+      font-size:15px;
+      outline:none;
+    }
+
+    .field input:focus,
+    .field select:focus{
+      border-color:#9ca3af;
+    }
+
+    .search-btn{
+      height:42px;
+      border:none;
+      border-radius:12px;
+      background:#111827;
+      color:#fff;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .table-wrap{
+      overflow:auto;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:1180px;
+      direction:ltr;
+    }
+
+    th,td{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      vertical-align:middle;
+      background:#fff;
+    }
+
+    th{
+      font-size:13px;
+      color:#4b5563;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    tr:hover td{
+      background:#fafafa;
+    }
+
+    .check{
+      width:20px;
+      height:20px;
+    }
+
+    .collection-cell{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:340px;
+      direction:rtl;
+      text-align:right;
+    }
+
+    .thumb{
+      width:54px;
+      height:54px;
+      border-radius:12px;
+      object-fit:cover;
+      background:#eee;
+      border:1px solid #e5e7eb;
+      flex-shrink:0;
+    }
+
+    .thumb-placeholder{
+      width:54px;
+      height:54px;
+      border-radius:12px;
+      background:#f3f4f6;
+      border:1px solid #e5e7eb;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#9ca3af;
+      font-size:20px;
+      flex-shrink:0;
+    }
+
+    .collection-name{
+      font-weight:800;
+      line-height:1.45;
+      margin-bottom:4px;
+    }
+
+    .collection-sub{
+      font-size:13px;
+      color:var(--muted);
+      direction:rtl;
+    }
+
+    .status-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:66px;
+      height:30px;
+      padding:0 12px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .status-badge.active{
+      color:#166534;
+      background:var(--green-bg);
+    }
+
+    .status-badge.draft{
+      color:#92400e;
+      background:var(--yellow-bg);
+    }
+
+    .status-badge.archived{
+      color:#374151;
+      background:#e5e7eb;
+    }
+
+    .table-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      position:relative;
+    }
+
+    .mini-btn{
+      border:none;
+      background:#f3f4f6;
+      color:#111;
+      border-radius:10px;
+      height:34px;
+      padding:0 12px;
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .mini-btn.dark{
+      background:#111;
+      color:#fff;
+    }
+
+    .row-dropdown{
+      position:absolute;
+      top:40px;
+      right:0;
+      min-width:180px;
+      background:#fff;
+      border:1px solid #d1d5db;
+      border-radius:14px;
+      box-shadow:0 12px 30px rgba(0,0,0,.12);
+      display:none;
+      z-index:40;
+      overflow:hidden;
+    }
+
+    .row-dropdown.active{
+      display:block;
+    }
+
+    .row-dropdown button{
+      width:100%;
+      text-align:left;
+      padding:12px 14px;
+      border:none;
+      background:#fff;
+      cursor:pointer;
+      font-weight:700;
+      border-bottom:1px solid #f1f5f9;
+    }
+
+    .row-dropdown button:last-child{
+      border-bottom:none;
+    }
+
+    .row-dropdown button:hover{
+      background:#f8fafc;
+    }
+
+    .row-dropdown .danger{
+      color:#b91c1c;
+    }
+
+    .pagination{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:12px 14px;
+      flex-wrap:wrap;
+    }
+
+    .pagination-left{
+      color:#6b7280;
+      font-size:14px;
+      font-weight:600;
+      direction:ltr;
+    }
+
+    .pagination-right{
+      display:flex;
+      gap:8px;
+    }
+
+    .empty{
+      padding:46px 20px;
+      text-align:center;
+      color:#6b7280;
+      font-weight:700;
+    }
+
+    .mobile-top{
+      display:none;
+      background:#111;
+      color:#fff;
+      padding:14px 14px 12px;
+      position:sticky;
+      top:0;
+      z-index:60;
+    }
+
+    .mobile-top-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .mobile-title{
+      font-size:22px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .mobile-top-search{
+      width:100%;
+      height:42px;
+      border:none;
+      border-radius:12px;
+      background:#2a2b2d;
+      color:#fff;
+      padding:0 14px;
+      outline:none;
+    }
+
+    .dropdown{
+      position:absolute;
+      top:46px;
+      left:0;
+      min-width:220px;
+      background:#fff;
+      border:1px solid #d1d5db;
+      border-radius:14px;
+      box-shadow:0 12px 30px rgba(0,0,0,.12);
+      display:none;
+      z-index:25;
+      overflow:hidden;
+    }
+
+    .dropdown.active{
+      display:block;
+    }
+
+    .dropdown button{
+      width:100%;
+      text-align:left;
+      padding:12px 14px;
+      border:none;
+      background:#fff;
+      cursor:pointer;
+      font-weight:700;
+      border-bottom:1px solid #f1f5f9;
+    }
+
+    .dropdown button:last-child{
+      border-bottom:none;
+    }
+
+    .dropdown button:hover{
+      background:#f8fafc;
+    }
+
+    @media (max-width: 1100px){
+      .app{
+        grid-template-columns:1fr;
+        grid-template-rows:auto 1fr;
+        grid-template-areas:"main";
+      }
+      .topbar,.sidebar{display:none}
+      .mobile-top{display:block}
+      .main{padding:14px}
+      .page{max-width:100%}
+      .summary-grid{
+        grid-template-columns:1fr 1fr;
+      }
+      .summary-cell{
+        border-right:none;
+        border-bottom:1px solid var(--line);
+      }
+      .summary-cell:nth-last-child(-n+2){
+        border-bottom:none;
+      }
+      .filters-row{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 700px){
+      .page-head{
+        align-items:flex-start;
+      }
+      .page-actions{
+        width:100%;
+      }
+      .page-actions .btn{
+        flex:1;
+      }
+      .summary-grid{
+        grid-template-columns:1fr;
+      }
+      .summary-cell{
+        border-bottom:1px solid var(--line) !important;
+      }
+      .summary-cell:last-child{
+        border-bottom:none !important;
+      }
+      table{
+        min-width:980px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-top">
+    <div class="mobile-top-row">
+      <div class="mobile-title">Collections</div>
+      <button class="btn primary" onclick="goToCreateCollection()">Add collection</button>
+    </div>
+    <input class="mobile-top-search" id="mobileSearchInput" type="text" placeholder="Search collections">
+  </div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="top-left">
+        <div class="brand">Smartkidsfy</div>
+      </div>
+
+      <div class="search-wrap">
+        <input class="top-search" id="desktopSearchTop" type="text" placeholder="Search collections">
+      </div>
+
+      <div class="top-right">
+        <div class="avatar">🛍️</div>
+        <div class="avatar">🔔</div>
+        <div style="font-weight:800">الأطفال المبتكرون الكويت</div>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <div class="side-group">
+        <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
+        <a class="nav-item" href="/admin-enhanced.html"><span>📦 Orders</span><span class="badge-count" id="ordersCountBadge">—</span></a>
+        <a class="nav-item" href="/products-admin"><span>🏷️ Products</span></a>
+        <a class="nav-item active" href="/collections-admin"><span>🗂️ Collections</span></a>
+        <div class="nav-item nav-sub"><span>Inventory</span></div>
+        <div class="nav-item nav-sub"><span>Purchase orders</span></div>
+        <div class="nav-item nav-sub"><span>Transfers</span></div>
+        <div class="nav-item nav-sub"><span>Gift cards</span></div>
+      </div>
+
+      <div class="side-group">
+        <a class="nav-item" href="#"><span>👥 Customers</span></a>
+        <a class="nav-item" href="#"><span>📣 Marketing</span></a>
+        <a class="nav-item" href="#"><span>🏷️ Discounts</span></a>
+        <a class="nav-item" href="#"><span>📝 Content</span></a>
+        <a class="nav-item" href="#"><span>🌍 Markets</span></a>
+        <a class="nav-item" href="#"><span>📊 Analytics</span></a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page">
+        <div id="alertBox" class="alert"></div>
+
+        <div class="page-head">
+          <div class="page-title">🗂️ Collections</div>
+
+          <div class="page-actions">
+            <button class="btn" onclick="refreshCollections()">Refresh</button>
+            <button class="btn primary" onclick="goToCreateCollection()">Add collection</button>
+          </div>
+        </div>
+
+        <section class="summary">
+          <div class="summary-grid">
+            <div class="summary-cell">
+              <div class="summary-label">Overview</div>
+              <div class="summary-value">Collections</div>
+              <div class="summary-sub">Collections backend connected</div>
+            </div>
+
+            <div class="summary-cell">
+              <div class="summary-label">Total</div>
+              <div class="summary-value" id="totalCollectionsValue">—</div>
+              <div class="summary-sub">All collections</div>
+            </div>
+
+            <div class="summary-cell">
+              <div class="summary-label">Active</div>
+              <div class="summary-value" id="activeCollectionsValue">—</div>
+              <div class="summary-sub">Published collections</div>
+            </div>
+
+            <div class="summary-cell">
+              <div class="summary-label">Draft</div>
+              <div class="summary-value" id="draftCollectionsValue">—</div>
+              <div class="summary-sub">Draft collections</div>
+            </div>
+
+            <div class="summary-cell">
+              <div class="summary-label">Archived</div>
+              <div class="summary-value" id="archivedCollectionsValue">—</div>
+              <div class="summary-sub">Archived collections</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="collections-card">
+          <div class="tabs-row">
+            <div class="tabs">
+              <button class="tab active" data-tab="all" onclick="setTab('all')">All</button>
+              <button class="tab" data-tab="active" onclick="setTab('active')">Active</button>
+              <button class="tab" data-tab="draft" onclick="setTab('draft')">Draft</button>
+              <button class="tab" data-tab="archived" onclick="setTab('archived')">Archived</button>
+            </div>
+
+            <div class="tools">
+              <div id="selectionPill" class="selection-pill">0 selected</div>
+              <button class="icon-btn" onclick="toggleFilters()" title="Toggle filters">⚙️</button>
+              <button class="icon-btn" onclick="refreshCollections()" title="Refresh">↻</button>
+              <button class="icon-btn" onclick="toggleBulkMenu()" title="Bulk actions">⋯</button>
+
+              <div id="bulkDropdown" class="dropdown">
+                <button onclick="bulkDeleteSelected()">Delete selected</button>
+                <button onclick="clearSelection()">Clear selection</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="filtersRow" class="filters-row">
+            <div class="field">
+              <input id="searchInput" type="text" placeholder="Search collections">
+            </div>
+
+            <div class="field">
+              <select id="sortSelect">
+                <option value="created_at:DESC">Newest first</option>
+                <option value="created_at:ASC">Oldest first</option>
+                <option value="updated_at:DESC">Recently updated</option>
+                <option value="title:ASC">Title A-Z</option>
+                <option value="title:DESC">Title Z-A</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <select id="limitSelect">
+                <option value="10">10 per page</option>
+                <option value="25" selected>25 per page</option>
+                <option value="50">50 per page</option>
+                <option value="100">100 per page</option>
+              </select>
+            </div>
+
+            <button class="search-btn" onclick="applyFilters()">Search</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th><input id="selectAllCheckbox" class="check" type="checkbox" onchange="toggleSelectAll(this.checked)"></th>
+                  <th>Collection</th>
+                  <th>Products</th>
+                  <th>Status</th>
+                  <th>Sort</th>
+                  <th>Updated</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="collectionsTableBody">
+                <tr>
+                  <td colspan="7" class="empty">Loading collections...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination">
+            <div class="pagination-left" id="paginationInfo">—</div>
+
+            <div class="pagination-right">
+              <button class="btn" id="prevBtn" onclick="goToPrevPage()">Previous</button>
+              <button class="btn" id="nextBtn" onclick="goToNextPage()">Next</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const API_BASE = '/api/collections';
+    let currentTab = 'all';
+    let currentOffset = 0;
+    let currentLimit = 25;
+    let totalCollections = 0;
+    let currentRows = [];
+    let selectedCollectionIds = new Set();
+
+    function qs(id) {
+      return document.getElementById(id);
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function safeText(value, fallback = '') {
+      const text = String(value ?? '').trim();
+      return text || fallback;
+    }
+
+    function formatDate(value) {
+      if (!value) return '—';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '—';
+      return date.toLocaleString('en-GB', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit'
+      });
+    }
+
+    function getStatusBadge(status) {
+      const normalized = String(status || 'active').toLowerCase();
+      const text = normalized === 'draft'
+        ? 'Draft'
+        : normalized === 'archived'
+          ? 'Archived'
+          : 'Active';
+
+      return `<span class="status-badge ${normalized}">${text}</span>`;
+    }
+
+    function getSortLabel(sortMode) {
+      const map = {
+        manual: 'Manual',
+        best_selling: 'Best selling',
+        title_asc: 'Title A-Z',
+        title_desc: 'Title Z-A',
+        price_desc: 'Highest price',
+        price_asc: 'Lowest price',
+        newest: 'Newest',
+        oldest: 'Oldest'
+      };
+
+      return map[sortMode] || 'Manual';
+    }
+
+    function getImageHtml(row) {
+      const image = safeText(row.image_url);
+      if (!image) {
+        return '<div class="thumb-placeholder">🗂️</div>';
+      }
+
+      return `<img class="thumb" src="${image}" alt="${escapeHtml(row.title)}" loading="lazy">`;
+    }
+
+    function buildQueryString() {
+      const search = safeText(qs('searchInput')?.value || qs('desktopSearchTop')?.value || qs('mobileSearchInput')?.value);
+      const limit = Number(qs('limitSelect')?.value || 25);
+      const sortValue = String(qs('sortSelect')?.value || 'created_at:DESC');
+      const [sort, order] = sortValue.split(':');
+
+      currentLimit = limit;
+
+      const params = new URLSearchParams();
+      params.set('limit', String(limit));
+      params.set('offset', String(currentOffset));
+      params.set('sort', sort || 'created_at');
+      params.set('order', order || 'DESC');
+
+      if (currentTab !== 'all') {
+        params.set('status', currentTab);
+      }
+
+      if (search) {
+        params.set('search', search);
+      }
+
+      return params.toString();
+    }
+
+    function showAlert(message, type = 'success') {
+      const box = qs('alertBox');
+      box.textContent = message;
+      box.className = `alert active ${type}`;
+
+      clearTimeout(window.__alertTimer);
+      window.__alertTimer = setTimeout(() => {
+        box.className = 'alert';
+        box.textContent = '';
+      }, 3200);
+    }
+
+    async function loadSummary() {
+      try {
+        const response = await fetch(`${API_BASE}/stats/summary`, { cache: 'no-store' });
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to load collection stats');
+        }
+
+        qs('totalCollectionsValue').textContent = result.data.totalCollections ?? 0;
+        qs('activeCollectionsValue').textContent = result.data.activeCollections ?? 0;
+        qs('draftCollectionsValue').textContent = result.data.draftCollections ?? 0;
+        qs('archivedCollectionsValue').textContent = result.data.archivedCollections ?? 0;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function loadCollections() {
+      try {
+        qs('collectionsTableBody').innerHTML = `
+          <tr>
+            <td colspan="7" class="empty">Loading collections...</td>
+          </tr>
+        `;
+
+        const response = await fetch(`${API_BASE}?${buildQueryString()}`, { cache: 'no-store' });
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to load collections');
+        }
+
+        currentRows = Array.isArray(result.data) ? result.data : [];
+        totalCollections = Number(result.pagination?.total || 0);
+
+        renderTable();
+        renderPagination();
+        updateSelectionUI();
+      } catch (error) {
+        console.error(error);
+        qs('collectionsTableBody').innerHTML = `
+          <tr>
+            <td colspan="7" class="empty">Failed to load collections</td>
+          </tr>
+        `;
+        showAlert(error.message || 'Failed to load collections', 'error');
+      }
+    }
+
+    function renderTable() {
+      const tbody = qs('collectionsTableBody');
+
+      if (!currentRows.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="empty">No collections found</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = currentRows.map(row => `
+        <tr>
+          <td>
+            <input
+              class="check"
+              type="checkbox"
+              ${selectedCollectionIds.has(Number(row.id)) ? 'checked' : ''}
+              onchange="toggleRowSelection(${Number(row.id)}, this.checked)"
+            >
+          </td>
+
+          <td>
+            <div class="collection-cell">
+              ${getImageHtml(row)}
+              <div>
+                <div class="collection-name">${escapeHtml(row.title)}</div>
+                <div class="collection-sub">/${escapeHtml(row.slug || '')}</div>
+              </div>
+            </div>
+          </td>
+
+          <td>${Number(row.product_count || 0)}</td>
+          <td>${getStatusBadge(row.status)}</td>
+          <td>${escapeHtml(getSortLabel(row.sort_mode))}</td>
+          <td>${escapeHtml(formatDate(row.updated_at || row.created_at))}</td>
+
+          <td>
+            <div class="table-actions">
+              <button class="mini-btn" onclick="goToEditCollection(${Number(row.id)})">Edit</button>
+              <button class="mini-btn dark" onclick="viewCollection(${JSON.stringify(row.slug || '')})">View</button>
+              <button class="mini-btn" onclick="toggleRowMenu(${Number(row.id)})">More</button>
+
+              <div id="rowMenu-${Number(row.id)}" class="row-dropdown">
+                <button onclick="duplicateCollection(${Number(row.id)})">Duplicate</button>
+                <button onclick="goToEditCollection(${Number(row.id)})">Edit</button>
+                <button onclick="viewCollection(${JSON.stringify(row.slug || '')})">View</button>
+                <button class="danger" onclick="deleteCollection(${Number(row.id)}, ${JSON.stringify(row.title || '')})">Delete collection</button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderPagination() {
+      const start = totalCollections === 0 ? 0 : currentOffset + 1;
+      const end = Math.min(currentOffset + currentLimit, totalCollections);
+
+      qs('paginationInfo').textContent = `${start}-${end} of ${totalCollections}`;
+
+      qs('prevBtn').disabled = currentOffset <= 0;
+      qs('nextBtn').disabled = currentOffset + currentLimit >= totalCollections;
+    }
+
+    function setTab(tab) {
+      currentTab = tab;
+      currentOffset = 0;
+
+      document.querySelectorAll('.tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+
+      loadCollections();
+    }
+
+    function applyFilters() {
+      currentOffset = 0;
+      loadCollections();
+    }
+
+    function toggleFilters() {
+      qs('filtersRow').classList.toggle('hidden');
+    }
+
+    function goToPrevPage() {
+      if (currentOffset <= 0) return;
+      currentOffset = Math.max(0, currentOffset - currentLimit);
+      loadCollections();
+    }
+
+    function goToNextPage() {
+      if (currentOffset + currentLimit >= totalCollections) return;
+      currentOffset += currentLimit;
+      loadCollections();
+    }
+
+    function goToCreateCollection() {
+      window.location.href = '/collection-edit.html';
+    }
+
+    function goToEditCollection(id) {
+      window.location.href = `/collection-edit.html?id=${encodeURIComponent(id)}`;
+    }
+
+    function viewCollection(slug) {
+      if (!slug) {
+        showAlert('Collection slug is missing', 'error');
+        return;
+      }
+      window.open(`/collection.html?slug=${encodeURIComponent(slug)}`, '_blank');
+    }
+
+    function toggleRowMenu(id) {
+      document.querySelectorAll('.row-dropdown').forEach(menu => {
+        if (menu.id !== `rowMenu-${id}`) {
+          menu.classList.remove('active');
+        }
+      });
+
+      qs(`rowMenu-${id}`)?.classList.toggle('active');
+    }
+
+    function toggleBulkMenu() {
+      qs('bulkDropdown').classList.toggle('active');
+    }
+
+    function closeMenus() {
+      document.querySelectorAll('.row-dropdown').forEach(menu => menu.classList.remove('active'));
+      qs('bulkDropdown')?.classList.remove('active');
+    }
+
+    function toggleRowSelection(id, checked) {
+      const numericId = Number(id);
+      if (checked) {
+        selectedCollectionIds.add(numericId);
+      } else {
+        selectedCollectionIds.delete(numericId);
+      }
+      updateSelectionUI();
+    }
+
+    function toggleSelectAll(checked) {
+      if (checked) {
+        currentRows.forEach(row => selectedCollectionIds.add(Number(row.id)));
+      } else {
+        currentRows.forEach(row => selectedCollectionIds.delete(Number(row.id)));
+      }
+
+      renderTable();
+      updateSelectionUI();
+    }
+
+    function clearSelection() {
+      selectedCollectionIds.clear();
+      qs('selectAllCheckbox').checked = false;
+      renderTable();
+      updateSelectionUI();
+      closeMenus();
+    }
+
+    function updateSelectionUI() {
+      const count = selectedCollectionIds.size;
+      const pill = qs('selectionPill');
+      pill.textContent = `${count} selected`;
+      pill.classList.toggle('active', count > 0);
+
+      const allChecked = currentRows.length > 0 && currentRows.every(row => selectedCollectionIds.has(Number(row.id)));
+      qs('selectAllCheckbox').checked = allChecked;
+    }
+
+    async function duplicateCollection(id) {
+      try {
+        closeMenus();
+
+        const response = await fetch(`${API_BASE}/${id}/duplicate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to duplicate collection');
+        }
+
+        showAlert('Collection duplicated successfully', 'success');
+        await loadSummary();
+        await loadCollections();
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to duplicate collection', 'error');
+      }
+    }
+
+    async function deleteCollection(id, title) {
+      try {
+        closeMenus();
+
+        const confirmed = window.confirm(`Delete collection "${title}"?`);
+        if (!confirmed) return;
+
+        const response = await fetch(`${API_BASE}/${id}`, {
+          method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to delete collection');
+        }
+
+        selectedCollectionIds.delete(Number(id));
+        showAlert('Collection deleted successfully', 'success');
+        await loadSummary();
+        await loadCollections();
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to delete collection', 'error');
+      }
+    }
+
+    async function bulkDeleteSelected() {
+      try {
+        closeMenus();
+
+        const ids = Array.from(selectedCollectionIds);
+        if (!ids.length) {
+          showAlert('No collections selected', 'warning');
+          return;
+        }
+
+        const confirmed = window.confirm(`Delete ${ids.length} selected collection(s)?`);
+        if (!confirmed) return;
+
+        for (const id of ids) {
+          const response = await fetch(`${API_BASE}/${id}`, {
+            method: 'DELETE'
+          });
+
+          const result = await response.json();
+          if (!response.ok || !result.success) {
+            throw new Error(result?.error || `Failed to delete collection ${id}`);
+          }
+        }
+
+        clearSelection();
+        showAlert('Selected collections deleted successfully', 'success');
+        await loadSummary();
+        await loadCollections();
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to delete selected collections', 'error');
+      }
+    }
+
+    async function refreshCollections() {
+      await loadSummary();
+      await loadCollections();
+    }
+
+    function bindSearchInputs() {
+      const desktop = qs('desktopSearchTop');
+      const mobile = qs('mobileSearchInput');
+      const search = qs('searchInput');
+
+      const handler = (value) => {
+        if (search !== document.activeElement) search.value = value;
+        if (desktop !== document.activeElement) desktop.value = value;
+        if (mobile !== document.activeElement) mobile.value = value;
+      };
+
+      desktop?.addEventListener('input', e => handler(e.target.value));
+      mobile?.addEventListener('input', e => handler(e.target.value));
+      search?.addEventListener('input', e => handler(e.target.value));
+
+      desktop?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') applyFilters();
+      });
+
+      mobile?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') applyFilters();
+      });
+
+      search?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') applyFilters();
+      });
+
+      qs('sortSelect')?.addEventListener('change', applyFilters);
+      qs('limitSelect')?.addEventListener('change', applyFilters);
+    }
+
+    async function loadOrdersCountBadge() {
+      try {
+        const response = await fetch('/api/orders?limit=1&offset=0', { cache: 'no-store' });
+        const result = await response.json();
+        if (response.ok && result.success) {
+          qs('ordersCountBadge').textContent = Number(result.pagination?.total || 0);
+        }
+      } catch (_) {
+        qs('ordersCountBadge').textContent = '—';
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.table-actions') && !e.target.closest('.tools')) {
+        closeMenus();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      bindSearchInputs();
+      await loadOrdersCountBadge();
+      await loadSummary();
+      await loadCollections();
+    });
+  </script>
+</body>
+</html>

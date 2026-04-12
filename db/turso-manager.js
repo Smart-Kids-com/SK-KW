@@ -5,7 +5,7 @@ const { createClient } = require('@libsql/client');
 const { SYSTEM_CONFIG } = require('../config/system');
 
 const USE_TURSO = !!process.env.DATABASE_URL;
-const DB_PATH = path.join(__dirname, '..', SYSTEM_CONFIG.DATABASE_CONFIG.NAME);
+const DB_PATH = path.join(__dirname, '.', SYSTEM_CONFIG.DATABASE_CONFIG.NAME);
 
 let client = null;
 
@@ -250,6 +250,34 @@ class DatabaseManager {
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
       )`,
 
+      `CREATE TABLE IF NOT EXISTS collections (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        slug TEXT NOT NULL UNIQUE,
+        description TEXT DEFAULT '',
+        image_url TEXT DEFAULT '',
+        sort_mode TEXT NOT NULL DEFAULT 'manual',
+        status TEXT NOT NULL DEFAULT 'active',
+        theme_template TEXT DEFAULT 'default-collection',
+        seo_title TEXT DEFAULT '',
+        seo_description TEXT DEFAULT '',
+        online_store INTEGER NOT NULL DEFAULT 1,
+        pos_excluded INTEGER NOT NULL DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )`,
+
+      `CREATE TABLE IF NOT EXISTS collection_products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        collection_id INTEGER NOT NULL,
+        product_id INTEGER NOT NULL,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(collection_id, product_id),
+        FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+      )`,
+
       `CREATE INDEX IF NOT EXISTS idx_order_number ON ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}(order_number)`,
       `CREATE INDEX IF NOT EXISTS idx_order_status ON ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}(status)`,
       `CREATE INDEX IF NOT EXISTS idx_order_created_at ON ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}(created_at)`,
@@ -259,7 +287,13 @@ class DatabaseManager {
       `CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug)`,
       `CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku)`,
       `CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(product_id)`,
-      `CREATE INDEX IF NOT EXISTS idx_product_images_sort_order ON product_images(sort_order)`
+      `CREATE INDEX IF NOT EXISTS idx_product_images_sort_order ON product_images(sort_order)`,
+
+      `CREATE INDEX IF NOT EXISTS idx_collections_slug ON collections(slug)`,
+      `CREATE INDEX IF NOT EXISTS idx_collections_status ON collections(status)`,
+      `CREATE INDEX IF NOT EXISTS idx_collection_products_collection_id ON collection_products(collection_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_collection_products_product_id ON collection_products(product_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_collection_products_sort_order ON collection_products(sort_order)`
     ];
 
     const migrationCommands = [
@@ -268,7 +302,15 @@ class DatabaseManager {
       `ALTER TABLE products ADD COLUMN category TEXT DEFAULT ''`,
       `ALTER TABLE products ADD COLUMN tags TEXT DEFAULT ''`,
       `ALTER TABLE products ADD COLUMN seo_title TEXT DEFAULT ''`,
-      `ALTER TABLE products ADD COLUMN seo_description TEXT DEFAULT ''`
+      `ALTER TABLE products ADD COLUMN seo_description TEXT DEFAULT ''`,
+
+      `ALTER TABLE collections ADD COLUMN sort_mode TEXT NOT NULL DEFAULT 'manual'`,
+      `ALTER TABLE collections ADD COLUMN status TEXT NOT NULL DEFAULT 'active'`,
+      `ALTER TABLE collections ADD COLUMN theme_template TEXT DEFAULT 'default-collection'`,
+      `ALTER TABLE collections ADD COLUMN seo_title TEXT DEFAULT ''`,
+      `ALTER TABLE collections ADD COLUMN seo_description TEXT DEFAULT ''`,
+      `ALTER TABLE collections ADD COLUMN online_store INTEGER NOT NULL DEFAULT 1`,
+      `ALTER TABLE collections ADD COLUMN pos_excluded INTEGER NOT NULL DEFAULT 1`
     ];
 
     for (const sql of sqlCommands) {
@@ -291,7 +333,8 @@ class DatabaseManager {
         if (
           !message.includes('duplicate column') &&
           !message.includes('already exists') &&
-          !message.includes('duplicate')
+          !message.includes('duplicate') &&
+          !message.includes('no such table')
         ) {
           console.warn('⚠️ تحذير migration:', err.message);
         }
