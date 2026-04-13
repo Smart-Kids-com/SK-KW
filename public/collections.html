@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>المجموعات - Smart Kids Kuwait</title>
-  <meta name="description" content="تصفح مجموعات Smart Kids Kuwait المتنوعة - مونتيسوري، القصص التفاعلية، الكتب الإسلامية وأكثر">
+  <meta name="description" content="تصفح جميع المجموعات في Smart Kids Kuwait">
   <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457">
 
   <style>
@@ -285,7 +285,7 @@
     .collection-icon {
       font-size: 2.2rem;
       margin-bottom: 0.65rem;
-      display: block;
+      display: none;
     }
 
     .collection-title {
@@ -302,6 +302,7 @@
       font-size: 0.88rem;
       line-height: 1.55;
       min-height: 56px;
+      display: none;
     }
 
     .collection-count {
@@ -465,18 +466,18 @@
 
     <div class="side-menu__footer">
       <div class="side-menu__social">
-        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.png" alt="Facebook"></a>
-        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.png" alt="Instagram"></a>
-        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.png" alt="Pinterest"></a>
-        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.png" alt="TikTok"></a>
-        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.png" alt="Snapchat"></a>
-        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.png" alt="YouTube"></a>
+        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.webp" alt="Facebook"></a>
+        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.webp" alt="Instagram"></a>
+        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.webp" alt="Pinterest"></a>
+        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.webp" alt="TikTok"></a>
+        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.webp" alt="Snapchat"></a>
+        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.webp" alt="YouTube"></a>
       </div>
     </div>
   </aside>
 
   <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
-    <img src="/icon-whatsapp.png" alt="WhatsApp" class="whatsapp-icon-img">
+    <img src="/icon-whatsapp.webp" alt="WhatsApp" class="whatsapp-icon-img">
   </a>
 
   <div class="container">
@@ -510,57 +511,6 @@
       return text || fallback;
     }
 
-    function getCollectionMeta(title) {
-      const value = safeText(title).toLowerCase();
-
-      if (value.includes('islam') || value.includes('إسلام') || value.includes('اسلام')) {
-        return {
-          icon: '🕌',
-          description: 'منتجات وكتب وقصص تعليمية ذات طابع إسلامي للأطفال.'
-        };
-      }
-
-      if (value.includes('book') || value.includes('قصص') || value.includes('كتب')) {
-        return {
-          icon: '📚',
-          description: 'قصص وكتب تعليمية وتفاعلية تناسب مختلف الأعمار.'
-        };
-      }
-
-      if (value.includes('audio') || value.includes('صوت')) {
-        return {
-          icon: '🎧',
-          description: 'منتجات صوتية تعليمية وترفيهية للأطفال.'
-        };
-      }
-
-      if (value.includes('montessori') || value.includes('مونتيسوري')) {
-        return {
-          icon: '🧩',
-          description: 'ألعاب وأنشطة تعليمية مستوحاة من منهج مونتيسوري.'
-        };
-      }
-
-      if (value.includes('baby') || value.includes('رضع') || value.includes('مواليد')) {
-        return {
-          icon: '🍼',
-          description: 'منتجات مناسبة للأطفال الصغار والرضع.'
-        };
-      }
-
-      if (value.includes('offer') || value.includes('عرض') || value.includes('خصم')) {
-        return {
-          icon: '🎁',
-          description: 'عروض ومنتجات مختارة بأسعار مميزة.'
-        };
-      }
-
-      return {
-        icon: '🧸',
-        description: 'مجموعة مميزة من المنتجات المناسبة للأطفال.'
-      };
-    }
-
     function getCollectionUrl(collection) {
       const slug = safeText(collection.slug);
       const id = safeText(collection.id);
@@ -588,15 +538,12 @@
 
       return collections
         .filter(item => String(item.status || 'active').toLowerCase() !== 'archived')
-        .map((item) => {
-          const meta = getCollectionMeta(item.title);
-          return {
-            ...item,
-            icon: meta.icon,
-            description: safeText(item.description, meta.description),
-            product_count: Number(item.product_count || 0)
-          };
-        });
+        .map((item) => ({
+          ...item,
+          icon: safeText(item.icon, ''),
+          description: safeText(item.description, ''),
+          product_count: Number(item.product_count || 0)
+        }));
     }
 
     async function loadCollections() {
@@ -623,12 +570,17 @@
 
       grid.innerHTML = collections.map(collection => {
         const url = getCollectionUrl(collection);
+        const title = safeText(collection.title, 'مجموعة');
+        const description = safeText(collection.description, '');
+        const icon = safeText(collection.icon, '');
+        const count = Number(collection.product_count || 0);
+
         return `
           <div class="collection-card" onclick="openCollection(${JSON.stringify(collection.slug || '')}, ${JSON.stringify(String(collection.id || ''))})">
-            <span class="collection-icon">${collection.icon}</span>
-            <h3 class="collection-title">${escapeHtml(collection.title)}</h3>
-            <p class="collection-description">${escapeHtml(collection.description)}</p>
-            <div class="collection-count">${collection.product_count || 0} منتج</div>
+            ${icon ? `<span class="collection-icon" style="display:block;">${escapeHtml(icon)}</span>` : ``}
+            <h3 class="collection-title">${escapeHtml(title)}</h3>
+            ${description ? `<p class="collection-description" style="display:block;">${escapeHtml(description)}</p>` : ``}
+            <div class="collection-count">${count} منتج</div>
             <a href="${url}" class="browse-btn" onclick="event.stopPropagation()">تصفح المجموعة</a>
           </div>
         `;
