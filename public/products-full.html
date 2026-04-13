@@ -807,26 +807,27 @@
       <nav class="side-menu__nav">
         <a href="./index.html">الصفحة الرئيسية</a>
         <a href="./products-full.html">كل المنتجات</a>
+        <a href="./collections.html">المجموعات</a>
         <a href="./cart.html">عربة التسوق</a>
         <a href="./checkout.html">إتمام الطلب</a>
       </nav>
     </div>
 
     <div class="side-menu__footer">
-      <div class="side-menu__social">
-        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.png" alt="Facebook"></a>
-        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.png" alt="Instagram"></a>
-        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.png" alt="Pinterest"></a>
-        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.png" alt="TikTok"></a>
-        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.png" alt="Snapchat"></a>
-        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.png" alt="YouTube"></a>
-      </div>
-    </div>
-  </aside>
+  <div class="side-menu__social">
+    <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.webp" alt="Facebook"></a>
+    <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.webp" alt="Instagram"></a>
+    <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.webp" alt="Pinterest"></a>
+    <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.webp" alt="TikTok"></a>
+    <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.webp" alt="Snapchat"></a>
+    <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.webp" alt="YouTube"></a>
+  </div>
+</div>
+</aside>
 
-  <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
-    <img src="/icon-whatsapp.png" alt="WhatsApp" class="whatsapp-icon-img">
-  </a>
+<a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
+  <img src="/icon-whatsapp.webp" alt="WhatsApp" class="whatsapp-icon-img">
+</a>
 
   <div class="toast" id="cartToast">
     <div class="toast-inner">
@@ -848,6 +849,7 @@
   <div class="container">
     <div class="nav">
       <a href="#products">المنتجات</a>
+      <a href="./collections.html">المجموعات</a>
       <a href="./cart.html">🛍️ السلة</a>
     </div>
 
@@ -856,7 +858,6 @@
         type="text"
         class="search-input"
         id="mainSearchInput"
-        data-products-search
         placeholder="🔍 ابحث في المنتجات بالاسم أو الوصف أو الفئة..."
       >
     </div>
@@ -893,142 +894,354 @@
   </div>
 
   <script>
+    const PRODUCTS_API = '/api/products?status=active&limit=1000&offset=0&sort=created_at&order=DESC';
+
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
     let toastTimer = null;
 
-    window.DATA_URL_CANDIDATES = ["/api/products?status=active&limit=1000"];
+    let allProducts = [];
+    let filteredProducts = [];
+    let currentCategory = 'الكل';
+    let visibleCount = 12;
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function safeText(value, fallback = '') {
+      const text = String(value ?? '').trim();
+      return text || fallback;
+    }
+
+    function normalizeText(value) {
+      return safeText(value).toLowerCase();
+    }
+
+    function extractTitle(product) {
+      return safeText(product.product_name ?? product.name ?? product.title, 'منتج');
+    }
+
+    function extractDescription(product) {
+      return safeText(product.description ?? product.body_html, '');
+    }
+
+    function extractCategory(product) {
+      return safeText(product.category ?? product.product_type ?? product.type, 'غير مصنف');
+    }
+
+    function extractPrice(product) {
+      return Number(product.price ?? product.sale_price ?? 0) || 0;
+    }
+
+    function extractImage(product) {
+      const image =
+        product.primary_image ||
+        product.image_url ||
+        product.image ||
+        (Array.isArray(product.images) && product.images[0] && (product.images[0].image_url || product.images[0].src || product.images[0].url)) ||
+        '';
+
+      return safeText(image, `https://via.placeholder.com/400x400?text=${encodeURIComponent(extractTitle(product))}`);
+    }
+
+    function getProductUrl(product) {
+      const slug = safeText(product.slug);
+      const id = safeText(product.id);
+
+      if (slug) return `./product-page.html?slug=${encodeURIComponent(slug)}`;
+      return `./product-page.html?id=${encodeURIComponent(id)}`;
+    }
 
     function saveCart() {
-      localStorage.setItem("cart", JSON.stringify(cart));
+      localStorage.setItem('cart', JSON.stringify(cart));
     }
 
     function updateCartDisplay() {
       const totalQty = cart.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
       const badges = [
-        document.getElementById("cartBadge"),
-        document.getElementById("menuCartBadge")
+        document.getElementById('cartBadge'),
+        document.getElementById('menuCartBadge')
       ];
 
       badges.forEach((badge) => {
         if (!badge) return;
 
         if (totalQty > 0) {
-          badge.style.display = "flex";
+          badge.style.display = 'flex';
           badge.textContent = totalQty;
         } else {
-          badge.style.display = "none";
-          badge.textContent = "0";
+          badge.style.display = 'none';
+          badge.textContent = '0';
         }
       });
     }
 
-    function normalizeCartProduct(name, price, id, image) {
-      return {
-        id: id || name,
-        name: name || "منتج",
-        price: Number(price) || 0,
-        quantity: 1,
-        image: image || ""
-      };
+    function showCartToast(product) {
+      const toast = document.getElementById('cartToast');
+      const toastImage = document.getElementById('toastImage');
+      const toastName = document.getElementById('toastName');
+
+      if (toastImage) {
+        toastImage.src = extractImage(product);
+      }
+
+      if (toastName) {
+        toastName.textContent = extractTitle(product);
+      }
+
+      toast.classList.add('show');
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3200);
     }
 
-    window.addToCart = function(name, price, id, btn, image) {
-      const itemId = id || name || "منتج";
+    function hideCartToast() {
+      const toast = document.getElementById('cartToast');
+      if (toast) toast.classList.remove('show');
+      clearTimeout(toastTimer);
+    }
+
+    function addToCart(product) {
+      const itemId = product.id || product.slug || extractTitle(product);
       const existing = cart.find(item => String(item.id) === String(itemId));
 
       if (existing) {
         existing.quantity += 1;
       } else {
-        cart.push(normalizeCartProduct(name, price, itemId, image));
+        cart.push({
+          id: itemId,
+          name: extractTitle(product),
+          price: extractPrice(product),
+          quantity: 1,
+          image: extractImage(product)
+        });
       }
 
       saveCart();
       updateCartDisplay();
-      showCartToast(name, image);
-    };
-
-    function showCartToast(name, image) {
-      const toast = document.getElementById("cartToast");
-      const toastImage = document.getElementById("toastImage");
-      const toastName = document.getElementById("toastName");
-
-      if (toastImage) {
-        toastImage.src = image || "https://via.placeholder.com/300x300?text=Product";
-      }
-
-      if (toastName) {
-        toastName.textContent = name || "منتج";
-      }
-
-      toast.classList.add("show");
-
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        toast.classList.remove("show");
-      }, 3200);
-    }
-
-    function hideCartToast() {
-      const toast = document.getElementById("cartToast");
-      if (toast) toast.classList.remove("show");
-      clearTimeout(toastTimer);
+      showCartToast(product);
     }
 
     function openMenu() {
-      document.body.classList.add("menu-open");
+      document.body.classList.add('menu-open');
     }
 
     function closeMenu() {
-      document.body.classList.remove("menu-open");
+      document.body.classList.remove('menu-open');
     }
 
     function focusMainSearch() {
       closeMenu();
-      const input = document.getElementById("mainSearchInput");
+      const input = document.getElementById('mainSearchInput');
       if (!input) return;
-      input.scrollIntoView({ behavior: "smooth", block: "center" });
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
       setTimeout(() => input.focus(), 250);
     }
 
     function toggleMobileFilters() {
-      const sidebar = document.getElementById("sidebarFilters");
-      const icon = document.getElementById("filterToggleIcon");
+      const sidebar = document.getElementById('sidebarFilters');
+      const icon = document.getElementById('filterToggleIcon');
       if (!sidebar || !icon) return;
 
-      sidebar.classList.toggle("mobile-open");
-      icon.textContent = sidebar.classList.contains("mobile-open") ? "⌃" : "⌄";
+      sidebar.classList.toggle('mobile-open');
+      icon.textContent = sidebar.classList.contains('mobile-open') ? '⌃' : '⌄';
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    function updateStats() {
+      const stats = document.getElementById('productsStats');
+      const strong = stats.querySelector('strong');
+      if (strong) {
+        strong.textContent = filteredProducts.length;
+      }
+    }
+
+    function buildCategoryFilters() {
+      const container = document.getElementById('categoryFilters');
+      const categories = [...new Set(allProducts.map(extractCategory).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ar'));
+
+      container.innerHTML = `
+        <button class="filter-btn ${currentCategory === 'الكل' ? 'active' : ''}" data-category="الكل">الكل</button>
+        ${categories.map(cat => `
+          <button class="filter-btn ${currentCategory === cat ? 'active' : ''}" data-category="${escapeHtml(cat)}">${escapeHtml(cat)}</button>
+        `).join('')}
+      `;
+
+      container.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentCategory = btn.dataset.category || 'الكل';
+          visibleCount = 12;
+          applyFilters();
+        });
+      });
+    }
+
+    function applyFilters() {
+      const query = normalizeText(document.getElementById('mainSearchInput').value);
+
+      filteredProducts = allProducts.filter(product => {
+        const matchesCategory = currentCategory === 'الكل' || extractCategory(product) === currentCategory;
+
+        if (!matchesCategory) return false;
+
+        if (!query) return true;
+
+        const haystack = normalizeText([
+          extractTitle(product),
+          extractDescription(product),
+          extractCategory(product),
+          product.vendor || '',
+          product.sku || '',
+          product.tags || ''
+        ].join(' '));
+
+        return haystack.includes(query);
+      });
+
+      buildCategoryFilters();
+      updateStats();
+      renderProducts();
+    }
+
+    function productCard(product) {
+      const title = extractTitle(product);
+      const description = extractDescription(product);
+      const category = extractCategory(product);
+      const price = extractPrice(product);
+      const image = extractImage(product);
+      const url = getProductUrl(product);
+      const id = product.id || product.slug || title;
+
+      return `
+        <article class="product">
+          <div class="product-image">
+            <a href="${url}">
+              <img src="${image}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x400?text=${encodeURIComponent(title)}'">
+            </a>
+          </div>
+
+          <div class="product-info">
+            <a href="${url}">
+              <div class="product-title">${escapeHtml(title)}</div>
+            </a>
+
+            <div class="product-description">${escapeHtml(description || 'وصف المنتج غير متوفر حالياً')}</div>
+            <div class="product-category">${escapeHtml(category)}</div>
+            <div class="product-price">KWD ${price.toFixed(3)}</div>
+
+            <div class="product-actions">
+              <button class="add-to-cart" type="button" data-product-id="${escapeHtml(String(id))}">إضافة إلى السلة</button>
+              <a class="view-product-btn" href="${url}">عرض المنتج</a>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderProducts() {
+      const container = document.getElementById('products');
+      const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+      if (!filteredProducts.length) {
+        container.innerHTML = `<div class="loading">لا توجد منتجات مطابقة</div>`;
+        loadMoreBtn.style.display = 'none';
+        return;
+      }
+
+      const visibleItems = filteredProducts.slice(0, visibleCount);
+      container.innerHTML = visibleItems.map(productCard).join('');
+
+      container.querySelectorAll('[data-product-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.productId;
+          const product = allProducts.find(p => String(p.id || p.slug || extractTitle(p)) === String(id));
+          if (product) addToCart(product);
+        });
+      });
+
+      loadMoreBtn.style.display = visibleCount < filteredProducts.length ? 'inline-flex' : 'none';
+    }
+
+    async function loadProducts() {
+      try {
+        const response = await fetch(PRODUCTS_API, {
+          cache: 'no-store',
+          headers: { Accept: 'application/json' }
+        });
+
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok || !result || !result.success) {
+          throw new Error(result?.error || `HTTP ${response.status}`);
+        }
+
+        allProducts = Array.isArray(result.data) ? result.data : [];
+        filteredProducts = [...allProducts];
+
+        buildCategoryFilters();
+        updateStats();
+        renderProducts();
+      } catch (error) {
+        console.error(error);
+        document.getElementById('products').innerHTML = `
+          <div class="loading">⚠️ حدث خطأ أثناء تحميل المنتجات</div>
+        `;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
       updateCartDisplay();
+      loadProducts();
 
-      const menuBtn = document.getElementById("menuBtn");
-      const menuClose = document.getElementById("menuClose");
-      const menuBackdrop = document.getElementById("menuBackdrop");
-      const searchBtn = document.getElementById("searchBtn");
-      const filterToggleBtn = document.getElementById("filterToggleBtn");
-      const toastClose = document.getElementById("toastClose");
-      const toastContinue = document.getElementById("toastContinue");
+      const menuBtn = document.getElementById('menuBtn');
+      const menuClose = document.getElementById('menuClose');
+      const menuBackdrop = document.getElementById('menuBackdrop');
+      const searchBtn = document.getElementById('searchBtn');
+      const filterToggleBtn = document.getElementById('filterToggleBtn');
+      const toastClose = document.getElementById('toastClose');
+      const toastContinue = document.getElementById('toastContinue');
+      const loadMoreBtn = document.getElementById('loadMoreBtn');
+      const mainSearchInput = document.getElementById('mainSearchInput');
 
-      if (menuBtn) menuBtn.addEventListener("click", openMenu);
-      if (menuClose) menuClose.addEventListener("click", closeMenu);
-      if (menuBackdrop) menuBackdrop.addEventListener("click", closeMenu);
-      if (searchBtn) searchBtn.addEventListener("click", focusMainSearch);
-      if (filterToggleBtn) filterToggleBtn.addEventListener("click", toggleMobileFilters);
+      if (menuBtn) menuBtn.addEventListener('click', openMenu);
+      if (menuClose) menuClose.addEventListener('click', closeMenu);
+      if (menuBackdrop) menuBackdrop.addEventListener('click', closeMenu);
+      if (searchBtn) searchBtn.addEventListener('click', focusMainSearch);
+      if (filterToggleBtn) filterToggleBtn.addEventListener('click', toggleMobileFilters);
 
       if (toastClose) {
-        toastClose.addEventListener("click", hideCartToast);
+        toastClose.addEventListener('click', hideCartToast);
       }
 
       if (toastContinue) {
-        toastContinue.addEventListener("click", (e) => {
+        toastContinue.addEventListener('click', (e) => {
           e.preventDefault();
           hideCartToast();
         });
       }
 
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
+      if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', () => {
+          visibleCount += 12;
+          renderProducts();
+        });
+      }
+
+      if (mainSearchInput) {
+        mainSearchInput.addEventListener('input', () => {
+          visibleCount = 12;
+          applyFilters();
+        });
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
           closeMenu();
           hideCartToast();
         }
@@ -1036,7 +1249,6 @@
     });
   </script>
 
-  <script src="./products-loader.js"></script>
   <div id="site-footer"></div>
   <script src="./footer.js"></script>
 </body>

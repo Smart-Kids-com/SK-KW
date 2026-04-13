@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title id="pageTitle">مجموعة - Smart Kids Kuwait</title>
-  <meta name="description" id="pageDescription" content="تصفح منتجات المجموعة المختارة من Smart Kids Kuwait" />
+  <meta name="description" id="pageDescription" content="مجموعة - Smart Kids Kuwait" />
   <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457" />
 
   <style>
@@ -167,6 +167,7 @@
       font-size: 1.8rem;
       line-height: 1;
       flex: 0 0 auto;
+      display: none;
     }
 
     .collection-info h1 {
@@ -181,6 +182,7 @@
       color: rgba(255,255,255,.84);
       font-size: 0.95rem;
       line-height: 1.45;
+      display: none;
     }
 
     .collection-stats {
@@ -669,7 +671,7 @@
   </header>
 
   <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
-    <img src="/icon-whatsapp.png" alt="WhatsApp" class="whatsapp-icon-img">
+    <img src="/icon-whatsapp.webp" alt="WhatsApp" class="whatsapp-icon-img">
   </a>
 
   <div class="toast" id="cartToast">
@@ -691,10 +693,10 @@
 
   <div class="collection-hero">
     <div class="collection-header">
-      <span class="collection-icon" id="collectionIcon">📦</span>
+      <span class="collection-icon" id="collectionIcon"></span>
       <div class="collection-info">
         <h1 id="collectionTitle">تحميل المجموعة...</h1>
-        <p id="collectionDescription">جاري التحميل...</p>
+        <p id="collectionDescription"></p>
       </div>
     </div>
 
@@ -764,59 +766,8 @@
       return Number.isFinite(n) ? n : fallback;
     }
 
-    function normalizeCategory(value) {
-      return String(value || 'عام').trim() || 'عام';
-    }
-
-    function getCollectionMeta(title) {
-      const value = normalizeCategory(title).toLowerCase();
-
-      if (value.includes('islam') || value.includes('إسلام') || value.includes('اسلام')) {
-        return {
-          icon: '🕌',
-          description: 'منتجات وكتب وقصص تعليمية ذات طابع إسلامي للأطفال.'
-        };
-      }
-
-      if (value.includes('book') || value.includes('قصص') || value.includes('كتب')) {
-        return {
-          icon: '📚',
-          description: 'قصص وكتب تعليمية وتفاعلية تناسب مختلف الأعمار.'
-        };
-      }
-
-      if (value.includes('audio') || value.includes('صوت')) {
-        return {
-          icon: '🎧',
-          description: 'منتجات صوتية تعليمية وترفيهية للأطفال.'
-        };
-      }
-
-      if (value.includes('montessori') || value.includes('مونتيسوري')) {
-        return {
-          icon: '🧩',
-          description: 'ألعاب وأنشطة تعليمية مستوحاة من منهج مونتيسوري.'
-        };
-      }
-
-      if (value.includes('baby') || value.includes('رضع') || value.includes('مواليد')) {
-        return {
-          icon: '🍼',
-          description: 'منتجات مناسبة للأطفال الصغار والرضع.'
-        };
-      }
-
-      if (value.includes('offer') || value.includes('عرض') || value.includes('خصم')) {
-        return {
-          icon: '🎁',
-          description: 'عروض ومنتجات مختارة بأسعار مميزة.'
-        };
-      }
-
-      return {
-        icon: '🧸',
-        description: 'مجموعة مميزة من المنتجات المناسبة للأطفال.'
-      };
+    function getCollectionIcon(collection) {
+      return safeText(collection?.icon, '');
     }
 
     function getProductTitle(product) {
@@ -824,7 +775,7 @@
     }
 
     function getProductVendor(product) {
-      return safeText(product.vendor, 'الأطفال المبتكرون الكويت');
+      return safeText(product.vendor, '');
     }
 
     function extractPrice(product) {
@@ -948,17 +899,19 @@
       }
 
       const products = Array.isArray(result.data) ? result.data : [];
-      const normalizedCategory = normalizeCategory(category);
+      const categoryName = safeText(category, 'المجموعة');
 
       return {
         id: null,
         slug: '',
-        title: normalizedCategory,
-        description: getCollectionMeta(normalizedCategory).description,
+        title: categoryName,
+        description: '',
+        icon: '',
         sort_mode: 'manual',
-        products: products.filter(product =>
-          normalizeCategory(product.category ?? product.category_name ?? product.product_type) === normalizedCategory
-        )
+        products: products.filter(product => {
+          const candidate = safeText(product.category ?? product.category_name ?? product.product_type, '');
+          return candidate === categoryName;
+        })
       };
     }
 
@@ -1001,18 +954,37 @@
 
     function updateCollectionInfo() {
       const title = currentCollectionTitle || 'المجموعة';
-      const meta = getCollectionMeta(title);
-      const description = safeText(currentCollection?.description, meta.description);
+      const description = safeText(currentCollection?.description, '');
       const sortMode = safeText(currentCollection?.sort_mode, 'manual');
 
-      document.getElementById('collectionIcon').textContent = meta.icon;
+      const iconEl = document.getElementById('collectionIcon');
+      const descEl = document.getElementById('collectionDescription');
+
+      const iconValue = getCollectionIcon(currentCollection);
+
+      if (iconValue) {
+        iconEl.textContent = iconValue;
+        iconEl.style.display = 'inline-block';
+      } else {
+        iconEl.textContent = '';
+        iconEl.style.display = 'none';
+      }
+
       document.getElementById('collectionTitle').textContent = title;
-      document.getElementById('collectionDescription').textContent = description;
+
+      if (description) {
+        descEl.textContent = description;
+        descEl.style.display = 'block';
+      } else {
+        descEl.textContent = '';
+        descEl.style.display = 'none';
+      }
+
       document.getElementById('productCount').textContent = `${allCollectionProducts.length || 0} منتج`;
       document.getElementById('collectionSortBadge').textContent = getSortLabel(sortMode);
 
       document.getElementById('pageTitle').textContent = `${title} - Smart Kids Kuwait`;
-      document.getElementById('pageDescription').setAttribute('content', description);
+      document.getElementById('pageDescription').setAttribute('content', description || title);
       document.title = `${title} - Smart Kids Kuwait`;
     }
 
@@ -1054,7 +1026,7 @@
 
               <div class="product-info">
                 <div class="product-title">${escapeHtml(title)}</div>
-                <div class="product-vendor">${escapeHtml(vendor)}</div>
+                ${vendor ? `<div class="product-vendor">${escapeHtml(vendor)}</div>` : ``}
 
                 <div class="price-stack">
                   ${comparePrice && comparePrice > price ? `<div class="product-compare-price">${comparePrice.toFixed(3)} KWD</div>` : ``}
