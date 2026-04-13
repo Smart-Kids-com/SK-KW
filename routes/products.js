@@ -112,7 +112,6 @@ async function enrichProduct(product) {
   };
 }
 
-
 async function makeUniqueSlug(baseText = '', excludeId = null) {
   const base = slugify(baseText) || `product-${Date.now()}`;
   let candidate = base;
@@ -705,6 +704,7 @@ router.get('/', async (req, res) => {
         OR category LIKE ?
         OR tags LIKE ?
       )`);
+
       const searchValue = `%${String(search).trim()}%`;
       params.push(
         searchValue,
@@ -741,7 +741,10 @@ router.get('/', async (req, res) => {
     sql += ` ORDER BY ${sortColumn} ${sortOrder}`;
     sql += ` LIMIT ? OFFSET ?`;
 
-    params.push(toInteger(limit, 50), toInteger(offset, 0));
+    const parsedLimit = Math.max(1, toInteger(limit, 50));
+    const parsedOffset = Math.max(0, toInteger(offset, 0));
+
+    params.push(parsedLimit, parsedOffset);
 
     const products = await db.all(sql, params);
     const enrichedProducts = await enrichProducts(products);
@@ -752,6 +755,7 @@ router.get('/', async (req, res) => {
     if (where.length > 0) {
       countSql += ` WHERE ${where.join(' AND ')}`;
       if (status) countParams.push(status);
+
       if (search) {
         const searchValue = `%${String(search).trim()}%`;
         countParams.push(
@@ -769,8 +773,6 @@ router.get('/', async (req, res) => {
 
     const countResult = await db.get(countSql, countParams);
     const total = Number(countResult?.total || 0);
-    const parsedLimit = toInteger(limit, 50);
-    const parsedOffset = toInteger(offset, 0);
 
     return res.json({
       success: true,
@@ -779,7 +781,7 @@ router.get('/', async (req, res) => {
         total,
         limit: parsedLimit,
         offset: parsedOffset,
-        totalPages: Math.ceil(total / parsedLimit)
+        totalPages: Math.ceil(total / Math.max(1, parsedLimit))
       }
     });
   } catch (error) {

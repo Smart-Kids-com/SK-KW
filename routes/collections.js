@@ -48,6 +48,18 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+function normalizeBooleanFlag(value, defaultValue = true) {
+  if (value === undefined || value === null || value === '') return defaultValue ? 1 : 0;
+  if (typeof value === 'boolean') return value ? 1 : 0;
+  if (typeof value === 'number') return value ? 1 : 0;
+
+  const text = String(value).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(text)) return 1;
+  if (['0', 'false', 'no', 'off'].includes(text)) return 0;
+
+  return defaultValue ? 1 : 0;
+}
+
 async function makeUniqueSlug(baseText = '', excludeId = null) {
   const base = slugify(baseText) || `collection-${Date.now()}`;
   let candidate = base;
@@ -84,18 +96,6 @@ function normalizeIncomingCollectionBody(body = {}) {
         ? body.products.map(item => item?.product_id ?? item?.id).filter(Boolean)
         : []
   };
-}
-
-function normalizeBooleanFlag(value, defaultValue = true) {
-  if (value === undefined || value === null || value === '') return defaultValue;
-  if (typeof value === 'boolean') return value ? 1 : 0;
-  if (typeof value === 'number') return value ? 1 : 0;
-
-  const text = String(value).trim().toLowerCase();
-  if (['1', 'true', 'yes', 'on'].includes(text)) return 1;
-  if (['0', 'false', 'no', 'off'].includes(text)) return 0;
-
-  return defaultValue ? 1 : 0;
 }
 
 async function getCollectionById(id) {
@@ -734,6 +734,8 @@ router.post('/:id/products/move', async (req, res) => {
       order += 1;
     }
 
+    await reindexCollectionProducts(id);
+
     const products = await getCollectionProducts(id, 'manual');
 
     return res.json({
@@ -745,7 +747,7 @@ router.post('/:id/products/move', async (req, res) => {
     console.error('❌ خطأ في نقل المنتجات داخل المجموعة:', error);
     return res.status(500).json({
       success: false,
-      error: 'فشل في نقل المنتجات داخل المجموعة'
+      error: 'فشل في نقل المنتجات'
     });
   }
 });
@@ -785,15 +787,6 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const collection = await getCollectionById(id);
-
-    if (!collection) {
-      return res.status(404).json({
-        success: false,
-        error: 'المجموعة غير موجودة'
-      });
-    }
-
     const {
       title,
       slug,
@@ -808,10 +801,18 @@ router.put('/:id', async (req, res) => {
       posExcluded
     } = normalizeIncomingCollectionBody(req.body);
 
+    const collection = await getCollectionById(id);
+    if (!collection) {
+      return res.status(404).json({
+        success: false,
+        error: 'المجموعة غير موجودة'
+      });
+    }
+
     const updateFields = [];
     const updateValues = [];
 
-    if (req.body.title !== undefined || req.body.name !== undefined) {
+    if (title !== undefined && req.body.title !== undefined) {
       const finalTitle = normalizeText(title);
       if (!finalTitle) {
         return res.status(400).json({
@@ -819,48 +820,47 @@ router.put('/:id', async (req, res) => {
           error: 'عنوان المجموعة غير صحيح'
         });
       }
-
       updateFields.push('title = ?');
       updateValues.push(finalTitle);
     }
 
-    if (req.body.slug !== undefined || req.body.handle !== undefined) {
-      const finalSlug = await makeUniqueSlug(slug || title || collection.title, id);
+    if (slug !== undefined && (req.body.slug !== undefined || req.body.handle !== undefined)) {
+      const finalSlug = await makeUniqueSlug(slug || collection.title, id);
       updateFields.push('slug = ?');
       updateValues.push(finalSlug);
     }
 
-    if (req.body.description !== undefined) {
+    if (description !== undefined && req.body.description !== undefined) {
       updateFields.push('description = ?');
       updateValues.push(normalizeText(description));
     }
 
-    if (req.body.imageUrl !== undefined || req.body.image_url !== undefined || req.body.image !== undefined) {
+    if (imageUrl !== undefined && (req.body.imageUrl !== undefined || req.body.image_url !== undefined || req.body.image !== undefined)) {
       updateFields.push('image_url = ?');
       updateValues.push(normalizeText(imageUrl));
     }
 
-    if (req.body.sortMode !== undefined || req.body.sort_mode !== undefined) {
+    if (sortMode !== undefined && (req.body.sortMode !== undefined || req.body.sort_mode !== undefined)) {
       updateFields.push('sort_mode = ?');
       updateValues.push(normalizeSortMode(sortMode));
     }
 
-    if (req.body.status !== undefined) {
+    if (status !== undefined && req.body.status !== undefined) {
       updateFields.push('status = ?');
       updateValues.push(normalizeStatus(status));
     }
 
-    if (req.body.themeTemplate !== undefined || req.body.theme_template !== undefined) {
+    if (themeTemplate !== undefined && (req.body.themeTemplate !== undefined || req.body.theme_template !== undefined)) {
       updateFields.push('theme_template = ?');
       updateValues.push(normalizeText(themeTemplate) || 'default-collection');
     }
 
-    if (req.body.seoTitle !== undefined || req.body.seo_title !== undefined) {
+    if (seoTitle !== undefined && (req.body.seoTitle !== undefined || req.body.seo_title !== undefined)) {
       updateFields.push('seo_title = ?');
       updateValues.push(normalizeText(seoTitle));
     }
 
-    if (req.body.seoDescription !== undefined || req.body.seo_description !== undefined) {
+    if (seoDescription !== undefined && (req.body.seoDescription !== undefined || req.body.seo_description !== undefined)) {
       updateFields.push('seo_description = ?');
       updateValues.push(normalizeText(seoDescription));
     }
@@ -1002,7 +1002,10 @@ router.get('/', async (req, res) => {
     sql += ` ORDER BY ${sortColumn} ${sortOrder}`;
     sql += ` LIMIT ? OFFSET ?`;
 
-    params.push(toInteger(limit, 50), toInteger(offset, 0));
+    const parsedLimit = Math.max(1, toInteger(limit, 50));
+    const parsedOffset = Math.max(0, toInteger(offset, 0));
+
+    params.push(parsedLimit, parsedOffset);
 
     const collections = await db.all(sql, params);
     const enrichedCollections = [];
@@ -1033,8 +1036,6 @@ router.get('/', async (req, res) => {
 
     const countResult = await db.get(countSql, countParams);
     const total = Number(countResult?.total || 0);
-    const parsedLimit = toInteger(limit, 50);
-    const parsedOffset = toInteger(offset, 0);
 
     return res.json({
       success: true,
