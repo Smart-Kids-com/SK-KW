@@ -552,58 +552,115 @@
     }
 
     async function loadProducts() {
-      try {
-        const searchInput = document.getElementById('searchInput');
-        const statusFilter = document.getElementById('statusFilter');
-        const sortFilter = document.getElementById('sortFilter');
+  const tbody = document.getElementById('productsTableBody');
 
-        const search = searchInput.value.trim();
-        const status = statusFilter.value || currentStatus;
-        const [sort, order] = sortFilter.value.split('-');
+  try {
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const sortFilter = document.getElementById('sortFilter');
 
-        syncSearchInputs();
+    const search = searchInput.value.trim();
+    const status = statusFilter.value || currentStatus;
+    const [sort, order] = String(sortFilter.value || 'created_at-DESC').split('-');
 
-        const params = new URLSearchParams();
-        if (search) params.append('search', search);
-        if (status) params.append('status', status);
-        params.append('sort', sort);
-        params.append('order', order);
-        params.append('limit', '50');
-        params.append('offset', '0');
+    syncSearchInputs();
 
-        const response = await fetch(`${API_BASE}?${params.toString()}`);
-        const result = await response.json();
+    tbody.innerHTML = `
+      <tr><td colspan="8" class="empty">Loading products...</td></tr>
+    `;
 
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to load products');
-        }
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (status) params.append('status', status);
+    params.append('sort', sort || 'created_at');
+    params.append('order', order || 'DESC');
+    params.append('limit', '50');
+    params.append('offset', '0');
 
-        currentProducts = Array.isArray(result.data) ? result.data : [];
-        selectedIds = selectedIds.filter(id => currentProducts.some(p => Number(p.id) === id));
-
-        renderProducts(currentProducts);
-        updatePagination(currentProducts);
-        updateSelectionUi();
-      } catch (error) {
-        console.error(error);
-        document.getElementById('productsTableBody').innerHTML = `
-          <tr><td colspan="8" class="empty">Failed to load products</td></tr>
-        `;
+    const response = await fetch(`${API_BASE}?${params.toString()}`, {
+      headers: {
+        'Accept': 'application/json'
       }
+    });
+
+    let result = null;
+    let rawText = '';
+
+    try {
+      result = await response.json();
+    } catch (_) {
+      try {
+        rawText = await response.text();
+      } catch (_) {}
     }
 
-    async function loadSummary() {
-      try {
-        const response = await fetch(`${API_BASE}/stats/summary`);
-        const result = await response.json();
-        if (!response.ok || !result.success) return;
-        document.getElementById('summaryTotalProducts').textContent = result.data.totalProducts || 0;
-        document.getElementById('summaryActiveProducts').textContent = result.data.activeProducts || 0;
-        document.getElementById('summaryTotalInventory').textContent = result.data.totalStock || 0;
-      } catch (error) {
-        console.error(error);
-      }
+    if (!response.ok) {
+      const serverMessage =
+        result?.error ||
+        result?.message ||
+        rawText ||
+        `HTTP ${response.status}`;
+      throw new Error(serverMessage);
     }
+
+    if (!result || result.success !== true) {
+      throw new Error(result?.error || result?.message || 'Failed to load products');
+    }
+
+    currentProducts = Array.isArray(result.data) ? result.data : [];
+    selectedIds = selectedIds.filter(id => currentProducts.some(p => Number(p.id) === id));
+
+    renderProducts(currentProducts);
+    updatePagination(currentProducts);
+    updateSelectionUi();
+  } catch (error) {
+    console.error('loadProducts error:', error);
+
+    currentProducts = [];
+    selectedIds = [];
+    updatePagination([]);
+    updateSelectionUi();
+
+    const message = escapeHtml(error?.message || 'Failed to load products');
+
+    tbody.innerHTML = `
+      <tr><td colspan="8" class="empty">${message}</td></tr>
+    `;
+
+    showAlert(error?.message || 'Failed to load products', 'error');
+  }
+}
+
+async function loadSummary() {
+  try {
+    const response = await fetch(`${API_BASE}/stats/summary`, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    let result = null;
+    let rawText = '';
+
+    try {
+      result = await response.json();
+    } catch (_) {
+      try {
+        rawText = await response.text();
+      } catch (_) {}
+    }
+
+    if (!response.ok || !result || result.success !== true) {
+      throw new Error(result?.error || result?.message || rawText || `Summary request failed: HTTP ${response.status}`);
+    }
+
+    document.getElementById('summaryTotalProducts').textContent = Number(result.data?.totalProducts || 0);
+    document.getElementById('summaryActiveProducts').textContent = Number(result.data?.activeProducts || 0);
+    document.getElementById('summaryTotalInventory').textContent = Number(result.data?.totalStock || 0);
+  } catch (error) {
+    console.error('loadSummary error:', error);
+  }
+}
 
     async function refreshPageData(showMessage = true) {
       closeActionsMenu();

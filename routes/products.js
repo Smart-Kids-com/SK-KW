@@ -780,7 +780,10 @@ router.get('/', async (req, res) => {
     let products = Array.isArray(rows) ? rows : [];
 
     if (status) {
-      products = products.filter(product => String(product.status || '') === String(status));
+      const normalizedStatus = String(status || '').trim().toLowerCase();
+      products = products.filter(product =>
+        String(product.status || '').trim().toLowerCase() === normalizedStatus
+      );
     }
 
     if (search) {
@@ -795,7 +798,9 @@ router.get('/', async (req, res) => {
           product.vendor,
           product.category,
           product.tags
-        ].map(v => String(v || '').toLowerCase()).join(' ');
+        ]
+          .map(v => String(v || '').trim().toLowerCase())
+          .join(' ');
         return haystack.includes(q);
       });
     }
@@ -809,8 +814,8 @@ router.get('/', async (req, res) => {
 
       switch (sortKey) {
         case 'product_name':
-          av = String(a.product_name || '').toLowerCase();
-          bv = String(b.product_name || '').toLowerCase();
+          av = String(a.product_name || '').trim().toLowerCase();
+          bv = String(b.product_name || '').trim().toLowerCase();
           break;
         case 'price':
           av = Number(a.price || 0);
@@ -825,20 +830,20 @@ router.get('/', async (req, res) => {
           bv = Number(b.stock || 0);
           break;
         case 'status':
-          av = String(a.status || '').toLowerCase();
-          bv = String(b.status || '').toLowerCase();
+          av = String(a.status || '').trim().toLowerCase();
+          bv = String(b.status || '').trim().toLowerCase();
           break;
         case 'product_type':
-          av = String(a.product_type || '').toLowerCase();
-          bv = String(b.product_type || '').toLowerCase();
+          av = String(a.product_type || '').trim().toLowerCase();
+          bv = String(b.product_type || '').trim().toLowerCase();
           break;
         case 'vendor':
-          av = String(a.vendor || '').toLowerCase();
-          bv = String(b.vendor || '').toLowerCase();
+          av = String(a.vendor || '').trim().toLowerCase();
+          bv = String(b.vendor || '').trim().toLowerCase();
           break;
         case 'category':
-          av = String(a.category || '').toLowerCase();
-          bv = String(b.category || '').toLowerCase();
+          av = String(a.category || '').trim().toLowerCase();
+          bv = String(b.category || '').trim().toLowerCase();
           break;
         case 'updated_at':
           av = new Date(a.updated_at || 0).getTime();
