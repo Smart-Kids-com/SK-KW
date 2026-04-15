@@ -883,7 +883,12 @@
     }
 
     function triggerImport() {
-      document.getElementById('importFileInput').click();
+      const input = document.getElementById('importFileInput');
+      if (!input) {
+        showAlert('Import input not found', 'error');
+        return;
+      }
+      input.click();
     }
 
     function normalizeHeaderName(name) {
@@ -956,14 +961,51 @@
       };
     }
 
-    async function fetchImportLookup() {
-      const response = await fetch(`${API_BASE}?limit=300&offset=0`, {
-        headers: { 'Accept': 'application/json' }
-      });
-      const result = await response.json();
+    async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 15000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to load products for import lookup');
+      try {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+          headers: {
+            Accept: 'application/json',
+            ...(options.headers || {})
+          }
+        });
+
+        const text = await response.text();
+        let result = null;
+
+        try {
+          result = text ? JSON.parse(text) : null;
+        } catch {
+          throw new Error(`Non-JSON response from ${url}`);
+        }
+
+        return { response, result };
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          throw new Error(`Request timeout: ${url}`);
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    async function fetchImportLookup() {
+      showAlert('جاري تجهيز بيانات المطابقة...', 'warning');
+
+      const { response, result } = await fetchJsonWithTimeout(
+        `${API_BASE}?limit=300&offset=0`,
+        {},
+        15000
+      );
+
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error || 'Failed to load products for import lookup');
       }
 
       const products = Array.isArray(result.data) ? result.data : [];
@@ -1019,28 +1061,37 @@
       let result;
 
       if (existing?.id) {
-        response = await fetch(`${API_BASE}/${existing.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify(requestBody)
-        });
-        result = await response.json();
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || `Failed to update ${payload.productName}`);
+        ({ response, result } = await fetchJsonWithTimeout(
+          `${API_BASE}/${existing.id}`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+          },
+          15000
+        ));
+
+        if (!response.ok || !result?.success) {
+          throw new Error(result?.error || `Failed to update ${payload.productName}`);
         }
+
         return 'updated';
       }
 
-      response = await fetch(API_BASE, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(requestBody)
-      });
-      result = await response.json();
+      ({ response, result } = await fetchJsonWithTimeout(
+        API_BASE,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        },
+        15000
+      ));
 
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || `Failed to create ${payload.productName}`);
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error || `Failed to create ${payload.productName}`);
       }
+
       return 'created';
     }
 
