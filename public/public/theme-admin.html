@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Theme Editor - Smart Kids Kuwait</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f3f3f3;
+      --card:#ffffff;
+      --line:#e5e7eb;
+      --text:#202223;
+      --muted:#6d7175;
+      --top:#111213;
+      --side:#f6f6f7;
+      --green:#16a34a;
+      --green-bg:#dcfce7;
+      --blue:#2563eb;
+      --blue-bg:#dbeafe;
+      --red:#dc2626;
+      --red-bg:#fee2e2;
+      --yellow:#f59e0b;
+      --yellow-bg:#fef3c7;
+      --shadow:0 1px 2px rgba(0,0,0,.08);
+    }
+
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      direction:ltr;
+    }
+
+    a{text-decoration:none;color:inherit}
+    button,input,select,textarea{font-family:inherit}
+
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:290px 1fr;
+      grid-template-rows:72px 1fr;
+      grid-template-areas:
+        "top top"
+        "side main";
+    }
+
+    .topbar{
+      grid-area:top;
+      background:var(--top);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:0 18px;
+      position:sticky;
+      top:0;
+      z-index:50;
+    }
+
+    .brand{font-size:20px;font-weight:800;white-space:nowrap}
+    .top-right{display:flex;align-items:center;gap:14px;white-space:nowrap}
+    .avatar{
+      width:34px;height:34px;border-radius:999px;background:#2a2b2d;
+      display:flex;align-items:center;justify-content:center;font-size:16px;
+    }
+
+    .sidebar{
+      grid-area:side;background:var(--side);border-right:1px solid #ddd;
+      padding:14px 14px 20px;overflow:auto;
+    }
+
+    .nav-item{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:11px 12px;border-radius:12px;color:#111;font-weight:600;
+      margin-bottom:4px;direction:ltr;text-align:left;
+    }
+    .nav-item.active{background:#e9eaeb}
+    .nav-sub{padding-left:42px;color:#444;font-weight:500}
+
+    .main{grid-area:main;padding:20px;overflow:auto}
+    .page{max-width:1480px;margin:0 auto}
+
+    .alert{
+      display:none;margin-bottom:14px;padding:14px 16px;border-radius:14px;font-weight:700;
+      border:1px solid transparent;background:#fff;direction:rtl;text-align:right;white-space:pre-line;
+    }
+    .alert.active{display:block}
+    .alert.success{background:#dcfce7;border-color:#86efac;color:#166534}
+    .alert.error{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+    .alert.warning{background:#fef3c7;border-color:#fcd34d;color:#92400e}
+
+    .page-head{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      margin-bottom:16px;flex-wrap:wrap;
+    }
+    .page-title{font-size:22px;font-weight:900;display:flex;align-items:center;gap:10px}
+    .page-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+    .btn{
+      height:40px;border-radius:12px;border:1px solid #d1d5db;background:#fff;color:#111;
+      padding:0 14px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);
+    }
+    .btn.primary{background:#111;color:#fff;border-color:#111}
+    .btn.green{background:#16a34a;color:#fff;border-color:#16a34a}
+    .btn.red{background:#fff;color:#b91c1c;border-color:#fca5a5}
+    .btn.small{height:34px;padding:0 12px;font-size:13px}
+
+    .layout{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:16px;
+      align-items:start;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+
+    .card-head{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      font-size:16px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .card-body{padding:16px}
+
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+      margin-bottom:14px;
+    }
+
+    .field label{
+      font-size:13px;
+      color:#4b5563;
+      font-weight:700;
+    }
+
+    .field input,
+    .field select,
+    .field textarea{
+      width:100%;
+      min-height:42px;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      padding:10px 14px;
+      font-size:14px;
+      outline:none;
+    }
+
+    .field textarea{
+      min-height:220px;
+      resize:vertical;
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+      line-height:1.5;
+    }
+
+    .section-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .section-item{
+      border:1px solid #e5e7eb;
+      background:#fff;
+      border-radius:16px;
+      padding:14px;
+    }
+
+    .section-item.active{
+      border-color:#111827;
+      box-shadow:0 0 0 2px rgba(17,24,39,.08);
+    }
+
+    .section-row{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .section-meta{
+      min-width:0;
+      flex:1;
+    }
+
+    .section-title{
+      font-size:16px;
+      font-weight:900;
+      margin-bottom:6px;
+      line-height:1.4;
+    }
+
+    .section-sub{
+      color:#6b7280;
+      font-size:13px;
+      line-height:1.5;
+      word-break:break-word;
+    }
+
+    .section-badges{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:66px;
+      height:28px;
+      padding:0 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .badge.visible{color:#166534;background:var(--green-bg)}
+    .badge.hidden{color:#92400e;background:var(--yellow-bg)}
+    .badge.type{color:#1d4ed8;background:var(--blue-bg)}
+
+    .section-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .empty{
+      padding:34px 20px;
+      text-align:center;
+      color:#6b7280;
+      font-weight:700;
+    }
+
+    .inline-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .helper{
+      font-size:12px;
+      color:#6b7280;
+      line-height:1.6;
+      background:#f9fafb;
+      border:1px solid #e5e7eb;
+      padding:10px 12px;
+      border-radius:12px;
+    }
+
+    .preview-box{
+      border:1px dashed #cbd5e1;
+      border-radius:16px;
+      padding:14px;
+      background:#fafafa;
+      color:#475569;
+      line-height:1.7;
+      font-size:14px;
+      white-space:pre-wrap;
+    }
+
+    @media (max-width: 1100px){
+      .app{
+        grid-template-columns:1fr;
+        grid-template-rows:72px 1fr;
+        grid-template-areas:
+          "top"
+          "main";
+      }
+      .sidebar{display:none}
+      .layout{grid-template-columns:1fr}
+    }
+
+    @media (max-width: 700px){
+      .main{padding:14px}
+      .page-actions{width:100%}
+      .page-actions .btn{flex:1}
+      .inline-grid{grid-template-columns:1fr}
+      .section-row{flex-direction:column}
+      .section-actions{justify-content:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">Theme Editor</div>
+      <div class="top-right">
+        <div class="avatar">🎨</div>
+        <div style="font-weight:800">Homepage Builder</div>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <a class="nav-item" href="/admin-enhanced"><span>🏠 Dashboard</span></a>
+      <a class="nav-item" href="/products-admin"><span>🏷️ Products</span></a>
+      <a class="nav-item nav-sub" href="/collections-admin"><span>Collections</span></a>
+      <a class="nav-item" href="/customers-admin"><span>👥 Customers</span></a>
+      <a class="nav-item active" href="/theme-admin"><span>🎨 Theme Editor</span></a>
+      <a class="nav-item nav-sub" href="#"><span>Homepage</span></a>
+    </aside>
+
+    <main class="main">
+      <div class="page">
+        <div id="alert" class="alert"></div>
+
+        <div class="page-head">
+          <div class="page-title">🎨 Homepage Theme Editor</div>
+          <div class="page-actions">
+            <button class="btn" onclick="refreshTheme()">Refresh</button>
+            <button class="btn green" onclick="addSectionPrompt()">Add section</button>
+            <button class="btn primary" onclick="saveThemeSettings()">Save theme settings</button>
+          </div>
+        </div>
+
+        <div class="layout">
+          <section class="card">
+            <div class="card-head">
+              <span>Homepage sections</span>
+              <div class="toolbar">
+                <button class="btn small" onclick="refreshTheme()">Reload</button>
+                <button class="btn small" onclick="addSectionPrompt()">+ Section</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="sectionsList" class="section-list">
+                <div class="empty">Loading sections...</div>
+              </div>
+            </div>
+          </section>
+
+          <aside>
+            <section class="card" style="margin-bottom:16px;">
+              <div class="card-head">Section editor</div>
+              <div class="card-body">
+                <div id="editorEmpty" class="empty">Select a section to edit</div>
+
+                <div id="editorWrap" style="display:none;">
+                  <div class="field">
+                    <label for="sectionTitle">Section title</label>
+                    <input id="sectionTitle" type="text" />
+                  </div>
+
+                  <div class="inline-grid">
+                    <div class="field">
+                      <label for="sectionType">Section type</label>
+                      <select id="sectionType">
+                        <option value="hero_slider">hero_slider</option>
+                        <option value="featured_collection">featured_collection</option>
+                        <option value="featured_products">featured_products</option>
+                        <option value="banner">banner</option>
+                        <option value="rich_text">rich_text</option>
+                      </select>
+                    </div>
+
+                    <div class="field">
+                      <label for="sectionVisible">Visibility</label>
+                      <select id="sectionVisible">
+                        <option value="1">Visible</option>
+                        <option value="0">Hidden</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label for="sectionSettings">Settings JSON</label>
+                    <textarea id="sectionSettings"></textarea>
+                  </div>
+
+                  <div class="helper" style="margin-bottom:14px;">
+                    أمثلة سريعة حسب النوع:
+                    {"title":"عنوان","subtitle":"نص فرعي","buttonText":"تسوق الآن","buttonLink":"/collections"}
+                    أو
+                    {"collectionSlug":"books","limit":8}
+                    أو
+                    {"imageUrl":"https://...","link":"/collections/offers"}
+                  </div>
+
+                  <div class="toolbar">
+                    <button class="btn primary" onclick="saveCurrentSection()">Save section</button>
+                    <button class="btn" onclick="duplicateCurrentSection()">Duplicate</button>
+                    <button class="btn red" onclick="deleteCurrentSection()">Delete</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card" style="margin-bottom:16px;">
+              <div class="card-head">Theme settings</div>
+              <div class="card-body">
+                <div class="field">
+                  <label for="themePrimaryColor">Primary color</label>
+                  <input id="themePrimaryColor" type="text" placeholder="#16a34a" />
+                </div>
+
+                <div class="field">
+                  <label for="themeSecondaryColor">Secondary color</label>
+                  <input id="themeSecondaryColor" type="text" placeholder="#111827" />
+                </div>
+
+                <div class="field">
+                  <label for="themeHomepageTitle">Homepage title</label>
+                  <input id="themeHomepageTitle" type="text" placeholder="Smart Kids Kuwait" />
+                </div>
+
+                <div class="field">
+                  <label for="themeAnnouncementText">Announcement text</label>
+                  <input id="themeAnnouncementText" type="text" placeholder="نص الشريط العلوي" />
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">Selected section preview</div>
+              <div class="card-body">
+                <div id="sectionPreview" class="preview-box">No section selected</div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const THEME_API = '/api/theme';
+    const PAGE_KEY = 'home';
+
+    let pageData = null;
+    let themeSettings = {};
+    let currentSections = [];
+    let selectedSectionId = null;
+
+    function showAlert(message, type = 'success') {
+      const el = document.getElementById('alert');
+      el.textContent = message;
+      el.className = `alert active ${type}`;
+      setTimeout(() => el.classList.remove('active'), 4000);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function prettifyJson(value) {
+      try {
+        return JSON.stringify(value || {}, null, 2);
+      } catch {
+        return '{}';
+      }
+    }
+
+    function parseJsonSafe(text) {
+      try {
+        return { ok: true, value: JSON.parse(text || '{}') };
+      } catch (error) {
+        return { ok: false, error };
+      }
+    }
+
+    function getSelectedSection() {
+      return currentSections.find(section => Number(section.id) === Number(selectedSectionId)) || null;
+    }
+
+    function defaultSettingsForType(type) {
+      switch (type) {
+        case 'hero_slider':
+          return {
+            title: 'عنوان رئيسي',
+            subtitle: 'نص فرعي للقسم',
+            buttonText: 'تسوق الآن',
+            buttonLink: '/collections',
+            imageUrl: ''
+          };
+        case 'featured_collection':
+          return {
+            title: 'مجموعة مميزة',
+            collectionSlug: '',
+            limit: 8,
+            layout: 'grid'
+          };
+        case 'featured_products':
+          return {
+            title: 'منتجات مختارة',
+            productIds: [],
+            layout: 'slider'
+          };
+        case 'banner':
+          return {
+            title: 'بانر',
+            imageUrl: '',
+            link: '',
+            height: 'medium'
+          };
+        case 'rich_text':
+          return {
+            title: 'عنوان نصي',
+            text: 'اكتب النص هنا',
+            align: 'center'
+          };
+        default:
+          return {};
+      }
+    }
+
+    async function loadPage() {
+      const response = await fetch(`${THEME_API}/pages/${PAGE_KEY}`);
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to load theme page');
+      }
+
+      pageData = result.data;
+      currentSections = Array.isArray(result.data.sections) ? result.data.sections : [];
+    }
+
+    async function loadSettings() {
+      const response = await fetch(`${THEME_API}/settings`);
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to load theme settings');
+      }
+
+      themeSettings = result.data || {};
+    }
+
+    function renderThemeSettings() {
+      document.getElementById('themePrimaryColor').value = themeSettings.primaryColor || '';
+      document.getElementById('themeSecondaryColor').value = themeSettings.secondaryColor || '';
+      document.getElementById('themeHomepageTitle').value = themeSettings.homepageTitle || '';
+      document.getElementById('themeAnnouncementText').value = themeSettings.announcementText || '';
+    }
+
+    function renderSections() {
+      const container = document.getElementById('sectionsList');
+
+      if (!currentSections.length) {
+        container.innerHTML = `<div class="empty">No sections yet. Add your first section.</div>`;
+        return;
+      }
+
+      container.innerHTML = currentSections.map((section, index) => {
+        const isActive = Number(section.id) === Number(selectedSectionId);
+        const isVisible = Number(section.is_visible || 0) === 1;
+        const settingsPreview = JSON.stringify(section.settings || {}).slice(0, 120);
+
+        return `
+          <div class="section-item ${isActive ? 'active' : ''}">
+            <div class="section-row">
+              <div class="section-meta" onclick="selectSection(${section.id})" style="cursor:pointer;">
+                <div class="section-title">${escapeHtml(section.title || 'Section')}</div>
+                <div class="section-sub">${escapeHtml(settingsPreview || '{}')}</div>
+                <div class="section-badges">
+                  <span class="badge type">${escapeHtml(section.type || '-')}</span>
+                  <span class="badge ${isVisible ? 'visible' : 'hidden'}">${isVisible ? 'Visible' : 'Hidden'}</span>
+                  <span class="badge type">#${index + 1}</span>
+                </div>
+              </div>
+
+              <div class="section-actions">
+                <button class="btn small" onclick="moveSectionUp(${section.id})">↑</button>
+                <button class="btn small" onclick="moveSectionDown(${section.id})">↓</button>
+                <button class="btn small" onclick="selectSection(${section.id})">Edit</button>
+                <button class="btn small" onclick="toggleSectionVisibility(${section.id})">${isVisible ? 'Hide' : 'Show'}</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderEditor() {
+      const section = getSelectedSection();
+      const editorEmpty = document.getElementById('editorEmpty');
+      const editorWrap = document.getElementById('editorWrap');
+      const preview = document.getElementById('sectionPreview');
+
+      if (!section) {
+        editorEmpty.style.display = 'block';
+        editorWrap.style.display = 'none';
+        preview.textContent = 'No section selected';
+        return;
+      }
+
+      editorEmpty.style.display = 'none';
+      editorWrap.style.display = 'block';
+
+      document.getElementById('sectionTitle').value = section.title || '';
+      document.getElementById('sectionType').value = section.type || 'rich_text';
+      document.getElementById('sectionVisible').value = String(Number(section.is_visible || 0));
+      document.getElementById('sectionSettings').value = prettifyJson(section.settings || {});
+      preview.textContent = prettifyJson(section);
+    }
+
+    function selectSection(sectionId) {
+      selectedSectionId = Number(sectionId);
+      renderSections();
+      renderEditor();
+    }
+
+    async function refreshTheme(showMessage = false) {
+      try {
+        await Promise.all([loadPage(), loadSettings()]);
+        if (selectedSectionId && !currentSections.some(s => Number(s.id) === Number(selectedSectionId))) {
+          selectedSectionId = null;
+        }
+        renderThemeSettings();
+        renderSections();
+        renderEditor();
+        if (showMessage) showAlert('تم تحديث بيانات الثيم', 'success');
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Theme load failed', 'error');
+      }
+    }
+
+    async function addSectionPrompt() {
+      const type = prompt(
+        'Enter section type:\nhero_slider\nfeatured_collection\nfeatured_products\nbanner\nrich_text',
+        'hero_slider'
+      );
+
+      if (!type) return;
+
+      const cleanType = String(type).trim();
+      const title = prompt('Section title', cleanType) || cleanType;
+
+      try {
+        const response = await fetch(`${THEME_API}/pages/${PAGE_KEY}/sections`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: cleanType,
+            title,
+            is_visible: 1,
+            settings: defaultSettingsForType(cleanType)
+          })
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to create section');
+        }
+
+        await refreshTheme(false);
+        selectedSectionId = Number(result.data.id);
+        renderSections();
+        renderEditor();
+        showAlert('تمت إضافة section جديدة', 'success');
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Create section failed', 'error');
+      }
+    }
+
+    async function saveCurrentSection() {
+      const section = getSelectedSection();
+      if (!section) {
+        showAlert('اختر section أولًا', 'warning');
+        return;
+      }
+
+      const parsed = parseJsonSafe(document.getElementById('sectionSettings').value);
+      if (!parsed.ok) {
+        showAlert('JSON غير صالح داخل settings', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${THEME_API}/sections/${section.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: document.getElementById('sectionTitle').value.trim(),
+            type: document.getElementById('sectionType').value,
+            is_visible: Number(document.getElementById('sectionVisible').value),
+            settings: parsed.value
+          })
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to save section');
+        }
+
+        await refreshTheme(false);
+        selectedSectionId = Number(section.id);
+        renderSections();
+        renderEditor();
+        showAlert('تم حفظ section بنجاح', 'success');
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Save failed', 'error');
+      }
+    }
+
+    async function deleteCurrentSection() {
+      const section = getSelectedSection();
+      if (!section) {
+        showAlert('اختر section أولًا', 'warning');
+        return;
+      }
+
+      if (!confirm(`Delete section "${section.title}"?`)) return;
+
+      try {
+        const response = await fetch(`${THEME_API}/sections/${section.id}`, {
+          method: 'DELETE'
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to delete section');
+        }
+
+        selectedSectionId = null;
+        await refreshTheme(false);
+        showAlert('تم حذف section', 'success');
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Delete failed', 'error');
+      }
+    }
+
+    async function duplicateCurrentSection() {
+      const section = getSelectedSection();
+      if (!section) {
+        showAlert('اختر section أولًا', 'warning');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${THEME_API}/sections/${section.id}/duplicate`, {
+          method: 'POST'
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to duplicate section');
+        }
+
+        await refreshTheme(false);
+        selectedSectionId = Number(result.data.id);
+        renderSections();
+        renderEditor();
+        showAlert('تم نسخ section', 'success');
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Duplicate failed', 'error');
+      }
+    }
+
+    async function toggleSectionVisibility(sectionId) {
+      const section = currentSections.find(s => Number(s.id) === Number(sectionId));
+      if (!section) return;
+
+      try {
+        const response = await fetch(`${THEME_API}/sections/${section.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            is_visible: Number(section.is_visible || 0) ? 0 : 1
+          })
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to toggle visibility');
+        }
+
+        await refreshTheme(false);
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Visibility update failed', 'error');
+      }
+    }
+
+    async function reorderSections(newIds) {
+      const response = await fetch(`${THEME_API}/pages/${PAGE_KEY}/reorder`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sectionIds: newIds })
+      });
+
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to reorder sections');
+      }
+
+      currentSections = result.data || [];
+      renderSections();
+      renderEditor();
+    }
+
+    async function moveSectionUp(sectionId) {
+      const ids = currentSections.map(s => Number(s.id));
+      const index = ids.indexOf(Number(sectionId));
+      if (index <= 0) return;
+
+      [ids[index - 1], ids[index]] = [ids[index], ids[index - 1]];
+
+      try {
+        await reorderSections(ids);
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Move up failed', 'error');
+      }
+    }
+
+    async function moveSectionDown(sectionId) {
+      const ids = currentSections.map(s => Number(s.id));
+      const index = ids.indexOf(Number(sectionId));
+      if (index === -1 || index >= ids.length - 1) return;
+
+      [ids[index], ids[index + 1]] = [ids[index + 1], ids[index]];
+
+      try {
+        await reorderSections(ids);
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Move down failed', 'error');
+      }
+    }
+
+    async function saveThemeSettings() {
+      try {
+        const payload = {
+          settings: {
+            primaryColor: document.getElementById('themePrimaryColor').value.trim(),
+            secondaryColor: document.getElementById('themeSecondaryColor').value.trim(),
+            homepageTitle: document.getElementById('themeHomepageTitle').value.trim(),
+            announcementText: document.getElementById('themeAnnouncementText').value.trim()
+          }
+        };
+
+        const response = await fetch(`${THEME_API}/settings`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to save theme settings');
+        }
+
+        themeSettings = result.data || {};
+        renderThemeSettings();
+        showAlert('تم حفظ إعدادات الثيم', 'success');
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Save theme settings failed', 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      refreshTheme();
+    });
+  </script>
+</body>
+</html>
