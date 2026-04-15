@@ -88,7 +88,6 @@
       margin-bottom:4px;direction:ltr;text-align:left;
     }
     .nav-item.active{background:#e9eaeb}
-    .nav-sub{padding-left:42px;color:#444;font-weight:500}
 
     .badge-count{
       background:#e5e7eb;min-width:34px;height:24px;border-radius:999px;
@@ -270,15 +269,16 @@
       </div>
     </header>
 
-   <aside class="sidebar">
-  <div class="side-group">
-    <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
-    <a class="nav-item" href="/orders-admin.html"><span>📦 Orders</span><span class="badge-count" id="ordersCountBadge">—</span></a>
-    <a class="nav-item" href="/products-admin"><span>🏷️ Products</span></a>
-    <a class="nav-item nav-sub" href="/collections-admin"><span>Collections</span></a>
-    <a class="nav-item active" href="/customers-admin"><span>👥 Customers</span></a>
-  </div>
-</aside>
+    <aside class="sidebar">
+      <div class="side-group">
+        <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
+        <a class="nav-item" href="/orders-admin.html"><span>📦 Orders</span><span class="badge-count" id="ordersCountBadge">—</span></a>
+        <a class="nav-item" href="/products-admin"><span>🏷️ Products</span></a>
+        <a class="nav-item" href="/collections-admin"><span>🗂️ Collections</span></a>
+        <a class="nav-item active" href="/customers-admin"><span>👥 Customers</span></a>
+        <a class="nav-item" href="/theme-admin"><span>🎨 Theme</span></a>
+      </div>
+    </aside>
 
     <main class="main">
       <div class="page">
@@ -290,7 +290,7 @@
           <div class="page-actions">
             <button class="btn" onclick="toggleFilters()">Filters</button>
             <button class="btn" onclick="exportCustomersCsv()">Export</button>
-            <button class="btn primary" onclick="refreshPageData()">Refresh</button>
+            <button class="btn primary" onclick="refreshPageData(true)">Refresh</button>
           </div>
         </div>
 
@@ -337,7 +337,7 @@
             <div class="tools">
               <button class="icon-btn" title="Toggle filters" onclick="toggleFilters()">☰</button>
               <button class="icon-btn" title="Sort" onclick="cycleSort()">⇄</button>
-              <button class="icon-btn" title="Refresh" onclick="refreshPageData()">↻</button>
+              <button class="icon-btn" title="Refresh" onclick="refreshPageData(true)">↻</button>
             </div>
           </div>
 
@@ -468,14 +468,14 @@
     }
 
     function noopPager() {
-      showAlert('واجهة Pagination جاهزة، والقائمة الآن تجلب حتى 50 عميل في الصفحة.', 'warning');
+      showAlert('الواجهة الآن تجلب أول 50 عميل في الصفحة.', 'warning');
     }
 
     function getInitials(customer) {
       const name = String(customer.full_name || customer.name || '').trim();
       if (!name) return 'C';
       const parts = name.split(/\s+/).filter(Boolean);
-      if (parts.length === 1) return parts[0].slice(0, 1);
+      if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
       return (parts[0].slice(0, 1) + parts[1].slice(0, 1)).toUpperCase();
     }
 
@@ -510,7 +510,11 @@
     }
 
     async function loadCustomers() {
+      const tbody = document.getElementById('customersTableBody');
+
       try {
+        tbody.innerHTML = `<tr><td colspan="9" class="empty">Loading customers...</td></tr>`;
+
         const searchInput = document.getElementById('searchInput');
         const statusFilter = document.getElementById('statusFilter');
         const sortFilter = document.getElementById('sortFilter');
@@ -529,8 +533,17 @@
         params.append('limit', '50');
         params.append('offset', '0');
 
-        const response = await fetch(`${CUSTOMERS_API}?${params.toString()}`);
-        const result = await response.json();
+        const response = await fetch(`${CUSTOMERS_API}?${params.toString()}`, {
+          cache: 'no-store',
+          headers: { 'Accept': 'application/json' }
+        });
+
+        let result;
+        try {
+          result = await response.json();
+        } catch {
+          throw new Error('Customers API returned non-JSON response');
+        }
 
         if (!response.ok || !result.success) {
           throw new Error(result.error || 'Failed to load customers');
@@ -541,15 +554,17 @@
         updatePagination(currentCustomers);
       } catch (error) {
         console.error(error);
-        document.getElementById('customersTableBody').innerHTML = `
-          <tr><td colspan="9" class="empty">Failed to load customers</td></tr>
+        tbody.innerHTML = `
+          <tr><td colspan="9" class="empty">${escapeHtml(error.message || 'Failed to load customers')}</td></tr>
         `;
       }
     }
 
     async function loadSummary() {
       try {
-        const response = await fetch(`${CUSTOMERS_API}/stats/summary`);
+        const response = await fetch(`${CUSTOMERS_API}/stats/summary`, {
+          headers: { 'Accept': 'application/json' }
+        });
         const result = await response.json();
 
         if (!response.ok || !result.success) return;
@@ -565,7 +580,7 @@
 
     async function refreshPageData(showMessage = false) {
       await loadCustomers();
-      Promise.allSettled([loadOrdersCount(), loadSummary()]).catch(() => {});
+      await Promise.allSettled([loadOrdersCount(), loadSummary()]);
       if (showMessage) showAlert('تم تحديث البيانات', 'success');
     }
 
@@ -692,22 +707,22 @@
         });
       });
 
-      document.getElementById('searchInput').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') loadCustomers();
+      document.getElementById('searchInput').addEventListener('input', () => {
+        syncSearchInputs();
+        clearTimeout(window.__customersSearchTimer);
+        window.__customersSearchTimer = setTimeout(() => loadCustomers(), 250);
       });
 
-      document.getElementById('desktopSearchTop').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          syncIncomingSearch(e.target.value.trim());
-          loadCustomers();
-        }
+      document.getElementById('desktopSearchTop').addEventListener('input', (e) => {
+        syncIncomingSearch(e.target.value);
+        clearTimeout(window.__customersSearchTimer);
+        window.__customersSearchTimer = setTimeout(() => loadCustomers(), 250);
       });
 
-      document.getElementById('mobileSearchInput').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          syncIncomingSearch(e.target.value.trim());
-          loadCustomers();
-        }
+      document.getElementById('mobileSearchInput').addEventListener('input', (e) => {
+        syncIncomingSearch(e.target.value);
+        clearTimeout(window.__customersSearchTimer);
+        window.__customersSearchTimer = setTimeout(() => loadCustomers(), 250);
       });
 
       document.getElementById('statusFilter').addEventListener('change', loadCustomers);
