@@ -12,6 +12,7 @@ const ordersRoutes = require('./routes/orders');
 const productsRoutes = require('./routes/products');
 const collectionsRoutes = require('./routes/collections');
 const customersRoutes = require('./routes/customers');
+const themeRoutes = require('./routes/theme');
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
@@ -273,7 +274,9 @@ app.use(
     '/collection-edit.html',
     '/customers-admin',
     '/customers-admin.html',
-    '/customer-view.html'
+    '/customer-view.html',
+    '/theme-admin',
+    '/theme-admin.html'
   ],
   requireAdminAuth
 );
@@ -299,6 +302,7 @@ app.use('/api/orders', ordersRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/collections', collectionsRoutes);
 app.use('/api/customers', customersRoutes);
+app.use('/api/theme', themeRoutes);
 
 // Route للـ Health Check
 app.get('/api/health', async (req, res, next) => {
@@ -405,6 +409,14 @@ app.get('/customer-view.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'customer-view.html'));
 });
 
+app.get('/theme-admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'theme-admin.html'));
+});
+
+app.get('/theme-admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'theme-admin.html'));
+});
+
 /* =========================================
    خدمة الملفات الثابتة
 ========================================= */
@@ -463,6 +475,7 @@ async function startServer() {
       console.log(`║ 🏷️ إدارة المنتجات: http://${HOST}:${PORT}/products-admin`);
       console.log(`║ 🗂️ إدارة المجموعات: http://${HOST}:${PORT}/collections-admin`);
       console.log(`║ 👥 إدارة العملاء: http://${HOST}:${PORT}/customers-admin`);
+      console.log(`║ 🎨 محرر الثيم: http://${HOST}:${PORT}/theme-admin`);
       console.log(`║ ✏️ تعديل/إضافة منتج: http://${HOST}:${PORT}/product-edit.html`);
       console.log(`║ 🧩 تعديل/إضافة مجموعة: http://${HOST}:${PORT}/collection-edit.html`);
       console.log(`║ 👤 عرض العميل: http://${HOST}:${PORT}/customer-view.html?id=1`);
@@ -503,6 +516,16 @@ async function startServer() {
       console.log(`║ POST   http://${HOST}:${PORT}/api/customers`);
       console.log(`║ PUT    http://${HOST}:${PORT}/api/customers/:id`);
       console.log(`║ DELETE http://${HOST}:${PORT}/api/customers/:id`);
+      console.log('║');
+      console.log(`║ GET    http://${HOST}:${PORT}/api/theme/pages/home`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/theme/pages/home/sections`);
+      console.log(`║ POST   http://${HOST}:${PORT}/api/theme/pages/home/sections`);
+      console.log(`║ PUT    http://${HOST}:${PORT}/api/theme/sections/:id`);
+      console.log(`║ DELETE http://${HOST}:${PORT}/api/theme/sections/:id`);
+      console.log(`║ POST   http://${HOST}:${PORT}/api/theme/sections/:id/duplicate`);
+      console.log(`║ POST   http://${HOST}:${PORT}/api/theme/pages/home/reorder`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/theme/settings`);
+      console.log(`║ PUT    http://${HOST}:${PORT}/api/theme/settings`);
       console.log('╚════════════════════════════════════════════════════════╝\n');
     });
 
