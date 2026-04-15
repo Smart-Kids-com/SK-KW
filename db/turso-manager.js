@@ -187,6 +187,43 @@ class DatabaseManager {
     }
   }
 
+  async tableExists(tableName) {
+    if (this.useTurso) {
+      const row = await this.get(
+        `SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?`,
+        [tableName]
+      );
+      return !!row;
+    }
+
+    const row = await this.get(
+      `SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?`,
+      [tableName]
+    );
+    return !!row;
+  }
+
+  async getTableColumns(tableName) {
+    const exists = await this.tableExists(tableName);
+    if (!exists) return [];
+
+    const rows = await this.all(`PRAGMA table_info(${tableName})`);
+    return Array.isArray(rows) ? rows.map(row => String(row.name || '').trim()) : [];
+  }
+
+  async addColumnIfMissing(tableName, columnName, columnSql) {
+    const columns = await this.getTableColumns(tableName);
+    const hasColumn = columns.some(col => col.toLowerCase() === String(columnName).toLowerCase());
+
+    if (hasColumn) {
+      return false;
+    }
+
+    await this.run(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnSql}`);
+    console.log(`✅ تمت إضافة العمود ${tableName}.${columnName}`);
+    return true;
+  }
+
   async initializeTables() {
     const sqlCommands = [
       `CREATE TABLE IF NOT EXISTS ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS} (
@@ -296,38 +333,38 @@ class DatabaseManager {
       `CREATE INDEX IF NOT EXISTS idx_collection_products_sort_order ON collection_products(sort_order)`
     ];
 
-    const migrationCommands = [
-      `ALTER TABLE products ADD COLUMN product_type TEXT DEFAULT ''`,
-      `ALTER TABLE products ADD COLUMN vendor TEXT DEFAULT ''`,
-      `ALTER TABLE products ADD COLUMN category TEXT DEFAULT ''`,
-      `ALTER TABLE products ADD COLUMN tags TEXT DEFAULT ''`,
-      `ALTER TABLE products ADD COLUMN seo_title TEXT DEFAULT ''`,
-      `ALTER TABLE products ADD COLUMN seo_description TEXT DEFAULT ''`,
-
-      `ALTER TABLE collections ADD COLUMN sort_mode TEXT NOT NULL DEFAULT 'manual'`,
-      `ALTER TABLE collections ADD COLUMN status TEXT NOT NULL DEFAULT 'active'`,
-      `ALTER TABLE collections ADD COLUMN theme_template TEXT DEFAULT 'default-collection'`,
-      `ALTER TABLE collections ADD COLUMN seo_title TEXT DEFAULT ''`,
-      `ALTER TABLE collections ADD COLUMN seo_description TEXT DEFAULT ''`,
-      `ALTER TABLE collections ADD COLUMN online_store INTEGER NOT NULL DEFAULT 1`,
-      `ALTER TABLE collections ADD COLUMN pos_excluded INTEGER NOT NULL DEFAULT 1`
-    ];
-
     for (const sql of sqlCommands) {
       try {
         await this.run(sql);
         console.log('✅ تم تنفيذ أمر إنشاء جدول/فهرس');
       } catch (err) {
-        if (!String(err.message || '').includes('already')) {
+        const message = String(err.message || '').toLowerCase();
+        if (!message.includes('already exists')) {
           console.warn('⚠️ تحذير:', err.message);
         }
       }
     }
 
-    for (const sql of migrationCommands) {
+    const migrations = [
+      ['products', 'product_type', `TEXT DEFAULT ''`],
+      ['products', 'vendor', `TEXT DEFAULT ''`],
+      ['products', 'category', `TEXT DEFAULT ''`],
+      ['products', 'tags', `TEXT DEFAULT ''`],
+      ['products', 'seo_title', `TEXT DEFAULT ''`],
+      ['products', 'seo_description', `TEXT DEFAULT ''`],
+
+      ['collections', 'sort_mode', `TEXT NOT NULL DEFAULT 'manual'`],
+      ['collections', 'status', `TEXT NOT NULL DEFAULT 'active'`],
+      ['collections', 'theme_template', `TEXT DEFAULT 'default-collection'`],
+      ['collections', 'seo_title', `TEXT DEFAULT ''`],
+      ['collections', 'seo_description', `TEXT DEFAULT ''`],
+      ['collections', 'online_store', `INTEGER NOT NULL DEFAULT 1`],
+      ['collections', 'pos_excluded', `INTEGER NOT NULL DEFAULT 1`]
+    ];
+
+    for (const [tableName, columnName, columnSql] of migrations) {
       try {
-        await this.run(sql);
-        console.log('✅ تم تنفيذ migration');
+        await this.addColumnIfMissing(tableName, columnName, columnSql);
       } catch (err) {
         const message = String(err.message || '').toLowerCase();
         if (
@@ -336,7 +373,7 @@ class DatabaseManager {
           !message.includes('duplicate') &&
           !message.includes('no such table')
         ) {
-          console.warn('⚠️ تحذير migration:', err.message);
+          console.warn(`⚠️ تحذير migration ${tableName}.${columnName}:`, err.message);
         }
       }
     }
