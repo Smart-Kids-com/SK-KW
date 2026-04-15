@@ -116,14 +116,6 @@
     }
 
     .side-group{margin-bottom:18px}
-    .side-title{
-      font-size:13px;
-      color:var(--muted);
-      margin:10px 10px 8px;
-      font-weight:700;
-      direction:ltr;
-      text-align:left;
-    }
 
     .nav-item{
       display:flex;
@@ -140,7 +132,6 @@
     }
 
     .nav-item.active{background:#e9eaeb}
-    .nav-sub{padding-left:42px;color:#444;font-weight:500}
 
     .badge-count{
       background:#e5e7eb;
@@ -582,13 +573,16 @@
       </div>
     </header>
 
-   <aside class="sidebar">
-  <div class="side-group">
-    <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
-    <a class="nav-item" href="/orders-admin.html"><span>📦 Orders</span><span class="badge-count">—</span></a>
-    <a class="nav-item active" href="/products-admin"><span>🏷️ Products</span></a>
-  </div>
-</aside>
+    <aside class="sidebar">
+      <div class="side-group">
+        <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
+        <a class="nav-item" href="/orders-admin.html"><span>📦 Orders</span></a>
+        <a class="nav-item active" href="/products-admin"><span>🏷️ Products</span></a>
+        <a class="nav-item" href="/collections-admin"><span>🗂️ Collections</span></a>
+        <a class="nav-item" href="/customers-admin"><span>👥 Customers</span></a>
+        <a class="nav-item" href="/theme-admin"><span>🎨 Theme</span></a>
+      </div>
+    </aside>
 
     <main class="main">
       <div class="page">
@@ -707,7 +701,7 @@
               </div>
               <div class="card-body">
                 <div class="seo-preview">
-                  <div class="seo-site" id="seoSiteText">https://smartkidskw.com/products/...</div>
+                  <div class="seo-site" id="seoSiteText">https://smartkidskw.com/product-page.html?slug=...</div>
                   <div class="seo-link" id="seoTitlePreview">Product title</div>
                   <div class="seo-desc" id="seoDescPreview">Product description will appear here.</div>
                 </div>
@@ -808,7 +802,6 @@
 
   <script>
     const API_BASE = '/api/products';
-    const SITE_BASE = `${location.origin}/product-page.html`;
     const params = new URLSearchParams(window.location.search);
     const productId = params.get('id');
 
@@ -857,8 +850,7 @@
 
       if (currentProduct) {
         document.getElementById('statusBadgeWrap').innerHTML = statusBadgeHtml(currentProduct.status || document.getElementById('status').value);
-        document.getElementById('sublineText').textContent =
-          `${currentProduct.created_at ? formatDate(currentProduct.created_at) : ''}`;
+        document.getElementById('sublineText').textContent = `${currentProduct.created_at ? formatDate(currentProduct.created_at) : ''}`;
         document.getElementById('deleteBtn').style.display = 'inline-flex';
       } else {
         document.getElementById('statusBadgeWrap').innerHTML = '';
@@ -1068,7 +1060,9 @@
       }
 
       try {
-        const response = await fetch(`${API_BASE}/${productId}`);
+        const response = await fetch(`${API_BASE}/${productId}`, {
+          headers: { 'Accept': 'application/json' }
+        });
         const result = await response.json();
 
         if (!response.ok || !result.success) {
@@ -1100,7 +1094,8 @@
         const response = await fetch(url, {
           method,
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           },
           body: JSON.stringify(payload)
         });
@@ -1133,7 +1128,8 @@
 
       try {
         const response = await fetch(`${API_BASE}/${currentProduct.id}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: { 'Accept': 'application/json' }
         });
 
         const result = await response.json();
@@ -1185,7 +1181,10 @@
       try {
         const response = await fetch(API_BASE, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
           body: JSON.stringify(payload)
         });
 
@@ -1211,6 +1210,10 @@
           if (!targetProduct) return;
         } else {
           const payload = collectPayload();
+          const currentTags = Array.isArray(currentProduct.tags_list)
+            ? currentProduct.tags_list
+            : String(currentProduct.tags || '').split(',').map(v => v.trim()).filter(Boolean);
+
           const hasUnsavedChanges =
             payload.productName !== (currentProduct.product_name || '') ||
             payload.description !== (currentProduct.description || '') ||
@@ -1225,7 +1228,7 @@
             payload.productType !== (currentProduct.product_type || '') ||
             payload.vendor !== (currentProduct.vendor || '') ||
             payload.category !== (currentProduct.category || '') ||
-            payload.tags.join(',') !== (Array.isArray(currentProduct.tags_list) ? currentProduct.tags_list.join(',') : String(currentProduct.tags || '').split(',').map(v => v.trim()).filter(Boolean).join(','));
+            payload.tags.join(',') !== currentTags.join(',');
 
           if (hasUnsavedChanges) {
             targetProduct = await saveProduct();
@@ -1254,13 +1257,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
-      [
-        'productName',
-        'slug',
-        'seoTitle',
-        'seoDescription',
-        'description'
-      ].forEach(id => {
+      ['productName', 'slug', 'seoTitle', 'seoDescription', 'description'].forEach(id => {
         document.getElementById(id).addEventListener('input', updateSeoPreview);
       });
 
