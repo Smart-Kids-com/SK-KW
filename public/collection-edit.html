@@ -120,15 +120,6 @@
     }
 
     .side-group{margin-bottom:18px}
-    .side-title{
-      font-size:13px;
-      color:var(--muted);
-      margin:10px 10px 8px;
-      font-weight:700;
-      direction:ltr;
-      text-align:left;
-    }
-
     .nav-item{
       display:flex;
       align-items:center;
@@ -145,12 +136,6 @@
 
     .nav-item.active{
       background:#e9eaeb;
-    }
-
-    .nav-sub{
-      padding-left:42px;
-      color:#444;
-      font-weight:500;
     }
 
     .main{
@@ -921,12 +906,9 @@
     <aside class="sidebar">
       <div class="side-group">
         <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
-        <a class="nav-item" href="/admin-enhanced.html"><span>📦 Orders</span></a>
+        <a class="nav-item" href="/orders-admin.html"><span>📦 Orders</span></a>
         <a class="nav-item" href="/products-admin"><span>🏷️ Products</span></a>
         <a class="nav-item active" href="/collections-admin"><span>🗂️ Collections</span></a>
-        <div class="nav-item nav-sub"><span>Inventory</span></div>
-        <div class="nav-item nav-sub"><span>Purchase orders</span></div>
-        <div class="nav-item nav-sub"><span>Transfers</span></div>
       </div>
     </aside>
 
@@ -1214,9 +1196,14 @@
       </div>
 
       <div class="modal-foot">
-        <div class="browse-count" id="browseCountText">0 selected</div>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div class="browse-count" id="browseCountText">0 selected</div>
+          <div class="browse-count" id="browsePaginationInfo">0-0 of 0</div>
+        </div>
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn" type="button" id="browsePrevBtn" onclick="goToBrowsePrevPage()">Previous</button>
+          <button class="btn" type="button" id="browseNextBtn" onclick="goToBrowseNextPage()">Next</button>
           <button class="btn" type="button" onclick="closeBrowseModal()">Cancel</button>
           <button class="btn primary" type="button" onclick="addSelectedBrowseProducts()">Add products</button>
         </div>
@@ -1238,6 +1225,7 @@
     let selectedBrowseProductIds = new Set();
     let browseOffset = 0;
     let browseLimit = 50;
+    let browseTotal = 0;
     let browseTimer = null;
 
     function qs(id) {
@@ -1752,21 +1740,10 @@
       const value = safeText(rawValue);
       if (!value) return '';
 
-      if (field === 'id') {
-        return value;
-      }
-
-      if (field === 'sku') {
-        return value;
-      }
-
-      if (field === 'barcode') {
-        return value;
-      }
-
-      if (field === 'title') {
-        return value;
-      }
+      if (field === 'id') return value;
+      if (field === 'sku') return value;
+      if (field === 'barcode') return value;
+      if (field === 'title') return value;
 
       return value;
     }
@@ -1822,7 +1799,9 @@
         }
 
         browseProducts = rows;
+        browseTotal = Number(result.pagination?.total || 0);
         renderBrowseProducts();
+        renderBrowsePagination();
       } catch (error) {
         console.error(error);
         qs('browseProductsBody').innerHTML = `
@@ -1844,6 +1823,7 @@
           </tr>
         `;
         updateBrowseSelectionUi();
+        renderBrowsePagination();
         return;
       }
 
@@ -1881,6 +1861,33 @@
       }).join('');
 
       updateBrowseSelectionUi();
+    }
+
+    function renderBrowsePagination() {
+      const box = qs('browsePaginationInfo');
+      const prevBtn = qs('browsePrevBtn');
+      const nextBtn = qs('browseNextBtn');
+
+      if (!box || !prevBtn || !nextBtn) return;
+
+      const start = browseTotal === 0 ? 0 : browseOffset + 1;
+      const end = Math.min(browseOffset + browseLimit, browseTotal);
+
+      box.textContent = `${start}-${end} of ${browseTotal}`;
+      prevBtn.disabled = browseOffset <= 0;
+      nextBtn.disabled = browseOffset + browseLimit >= browseTotal;
+    }
+
+    function goToBrowsePrevPage() {
+      if (browseOffset <= 0) return;
+      browseOffset = Math.max(0, browseOffset - browseLimit);
+      loadBrowseProducts(false);
+    }
+
+    function goToBrowseNextPage() {
+      if (browseOffset + browseLimit >= browseTotal) return;
+      browseOffset += browseLimit;
+      loadBrowseProducts(false);
     }
 
     function toggleBrowseSelection(productId, checked) {

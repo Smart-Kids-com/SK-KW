@@ -358,7 +358,7 @@
     }
 
     .page{
-      width:min(100%, 520px);
+      width:min(100%, 640px);
       margin:0 auto;
       padding:16px 12px 36px;
     }
@@ -765,9 +765,9 @@
     }
 
     @media (min-width:700px){
-      .page{ width:min(100%, 620px); }
+      .page{ width:min(100%, 760px); }
       .logo-wrap img, .drawer-logo img{ width:360px; }
-      .card{ flex-basis:60%; }
+      .card{ flex-basis:48%; }
     }
 
     @media (max-width: 768px){
@@ -876,8 +876,8 @@
 
   <main class="page">
     <section class="hero">
-      <button class="hero-arrow prev" id="heroPrev" type="button">›</button>
-      <button class="hero-arrow next" id="heroNext" type="button">‹</button>
+      <button class="hero-arrow prev" id="heroPrev" type="button">‹</button>
+      <button class="hero-arrow next" id="heroNext" type="button">›</button>
 
       <div class="hero-track" id="heroTrack"></div>
       <div class="hero-dots" id="heroDots"></div>
@@ -889,9 +889,9 @@
         <a class="section-link" href="./products-full.html">عرض الكل</a>
       </div>
       <div class="h-scroll-wrap">
-        <button class="scroll-btn prev" type="button" onclick="scrollCards('latestTrack',-1)">›</button>
+        <button class="scroll-btn prev" type="button" onclick="scrollCards('latestTrack',-1)">‹</button>
         <div class="h-scroll" id="latestTrack"></div>
-        <button class="scroll-btn next" type="button" onclick="scrollCards('latestTrack',1)">‹</button>
+        <button class="scroll-btn next" type="button" onclick="scrollCards('latestTrack',1)">›</button>
       </div>
     </section>
 
@@ -913,6 +913,8 @@
   <script>
     const COLLECTIONS_API = '/api/collections';
     const PRODUCTS_API = '/api/products';
+    const HOME_PRODUCTS_LIMIT = 200;
+    const HOME_COLLECTIONS_LIMIT = 50;
 
     let allProducts = [];
     let allCollections = [];
@@ -954,6 +956,7 @@
     }
 
     function getImage(product) {
+      if (product.primary_image) return product.primary_image;
       if (product.image_url) return product.image_url;
       if (product.image) return product.image;
       if (Array.isArray(product.images) && product.images.length > 0) {
@@ -964,9 +967,23 @@
       return `https://via.placeholder.com/800x800?text=${encodeURIComponent(getTitle(product))}`;
     }
 
+    function getCollectionImage(collection) {
+      return (
+        collection.image_url ||
+        collection.image ||
+        collection.cover_image ||
+        collection.banner_image ||
+        collection.primary_image ||
+        `https://via.placeholder.com/800x800?text=${encodeURIComponent(safeText(collection.title, 'Collection'))}`
+      );
+    }
+
     function getPrice(product) {
-      if (product.price != null && !isNaN(parseFloat(product.price))) return parseFloat(product.price);
-      if (product.sale_price != null && !isNaN(parseFloat(product.sale_price))) return parseFloat(product.sale_price);
+      const salePrice = parseFloat(product.sale_price);
+      const regularPrice = parseFloat(product.price);
+
+      if (!isNaN(salePrice) && salePrice > 0) return salePrice;
+      if (!isNaN(regularPrice)) return regularPrice;
       if (product.variants && product.variants[0] && product.variants[0].price) return parseFloat(product.variants[0].price);
       return 0;
     }
@@ -1145,11 +1162,15 @@
       const title = safeText(collection.title, 'مجموعة');
       const description = safeText(collection.description, '');
       const count = Number(collection.product_count || 0);
+      const image = getCollectionImage(collection);
 
       return `
         <article class="card">
           <a class="card-link" href="${url}">
             <div class="card-inner">
+              <div class="card-image">
+                <img src="${image}" alt="${escapeHtml(title)}" loading="lazy">
+              </div>
               <div class="card-info">
                 <div class="card-title">${escapeHtml(title)}</div>
                 ${description ? `<div style="font-size:.9rem;color:#eadcf2;margin-bottom:10px;line-height:1.6;">${escapeHtml(description)}</div>` : ``}
@@ -1282,7 +1303,7 @@
 
     async function fetchAllProducts() {
       try {
-        const data = await fetchJson(`${PRODUCTS_API}?status=active&limit=1000&offset=0&sort=created_at&order=DESC`);
+        const data = await fetchJson(`${PRODUCTS_API}?status=active&limit=${HOME_PRODUCTS_LIMIT}&offset=0&sort=created_at&order=DESC`);
         return Array.isArray(data) ? data : [];
       } catch (error) {
         console.warn('Failed to fetch all products', error);
@@ -1292,7 +1313,7 @@
 
     async function fetchAllCollections() {
       try {
-        const data = await fetchJson(`${COLLECTIONS_API}?limit=1000&offset=0&sort=created_at&order=DESC`);
+        const data = await fetchJson(`${COLLECTIONS_API}?limit=${HOME_COLLECTIONS_LIMIT}&offset=0&sort=created_at&order=DESC`);
         return Array.isArray(data) ? data.filter(item => String(item.status || 'active').toLowerCase() !== 'archived') : [];
       } catch (error) {
         console.warn('Failed to fetch collections', error);
