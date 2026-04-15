@@ -11,6 +11,7 @@ const db = require('./db/turso-manager');
 const ordersRoutes = require('./routes/orders');
 const productsRoutes = require('./routes/products');
 const collectionsRoutes = require('./routes/collections');
+const customersRoutes = require('./routes/customers');
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
@@ -269,7 +270,10 @@ app.use(
     '/order-details.html',
     '/collections-admin',
     '/collections-admin.html',
-    '/collection-edit.html'
+    '/collection-edit.html',
+    '/customers-admin',
+    '/customers-admin.html',
+    '/customer-view.html'
   ],
   requireAdminAuth
 );
@@ -294,6 +298,7 @@ app.use('/api', async (req, res, next) => {
 app.use('/api/orders', ordersRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/collections', collectionsRoutes);
+app.use('/api/customers', customersRoutes);
 
 // Route للـ Health Check
 app.get('/api/health', async (req, res, next) => {
@@ -388,6 +393,18 @@ app.get('/order-details.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'order-details.html'));
 });
 
+app.get('/customers-admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'customers-admin.html'));
+});
+
+app.get('/customers-admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'customers-admin.html'));
+});
+
+app.get('/customer-view.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'customer-view.html'));
+});
+
 /* =========================================
    خدمة الملفات الثابتة
 ========================================= */
@@ -445,8 +462,10 @@ async function startServer() {
       console.log(`║ 📈 لوحة متقدمة: http://${HOST}:${PORT}/admin-enhanced`);
       console.log(`║ 🏷️ إدارة المنتجات: http://${HOST}:${PORT}/products-admin`);
       console.log(`║ 🗂️ إدارة المجموعات: http://${HOST}:${PORT}/collections-admin`);
+      console.log(`║ 👥 إدارة العملاء: http://${HOST}:${PORT}/customers-admin`);
       console.log(`║ ✏️ تعديل/إضافة منتج: http://${HOST}:${PORT}/product-edit.html`);
       console.log(`║ 🧩 تعديل/إضافة مجموعة: http://${HOST}:${PORT}/collection-edit.html`);
+      console.log(`║ 👤 عرض العميل: http://${HOST}:${PORT}/customer-view.html?id=1`);
       console.log('║');
       console.log('║ API Endpoints:');
       console.log(`║ GET    http://${HOST}:${PORT}/api/orders`);
@@ -477,6 +496,13 @@ async function startServer() {
       console.log(`║ POST   http://${HOST}:${PORT}/api/collections/:id/products/remove`);
       console.log(`║ POST   http://${HOST}:${PORT}/api/collections/:id/products/reorder`);
       console.log(`║ POST   http://${HOST}:${PORT}/api/collections/:id/products/move`);
+      console.log('║');
+      console.log(`║ GET    http://${HOST}:${PORT}/api/customers`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/customers/:id`);
+      console.log(`║ GET    http://${HOST}:${PORT}/api/customers/stats/summary`);
+      console.log(`║ POST   http://${HOST}:${PORT}/api/customers`);
+      console.log(`║ PUT    http://${HOST}:${PORT}/api/customers/:id`);
+      console.log(`║ DELETE http://${HOST}:${PORT}/api/customers/:id`);
       console.log('╚════════════════════════════════════════════════════════╝\n');
     });
 

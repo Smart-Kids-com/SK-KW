@@ -5,6 +5,8 @@ const db = require('../db/turso-manager');
 /**
  * Helpers
  */
+const MAX_PRODUCTS_LIST_LIMIT = 100;
+
 function slugify(text = '') {
   return String(text)
     .trim()
@@ -27,6 +29,10 @@ function toNumber(value, fallback = 0) {
 function toInteger(value, fallback = 0) {
   const n = parseInt(value, 10);
   return Number.isFinite(n) ? n : fallback;
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }
 
 function normalizeText(value = '') {
@@ -112,6 +118,15 @@ async function enrichProduct(product) {
   };
 }
 
+function buildPlainProduct(product) {
+  return {
+    ...product,
+    tags_list: parseTags(product.tags),
+    images: [],
+    primary_image: product.image_url || ''
+  };
+}
+
 async function makeUniqueSlug(baseText = '', excludeId = null) {
   const base = slugify(baseText) || `product-${Date.now()}`;
   let candidate = base;
@@ -148,16 +163,6 @@ function normalizeIncomingProductBody(body = {}) {
     seoDescription: body.seoDescription ?? body.seo_description ?? '',
     images: body.images
   };
-}
-
-async function enrichProducts(products = []) {
-  const enriched = [];
-
-  for (const product of products) {
-    enriched.push(await enrichProduct(product));
-  }
-
-  return enriched;
 }
 
 /**
@@ -741,13 +746,14 @@ router.get('/', async (req, res) => {
     sql += ` ORDER BY ${sortColumn} ${sortOrder}`;
     sql += ` LIMIT ? OFFSET ?`;
 
-    const parsedLimit = Math.max(1, toInteger(limit, 50));
+    const parsedLimit = clamp(toInteger(limit, 50), 1, MAX_PRODUCTS_LIST_LIMIT);
     const parsedOffset = Math.max(0, toInteger(offset, 0));
 
     params.push(parsedLimit, parsedOffset);
 
     const products = await db.all(sql, params);
-    const enrichedProducts = await enrichProducts(products);
+
+    const plainProducts = products.map(product => buildPlainProduct(product));
 
     let countSql = `SELECT COUNT(*) as total FROM products`;
     const countParams = [];
@@ -776,7 +782,7 @@ router.get('/', async (req, res) => {
 
     return res.json({
       success: true,
-      data: enrichedProducts,
+      data: plainProducts,
       pagination: {
         total,
         limit: parsedLimit,

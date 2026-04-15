@@ -293,9 +293,9 @@
     <aside class="sidebar">
       <div class="side-group">
         <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
-        <a class="nav-item" href="/admin-enhanced.html"><span>📦 Orders</span><span class="badge-count" id="ordersCountBadge">—</span></a>
-        <a class="nav-item active" href="/products-admin"><span>🏷️ Products</span></a>
-        <a class="nav-item nav-sub" href="/collections-admin"><span>Collections</span></a>
+        <a class="nav-item" href="/orders-admin.html"><span>📦 Orders</span><span class="badge-count" id="ordersCountBadge">—</span></a>
+        <a class="nav-item active" href="/products-admin.html"><span>🏷️ Products</span></a>
+        <a class="nav-item nav-sub" href="/collections-admin.html"><span>Collections</span></a>
       </div>
     </aside>
 
@@ -642,7 +642,7 @@
               <div class="product-cell">
                 ${
                   primaryImage
-                    ? `<img class="thumb" src="${escapeHtml(primaryImage)}" alt="${escapeHtml(product.product_name || '')}">`
+                    ? `<img class="thumb" loading="lazy" decoding="async" src="${escapeHtml(primaryImage)}" alt="${escapeHtml(product.product_name || '')}">`
                     : `<div class="thumb-placeholder">🧸</div>`
                 }
                 <div>
@@ -677,9 +677,10 @@
       window.location.href = `/product-edit.html?id=${id}`;
     }
 
-    async function duplicateProduct(id) {
+    async function duplicateProduct(id, options = {}) {
+      const { silent = false, skipRefresh = true } = options;
       const product = currentProducts.find(p => Number(p.id) === Number(id));
-      if (!product) return;
+      if (!product) return null;
 
       const payload = {
         productName: `${product.product_name || 'Product'} - Copy`,
@@ -697,21 +698,41 @@
         tags: Array.isArray(product.tags_list) ? product.tags_list : [],
         seoTitle: product.seo_title || '',
         seoDescription: product.seo_description || '',
-        images: Array.isArray(product.images) ? product.images.map(img => ({
-          image_url: img.image_url,
-          sort_order: img.sort_order
-        })) : []
+        images: []
       };
 
-      const response = await fetch(API_BASE, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      try {
+        const response = await fetch(API_BASE, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
 
-      const result = await response.json();
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to duplicate product');
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to duplicate product');
+        }
+
+        if (!skipRefresh) {
+          await refreshPageData(false);
+        } else if (result.data) {
+          currentProducts = [result.data, ...currentProducts];
+          updatePagination(currentProducts);
+          renderProducts(currentProducts);
+          updateSelectionUi();
+        }
+
+        if (!silent) {
+          showAlert('Product duplicated successfully', 'success');
+        }
+
+        return result.data || null;
+      } catch (error) {
+        console.error(error);
+        if (!silent) {
+          showAlert(error.message || 'Failed to duplicate product', 'error');
+        }
+        throw error;
       }
     }
 
@@ -736,9 +757,17 @@
           }
         }
 
-        showAlert('تم تحديث حالة المنتجات المحددة', 'success');
+        currentProducts = currentProducts.map(product =>
+          selectedIds.includes(Number(product.id))
+            ? { ...product, status }
+            : product
+        );
+
         selectedIds = [];
-        await refreshPageData(false);
+        renderProducts(currentProducts);
+        updatePagination(currentProducts);
+        updateSelectionUi();
+        showAlert('تم تحديث حالة المنتجات المحددة', 'success');
       } catch (error) {
         console.error(error);
         showAlert(error.message || 'Bulk status update failed', 'error');
@@ -764,9 +793,12 @@
           }
         }
 
-        showAlert('تم حذف المنتجات المحددة', 'success');
+        currentProducts = currentProducts.filter(product => !selectedIds.includes(Number(product.id)));
         selectedIds = [];
-        await refreshPageData(false);
+        renderProducts(currentProducts);
+        updatePagination(currentProducts);
+        updateSelectionUi();
+        showAlert('تم حذف المنتجات المحددة', 'success');
       } catch (error) {
         console.error(error);
         showAlert(error.message || 'Bulk delete failed', 'error');
@@ -783,10 +815,12 @@
       try {
         const ids = [...selectedIds];
         for (const id of ids) {
-          await duplicateProduct(id);
+          await duplicateProduct(id, { silent: true, skipRefresh: true });
         }
         selectedIds = [];
-        await refreshPageData(false);
+        updatePagination(currentProducts);
+        renderProducts(currentProducts);
+        updateSelectionUi();
         showAlert('تم نسخ المنتجات المحددة', 'success');
       } catch (error) {
         console.error(error);
@@ -909,9 +943,9 @@
         row['Image Src'] ||
         '';
 
-      const compareAt = parseImportNumber(row.compare_at_price ?? row.compareAtPrice ?? 0, 0);
+      const compareAt = parseImportNumber(row.compare_at_price ?? row.compareAtPrice ?? row['Variant Compare At Price'] ?? row['Compare At Price / Kuwait'] ?? 0, 0);
       const sale = parseImportNumber(row.salePrice ?? row.sale_price ?? 0, 0);
-      const regular = parseImportNumber(row.price ?? row.regular_price ?? row['Variant Price'] ?? 0, 0);
+      const regular = parseImportNumber(row.price ?? row.regular_price ?? row['Variant Price'] ?? row['Price / Kuwait'] ?? 0, 0);
 
       return {
         id: String(row.id || '').trim(),
@@ -926,15 +960,15 @@
         status: parseImportStatus(row),
         productType: row.productType || row.product_type || row.type || row['Type'] || '',
         vendor: row.vendor || row['Vendor'] || '',
-        category: row.category || row.collection || '',
+        category: row.category || row['Product Category'] || row.collection || row.product_category || row['Collection'] || '',
         tags: parseImportTags(row.tags || row['Tags'] || ''),
-        seoTitle: row.seoTitle || row.seo_title || row.meta_title || '',
-        seoDescription: row.seoDescription || row.seo_description || row.meta_description || ''
+        seoTitle: row.seoTitle || row.seo_title || row.meta_title || row['SEO Title'] || '',
+        seoDescription: row.seoDescription || row.seo_description || row.meta_description || row['SEO Description'] || ''
       };
     }
 
     async function fetchImportLookup() {
-      const response = await fetch(`${API_BASE}?limit=1000&offset=0`);
+      const response = await fetch(`${API_BASE}?limit=300&offset=0`);
       const result = await response.json();
 
       if (!response.ok || !result.success) {
@@ -1133,7 +1167,8 @@
           console.warn('Import issues:', result.failedRows);
         }
 
-        await refreshPageData(false);
+        await Promise.allSettled([loadProducts(), loadOrdersCount(), loadSummary()]);
+        updateSelectionUi();
       } catch (error) {
         console.error(error);
         showAlert(error.message || 'Import failed', 'error');

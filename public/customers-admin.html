@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customers - Smart Kids Kuwait</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f3f3f3;
+      --card:#ffffff;
+      --line:#e5e7eb;
+      --text:#202223;
+      --muted:#6d7175;
+      --top:#111213;
+      --side:#f6f6f7;
+      --green:#16a34a;
+      --green-bg:#bbf7d0;
+      --yellow:#f59e0b;
+      --yellow-bg:#fde68a;
+      --gray-bg:#e5e7eb;
+      --blue:#2563eb;
+      --blue-bg:#dbeafe;
+      --red:#dc2626;
+      --red-bg:#fee2e2;
+      --shadow:0 1px 2px rgba(0,0,0,.08);
+    }
+
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      direction:ltr;
+    }
+
+    a{text-decoration:none;color:inherit}
+    button,input,select{font-family:inherit}
+
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:290px 1fr;
+      grid-template-rows:72px 1fr;
+      grid-template-areas:
+        "top top"
+        "side main";
+    }
+
+    .topbar{
+      grid-area:top;
+      background:var(--top);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:0 18px;
+      position:sticky;
+      top:0;
+      z-index:50;
+    }
+
+    .top-left{display:flex;align-items:center;gap:14px;min-width:0}
+    .brand{font-size:20px;font-weight:800;white-space:nowrap}
+
+    .search-wrap{flex:1;max-width:720px;margin:0 auto;width:100%}
+    .top-search{
+      width:100%;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.08);
+      background:#2a2b2d;color:#fff;padding:0 16px;outline:none;font-size:15px;
+    }
+
+    .top-right{display:flex;align-items:center;gap:14px;white-space:nowrap}
+    .avatar{
+      width:34px;height:34px;border-radius:999px;background:#2a2b2d;
+      display:flex;align-items:center;justify-content:center;font-size:16px;
+    }
+
+    .sidebar{
+      grid-area:side;background:var(--side);border-right:1px solid #ddd;
+      padding:14px 14px 20px;overflow:auto;
+    }
+
+    .side-group{margin-bottom:18px}
+    .nav-item{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:11px 12px;border-radius:12px;color:#111;font-weight:600;
+      margin-bottom:4px;direction:ltr;text-align:left;
+    }
+    .nav-item.active{background:#e9eaeb}
+    .nav-sub{padding-left:42px;color:#444;font-weight:500}
+
+    .badge-count{
+      background:#e5e7eb;min-width:34px;height:24px;border-radius:999px;
+      display:flex;align-items:center;justify-content:center;font-size:13px;color:#444;padding:0 8px;
+    }
+
+    .main{grid-area:main;padding:20px;overflow:auto}
+    .page{max-width:1460px;margin:0 auto}
+
+    .alert{
+      display:none;margin-bottom:14px;padding:14px 16px;border-radius:14px;font-weight:700;
+      border:1px solid transparent;background:#fff;direction:rtl;text-align:right;white-space:pre-line;
+    }
+    .alert.active{display:block}
+    .alert.success{background:#dcfce7;border-color:#86efac;color:#166534}
+    .alert.error{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+    .alert.warning{background:#fef3c7;border-color:#fcd34d;color:#92400e}
+
+    .page-head{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;
+      margin-bottom:16px;flex-wrap:wrap;
+    }
+    .page-title{font-size:20px;font-weight:800;display:flex;align-items:center;gap:10px;direction:ltr}
+    .page-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+    .btn{
+      height:38px;border-radius:12px;border:1px solid #d1d5db;background:#fff;color:#111;
+      padding:0 14px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);
+    }
+    .btn.primary{background:#111;color:#fff;border-color:#111}
+
+    .summary{
+      background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+      box-shadow:var(--shadow);margin-bottom:16px;
+    }
+    .summary-grid{display:grid;grid-template-columns:180px repeat(4,1fr);direction:ltr}
+    .summary-cell{padding:16px 18px;border-right:1px solid var(--line);min-height:86px;text-align:left}
+    .summary-cell:first-child{border-right:none}
+    .summary-label{color:#444;font-size:13px;margin-bottom:8px;font-weight:700}
+    .summary-value{font-size:17px;font-weight:800}
+    .summary-sub{font-size:13px;color:#6b7280;margin-top:6px}
+
+    .customers-card{
+      background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);
+    }
+
+    .tabs-row{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap;
+    }
+    .tabs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;direction:ltr}
+    .tab{
+      height:36px;border:none;background:transparent;border-radius:12px;padding:0 14px;
+      font-weight:700;color:#444;cursor:pointer;
+    }
+    .tab.active{background:#ededee;color:#111}
+
+    .tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;position:relative}
+    .icon-btn{
+      width:38px;height:38px;border-radius:12px;border:1px solid #d1d5db;background:#fff;
+      cursor:pointer;font-size:16px;
+    }
+
+    .filters-row{
+      display:grid;grid-template-columns:1.6fr 220px 220px 120px;
+      gap:12px;padding:14px;border-bottom:1px solid var(--line);
+    }
+    .filters-row.hidden{display:none}
+
+    .field input,.field select{
+      width:100%;height:42px;border-radius:12px;border:1px solid #d1d5db;background:#fff;
+      padding:0 14px;font-size:15px;outline:none;
+    }
+    .field input:focus,.field select:focus{border-color:#9ca3af}
+    .search-btn{
+      height:42px;border:none;border-radius:12px;background:#111827;color:#fff;font-weight:800;cursor:pointer;
+    }
+
+    .table-wrap{overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:1320px;direction:ltr}
+    th,td{
+      padding:14px 16px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;background:#fff;
+    }
+    th{font-size:13px;color:#4b5563;font-weight:800;white-space:nowrap}
+    tr:hover td{background:#fafafa}
+
+    .customer-cell{
+      display:flex;align-items:center;gap:12px;min-width:280px;
+    }
+
+    .customer-avatar{
+      width:44px;height:44px;border-radius:999px;background:#eef2ff;color:#4338ca;
+      display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;flex-shrink:0;
+      border:1px solid #dbeafe;
+      text-transform:uppercase;
+    }
+
+    .customer-name{font-weight:800;line-height:1.45;margin-bottom:4px}
+    .customer-sub{font-size:13px;color:var(--muted)}
+
+    .status-badge{
+      display:inline-flex;align-items:center;justify-content:center;min-width:74px;height:30px;
+      padding:0 12px;border-radius:999px;font-size:13px;font-weight:800;
+    }
+    .status-badge.active{color:#166534;background:var(--green-bg)}
+    .status-badge.inactive{color:#92400e;background:var(--yellow-bg)}
+    .status-badge.blocked{color:#991b1b;background:var(--red-bg)}
+    .status-badge.new{color:#1d4ed8;background:var(--blue-bg)}
+
+    .mini-btn{
+      border:none;background:#f3f4f6;color:#111;border-radius:10px;height:34px;padding:0 12px;cursor:pointer;font-weight:700;
+    }
+
+    .pagination{
+      display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 14px;flex-wrap:wrap;
+    }
+    .pagination-left{color:#6b7280;font-size:14px;font-weight:600;direction:ltr}
+    .pagination-right{display:flex;gap:8px}
+
+    .empty{padding:46px 20px;text-align:center;color:#6b7280;font-weight:700}
+
+    .mobile-top{
+      display:none;background:#111;color:#fff;padding:14px 14px 12px;position:sticky;top:0;z-index:60;
+    }
+    .mobile-top-row{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;
+    }
+    .mobile-title{font-size:22px;font-weight:900;white-space:nowrap}
+    .mobile-top-search{
+      width:100%;height:42px;border:none;border-radius:12px;background:#2a2b2d;color:#fff;padding:0 14px;outline:none;
+    }
+
+    @media (max-width: 1100px){
+      .app{grid-template-columns:1fr;grid-template-rows:auto 1fr;grid-template-areas:"main"}
+      .topbar,.sidebar{display:none}
+      .mobile-top{display:block}
+      .main{padding:14px}
+      .page{max-width:100%}
+      .summary-grid{grid-template-columns:1fr 1fr}
+      .summary-cell{border-right:none;border-bottom:1px solid var(--line)}
+      .summary-cell:nth-last-child(-n+2){border-bottom:none}
+      .filters-row{grid-template-columns:1fr}
+    }
+
+    @media (max-width: 700px){
+      .page-head{align-items:flex-start}
+      .page-actions{width:100%}
+      .page-actions .btn{flex:1}
+      .summary-grid{grid-template-columns:1fr}
+      .summary-cell{border-bottom:1px solid var(--line)!important}
+      .summary-cell:last-child{border-bottom:none!important}
+      table{min-width:1080px}
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-top">
+    <div class="mobile-top-row">
+      <div class="mobile-title">Customers</div>
+      <button class="btn primary" onclick="refreshPageData()">Refresh</button>
+    </div>
+    <input class="mobile-top-search" id="mobileSearchInput" type="text" placeholder="Search customers">
+  </div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="top-left">
+        <div class="brand">Smartkidsfy</div>
+      </div>
+
+      <div class="search-wrap">
+        <input class="top-search" id="desktopSearchTop" type="text" placeholder="Search">
+      </div>
+
+      <div class="top-right">
+        <div class="avatar">👥</div>
+        <div class="avatar">🔔</div>
+        <div style="font-weight:800">الأطفال المبتكرون الكويت</div>
+      </div>
+    </header>
+
+   <aside class="sidebar">
+  <div class="side-group">
+    <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
+    <a class="nav-item" href="/orders-admin.html"><span>📦 Orders</span><span class="badge-count" id="ordersCountBadge">—</span></a>
+    <a class="nav-item" href="/products-admin"><span>🏷️ Products</span></a>
+    <a class="nav-item nav-sub" href="/collections-admin"><span>Collections</span></a>
+    <a class="nav-item active" href="/customers-admin"><span>👥 Customers</span></a>
+  </div>
+</aside>
+
+    <main class="main">
+      <div class="page">
+        <div id="alert" class="alert"></div>
+
+        <div class="page-head">
+          <div class="page-title">Customers 👥</div>
+
+          <div class="page-actions">
+            <button class="btn" onclick="toggleFilters()">Filters</button>
+            <button class="btn" onclick="exportCustomersCsv()">Export</button>
+            <button class="btn primary" onclick="refreshPageData()">Refresh</button>
+          </div>
+        </div>
+
+        <section class="summary">
+          <div class="summary-grid">
+            <div class="summary-cell">
+              <div class="summary-label">Date range</div>
+              <div class="summary-value">30 days</div>
+              <div class="summary-sub">Summary view</div>
+            </div>
+            <div class="summary-cell">
+              <div class="summary-label">Total customers</div>
+              <div class="summary-value" id="summaryTotalCustomers">0</div>
+              <div class="summary-sub">All customers</div>
+            </div>
+            <div class="summary-cell">
+              <div class="summary-label">Active customers</div>
+              <div class="summary-value" id="summaryActiveCustomers">0</div>
+              <div class="summary-sub">Customers with activity</div>
+            </div>
+            <div class="summary-cell">
+              <div class="summary-label">New customers</div>
+              <div class="summary-value" id="summaryNewCustomers">0</div>
+              <div class="summary-sub">Recently added</div>
+            </div>
+            <div class="summary-cell">
+              <div class="summary-label">Marketing opt-in</div>
+              <div class="summary-value" id="summaryMarketingCustomers">0</div>
+              <div class="summary-sub">Accepts marketing</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="customers-card">
+          <div class="tabs-row">
+            <div class="tabs">
+              <button class="tab active" data-status="">All</button>
+              <button class="tab" data-status="active">Active</button>
+              <button class="tab" data-status="new">New</button>
+              <button class="tab" data-status="inactive">Inactive</button>
+              <button class="tab" data-status="blocked">Blocked</button>
+            </div>
+
+            <div class="tools">
+              <button class="icon-btn" title="Toggle filters" onclick="toggleFilters()">☰</button>
+              <button class="icon-btn" title="Sort" onclick="cycleSort()">⇄</button>
+              <button class="icon-btn" title="Refresh" onclick="refreshPageData()">↻</button>
+            </div>
+          </div>
+
+          <div id="filtersRow" class="filters-row">
+            <div class="field">
+              <input type="text" id="searchInput" placeholder="Search by name / email / phone / city">
+            </div>
+            <div class="field">
+              <select id="statusFilter">
+                <option value="">All statuses</option>
+                <option value="active">Active</option>
+                <option value="new">New</option>
+                <option value="inactive">Inactive</option>
+                <option value="blocked">Blocked</option>
+              </select>
+            </div>
+            <div class="field">
+              <select id="sortFilter">
+                <option value="created_at-DESC">Newest first</option>
+                <option value="created_at-ASC">Oldest first</option>
+                <option value="full_name-ASC">Name A-Z</option>
+                <option value="full_name-DESC">Name Z-A</option>
+                <option value="total_orders-DESC">Most orders</option>
+                <option value="total_spent-DESC">Highest spend</option>
+              </select>
+            </div>
+            <button class="search-btn" onclick="loadCustomers()">Search</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Status</th>
+                  <th>Phone</th>
+                  <th>City</th>
+                  <th>Total orders</th>
+                  <th>Total spent</th>
+                  <th>Marketing</th>
+                  <th>Last order</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="customersTableBody">
+                <tr><td colspan="9" class="empty">Loading customers...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination">
+            <div class="pagination-left" id="paginationText">0-0</div>
+            <div class="pagination-right">
+              <button class="icon-btn" onclick="noopPager()">‹</button>
+              <button class="icon-btn" onclick="noopPager()">›</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const CUSTOMERS_API = '/api/customers';
+    const ORDERS_API = '/api/orders';
+
+    let currentCustomers = [];
+    let currentStatus = '';
+    let filtersVisible = true;
+    let currentSortIndex = 0;
+
+    const sortOptions = [
+      'created_at-DESC',
+      'created_at-ASC',
+      'full_name-ASC',
+      'full_name-DESC',
+      'total_orders-DESC',
+      'total_spent-DESC'
+    ];
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showAlert(message, type='success') {
+      const el = document.getElementById('alert');
+      el.textContent = message;
+      el.className = `alert active ${type}`;
+      setTimeout(() => el.classList.remove('active'), 4500);
+    }
+
+    function formatMoney(value) {
+      const num = Number(value || 0);
+      return `KWD ${num.toFixed(3)}`;
+    }
+
+    function syncSearchInputs() {
+      const desktop = document.getElementById('searchInput');
+      const mobile = document.getElementById('mobileSearchInput');
+      const top = document.getElementById('desktopSearchTop');
+      const val = desktop.value.trim();
+      if (mobile) mobile.value = val;
+      if (top) top.value = val;
+    }
+
+    function syncIncomingSearch(sourceValue) {
+      document.getElementById('searchInput').value = sourceValue;
+      const mobile = document.getElementById('mobileSearchInput');
+      const top = document.getElementById('desktopSearchTop');
+      if (mobile) mobile.value = sourceValue;
+      if (top) top.value = sourceValue;
+    }
+
+    function toggleFilters() {
+      filtersVisible = !filtersVisible;
+      document.getElementById('filtersRow').classList.toggle('hidden', !filtersVisible);
+    }
+
+    function cycleSort() {
+      currentSortIndex = (currentSortIndex + 1) % sortOptions.length;
+      document.getElementById('sortFilter').value = sortOptions[currentSortIndex];
+      loadCustomers();
+    }
+
+    function noopPager() {
+      showAlert('واجهة Pagination جاهزة، والقائمة الآن تجلب حتى 50 عميل في الصفحة.', 'warning');
+    }
+
+    function getInitials(customer) {
+      const name = String(customer.full_name || customer.name || '').trim();
+      if (!name) return 'C';
+      const parts = name.split(/\s+/).filter(Boolean);
+      if (parts.length === 1) return parts[0].slice(0, 1);
+      return (parts[0].slice(0, 1) + parts[1].slice(0, 1)).toUpperCase();
+    }
+
+    function normalizeCustomerStatus(customer) {
+      const raw = String(customer.status || '').trim().toLowerCase();
+      if (['active', 'inactive', 'blocked', 'new'].includes(raw)) return raw;
+
+      const totalOrders = Number(customer.total_orders || 0);
+      const createdAt = new Date(customer.created_at || Date.now()).getTime();
+      const daysSinceCreated = Math.floor((Date.now() - createdAt) / (1000 * 60 * 60 * 24));
+
+      if (customer.is_blocked || raw === 'banned') return 'blocked';
+      if (totalOrders > 0) return 'active';
+      if (daysSinceCreated <= 14) return 'new';
+      return 'inactive';
+    }
+
+    function formatDate(value) {
+      if (!value) return '-';
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return '-';
+      return d.toLocaleDateString('en-GB');
+    }
+
+    async function loadOrdersCount() {
+      try {
+        const response = await fetch(`${ORDERS_API}?limit=1&offset=0`);
+        const result = await response.json();
+        if (!response.ok || !result.success) return;
+        document.getElementById('ordersCountBadge').textContent = result.pagination?.total ?? '—';
+      } catch (_) {}
+    }
+
+    async function loadCustomers() {
+      try {
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const sortFilter = document.getElementById('sortFilter');
+
+        const search = searchInput.value.trim();
+        const status = statusFilter.value || currentStatus;
+        const [sort, order] = sortFilter.value.split('-');
+
+        syncSearchInputs();
+
+        const params = new URLSearchParams();
+        if (search) params.append('search', search);
+        if (status) params.append('status', status);
+        params.append('sort', sort);
+        params.append('order', order);
+        params.append('limit', '50');
+        params.append('offset', '0');
+
+        const response = await fetch(`${CUSTOMERS_API}?${params.toString()}`);
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to load customers');
+        }
+
+        currentCustomers = Array.isArray(result.data) ? result.data : [];
+        renderCustomers(currentCustomers);
+        updatePagination(currentCustomers);
+      } catch (error) {
+        console.error(error);
+        document.getElementById('customersTableBody').innerHTML = `
+          <tr><td colspan="9" class="empty">Failed to load customers</td></tr>
+        `;
+      }
+    }
+
+    async function loadSummary() {
+      try {
+        const response = await fetch(`${CUSTOMERS_API}/stats/summary`);
+        const result = await response.json();
+
+        if (!response.ok || !result.success) return;
+
+        document.getElementById('summaryTotalCustomers').textContent = result.data.totalCustomers || 0;
+        document.getElementById('summaryActiveCustomers').textContent = result.data.activeCustomers || 0;
+        document.getElementById('summaryNewCustomers').textContent = result.data.newCustomers || 0;
+        document.getElementById('summaryMarketingCustomers').textContent = result.data.marketingCustomers || 0;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function refreshPageData(showMessage = false) {
+      await loadCustomers();
+      Promise.allSettled([loadOrdersCount(), loadSummary()]).catch(() => {});
+      if (showMessage) showAlert('تم تحديث البيانات', 'success');
+    }
+
+    function updatePagination(customers) {
+      const total = customers.length;
+      document.getElementById('paginationText').textContent = total ? `1-${total}` : '0-0';
+    }
+
+    function renderCustomers(customers) {
+      const tbody = document.getElementById('customersTableBody');
+
+      if (!customers.length) {
+        tbody.innerHTML = `<tr><td colspan="9" class="empty">No customers found</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = customers.map(customer => {
+        const status = normalizeCustomerStatus(customer);
+        const acceptsMarketing = customer.accepts_marketing || customer.marketing_opt_in || customer.acceptsMarketing;
+        const totalOrders = Number(customer.total_orders || 0);
+        const totalSpent = Number(customer.total_spent || 0);
+
+        return `
+          <tr>
+            <td>
+              <div class="customer-cell">
+                <div class="customer-avatar">${escapeHtml(getInitials(customer))}</div>
+                <div>
+                  <div class="customer-name">${escapeHtml(customer.full_name || customer.name || '-')}</div>
+                  <div class="customer-sub">${escapeHtml(customer.email || '-')}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="status-badge ${escapeHtml(status)}">
+                ${escapeHtml(status.charAt(0).toUpperCase() + status.slice(1))}
+              </span>
+            </td>
+            <td>${escapeHtml(customer.phone || '-')}</td>
+            <td>${escapeHtml(customer.city || customer.area || '-')}</td>
+            <td>${totalOrders}</td>
+            <td>${formatMoney(totalSpent)}</td>
+            <td>${acceptsMarketing ? 'Yes' : 'No'}</td>
+            <td>${formatDate(customer.last_order_at || customer.lastOrderAt)}</td>
+            <td>
+              <button class="mini-btn" onclick="viewCustomer(${Number(customer.id || 0)})">View</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function viewCustomer(id) {
+      if (!id) {
+        showAlert('رقم العميل غير صحيح', 'warning');
+        return;
+      }
+      window.location.href = `/customer-view.html?id=${id}`;
+    }
+
+    function exportCustomersCsv() {
+      if (!currentCustomers.length) {
+        showAlert('لا توجد بيانات للتصدير', 'warning');
+        return;
+      }
+
+      const headers = [
+        'id',
+        'full_name',
+        'email',
+        'phone',
+        'city',
+        'status',
+        'total_orders',
+        'total_spent',
+        'accepts_marketing',
+        'last_order_at',
+        'created_at'
+      ];
+
+      const escapeCsv = (value) => {
+        const str = String(value ?? '');
+        return `"${str.replace(/"/g, '""')}"`;
+      };
+
+      const rows = currentCustomers.map(customer => [
+        customer.id,
+        customer.full_name || customer.name || '',
+        customer.email || '',
+        customer.phone || '',
+        customer.city || customer.area || '',
+        normalizeCustomerStatus(customer),
+        customer.total_orders || 0,
+        customer.total_spent || 0,
+        customer.accepts_marketing || customer.marketing_opt_in || false,
+        customer.last_order_at || customer.lastOrderAt || '',
+        customer.created_at || ''
+      ].map(escapeCsv).join(','));
+
+      const bom = '\uFEFF';
+      const csv = bom + [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'customers-export.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      showAlert('تم تصدير العملاء بنجاح', 'success');
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentStatus = tab.dataset.status || '';
+          document.getElementById('statusFilter').value = currentStatus;
+          loadCustomers();
+        });
+      });
+
+      document.getElementById('searchInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') loadCustomers();
+      });
+
+      document.getElementById('desktopSearchTop').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          syncIncomingSearch(e.target.value.trim());
+          loadCustomers();
+        }
+      });
+
+      document.getElementById('mobileSearchInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          syncIncomingSearch(e.target.value.trim());
+          loadCustomers();
+        }
+      });
+
+      document.getElementById('statusFilter').addEventListener('change', loadCustomers);
+      document.getElementById('sortFilter').addEventListener('change', loadCustomers);
+
+      await refreshPageData(false);
+    });
+  </script>
+</body>
+</html>
