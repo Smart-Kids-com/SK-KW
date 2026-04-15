@@ -6,219 +6,817 @@
   <title>Smart Kids Kuwait Admin - Home</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-    :root{--bg:#f6f6f7;--panel:#fff;--line:#e3e3e6;--text:#303030;--muted:#6d7175;--topbar:#111213;--green:#008060;--shadow:0 1px 0 rgba(0,0,0,.04),0 2px 8px rgba(0,0,0,.04);--sidebar-w:268px;--topbar-h:64px;--mobile-black:#000;--mobile-green:#97ea67}
-    html,body{background:var(--bg);color:var(--text);font-family:Inter,"Segoe UI",Tahoma,Arial,sans-serif}
-    a{text-decoration:none;color:inherit} button,input,select{font-family:inherit}
-    .app{min-height:100vh}.desktop-shell{display:none}
-    .desktop-topbar{height:var(--topbar-h);background:var(--topbar);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:50}
-    .desktop-topbar-left,.desktop-topbar-right{display:flex;align-items:center;gap:16px}
-    .shopify-mark{display:flex;align-items:center;gap:8px;font-weight:800}.desktop-search{width:min(810px,52vw);position:relative}
-    .desktop-search input{width:100%;height:40px;border-radius:12px;border:1px solid #3a3a3d;background:#2a2a2c;color:#fff;padding:0 82px 0 38px;font-size:13px;outline:none}
-    .desktop-search .icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#d0d0d2}.desktop-search .kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#d5d5d7}.desktop-search .kbd span{padding:3px 6px;border-radius:6px;background:#444447;border:1px solid #515154;font-weight:700}
-    .account-chip{display:inline-flex;align-items:center;gap:10px;font-weight:700;color:#fff}.account-chip img{width:30px;height:30px;border-radius:50%;object-fit:cover;background:#fff}
-    .desktop-body{display:grid;grid-template-columns:var(--sidebar-w) minmax(0,1fr);min-height:calc(100vh - var(--topbar-h))}.desktop-sidebar{border-right:1px solid var(--line);background:#efefef;padding:14px 12px 18px;position:sticky;top:var(--topbar-h);height:calc(100vh - var(--topbar-h));overflow:auto}
-    .side-group{margin-bottom:14px}.side-link{min-height:40px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 10px;border-radius:10px;color:#303030;font-weight:600;font-size:14px}.side-link:hover{background:#e9e9ea}.side-link.active{background:#fff;box-shadow:inset 0 0 0 1px #e1e1e3}.side-link-left{display:flex;align-items:center;gap:12px;min-width:0}.side-link small{color:#6f7377;font-weight:700;background:#e4e4e5;padding:3px 10px;border-radius:999px}
-    .desktop-main{padding:16px 14px 22px;overflow:auto}.desktop-content-wrap{max-width:1320px}
-    .alert{display:none;margin-bottom:12px;padding:12px 14px;border-radius:12px;font-size:14px;font-weight:700}.alert.active{display:block}.alert.success{background:#e3f1df;color:#0b6b42;border:1px solid #bfdcb9}.alert.error{background:#ffe9e5;color:#9d240d;border:1px solid #f1c7bf}
-    .dashboard-toolbar,.quick-actions-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;direction:ltr}
-    .filter-pill,.report-pill,.quick-action-pill,.ghost-btn,.primary-btn{min-height:36px;padding:0 14px;border:1px solid #d4d4d6;background:#fff;border-radius:12px;display:inline-flex;align-items:center;gap:8px;font-size:14px;color:#303030;font-weight:600}
-    .primary-btn{background:#2a2a2c;color:#fff;border-color:#2a2a2c;cursor:pointer}
-    .metric-strip{border:1px solid #d9d9db;background:#fff;border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}.metric-strip-inner{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}.metric-box{padding:12px 14px;border-right:1px solid #e3e3e5;min-width:0}.metric-box:last-child{border-right:none}.metric-title{font-size:13px;color:#4c4f52;font-weight:700;margin-bottom:6px}.metric-value{font-size:20px;font-weight:900;color:#1f1f20}.metric-change{font-size:12px;color:var(--green);font-weight:800;margin-top:4px}
-    .marketing-stack{display:grid;gap:16px}.marketing-card{display:grid;grid-template-columns:1fr 220px;gap:20px;background:#fff;border:1px solid #dcdcdf;border-radius:16px;padding:18px 20px;box-shadow:var(--shadow)}.marketing-card h3{font-size:16px;margin-bottom:10px;font-weight:800;color:#303030}.marketing-card p{font-size:14px;line-height:1.6;color:#4c4f52;margin-bottom:14px}.marketing-actions{display:flex;gap:10px;flex-wrap:wrap}.marketing-visual{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f5f8f1,#eef7ee);border-radius:14px;min-height:156px;color:#4a8f62;font-size:44px}
-    .mobile-shell{display:block}.mobile-header{background:var(--mobile-black);color:#fff;padding:16px 14px 24px}.mobile-header-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.mobile-header-brand{display:flex;align-items:center;gap:14px;min-width:0}.mobile-avatar,.mobile-store{width:58px;height:58px;border-radius:18px;overflow:hidden;display:flex;align-items:center;justify-content:center}.mobile-avatar{border-radius:50%;background:#fff}.mobile-avatar img{width:100%;height:100%;object-fit:cover}.mobile-store{background:var(--mobile-green);color:#24420c;font-size:28px}.mobile-brand-text h1{font-size:20px;line-height:1.15;font-weight:900;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mobile-brand-text p{font-size:12px;color:#d7d7d9}.mobile-bell{font-size:32px;line-height:1}
-    .mobile-main{margin-top:-8px;padding:0 10px 94px}.mobile-surface{background:#fff;border-radius:34px;box-shadow:var(--shadow);border:1px solid #ececee;overflow:hidden}.mobile-dashboard{padding:14px}.mobile-top-pills{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;direction:ltr}.mobile-pill{min-height:72px;background:#f1f1f2;border-radius:22px;padding:0 18px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:18px;font-weight:800;color:#303030}.mobile-pill .dot{width:16px;height:16px;border-radius:50%;background:#78d28a}
-    .mobile-stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:18px;direction:ltr}.mobile-stat .label{color:#8a8a8e;font-size:15px;font-weight:700;margin-bottom:8px}.mobile-stat .value{font-size:18px;line-height:1.2;font-weight:900;color:#222;word-break:break-word}.mobile-stat .change{color:#89a88b;font-size:13px;line-height:1.25;font-weight:800;margin-top:6px}
-    .mobile-quick-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;direction:ltr}.mobile-quick-card{min-height:150px;border:1px solid #e6e6e8;background:#f8f8f9;border-radius:22px;padding:16px;text-align:left}.mobile-quick-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:8px}.mobile-quick-value{font-size:30px;font-weight:900;line-height:1;color:#222}.mobile-quick-icon{font-size:34px}.mobile-quick-title{font-size:16px;font-weight:800;color:#2f2f2f;line-height:1.35;margin-bottom:4px}.mobile-quick-sub{font-size:12px;color:#707377;line-height:1.35}
-    .mobile-bottom-nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #e8e8ea;box-shadow:0 -6px 18px rgba(0,0,0,.06);display:grid;grid-template-columns:repeat(4,1fr);z-index:80}.mobile-bottom-link{min-height:68px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:800;color:#6c7075}.mobile-bottom-link.active{color:#111}
-    @media (min-width:1100px){.desktop-shell{display:block}.mobile-shell{display:none}}@media (max-width:1099px){.desktop-shell{display:none}.mobile-shell{display:block}}@media (max-width:740px){.mobile-top-pills,.mobile-quick-grid{grid-template-columns:1fr}}@media (max-width:640px){.mobile-brand-text h1{font-size:18px}.mobile-bell{font-size:28px}.mobile-avatar,.mobile-store{width:54px;height:54px}}
+    :root{
+      --bg:#f3f3f3;
+      --card:#ffffff;
+      --line:#e5e7eb;
+      --text:#202223;
+      --muted:#6d7175;
+      --top:#111213;
+      --side:#f6f6f7;
+      --shadow:0 1px 2px rgba(0,0,0,.08);
+      --green:#16a34a;
+      --green-bg:#dcfce7;
+      --yellow:#f59e0b;
+      --yellow-bg:#fef3c7;
+      --red:#dc2626;
+      --red-bg:#fee2e2;
+      --blue:#2563eb;
+      --blue-bg:#dbeafe;
+    }
+
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      direction:ltr;
+    }
+
+    a{text-decoration:none;color:inherit}
+    button,input,select{font-family:inherit}
+
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:290px 1fr;
+      grid-template-rows:72px 1fr;
+      grid-template-areas:
+        "top top"
+        "side main";
+    }
+
+    .topbar{
+      grid-area:top;
+      background:var(--top);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:0 18px;
+      position:sticky;
+      top:0;
+      z-index:50;
+    }
+
+    .top-left{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width:0;
+    }
+
+    .brand{
+      font-size:20px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .search-wrap{
+      flex:1;
+      max-width:720px;
+      margin:0 auto;
+      width:100%;
+    }
+
+    .top-search{
+      width:100%;
+      height:42px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background:#2a2b2d;
+      color:#fff;
+      padding:0 16px;
+      outline:none;
+      font-size:15px;
+    }
+
+    .top-right{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      white-space:nowrap;
+    }
+
+    .avatar{
+      width:34px;
+      height:34px;
+      border-radius:999px;
+      background:#2a2b2d;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+    }
+
+    .sidebar{
+      grid-area:side;
+      background:var(--side);
+      border-right:1px solid #ddd;
+      padding:14px 14px 20px;
+      overflow:auto;
+    }
+
+    .side-group{margin-bottom:18px}
+
+    .nav-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:11px 12px;
+      border-radius:12px;
+      color:#111;
+      font-weight:600;
+      margin-bottom:4px;
+      direction:ltr;
+      text-align:left;
+    }
+
+    .nav-item.active{background:#e9eaeb}
+
+    .badge-count{
+      background:#e5e7eb;
+      min-width:34px;
+      height:24px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13px;
+      color:#444;
+      padding:0 8px;
+    }
+
+    .main{
+      grid-area:main;
+      padding:20px;
+      overflow:auto;
+    }
+
+    .page{
+      max-width:1460px;
+      margin:0 auto;
+    }
+
+    .alert{
+      display:none;
+      margin-bottom:14px;
+      padding:14px 16px;
+      border-radius:14px;
+      font-weight:700;
+      border:1px solid transparent;
+      background:#fff;
+      direction:rtl;
+      text-align:right;
+      white-space:pre-line;
+    }
+
+    .alert.active{display:block}
+    .alert.success{background:#dcfce7;border-color:#86efac;color:#166534}
+    .alert.error{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
+    .alert.warning{background:#fef3c7;border-color:#fcd34d;color:#92400e}
+
+    .page-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    }
+
+    .page-head-left{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .page-title{
+      font-size:24px;
+      font-weight:900;
+      line-height:1.2;
+    }
+
+    .page-sub{
+      font-size:13px;
+      color:#6b7280;
+      font-weight:600;
+    }
+
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .btn{
+      height:38px;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      color:#111;
+      padding:0 14px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+    }
+
+    .btn.primary{
+      background:#111;
+      color:#fff;
+      border-color:#111;
+    }
+
+    .btn.active-filter{
+      background:#111827;
+      color:#fff;
+      border-color:#111827;
+    }
+
+    .filters-card,
+    .metrics-card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      margin-bottom:16px;
+    }
+
+    .card-head{
+      padding:16px 18px;
+      border-bottom:1px solid var(--line);
+      font-size:16px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .card-body{
+      padding:18px;
+    }
+
+    .date-presets{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .field-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr auto;
+      gap:12px;
+      align-items:end;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .field label{
+      font-size:13px;
+      color:#4b5563;
+      font-weight:700;
+    }
+
+    .field input{
+      width:100%;
+      height:42px;
+      border-radius:12px;
+      border:1px solid #d1d5db;
+      background:#fff;
+      padding:0 14px;
+      font-size:15px;
+      outline:none;
+    }
+
+    .field input:focus{
+      border-color:#9ca3af;
+    }
+
+    .helper{
+      font-size:12px;
+      color:#6b7280;
+      line-height:1.6;
+      margin-top:10px;
+    }
+
+    .metrics-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+    }
+
+    .metric-box{
+      border:1px solid #e5e7eb;
+      border-radius:16px;
+      background:#fff;
+      padding:16px;
+      min-height:120px;
+    }
+
+    .metric-label{
+      color:#4b5563;
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:10px;
+    }
+
+    .metric-value{
+      font-size:28px;
+      font-weight:900;
+      line-height:1.15;
+      color:#111827;
+      word-break:break-word;
+    }
+
+    .metric-sub{
+      margin-top:10px;
+      font-size:13px;
+      color:#6b7280;
+      line-height:1.5;
+    }
+
+    .status-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:2px;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:30px;
+      padding:0 12px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .chip.green{color:#166534;background:var(--green-bg)}
+    .chip.yellow{color:#92400e;background:var(--yellow-bg)}
+    .chip.blue{color:#1d4ed8;background:var(--blue-bg)}
+    .chip.red{color:#991b1b;background:var(--red-bg)}
+
+    .mobile-top{
+      display:none;
+      background:#111;
+      color:#fff;
+      padding:14px 14px 12px;
+      position:sticky;
+      top:0;
+      z-index:60;
+    }
+
+    .mobile-top-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .mobile-title{
+      font-size:22px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .mobile-top-search{
+      width:100%;
+      height:42px;
+      border:none;
+      border-radius:12px;
+      background:#2a2b2d;
+      color:#fff;
+      padding:0 14px;
+      outline:none;
+    }
+
+    @media (max-width: 1100px){
+      .app{
+        grid-template-columns:1fr;
+        grid-template-rows:auto 1fr;
+        grid-template-areas:"main";
+      }
+      .topbar,.sidebar{display:none}
+      .mobile-top{display:block}
+      .main{padding:14px}
+      .page{max-width:100%}
+      .metrics-grid{grid-template-columns:1fr 1fr}
+      .field-grid{grid-template-columns:1fr}
+    }
+
+    @media (max-width: 700px){
+      .page-head{align-items:flex-start}
+      .toolbar{width:100%}
+      .toolbar .btn{flex:1}
+      .metrics-grid{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="desktop-shell">
-      <header class="desktop-topbar">
-        <div class="desktop-topbar-left">
-          <div class="shopify-mark"><span style="font-size:28px;">🛍️</span><span>Smartkidsfy</span></div>
-          <div class="desktop-search"><span class="icon">⌕</span><input type="text" placeholder="Search" /><div class="kbd"><span>CTRL</span><span>K</span></div></div>
-        </div>
-        <div class="desktop-topbar-right">
-          <button class="primary-btn" onclick="window.location.href='/orders-admin.html'">Orders</button>
-          <div class="account-chip"><img src="https://smartkidskw.com/logo-sk-smart-kids.png" alt="Smart Kids Kuwait"><span>الأطفال المبتكرون الكويت</span></div>
-        </div>
-      </header>
-
-      <div class="desktop-body">
-        <aside class="desktop-sidebar">
-          <div class="side-group">
-            <a class="side-link active" href="/admin-enhanced.html"><div class="side-link-left"><span>⌂</span><span>Home</span></div></a>
-            <a class="side-link" href="/orders-admin.html"><div class="side-link-left"><span>🧾</span><span>Orders</span></div><small id="desktopOrdersCountBadge">0</small></a>
-            <a class="side-link" href="/products-admin.html"><div class="side-link-left"><span>🏷️</span><span>Products</span></div></a>
-            <a class="side-link" href="/collections-admin"><div class="side-link-left"><span>🗂️</span><span>Collections</span></div></a>
-            <div class="side-link"><div class="side-link-left"><span>👥</span><span>Customers</span></div></div>
-            <div class="side-link"><div class="side-link-left"><span>📣</span><span>Marketing</span></div></div>
-            <div class="side-link"><div class="side-link-left"><span>⚙️</span><span>Settings</span></div></div>
-          </div>
-        </aside>
-
-        <main class="desktop-main">
-          <div class="desktop-content-wrap">
-            <div class="alert" id="desktopAlert"></div>
-
-            <section>
-              <div class="dashboard-toolbar">
-                <div class="filter-pill">Last 90 days</div>
-                <a class="report-pill" href="/orders-admin.html">Open Orders</a>
-              </div>
-
-              <div class="metric-strip">
-                <div class="metric-strip-inner">
-                  <div class="metric-box"><div class="metric-title">Total sales</div><div class="metric-value" id="desktopTotalSalesValue">KWD 0.000</div><div class="metric-change">Live</div></div>
-                  <div class="metric-box"><div class="metric-title">Orders</div><div class="metric-value" id="desktopOrdersValue">0</div><div class="metric-change">Live</div></div>
-                  <div class="metric-box"><div class="metric-title">Pending orders</div><div class="metric-value" id="desktopPendingValue">0</div><div class="metric-change">Live</div></div>
-                  <div class="metric-box"><div class="metric-title">Unpaid orders</div><div class="metric-value" id="desktopUnpaidValue">0</div><div class="metric-change">Live</div></div>
-                </div>
-              </div>
-
-              <div class="quick-actions-row">
-                <a class="quick-action-pill" href="/orders-admin.html">Open orders page</a>
-                <a class="quick-action-pill" href="/products-admin.html">Open products page</a>
-                <a class="quick-action-pill" href="/collections-admin">Open collections page</a>
-                <a class="quick-action-pill" href="/product-edit.html">Add product</a>
-                <a class="quick-action-pill" href="/collection-edit.html">Add collection</a>
-              </div>
-
-              <div class="marketing-stack">
-                <div class="marketing-card">
-                  <div>
-                    <h3>Orders are now a separate page</h3>
-                    <p>تم فصل صفحة Orders عن Home بشكل مستقل. الدخول على Orders الآن يفتح صفحة مستقلة بدل النزول داخل نفس الصفحة.</p>
-                    <div class="marketing-actions">
-                      <a class="primary-btn" href="/orders-admin.html">Go to Orders</a>
-                      <a class="ghost-btn" href="/products-admin.html">Go to Products</a>
-                    </div>
-                  </div>
-                  <div class="marketing-visual">🧾</div>
-                </div>
-
-                <div class="marketing-card">
-                  <div>
-                    <h3>Collections management</h3>
-                    <p>تم تفعيل صفحة Collections وربطها بالـ backend بحيث تقدر تدخل عليها وتضيف وتعدل وتدير المجموعات بشكل منفصل.</p>
-                    <div class="marketing-actions">
-                      <a class="primary-btn" href="/collections-admin">Go to Collections</a>
-                      <a class="ghost-btn" href="/collection-edit.html">Create collection</a>
-                    </div>
-                  </div>
-                  <div class="marketing-visual">🗂️</div>
-                </div>
-
-                <div class="marketing-card">
-                  <div>
-                    <h3>Dashboard home</h3>
-                    <p>هذه الصفحة الآن للـ Home / Dashboard فقط، من غير خلط مع جدول الأوردرز.</p>
-                  </div>
-                  <div class="marketing-visual">⌂</div>
-                </div>
-              </div>
-            </section>
-          </div>
-        </main>
-      </div>
+  <div class="mobile-top">
+    <div class="mobile-top-row">
+      <div class="mobile-title">Home</div>
+      <button class="btn primary" onclick="reloadDashboard()">Refresh</button>
     </div>
+    <input class="mobile-top-search" type="text" placeholder="Dashboard Home">
+  </div>
 
-    <div class="mobile-shell">
-      <header class="mobile-header">
-        <div class="mobile-header-row">
-          <div class="mobile-header-brand">
-            <div class="mobile-avatar"><img src="https://smartkidskw.com/logo-sk-smart-kids.png" alt="Smart Kids Kuwait"></div>
-            <div class="mobile-brand-text"><h1>Smart Kids Kuwait</h1><p>Admin Home</p></div>
+  <div class="app">
+    <header class="topbar">
+      <div class="top-left">
+        <div class="brand">Smartkidsfy</div>
+      </div>
+
+      <div class="search-wrap">
+        <input class="top-search" type="text" placeholder="Home dashboard">
+      </div>
+
+      <div class="top-right">
+        <div class="avatar">🏠</div>
+        <div class="avatar">🔔</div>
+        <div style="font-weight:800">الأطفال المبتكرون الكويت</div>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <div class="side-group">
+        <a class="nav-item active" href="/admin-enhanced"><span>🏠 Home</span></a>
+        <a class="nav-item" href="/orders-admin.html">
+          <span>📦 Orders</span>
+          <span class="badge-count" id="ordersCountBadge">0</span>
+        </a>
+        <a class="nav-item" href="/products-admin"><span>🏷️ Products</span></a>
+        <a class="nav-item" href="/collections-admin"><span>🗂️ Collections</span></a>
+        <a class="nav-item" href="/customers-admin"><span>👥 Customers</span></a>
+        <a class="nav-item" href="/theme-admin"><span>🎨 Theme</span></a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="page">
+        <div id="alertBox" class="alert"></div>
+
+        <div class="page-head">
+          <div class="page-head-left">
+            <div class="page-title">Home</div>
+            <div class="page-sub">Orders dashboard فقط — بدون خلط مع باقي الصفحات</div>
           </div>
-          <div class="mobile-bell">🔔</div>
+
+          <div class="toolbar">
+            <button class="btn" type="button" onclick="reloadDashboard()">Refresh</button>
+            <a class="btn" href="/orders-admin.html">Open Orders</a>
+            <a class="btn" href="/products-admin">Open Products</a>
+            <a class="btn" href="/collections-admin">Open Collections</a>
+          </div>
         </div>
-      </header>
 
-      <main class="mobile-main">
-        <section class="mobile-surface">
-          <div class="mobile-dashboard">
-            <div class="alert" id="mobileAlert"></div>
-
-            <div class="mobile-top-pills">
-              <a class="mobile-pill" href="/orders-admin.html"><span class="dot"></span><span>Orders</span></a>
-              <a class="mobile-pill" href="/products-admin.html"><span class="dot"></span><span>Products</span></a>
-              <a class="mobile-pill" href="/collections-admin"><span class="dot"></span><span>Collections</span></a>
+        <section class="filters-card">
+          <div class="card-head">
+            <span>📅 Date range</span>
+            <span id="activeRangeLabel" class="chip blue">All time</span>
+          </div>
+          <div class="card-body">
+            <div class="date-presets">
+              <button class="btn active-filter" type="button" data-range="all" onclick="applyPresetRange('all', this)">All time</button>
+              <button class="btn" type="button" data-range="today" onclick="applyPresetRange('today', this)">Today</button>
+              <button class="btn" type="button" data-range="yesterday" onclick="applyPresetRange('yesterday', this)">Yesterday</button>
+              <button class="btn" type="button" data-range="last7" onclick="applyPresetRange('last7', this)">Last 7 days</button>
+              <button class="btn" type="button" data-range="last30" onclick="applyPresetRange('last30', this)">Last 30 days</button>
             </div>
 
-            <div class="mobile-stats-grid">
-              <div class="mobile-stat"><div class="label">Sales</div><div class="value" id="mobileTotalSalesValue">KWD 0.000</div><div class="change">Live</div></div>
-              <div class="mobile-stat"><div class="label">Orders</div><div class="value" id="mobileOrdersValue">0</div><div class="change">Live</div></div>
-              <div class="mobile-stat"><div class="label">Pending</div><div class="value" id="mobilePendingValue">0</div><div class="change">Live</div></div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="dateFromInput">From</label>
+                <input id="dateFromInput" type="date">
+              </div>
+
+              <div class="field">
+                <label for="dateToInput">To</label>
+                <input id="dateToInput" type="date">
+              </div>
+
+              <button class="btn primary" type="button" style="height:42px;" onclick="applyCustomRange()">Apply custom range</button>
             </div>
 
-            <div class="mobile-quick-grid">
-              <a class="mobile-quick-card" href="/orders-admin.html">
-                <div class="mobile-quick-head"><div class="mobile-quick-value" id="mobileOrdersCountCard">0</div><div class="mobile-quick-icon">🧾</div></div>
-                <div class="mobile-quick-title">Orders</div>
-                <div class="mobile-quick-sub">افتح صفحة الطلبات المستقلة</div>
-              </a>
-
-              <a class="mobile-quick-card" href="/products-admin.html">
-                <div class="mobile-quick-head"><div class="mobile-quick-value">→</div><div class="mobile-quick-icon">🏷️</div></div>
-                <div class="mobile-quick-title">Products</div>
-                <div class="mobile-quick-sub">الدخول إلى المنتجات</div>
-              </a>
-
-              <a class="mobile-quick-card" href="/collections-admin">
-                <div class="mobile-quick-head"><div class="mobile-quick-value">→</div><div class="mobile-quick-icon">🗂️</div></div>
-                <div class="mobile-quick-title">Collections</div>
-                <div class="mobile-quick-sub">الدخول إلى المجموعات</div>
-              </a>
+            <div class="helper">
+              تقدر تختار فترة جاهزة أو تحدد From / To بنفسك، وسيتم حساب عدد الطلبات والمبيعات لنفس المدة فقط.
             </div>
           </div>
         </section>
-      </main>
 
-      <nav class="mobile-bottom-nav">
-        <a class="mobile-bottom-link active" href="/admin-enhanced.html"><span>⌂</span><span>Home</span></a>
-        <a class="mobile-bottom-link" href="/orders-admin.html"><span>🧾</span><span>Orders</span></a>
-        <a class="mobile-bottom-link" href="/products-admin.html"><span>🏷️</span><span>Products</span></a>
-        <a class="mobile-bottom-link" href="/collections-admin"><span>🗂️</span><span>Collections</span></a>
-      </nav>
-    </div>
+        <section class="metrics-card">
+          <div class="card-head">
+            <span>📊 Dashboard metrics</span>
+            <div class="status-row">
+              <span class="chip green" id="loadedOrdersChip">Orders: 0</span>
+              <span class="chip yellow" id="pendingChip">Pending: 0</span>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="metrics-grid">
+              <div class="metric-box">
+                <div class="metric-label">Orders count</div>
+                <div class="metric-value" id="ordersCountValue">0</div>
+                <div class="metric-sub">عدد الطلبات في الفترة المحددة</div>
+              </div>
+
+              <div class="metric-box">
+                <div class="metric-label">Total sales</div>
+                <div class="metric-value" id="totalSalesValue">KWD 0.000</div>
+                <div class="metric-sub">إجمالي قيمة الطلبات في الفترة</div>
+              </div>
+
+              <div class="metric-box">
+                <div class="metric-label">Average order value</div>
+                <div class="metric-value" id="avgOrderValue">KWD 0.000</div>
+                <div class="metric-sub">متوسط قيمة الطلب الواحد</div>
+              </div>
+
+              <div class="metric-box">
+                <div class="metric-label">Pending orders</div>
+                <div class="metric-value" id="pendingOrdersValue">0</div>
+                <div class="metric-sub">الطلبات التي حالتها pending / processing</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
   </div>
 
   <script>
-    const API_BASE='/api/orders';
-    function setText(id,v){const e=document.getElementById(id);if(e)e.textContent=v}
-    function formatCurrency(v){const n=Number(v||0);return `KWD ${n.toFixed(3)}`}
-    function showAlert(msg,type='success'){['desktopAlert','mobileAlert'].forEach(id=>{const e=document.getElementById(id);if(!e)return;e.textContent=msg;e.className=`alert active ${type}`;setTimeout(()=>e.classList.remove('active'),3500)})}
-    function isPending(o){return String(o.status||'').toLowerCase()==='pending'}
-    async function loadHomeData(){
-      try{
-        const r=await fetch(`${API_BASE}?limit=300&offset=0&sort=created_at&order=DESC`);
-        const d=await r.json();
-        if(!r.ok||!d.success)throw new Error(d.error||'Failed to load orders');
-        const orders=Array.isArray(d.data)?d.data:[];
-        const sales=orders.reduce((s,o)=>s+Number(o.total||0),0);
-        const count=orders.length;
-        const pending=orders.filter(isPending).length;
-        const unpaid=orders.filter(o=>String(o.status||'').toLowerCase()!=='completed').length;
+    const ORDERS_API = '/api/orders';
+    const FETCH_LIMIT = 200;
 
-        setText('desktopTotalSalesValue',formatCurrency(sales));
-        setText('desktopOrdersValue',String(count));
-        setText('desktopPendingValue',String(pending));
-        setText('desktopUnpaidValue',String(unpaid));
-        setText('desktopOrdersCountBadge',String(count));
+    let allOrders = [];
+    let activeRange = 'all';
 
-        setText('mobileTotalSalesValue',formatCurrency(sales));
-        setText('mobileOrdersValue',String(count));
-        setText('mobilePendingValue',String(pending));
-        setText('mobileOrdersCountCard',String(count));
-      }catch(err){
-        console.error(err);
-        showAlert(err.message||'Failed to load dashboard data','error');
+    function qs(id) {
+      return document.getElementById(id);
+    }
+
+    function showAlert(message, type = 'success') {
+      const box = qs('alertBox');
+      box.textContent = message;
+      box.className = `alert active ${type}`;
+
+      clearTimeout(window.__alertTimer);
+      window.__alertTimer = setTimeout(() => {
+        box.className = 'alert';
+        box.textContent = '';
+      }, 3500);
+    }
+
+    function setText(id, value) {
+      const el = qs(id);
+      if (el) el.textContent = value;
+    }
+
+    function formatCurrency(value) {
+      const num = Number(value || 0);
+      return `KWD ${num.toFixed(3)}`;
+    }
+
+    function normalizeDate(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return null;
+      return date;
+    }
+
+    function getOrderDate(order) {
+      return normalizeDate(
+        order.created_at ||
+        order.createdAt ||
+        order.date ||
+        order.order_date ||
+        order.updated_at ||
+        null
+      );
+    }
+
+    function getOrderTotal(order) {
+      return Number(
+        order.total ??
+        order.order_total ??
+        order.final_total ??
+        order.total_amount ??
+        0
+      ) || 0;
+    }
+
+    function isPendingOrder(order) {
+      const status = String(order.status || '').trim().toLowerCase();
+      return ['pending', 'processing', 'awaiting_payment'].includes(status);
+    }
+
+    function startOfDay(date) {
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    function endOfDay(date) {
+      const d = new Date(date);
+      d.setHours(23, 59, 59, 999);
+      return d;
+    }
+
+    function getTodayRange() {
+      const now = new Date();
+      return {
+        from: startOfDay(now),
+        to: endOfDay(now)
+      };
+    }
+
+    function getYesterdayRange() {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return {
+        from: startOfDay(d),
+        to: endOfDay(d)
+      };
+    }
+
+    function getLastDaysRange(days) {
+      const now = new Date();
+      const from = new Date();
+      from.setDate(now.getDate() - (days - 1));
+      return {
+        from: startOfDay(from),
+        to: endOfDay(now)
+      };
+    }
+
+    function setPresetButtonState(rangeName) {
+      document.querySelectorAll('[data-range]').forEach(btn => {
+        btn.classList.toggle('active-filter', btn.dataset.range === rangeName);
+      });
+    }
+
+    function filterOrdersByRange(orders) {
+      if (activeRange === 'all') return orders;
+
+      if (activeRange === 'custom') {
+        const fromValue = qs('dateFromInput').value;
+        const toValue = qs('dateToInput').value;
+
+        if (!fromValue || !toValue) return orders;
+
+        const from = startOfDay(new Date(fromValue));
+        const to = endOfDay(new Date(toValue));
+
+        return orders.filter(order => {
+          const orderDate = getOrderDate(order);
+          if (!orderDate) return false;
+          return orderDate >= from && orderDate <= to;
+        });
+      }
+
+      let range = null;
+
+      if (activeRange === 'today') range = getTodayRange();
+      if (activeRange === 'yesterday') range = getYesterdayRange();
+      if (activeRange === 'last7') range = getLastDaysRange(7);
+      if (activeRange === 'last30') range = getLastDaysRange(30);
+
+      if (!range) return orders;
+
+      return orders.filter(order => {
+        const orderDate = getOrderDate(order);
+        if (!orderDate) return false;
+        return orderDate >= range.from && orderDate <= range.to;
+      });
+    }
+
+    function updateRangeLabel() {
+      const labelMap = {
+        all: 'All time',
+        today: 'Today',
+        yesterday: 'Yesterday',
+        last7: 'Last 7 days',
+        last30: 'Last 30 days',
+        custom: 'Custom range'
+      };
+
+      setText('activeRangeLabel', labelMap[activeRange] || 'All time');
+    }
+
+    function renderDashboard() {
+      const filtered = filterOrdersByRange(allOrders);
+      const totalOrders = filtered.length;
+      const totalSales = filtered.reduce((sum, order) => sum + getOrderTotal(order), 0);
+      const avgOrder = totalOrders ? totalSales / totalOrders : 0;
+      const pendingOrders = filtered.filter(isPendingOrder).length;
+
+      setText('ordersCountValue', String(totalOrders));
+      setText('totalSalesValue', formatCurrency(totalSales));
+      setText('avgOrderValue', formatCurrency(avgOrder));
+      setText('pendingOrdersValue', String(pendingOrders));
+
+      setText('ordersCountBadge', String(allOrders.length));
+      setText('loadedOrdersChip', `Orders: ${filtered.length}`);
+      setText('pendingChip', `Pending: ${pendingOrders}`);
+
+      updateRangeLabel();
+    }
+
+    async function fetchAllOrders() {
+      let offset = 0;
+      let total = null;
+      const results = [];
+
+      while (true) {
+        const response = await fetch(`${ORDERS_API}?limit=${FETCH_LIMIT}&offset=${offset}&sort=created_at&order=DESC`, {
+          headers: { 'Accept': 'application/json' }
+        });
+
+        let result = null;
+        try {
+          result = await response.json();
+        } catch {
+          throw new Error(`Orders API returned non-JSON response (offset ${offset})`);
+        }
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to load orders');
+        }
+
+        const chunk = Array.isArray(result.data) ? result.data : [];
+        results.push(...chunk);
+
+        total = Number(result.pagination?.total ?? results.length);
+        offset += chunk.length;
+
+        if (!chunk.length || results.length >= total) {
+          break;
+        }
+      }
+
+      return results;
+    }
+
+    async function reloadDashboard(showMessage = false) {
+      try {
+        allOrders = await fetchAllOrders();
+        renderDashboard();
+        if (showMessage) showAlert('تم تحديث البيانات', 'success');
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to load dashboard data', 'error');
       }
     }
-    document.addEventListener('DOMContentLoaded',()=>{loadHomeData();setInterval(loadHomeData,30000)})
+
+    function applyPresetRange(rangeName, button) {
+      activeRange = rangeName;
+      if (rangeName !== 'custom') {
+        qs('dateFromInput').value = '';
+        qs('dateToInput').value = '';
+      }
+      setPresetButtonState(rangeName);
+      renderDashboard();
+    }
+
+    function applyCustomRange() {
+      const fromValue = qs('dateFromInput').value;
+      const toValue = qs('dateToInput').value;
+
+      if (!fromValue || !toValue) {
+        showAlert('اختر From و To أولًا', 'warning');
+        return;
+      }
+
+      const from = new Date(fromValue);
+      const to = new Date(toValue);
+
+      if (from > to) {
+        showAlert('تاريخ البداية يجب أن يكون قبل تاريخ النهاية', 'error');
+        return;
+      }
+
+      activeRange = 'custom';
+      setPresetButtonState('');
+      renderDashboard();
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await reloadDashboard(false);
+    });
   </script>
 </body>
 </html>
