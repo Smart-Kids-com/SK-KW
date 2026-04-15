@@ -7,22 +7,26 @@
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --bg:#f3f3f3;
+      --bg:#f6f6f7;
       --card:#ffffff;
       --line:#e5e7eb;
       --text:#202223;
       --muted:#6d7175;
       --top:#111213;
       --side:#f6f6f7;
-      --shadow:0 1px 2px rgba(0,0,0,.08);
-      --green:#16a34a;
-      --green-bg:#dcfce7;
-      --yellow:#f59e0b;
-      --yellow-bg:#fef3c7;
-      --red:#dc2626;
-      --red-bg:#fee2e2;
-      --blue:#2563eb;
-      --blue-bg:#dbeafe;
+      --shadow:0 1px 2px rgba(0,0,0,.06);
+      --green:#008060;
+      --green-bg:#dcf5e8;
+      --yellow:#b98900;
+      --yellow-bg:#fff4cc;
+      --red:#d82c0d;
+      --red-bg:#ffe0db;
+      --blue:#005bd3;
+      --blue-bg:#dbe9ff;
+      --chip:#f1f2f3;
+      --chip-active:#111827;
+      --chip-active-text:#fff;
+      --radius:18px;
     }
 
     body{
@@ -57,29 +61,13 @@
       padding:0 18px;
       position:sticky;
       top:0;
-      z-index:50;
+      z-index:80;
     }
 
-    .top-left{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      min-width:0;
-    }
+    .top-left{display:flex;align-items:center;gap:14px;min-width:0}
+    .brand{font-size:20px;font-weight:800;white-space:nowrap}
 
-    .brand{
-      font-size:20px;
-      font-weight:800;
-      white-space:nowrap;
-    }
-
-    .search-wrap{
-      flex:1;
-      max-width:720px;
-      margin:0 auto;
-      width:100%;
-    }
-
+    .search-wrap{flex:1;max-width:720px;margin:0 auto;width:100%}
     .top-search{
       width:100%;
       height:42px;
@@ -92,22 +80,10 @@
       font-size:15px;
     }
 
-    .top-right{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      white-space:nowrap;
-    }
-
+    .top-right{display:flex;align-items:center;gap:14px;white-space:nowrap}
     .avatar{
-      width:34px;
-      height:34px;
-      border-radius:999px;
-      background:#2a2b2d;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:16px;
+      width:34px;height:34px;border-radius:999px;background:#2a2b2d;
+      display:flex;align-items:center;justify-content:center;font-size:16px;
     }
 
     .sidebar{
@@ -132,8 +108,10 @@
       margin-bottom:4px;
       direction:ltr;
       text-align:left;
+      transition:.15s ease;
     }
 
+    .nav-item:hover{background:#eceeef}
     .nav-item.active{background:#e9eaeb}
 
     .badge-count{
@@ -172,7 +150,6 @@
       text-align:right;
       white-space:pre-line;
     }
-
     .alert.active{display:block}
     .alert.success{background:#dcfce7;border-color:#86efac;color:#166534}
     .alert.error{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
@@ -182,7 +159,7 @@
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
-      gap:16px;
+      gap:18px;
       margin-bottom:18px;
       flex-wrap:wrap;
     }
@@ -194,13 +171,14 @@
     }
 
     .page-title{
-      font-size:24px;
+      font-size:28px;
       font-weight:900;
-      line-height:1.2;
+      line-height:1.1;
+      color:#111827;
     }
 
     .page-sub{
-      font-size:13px;
+      font-size:14px;
       color:#6b7280;
       font-weight:600;
     }
@@ -222,28 +200,37 @@
       font-weight:700;
       cursor:pointer;
       box-shadow:var(--shadow);
+      transition:.15s ease;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn.primary{background:#111;color:#fff;border-color:#111}
+    .btn.chip{
+      background:var(--chip);
+      border-color:var(--chip);
+      box-shadow:none;
+      height:36px;
+    }
+    .btn.chip.active-filter{
+      background:var(--chip-active);
+      color:var(--chip-active-text);
+      border-color:var(--chip-active);
     }
 
-    .btn.primary{
-      background:#111;
-      color:#fff;
-      border-color:#111;
+    .layout{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 360px;
+      gap:18px;
+      align-items:start;
     }
 
-    .btn.active-filter{
-      background:#111827;
-      color:#fff;
-      border-color:#111827;
-    }
+    .stack{display:grid;gap:18px}
 
-    .filters-card,
-    .metrics-card{
+    .card{
       background:var(--card);
       border:1px solid var(--line);
-      border-radius:18px;
-      overflow:hidden;
+      border-radius:var(--radius);
       box-shadow:var(--shadow);
-      margin-bottom:16px;
+      overflow:hidden;
     }
 
     .card-head{
@@ -258,9 +245,7 @@
       flex-wrap:wrap;
     }
 
-    .card-body{
-      padding:18px;
-    }
+    .card-body{padding:18px}
 
     .date-presets{
       display:flex;
@@ -299,9 +284,7 @@
       outline:none;
     }
 
-    .field input:focus{
-      border-color:#9ca3af;
-    }
+    .field input:focus{border-color:#9ca3af}
 
     .helper{
       font-size:12px;
@@ -310,36 +293,39 @@
       margin-top:10px;
     }
 
-    .metrics-grid{
+    .kpi-grid{
       display:grid;
       grid-template-columns:repeat(4,1fr);
       gap:16px;
     }
 
-    .metric-box{
+    .kpi-box{
       border:1px solid #e5e7eb;
       border-radius:16px;
       background:#fff;
       padding:16px;
-      min-height:120px;
+      min-height:128px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
     }
 
-    .metric-label{
+    .kpi-label{
       color:#4b5563;
       font-size:13px;
       font-weight:700;
       margin-bottom:10px;
     }
 
-    .metric-value{
-      font-size:28px;
+    .kpi-value{
+      font-size:30px;
       font-weight:900;
-      line-height:1.15;
+      line-height:1.1;
       color:#111827;
       word-break:break-word;
     }
 
-    .metric-sub{
+    .kpi-sub{
       margin-top:10px;
       font-size:13px;
       color:#6b7280;
@@ -363,11 +349,141 @@
       font-size:13px;
       font-weight:800;
     }
-
     .chip.green{color:#166534;background:var(--green-bg)}
     .chip.yellow{color:#92400e;background:var(--yellow-bg)}
     .chip.blue{color:#1d4ed8;background:var(--blue-bg)}
     .chip.red{color:#991b1b;background:var(--red-bg)}
+
+    .attention-list,
+    .quick-actions,
+    .activity-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .attention-item,
+    .activity-item{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      border:1px solid #eceff1;
+      border-radius:14px;
+      padding:14px;
+      background:#fff;
+    }
+
+    .attention-left,
+    .activity-left{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
+    }
+
+    .attention-title,
+    .activity-title{
+      font-size:14px;
+      font-weight:800;
+      color:#111827;
+    }
+
+    .attention-sub,
+    .activity-sub{
+      font-size:13px;
+      color:#6b7280;
+      line-height:1.55;
+    }
+
+    .attention-value{
+      font-size:20px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .quick-actions{
+      grid-template-columns:1fr 1fr;
+    }
+
+    .quick-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border:1px solid #e5e7eb;
+      border-radius:16px;
+      padding:16px;
+      background:#fff;
+      transition:.15s ease;
+    }
+
+    .quick-link:hover{
+      transform:translateY(-2px);
+      border-color:#d1d5db;
+      box-shadow:0 4px 14px rgba(0,0,0,.06);
+    }
+
+    .quick-link-left{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .quick-link-title{
+      font-size:15px;
+      font-weight:800;
+      color:#111827;
+    }
+
+    .quick-link-sub{
+      font-size:13px;
+      color:#6b7280;
+      line-height:1.5;
+    }
+
+    .quick-link-icon{
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      background:#f3f4f6;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      flex-shrink:0;
+    }
+
+    .sidebar-metric{
+      display:grid;
+      gap:12px;
+    }
+
+    .mini-metric{
+      border:1px solid #eceff1;
+      border-radius:14px;
+      padding:14px;
+      background:#fff;
+    }
+
+    .mini-label{
+      font-size:13px;
+      color:#6b7280;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+
+    .mini-value{
+      font-size:24px;
+      font-weight:900;
+      color:#111827;
+    }
+
+    .mini-sub{
+      margin-top:8px;
+      font-size:12px;
+      color:#6b7280;
+      line-height:1.5;
+    }
 
     .mobile-top{
       display:none;
@@ -404,6 +520,10 @@
       outline:none;
     }
 
+    @media (max-width: 1280px){
+      .layout{grid-template-columns:1fr}
+    }
+
     @media (max-width: 1100px){
       .app{
         grid-template-columns:1fr;
@@ -414,7 +534,7 @@
       .mobile-top{display:block}
       .main{padding:14px}
       .page{max-width:100%}
-      .metrics-grid{grid-template-columns:1fr 1fr}
+      .kpi-grid{grid-template-columns:1fr 1fr}
       .field-grid{grid-template-columns:1fr}
     }
 
@@ -422,7 +542,8 @@
       .page-head{align-items:flex-start}
       .toolbar{width:100%}
       .toolbar .btn{flex:1}
-      .metrics-grid{grid-template-columns:1fr}
+      .kpi-grid{grid-template-columns:1fr}
+      .quick-actions{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -473,88 +594,221 @@
         <div class="page-head">
           <div class="page-head-left">
             <div class="page-title">Home</div>
-            <div class="page-sub">Orders dashboard فقط — بدون خلط مع باقي الصفحات</div>
+            <div class="page-sub">Shopify-inspired overview — clean numbers, attention items, and quick actions</div>
           </div>
 
           <div class="toolbar">
-            <button class="btn" type="button" onclick="reloadDashboard()">Refresh</button>
-            <a class="btn" href="/orders-admin.html">Open Orders</a>
-            <a class="btn" href="/products-admin">Open Products</a>
-            <a class="btn" href="/collections-admin">Open Collections</a>
+            <button class="btn" type="button" onclick="reloadDashboard(true)">Refresh</button>
+            <a class="btn" href="/orders-admin.html">Orders</a>
+            <a class="btn" href="/products-admin">Products</a>
+            <a class="btn" href="/collections-admin">Collections</a>
+            <a class="btn" href="/customers-admin">Customers</a>
+            <a class="btn" href="/theme-admin">Theme</a>
           </div>
         </div>
 
-        <section class="filters-card">
-          <div class="card-head">
-            <span>📅 Date range</span>
-            <span id="activeRangeLabel" class="chip blue">All time</span>
+        <div class="layout">
+          <div class="stack">
+            <section class="card">
+              <div class="card-head">
+                <span>📅 Date range</span>
+                <span id="activeRangeLabel" class="chip blue">All time</span>
+              </div>
+              <div class="card-body">
+                <div class="date-presets">
+                  <button class="btn chip active-filter" type="button" data-range="all" onclick="applyPresetRange('all', this)">All time</button>
+                  <button class="btn chip" type="button" data-range="today" onclick="applyPresetRange('today', this)">Today</button>
+                  <button class="btn chip" type="button" data-range="yesterday" onclick="applyPresetRange('yesterday', this)">Yesterday</button>
+                  <button class="btn chip" type="button" data-range="last7" onclick="applyPresetRange('last7', this)">Last 7 days</button>
+                  <button class="btn chip" type="button" data-range="last30" onclick="applyPresetRange('last30', this)">Last 30 days</button>
+                </div>
+
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="dateFromInput">From</label>
+                    <input id="dateFromInput" type="date">
+                  </div>
+
+                  <div class="field">
+                    <label for="dateToInput">To</label>
+                    <input id="dateToInput" type="date">
+                  </div>
+
+                  <button class="btn primary" type="button" style="height:42px;" onclick="applyCustomRange()">Apply custom range</button>
+                </div>
+
+                <div class="helper">
+                  اختَر فترة جاهزة أو استخدم نطاقًا مخصصًا، وسيتم تحديث كل المؤشرات والـ recent activity على نفس المدة.
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <span>📊 Performance overview</span>
+                <div class="status-row">
+                  <span class="chip green" id="loadedOrdersChip">Orders: 0</span>
+                  <span class="chip yellow" id="pendingChip">Pending: 0</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="kpi-grid">
+                  <div class="kpi-box">
+                    <div class="kpi-label">Total sales</div>
+                    <div class="kpi-value" id="totalSalesValue">KWD 0.000</div>
+                    <div class="kpi-sub">إجمالي قيمة الطلبات في الفترة المحددة</div>
+                  </div>
+
+                  <div class="kpi-box">
+                    <div class="kpi-label">Total orders</div>
+                    <div class="kpi-value" id="ordersCountValue">0</div>
+                    <div class="kpi-sub">عدد الطلبات في الفترة المحددة</div>
+                  </div>
+
+                  <div class="kpi-box">
+                    <div class="kpi-label">Average order value</div>
+                    <div class="kpi-value" id="avgOrderValue">KWD 0.000</div>
+                    <div class="kpi-sub">متوسط قيمة الطلب الواحد</div>
+                  </div>
+
+                  <div class="kpi-box">
+                    <div class="kpi-label">Pending orders</div>
+                    <div class="kpi-value" id="pendingOrdersValue">0</div>
+                    <div class="kpi-sub">الطلبات التي حالتها pending / processing</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <span>⚠️ Needs attention</span>
+              </div>
+              <div class="card-body">
+                <div class="attention-list">
+                  <div class="attention-item">
+                    <div class="attention-left">
+                      <div class="attention-title">Pending orders</div>
+                      <div class="attention-sub">طلبات تحتاج متابعة سريعة أو تنفيذ</div>
+                    </div>
+                    <div class="attention-value" id="attentionPendingValue">0</div>
+                  </div>
+
+                  <div class="attention-item">
+                    <div class="attention-left">
+                      <div class="attention-title">Today orders</div>
+                      <div class="attention-sub">الطلبات التي دخلت اليوم</div>
+                    </div>
+                    <div class="attention-value" id="attentionTodayValue">0</div>
+                  </div>
+
+                  <div class="attention-item">
+                    <div class="attention-left">
+                      <div class="attention-title">Cancelled orders</div>
+                      <div class="attention-sub">طلبات ملغية في نفس الفترة الحالية</div>
+                    </div>
+                    <div class="attention-value" id="attentionCancelledValue">0</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <span>🕒 Recent orders</span>
+                <a class="btn" href="/orders-admin.html">View all</a>
+              </div>
+              <div class="card-body">
+                <div class="activity-list" id="recentOrdersList">
+                  <div class="activity-item">
+                    <div class="activity-left">
+                      <div class="activity-title">Loading...</div>
+                      <div class="activity-sub">Please wait</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
-          <div class="card-body">
-            <div class="date-presets">
-              <button class="btn active-filter" type="button" data-range="all" onclick="applyPresetRange('all', this)">All time</button>
-              <button class="btn" type="button" data-range="today" onclick="applyPresetRange('today', this)">Today</button>
-              <button class="btn" type="button" data-range="yesterday" onclick="applyPresetRange('yesterday', this)">Yesterday</button>
-              <button class="btn" type="button" data-range="last7" onclick="applyPresetRange('last7', this)">Last 7 days</button>
-              <button class="btn" type="button" data-range="last30" onclick="applyPresetRange('last30', this)">Last 30 days</button>
-            </div>
 
-            <div class="field-grid">
-              <div class="field">
-                <label for="dateFromInput">From</label>
-                <input id="dateFromInput" type="date">
+          <aside class="stack">
+            <section class="card">
+              <div class="card-head">
+                <span>⚡ Quick actions</span>
               </div>
+              <div class="card-body">
+                <div class="quick-actions">
+                  <a class="quick-link" href="/orders-admin.html">
+                    <div class="quick-link-left">
+                      <div class="quick-link-title">Orders</div>
+                      <div class="quick-link-sub">Manage all orders and statuses</div>
+                    </div>
+                    <div class="quick-link-icon">📦</div>
+                  </a>
 
-              <div class="field">
-                <label for="dateToInput">To</label>
-                <input id="dateToInput" type="date">
+                  <a class="quick-link" href="/products-admin">
+                    <div class="quick-link-left">
+                      <div class="quick-link-title">Products</div>
+                      <div class="quick-link-sub">Edit products, stock, and prices</div>
+                    </div>
+                    <div class="quick-link-icon">🏷️</div>
+                  </a>
+
+                  <a class="quick-link" href="/collections-admin">
+                    <div class="quick-link-left">
+                      <div class="quick-link-title">Collections</div>
+                      <div class="quick-link-sub">Manage grouped products</div>
+                    </div>
+                    <div class="quick-link-icon">🗂️</div>
+                  </a>
+
+                  <a class="quick-link" href="/customers-admin">
+                    <div class="quick-link-left">
+                      <div class="quick-link-title">Customers</div>
+                      <div class="quick-link-sub">View customer profiles and orders</div>
+                    </div>
+                    <div class="quick-link-icon">👥</div>
+                  </a>
+
+                  <a class="quick-link" href="/theme-admin">
+                    <div class="quick-link-left">
+                      <div class="quick-link-title">Theme</div>
+                      <div class="quick-link-sub">Control homepage and content blocks</div>
+                    </div>
+                    <div class="quick-link-icon">🎨</div>
+                  </a>
+                </div>
               </div>
+            </section>
 
-              <button class="btn primary" type="button" style="height:42px;" onclick="applyCustomRange()">Apply custom range</button>
-            </div>
-
-            <div class="helper">
-              تقدر تختار فترة جاهزة أو تحدد From / To بنفسك، وسيتم حساب عدد الطلبات والمبيعات لنفس المدة فقط.
-            </div>
-          </div>
-        </section>
-
-        <section class="metrics-card">
-          <div class="card-head">
-            <span>📊 Dashboard metrics</span>
-            <div class="status-row">
-              <span class="chip green" id="loadedOrdersChip">Orders: 0</span>
-              <span class="chip yellow" id="pendingChip">Pending: 0</span>
-            </div>
-          </div>
-
-          <div class="card-body">
-            <div class="metrics-grid">
-              <div class="metric-box">
-                <div class="metric-label">Orders count</div>
-                <div class="metric-value" id="ordersCountValue">0</div>
-                <div class="metric-sub">عدد الطلبات في الفترة المحددة</div>
+            <section class="card">
+              <div class="card-head">
+                <span>📌 Snapshot</span>
               </div>
+              <div class="card-body">
+                <div class="sidebar-metric">
+                  <div class="mini-metric">
+                    <div class="mini-label">Loaded orders</div>
+                    <div class="mini-value" id="miniLoadedOrders">0</div>
+                    <div class="mini-sub">إجمالي الطلبات المسحوبة من النظام</div>
+                  </div>
 
-              <div class="metric-box">
-                <div class="metric-label">Total sales</div>
-                <div class="metric-value" id="totalSalesValue">KWD 0.000</div>
-                <div class="metric-sub">إجمالي قيمة الطلبات في الفترة</div>
-              </div>
+                  <div class="mini-metric">
+                    <div class="mini-label">Filtered orders</div>
+                    <div class="mini-value" id="miniFilteredOrders">0</div>
+                    <div class="mini-sub">الطلبات المطابقة للفترة الحالية</div>
+                  </div>
 
-              <div class="metric-box">
-                <div class="metric-label">Average order value</div>
-                <div class="metric-value" id="avgOrderValue">KWD 0.000</div>
-                <div class="metric-sub">متوسط قيمة الطلب الواحد</div>
+                  <div class="mini-metric">
+                    <div class="mini-label">Range</div>
+                    <div class="mini-value" id="miniRangeLabel">All time</div>
+                    <div class="mini-sub">الفترة النشطة الآن</div>
+                  </div>
+                </div>
               </div>
-
-              <div class="metric-box">
-                <div class="metric-label">Pending orders</div>
-                <div class="metric-value" id="pendingOrdersValue">0</div>
-                <div class="metric-sub">الطلبات التي حالتها pending / processing</div>
-              </div>
-            </div>
-          </div>
-        </section>
+            </section>
+          </aside>
+        </div>
       </div>
     </main>
   </div>
@@ -622,6 +876,11 @@
     function isPendingOrder(order) {
       const status = String(order.status || '').trim().toLowerCase();
       return ['pending', 'processing', 'awaiting_payment'].includes(status);
+    }
+
+    function isCancelledOrder(order) {
+      const status = String(order.status || '').trim().toLowerCase();
+      return status === 'cancelled';
     }
 
     function startOfDay(date) {
@@ -704,7 +963,7 @@
       });
     }
 
-    function updateRangeLabel() {
+    function getRangeLabel() {
       const labelMap = {
         all: 'All time',
         today: 'Today',
@@ -713,8 +972,63 @@
         last30: 'Last 30 days',
         custom: 'Custom range'
       };
+      return labelMap[activeRange] || 'All time';
+    }
 
-      setText('activeRangeLabel', labelMap[activeRange] || 'All time');
+    function updateRangeLabel() {
+      const label = getRangeLabel();
+      setText('activeRangeLabel', label);
+      setText('miniRangeLabel', label);
+    }
+
+    function renderRecentOrders(filtered) {
+      const list = qs('recentOrdersList');
+
+      if (!filtered.length) {
+        list.innerHTML = `
+          <div class="activity-item">
+            <div class="activity-left">
+              <div class="activity-title">No recent orders</div>
+              <div class="activity-sub">There are no orders in the selected date range.</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const rows = [...filtered]
+        .sort((a, b) => {
+          const ad = getOrderDate(a)?.getTime() || 0;
+          const bd = getOrderDate(b)?.getTime() || 0;
+          return bd - ad;
+        })
+        .slice(0, 5);
+
+      list.innerHTML = rows.map(order => {
+        const id = order.id || '';
+        const orderNumber = order.order_number || `#${id}`;
+        const customer = order.customer_name || 'Unknown customer';
+        const total = formatCurrency(getOrderTotal(order));
+        const status = String(order.status || 'pending').trim();
+
+        return `
+          <a class="activity-item" href="/order-details.html?id=${encodeURIComponent(id)}">
+            <div class="activity-left">
+              <div class="activity-title">${orderNumber} — ${customer}</div>
+              <div class="activity-sub">${status} • ${total}</div>
+            </div>
+            <div class="chip blue">${formatShortDate(getOrderDate(order))}</div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    function formatShortDate(date) {
+      if (!date) return '-';
+      return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short'
+      });
     }
 
     function renderDashboard() {
@@ -723,6 +1037,15 @@
       const totalSales = filtered.reduce((sum, order) => sum + getOrderTotal(order), 0);
       const avgOrder = totalOrders ? totalSales / totalOrders : 0;
       const pendingOrders = filtered.filter(isPendingOrder).length;
+      const cancelledOrders = filtered.filter(isCancelledOrder).length;
+      const todayOrders = filtered.filter(order => {
+        const orderDate = getOrderDate(order);
+        if (!orderDate) return false;
+        const today = new Date();
+        return orderDate.getFullYear() === today.getFullYear() &&
+               orderDate.getMonth() === today.getMonth() &&
+               orderDate.getDate() === today.getDate();
+      }).length;
 
       setText('ordersCountValue', String(totalOrders));
       setText('totalSalesValue', formatCurrency(totalSales));
@@ -733,7 +1056,15 @@
       setText('loadedOrdersChip', `Orders: ${filtered.length}`);
       setText('pendingChip', `Pending: ${pendingOrders}`);
 
+      setText('attentionPendingValue', String(pendingOrders));
+      setText('attentionTodayValue', String(todayOrders));
+      setText('attentionCancelledValue', String(cancelledOrders));
+
+      setText('miniLoadedOrders', String(allOrders.length));
+      setText('miniFilteredOrders', String(filtered.length));
+
       updateRangeLabel();
+      renderRecentOrders(filtered);
     }
 
     async function fetchAllOrders() {
@@ -782,7 +1113,7 @@
       }
     }
 
-    function applyPresetRange(rangeName, button) {
+    function applyPresetRange(rangeName) {
       activeRange = rangeName;
       if (rangeName !== 'custom') {
         qs('dateFromInput').value = '';

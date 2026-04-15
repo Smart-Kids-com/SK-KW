@@ -5,8 +5,6 @@ const db = require('../db/turso-manager');
 /**
  * Helpers
  */
-const MAX_PRODUCTS_LIST_LIMIT = 100;
-
 function slugify(text = '') {
   return String(text)
     .trim()
@@ -17,9 +15,8 @@ function slugify(text = '') {
 }
 
 function normalizeStatus(status) {
-  const value = String(status || '').trim().toLowerCase();
   const allowed = ['active', 'draft', 'archived'];
-  return allowed.includes(value) ? value : 'active';
+  return allowed.includes(status) ? status : 'active';
 }
 
 function toNumber(value, fallback = 0) {
@@ -30,10 +27,6 @@ function toNumber(value, fallback = 0) {
 function toInteger(value, fallback = 0) {
   const n = parseInt(value, 10);
   return Number.isFinite(n) ? n : fallback;
-}
-
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
 }
 
 function normalizeText(value = '') {
@@ -96,157 +89,6 @@ function normalizeImages(images, fallbackImageUrl = '') {
   return result;
 }
 
-function buildPlainProduct(product) {
-  return {
-    ...product,
-    tags_list: parseTags(product.tags),
-    images: [],
-    primary_image: product.image_url || ''
-  };
-}
-
-function normalizeIncomingProductBody(body = {}) {
-  return {
-    productName: body.productName ?? body.product_name ?? body.name ?? body.title ?? '',
-    slug: body.slug ?? body.handle ?? '',
-    sku: body.sku ?? body.sku_code ?? '',
-    description: body.description ?? body.body_html ?? '',
-    price: body.price ?? body.regular_price ?? 0,
-    salePrice: body.salePrice ?? body.sale_price ?? body.compare_at_price ?? 0,
-    imageUrl: body.imageUrl ?? body.image_url ?? body.image ?? '',
-    stock: body.stock ?? body.inventory ?? body.inventory_quantity ?? 0,
-    status: body.status ?? body.published ?? 'draft',
-    productType: body.productType ?? body.product_type ?? body.type ?? '',
-    vendor: body.vendor ?? '',
-    category: body.category ?? body.collection ?? '',
-    tags: body.tags ?? '',
-    seoTitle: body.seoTitle ?? body.seo_title ?? '',
-    seoDescription: body.seoDescription ?? body.seo_description ?? '',
-    images: body.images
-  };
-}
-
-/**
- * Schema safety
- */
-let productsSchemaReadyPromise = null;
-
-async function getTableColumns(tableName) {
-  const rows = await db.all(`PRAGMA table_info(${tableName})`);
-  return Array.isArray(rows) ? rows.map(row => row.name) : [];
-}
-
-async function ensureProductsSchema() {
-  if (productsSchemaReadyPromise) {
-    return productsSchemaReadyPromise;
-  }
-
-  productsSchemaReadyPromise = (async () => {
-    await db.run(`
-      CREATE TABLE IF NOT EXISTS products (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        product_name TEXT NOT NULL,
-        slug TEXT,
-        sku TEXT,
-        description TEXT,
-        price REAL DEFAULT 0,
-        sale_price REAL DEFAULT 0,
-        image_url TEXT,
-        stock INTEGER DEFAULT 0,
-        status TEXT DEFAULT 'active',
-        product_type TEXT,
-        vendor TEXT,
-        category TEXT,
-        tags TEXT,
-        seo_title TEXT,
-        seo_description TEXT,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await db.run(`
-      CREATE TABLE IF NOT EXISTS product_images (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        product_id INTEGER NOT NULL,
-        image_url TEXT NOT NULL,
-        sort_order INTEGER DEFAULT 0,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    const productColumns = await getTableColumns('products');
-    const productColumnSet = new Set(productColumns);
-
-    const missingProductColumns = [
-      ['slug', 'TEXT'],
-      ['sku', 'TEXT'],
-      ['description', 'TEXT'],
-      ['price', 'REAL DEFAULT 0'],
-      ['sale_price', 'REAL DEFAULT 0'],
-      ['image_url', 'TEXT'],
-      ['stock', 'INTEGER DEFAULT 0'],
-      ['status', `TEXT DEFAULT 'active'`],
-      ['product_type', 'TEXT'],
-      ['vendor', 'TEXT'],
-      ['category', 'TEXT'],
-      ['tags', 'TEXT'],
-      ['seo_title', 'TEXT'],
-      ['seo_description', 'TEXT'],
-      ['created_at', 'TEXT DEFAULT CURRENT_TIMESTAMP'],
-      ['updated_at', 'TEXT DEFAULT CURRENT_TIMESTAMP']
-    ];
-
-    for (const [columnName, columnSql] of missingProductColumns) {
-      if (!productColumnSet.has(columnName)) {
-        await db.run(`ALTER TABLE products ADD COLUMN ${columnName} ${columnSql}`);
-      }
-    }
-
-    const productImageColumns = await getTableColumns('product_images');
-    const productImageSet = new Set(productImageColumns);
-
-    const missingImageColumns = [
-      ['product_id', 'INTEGER NOT NULL DEFAULT 0'],
-      ['image_url', 'TEXT'],
-      ['sort_order', 'INTEGER DEFAULT 0'],
-      ['created_at', 'TEXT DEFAULT CURRENT_TIMESTAMP']
-    ];
-
-    for (const [columnName, columnSql] of missingImageColumns) {
-      if (!productImageSet.has(columnName)) {
-        await db.run(`ALTER TABLE product_images ADD COLUMN ${columnName} ${columnSql}`);
-      }
-    }
-
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug)`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_products_status ON products(status)`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at)`);
-    await db.run(`CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(product_id)`);
-  })().catch((error) => {
-    productsSchemaReadyPromise = null;
-    throw error;
-  });
-
-  return productsSchemaReadyPromise;
-}
-
-router.use(async (req, res, next) => {
-  try {
-    await ensureProductsSchema();
-    next();
-  } catch (error) {
-    console.error('❌ Product schema init error:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في تهيئة جدول المنتجات'
-    });
-  }
-});
-
-/**
- * Product helpers after schema
- */
 async function getProductImages(productId) {
   return await db.all(
     `SELECT id, product_id, image_url, sort_order, created_at
@@ -270,6 +112,7 @@ async function enrichProduct(product) {
   };
 }
 
+
 async function makeUniqueSlug(baseText = '', excludeId = null) {
   const base = slugify(baseText) || `product-${Date.now()}`;
   let candidate = base;
@@ -285,6 +128,37 @@ async function makeUniqueSlug(baseText = '', excludeId = null) {
     candidate = `${base}-${index}`;
     index += 1;
   }
+}
+
+function normalizeIncomingProductBody(body = {}) {
+  return {
+    productName: body.productName ?? body.product_name ?? body.name ?? body.title ?? '',
+    slug: body.slug ?? body.handle ?? '',
+    sku: body.sku ?? body.sku_code ?? '',
+    description: body.description ?? body.body_html ?? '',
+    price: body.price ?? body.regular_price ?? 0,
+    salePrice: body.salePrice ?? body.sale_price ?? body.compare_at_price ?? 0,
+    imageUrl: body.imageUrl ?? body.image_url ?? body.image ?? '',
+    stock: body.stock ?? body.inventory ?? body.inventory_quantity ?? 0,
+    status: body.status ?? body.published ?? 'draft',
+    productType: body.productType ?? body.product_type ?? body.type ?? '',
+    vendor: body.vendor ?? '',
+    category: body.category ?? body.collection ?? '',
+    tags: body.tags ?? '',
+    seoTitle: body.seoTitle ?? body.seo_title ?? '',
+    seoDescription: body.seoDescription ?? body.seo_description ?? '',
+    images: body.images
+  };
+}
+
+async function enrichProducts(products = []) {
+  const enriched = [];
+
+  for (const product of products) {
+    enriched.push(await enrichProduct(product));
+  }
+
+  return enriched;
 }
 
 /**
@@ -398,6 +272,18 @@ router.post('/', async (req, res) => {
     const finalImages = normalizeImages(images, imageUrl);
     const primaryImage = finalImages.length ? finalImages[0].image_url : normalizeText(imageUrl);
 
+    const existingSlug = await db.get(
+      `SELECT id FROM products WHERE slug = ?`,
+      [finalSlug]
+    );
+
+    if (existingSlug) {
+      return res.status(409).json({
+        success: false,
+        error: 'الـ slug مستخدم بالفعل'
+      });
+    }
+
     if (finalSku) {
       const existingSku = await db.get(
         `SELECT id FROM products WHERE sku = ?`,
@@ -429,11 +315,9 @@ router.post('/', async (req, res) => {
         category,
         tags,
         seo_title,
-        seo_description,
-        created_at,
-        updated_at
+        seo_description
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         normalizeText(productName),
         finalSlug,
@@ -537,7 +421,26 @@ router.put('/:id', async (req, res) => {
     }
 
     if (slug !== undefined) {
-      const finalSlug = await makeUniqueSlug(slug || product.product_name, id);
+      const finalSlug = await makeUniqueSlug(slug, id);
+      if (!finalSlug) {
+        return res.status(400).json({
+          success: false,
+          error: 'الـ slug غير صحيح'
+        });
+      }
+
+      const existingSlug = await db.get(
+        `SELECT id FROM products WHERE slug = ? AND id != ?`,
+        [finalSlug, id]
+      );
+
+      if (existingSlug) {
+        return res.status(409).json({
+          success: false,
+          error: 'الـ slug مستخدم بالفعل'
+        });
+      }
+
       updateFields.push('slug = ?');
       updateValues.push(finalSlug);
     }
@@ -581,18 +484,21 @@ router.put('/:id', async (req, res) => {
     }
 
     if (salePrice !== undefined) {
+      const finalSalePrice = toNumber(salePrice, 0);
       updateFields.push('sale_price = ?');
-      updateValues.push(toNumber(salePrice, 0));
+      updateValues.push(finalSalePrice);
     }
 
     if (stock !== undefined) {
+      const finalStock = toInteger(stock, 0);
       updateFields.push('stock = ?');
-      updateValues.push(toInteger(stock, 0));
+      updateValues.push(finalStock);
     }
 
     if (status !== undefined) {
+      const finalStatus = normalizeStatus(status);
       updateFields.push('status = ?');
-      updateValues.push(normalizeStatus(status));
+      updateValues.push(finalStatus);
     }
 
     if (productType !== undefined) {
@@ -709,7 +615,10 @@ router.delete('/:id', async (req, res) => {
     }
 
     await db.run(`DELETE FROM product_images WHERE product_id = ?`, [id]);
-    await db.run(`DELETE FROM products WHERE id = ?`, [id]);
+    await db.run(
+      `DELETE FROM products WHERE id = ?`,
+      [id]
+    );
 
     return res.json({
       success: true,
@@ -776,107 +685,101 @@ router.get('/', async (req, res) => {
       order = 'DESC'
     } = req.query;
 
-    const rows = await db.all(`SELECT * FROM products`);
-    let products = Array.isArray(rows) ? rows : [];
+    let sql = `SELECT * FROM products`;
+    const params = [];
+    const where = [];
 
     if (status) {
-      const normalizedStatus = String(status || '').trim().toLowerCase();
-      products = products.filter(product =>
-        String(product.status || '').trim().toLowerCase() === normalizedStatus
-      );
+      where.push(`status = ?`);
+      params.push(status);
     }
 
     if (search) {
-      const q = String(search).trim().toLowerCase();
-      products = products.filter(product => {
-        const haystack = [
-          product.product_name,
-          product.sku,
-          product.slug,
-          product.description,
-          product.product_type,
-          product.vendor,
-          product.category,
-          product.tags
-        ]
-          .map(v => String(v || '').trim().toLowerCase())
-          .join(' ');
-        return haystack.includes(q);
-      });
+      where.push(`(
+        product_name LIKE ?
+        OR sku LIKE ?
+        OR slug LIKE ?
+        OR description LIKE ?
+        OR product_type LIKE ?
+        OR vendor LIKE ?
+        OR category LIKE ?
+        OR tags LIKE ?
+      )`);
+      const searchValue = `%${String(search).trim()}%`;
+      params.push(
+        searchValue,
+        searchValue,
+        searchValue,
+        searchValue,
+        searchValue,
+        searchValue,
+        searchValue,
+        searchValue
+      );
     }
 
-    const sortKey = String(sort || 'created_at');
+    if (where.length > 0) {
+      sql += ` WHERE ${where.join(' AND ')}`;
+    }
+
+    const validSortColumns = [
+      'created_at',
+      'updated_at',
+      'product_name',
+      'price',
+      'sale_price',
+      'stock',
+      'status',
+      'product_type',
+      'vendor',
+      'category'
+    ];
+
+    const sortColumn = validSortColumns.includes(sort) ? sort : 'created_at';
     const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
-    products.sort((a, b) => {
-      let av;
-      let bv;
+    sql += ` ORDER BY ${sortColumn} ${sortOrder}`;
+    sql += ` LIMIT ? OFFSET ?`;
 
-      switch (sortKey) {
-        case 'product_name':
-          av = String(a.product_name || '').trim().toLowerCase();
-          bv = String(b.product_name || '').trim().toLowerCase();
-          break;
-        case 'price':
-          av = Number(a.price || 0);
-          bv = Number(b.price || 0);
-          break;
-        case 'sale_price':
-          av = Number(a.sale_price || 0);
-          bv = Number(b.sale_price || 0);
-          break;
-        case 'stock':
-          av = Number(a.stock || 0);
-          bv = Number(b.stock || 0);
-          break;
-        case 'status':
-          av = String(a.status || '').trim().toLowerCase();
-          bv = String(b.status || '').trim().toLowerCase();
-          break;
-        case 'product_type':
-          av = String(a.product_type || '').trim().toLowerCase();
-          bv = String(b.product_type || '').trim().toLowerCase();
-          break;
-        case 'vendor':
-          av = String(a.vendor || '').trim().toLowerCase();
-          bv = String(b.vendor || '').trim().toLowerCase();
-          break;
-        case 'category':
-          av = String(a.category || '').trim().toLowerCase();
-          bv = String(b.category || '').trim().toLowerCase();
-          break;
-        case 'updated_at':
-          av = new Date(a.updated_at || 0).getTime();
-          bv = new Date(b.updated_at || 0).getTime();
-          break;
-        case 'created_at':
-        default:
-          av = new Date(a.created_at || 0).getTime();
-          bv = new Date(b.created_at || 0).getTime();
-          break;
+    params.push(toInteger(limit, 50), toInteger(offset, 0));
+
+    const products = await db.all(sql, params);
+    const enrichedProducts = await enrichProducts(products);
+
+    let countSql = `SELECT COUNT(*) as total FROM products`;
+    const countParams = [];
+
+    if (where.length > 0) {
+      countSql += ` WHERE ${where.join(' AND ')}`;
+      if (status) countParams.push(status);
+      if (search) {
+        const searchValue = `%${String(search).trim()}%`;
+        countParams.push(
+          searchValue,
+          searchValue,
+          searchValue,
+          searchValue,
+          searchValue,
+          searchValue,
+          searchValue,
+          searchValue
+        );
       }
+    }
 
-      if (av < bv) return sortOrder === 'ASC' ? -1 : 1;
-      if (av > bv) return sortOrder === 'ASC' ? 1 : -1;
-      return 0;
-    });
-
-    const parsedLimit = clamp(toInteger(limit, 50), 1, MAX_PRODUCTS_LIST_LIMIT);
-    const parsedOffset = Math.max(0, toInteger(offset, 0));
-    const total = products.length;
-
-    const paginated = products
-      .slice(parsedOffset, parsedOffset + parsedLimit)
-      .map(product => buildPlainProduct(product));
+    const countResult = await db.get(countSql, countParams);
+    const total = Number(countResult?.total || 0);
+    const parsedLimit = toInteger(limit, 50);
+    const parsedOffset = toInteger(offset, 0);
 
     return res.json({
       success: true,
-      data: paginated,
+      data: enrichedProducts,
       pagination: {
         total,
         limit: parsedLimit,
         offset: parsedOffset,
-        totalPages: Math.ceil(total / Math.max(1, parsedLimit))
+        totalPages: Math.ceil(total / parsedLimit)
       }
     });
   } catch (error) {
