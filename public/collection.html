@@ -719,6 +719,10 @@
         throw new Error(result?.error || `HTTP ${response.status}`);
       }
 
+      if (String(result.data?.status || 'active').toLowerCase() === 'archived') {
+        throw new Error('المجموعة غير متاحة حالياً');
+      }
+
       return result.data;
     }
 
