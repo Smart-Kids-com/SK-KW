@@ -56,11 +56,7 @@
       font-weight: 700;
     }
 
-    .topbar-arrow {
-      font-size: 1.2rem;
-      line-height: 1;
-      flex: 0 0 auto;
-    }
+    .topbar-arrow { font-size: 1.2rem; line-height: 1; flex: 0 0 auto; }
 
     .header {
       background: #fff;
@@ -246,38 +242,22 @@
       outline: none;
     }
 
-    .search-input::placeholder {
-      color: rgba(255,255,255,.75);
-    }
+    .search-input::placeholder { color: rgba(255,255,255,.75); }
 
     .products {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 22px 18px;
-      margin: 0 0 2rem;
+      margin: 0 0 1.2rem;
       align-items: start;
     }
 
-    .product {
-      background: transparent;
-      border-radius: 18px;
-      overflow: visible;
-      transition: transform .2s ease;
-    }
+    .product { background: transparent; border-radius: 18px; overflow: visible; transition: transform .2s ease; }
+    .product:hover { transform: translateY(-4px); }
 
-    .product:hover {
-      transform: translateY(-4px);
-    }
+    .product-link { display: block; color: inherit; }
 
-    .product-link {
-      display: block;
-      color: inherit;
-    }
-
-    .product-media {
-      position: relative;
-      margin-bottom: 12px;
-    }
+    .product-media { position: relative; margin-bottom: 12px; }
 
     .product-image {
       width: 100%;
@@ -289,12 +269,7 @@
       box-shadow: 0 10px 28px rgba(0,0,0,.18);
     }
 
-    .product-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+    .product-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
     .offer-badge {
       position: absolute;
@@ -314,10 +289,7 @@
       z-index: 2;
     }
 
-    .product-info {
-      padding: 0 2px;
-      background: transparent;
-    }
+    .product-info { padding: 0 2px; background: transparent; }
 
     .product-title {
       font-size: 1.05rem;
@@ -333,17 +305,9 @@
       min-height: 3.2em;
     }
 
-    .product-vendor {
-      color: var(--text-soft);
-      font-size: 0.92rem;
-      margin-bottom: 8px;
-      line-height: 1.4;
-    }
+    .product-vendor { color: var(--text-soft); font-size: 0.92rem; margin-bottom: 8px; line-height: 1.4; }
 
-    .price-stack {
-      margin-bottom: 14px;
-      min-height: 56px;
-    }
+    .price-stack { margin-bottom: 14px; min-height: 56px; }
 
     .product-compare-price {
       color: rgba(255,255,255,.65);
@@ -365,11 +329,7 @@
       white-space: nowrap;
     }
 
-    .product-actions {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
+    .product-actions { display: grid; grid-template-columns: 1fr; gap: 10px; }
 
     .add-to-cart,
     .view-details {
@@ -402,9 +362,7 @@
     }
 
     .add-to-cart:hover,
-    .view-details:hover {
-      transform: translateY(-2px);
-    }
+    .view-details:hover { transform: translateY(-2px); }
 
     .loading,
     .empty-state {
@@ -414,10 +372,27 @@
       color: white;
     }
 
-    .back-to-collections {
-      text-align: center;
-      margin: 1.5rem 0 0;
+    .load-more-wrap{
+      display:flex;
+      justify-content:center;
+      margin: 0 0 1.7rem;
     }
+    .load-more-btn{
+      min-height:48px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: 2px solid rgba(255,255,255,.55);
+      background: rgba(255,255,255,.12);
+      color:#fff;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .load-more-btn:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
+    .back-to-collections { text-align: center; margin: 1.5rem 0 0; }
 
     .back-btn {
       display: inline-flex;
@@ -447,12 +422,7 @@
       z-index: 1000;
     }
 
-    .whatsapp-icon-img {
-      width: 34px;
-      height: 34px;
-      object-fit: contain;
-      display: block;
-    }
+    .whatsapp-icon-img { width: 34px; height: 34px; object-fit: contain; display: block; }
 
     .toast{
       position:fixed;
@@ -471,10 +441,7 @@
       overflow:hidden;
     }
 
-    .toast.show{
-      transform:translateX(-50%) translateY(0);
-      opacity:1;
-    }
+    .toast.show{ transform:translateX(-50%) translateY(0); opacity:1; }
 
     .toast-inner{
       display:grid;
@@ -485,79 +452,31 @@
     }
 
     .toast-thumb{
-      width:72px;
-      height:72px;
-      border-radius:14px;
-      overflow:hidden;
-      background:#f1f1f1;
-      border:1px solid #eee;
+      width:72px;height:72px;border-radius:14px;overflow:hidden;background:#f1f1f1;border:1px solid #eee;
     }
 
-    .toast-thumb img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
+    .toast-thumb img{ width:100%;height:100%;object-fit:cover;display:block; }
 
-    .toast-content{
-      min-width:0;
-    }
+    .toast-content{ min-width:0; }
 
-    .toast-title{
-      font-size:1rem;
-      font-weight:800;
-      color:#384;
-      margin-bottom:4px;
-    }
+    .toast-title{ font-size:1rem;font-weight:800;color:#384;margin-bottom:4px; }
 
-    .toast-name{
-      font-size:.96rem;
-      color:#111;
-      line-height:1.5;
-      margin-bottom:8px;
-    }
+    .toast-name{ font-size:.96rem;color:#111;line-height:1.5;margin-bottom:8px; }
 
-    .toast-actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
+    .toast-actions{ display:flex;gap:8px;flex-wrap:wrap; }
 
     .toast-actions a{
-      min-height:34px;
-      padding:0 12px;
-      border-radius:10px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      font-size:.9rem;
-      font-weight:700;
+      min-height:34px;padding:0 12px;border-radius:10px;
+      display:inline-flex;align-items:center;justify-content:center;
+      font-size:.9rem;font-weight:700;
     }
 
-    .toast-cart-link{
-      background:#5b1970;
-      color:#fff;
-    }
-
-    .toast-continue{
-      background:#f3eef7;
-      color:#5b1970;
-    }
+    .toast-cart-link{ background:#5b1970;color:#fff; }
+    .toast-continue{ background:#f3eef7;color:#5b1970; }
 
     .toast-close{
-      width:36px;
-      height:36px;
-      border:0;
-      border-radius:999px;
-      background:#f5f2f8;
-      color:#6f6380;
-      cursor:pointer;
-      font-size:1.2rem;
-    }
-
-    @media (max-width: 900px) {
-      .container { padding: 1rem .9rem 2rem; }
+      width:36px;height:36px;border:0;border-radius:999px;
+      background:#f5f2f8;color:#6f6380;cursor:pointer;font-size:1.2rem;
     }
 
     @media (max-width: 768px) {
@@ -566,8 +485,7 @@
       .header-icon-btn { width: 40px; height: 40px; font-size: 1.45rem; }
 
       .collection-hero { padding: 12px 12px 16px; border-radius: 0 0 18px 18px; }
-
-      .products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 14px; }
+      .products { gap: 18px 14px; }
 
       .product-title { font-size: .98rem; }
       .product-vendor { font-size: .86rem; }
@@ -672,6 +590,10 @@
       </div>
     </div>
 
+    <div class="load-more-wrap">
+      <button class="load-more-btn" id="loadMoreBtn" type="button" onclick="loadMoreProducts()" disabled>تحميل المزيد</button>
+    </div>
+
     <div class="back-to-collections">
       <a href="./collections.html" class="back-btn">← العودة إلى المجموعات</a>
     </div>
@@ -679,16 +601,19 @@
 
   <script>
     const COLLECTIONS_API = '/api/collections';
-    const PRODUCTS_API = '/api/products';
 
     let currentCollection = null;
-    let currentCollectionSlug = '';
-    let currentCollectionTitle = '';
     let allCollectionProducts = [];
     let filteredProducts = [];
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
     let toastTimer = null;
+
+    // pagination
     let productsLoading = true;
+    let productsOffset = 0;
+    const productsLimit = 50;
+    let productsTotal = null;
+    let productsHasMore = false;
 
     function escapeHtml(str) {
       return String(str || '')
@@ -709,21 +634,13 @@
       return Number.isFinite(n) ? n : fallback;
     }
 
-    function getCollectionIcon(collection) {
-      return safeText(collection?.icon, '');
-    }
+    function getCollectionIcon(collection) { return safeText(collection?.icon, ''); }
 
-    function getProductTitle(product) {
-      return safeText(product.product_name ?? product.name ?? product.title, 'منتج');
-    }
+    function getProductTitle(product) { return safeText(product.product_name ?? product.name ?? product.title, 'منتج'); }
 
-    function getProductVendor(product) {
-      return safeText(product.vendor, '');
-    }
+    function getProductVendor(product) { return safeText(product.vendor, ''); }
 
-    function extractPrice(product) {
-      return safeNumber(product.price ?? product.sale_price ?? product.regular_price, 0);
-    }
+    function extractPrice(product) { return safeNumber(product.price ?? product.sale_price ?? product.regular_price, 0); }
 
     function getComparePrice(product) {
       const sale = safeNumber(product.sale_price, 0);
@@ -745,16 +662,12 @@
         (Array.isArray(product.images) && product.images[0] && (product.images[0].image_url || product.images[0].url || product.images[0].src)) ??
         '';
 
-      return safeText(
-        image,
-        `https://via.placeholder.com/400x400?text=${encodeURIComponent(getProductTitle(product))}`
-      );
+      return safeText(image, `https://via.placeholder.com/400x400?text=${encodeURIComponent(getProductTitle(product))}`);
     }
 
     function getProductUrl(product) {
       const slug = safeText(product.slug);
       const id = safeText(product.id);
-
       if (slug) return `./product-page.html?slug=${encodeURIComponent(slug)}`;
       return `./product-page.html?id=${encodeURIComponent(id)}`;
     }
@@ -775,32 +688,31 @@
 
     function showCartToast(product) {
       const toast = document.getElementById('cartToast');
-      const toastImage = document.getElementById('toastImage');
-      const toastName = document.getElementById('toastName');
-
-      toastImage.src = extractImage(product);
-      toastName.textContent = getProductTitle(product);
+      document.getElementById('toastImage').src = extractImage(product);
+      document.getElementById('toastName').textContent = getProductTitle(product);
 
       toast.classList.add('show');
-
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3200);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
     }
 
     function hideCartToast() {
-      const toast = document.getElementById('cartToast');
-      toast.classList.remove('show');
+      document.getElementById('cartToast').classList.remove('show');
       clearTimeout(toastTimer);
     }
 
-    async function fetchCollectionBySlug(slug) {
-      const response = await fetch(`${COLLECTIONS_API}/slug/${encodeURIComponent(slug)}?includeProducts=0`, {
-        cache: 'no-store',
-        headers: { Accept: 'application/json' }
-      });
+    async function fetchCollectionMeta() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const slug = safeText(urlParams.get('slug'));
+      const id = safeText(urlParams.get('id'));
 
+      if (!slug && !id) throw new Error('اسم المجموعة غير موجود');
+
+      const endpoint = slug
+        ? `${COLLECTIONS_API}/slug/${encodeURIComponent(slug)}?includeProducts=0`
+        : `${COLLECTIONS_API}/${encodeURIComponent(id)}?includeProducts=0`;
+
+      const response = await fetch(endpoint, { cache: 'no-store', headers: { Accept: 'application/json' } });
       const result = await response.json().catch(() => null);
 
       if (!response.ok || !result || !result.success) {
@@ -810,125 +722,29 @@
       return result.data;
     }
 
-    async function fetchCollectionById(id) {
-      const response = await fetch(`${COLLECTIONS_API}/${encodeURIComponent(id)}?includeProducts=0`, {
-        cache: 'no-store',
-        headers: { Accept: 'application/json' }
-      });
+    async function fetchCollectionProductsPage(collectionId, sortMode, limit, offset) {
+      const params = new URLSearchParams();
+      params.set('sort', sortMode || 'manual');
+      params.set('limit', String(limit));
+      params.set('offset', String(offset));
 
-      const result = await response.json().catch(() => null);
-
-      if (!response.ok || !result || !result.success) {
-        throw new Error(result?.error || `HTTP ${response.status}`);
-      }
-
-      return result.data;
-    }
-
-    async function fetchCollectionProductsById(id, sortMode = 'manual') {
       const response = await fetch(
-        `${COLLECTIONS_API}/${encodeURIComponent(id)}/products?sort=${encodeURIComponent(sortMode || 'manual')}`,
+        `${COLLECTIONS_API}/${encodeURIComponent(collectionId)}/products?${params.toString()}`,
         { cache: 'no-store', headers: { Accept: 'application/json' } }
       );
 
       const result = await response.json().catch(() => null);
-
       if (!response.ok || !result || !result.success) {
         throw new Error(result?.error || `HTTP ${response.status}`);
       }
 
-      return Array.isArray(result.data) ? result.data : [];
-    }
-
-    async function fetchLegacyCategoryProducts(category) {
-      const response = await fetch(`${PRODUCTS_API}?status=active&limit=1000`, {
-        cache: 'no-store',
-        headers: { Accept: 'application/json' }
-      });
-
-      const result = await response.json().catch(() => null);
-
-      if (!response.ok || !result || !result.success) {
-        throw new Error(result?.error || `HTTP ${response.status}`);
-      }
-
-      const products = Array.isArray(result.data) ? result.data : [];
-      const categoryName = safeText(category, 'المجموعة');
-
-      return {
-        id: null,
-        slug: '',
-        title: categoryName,
-        description: '',
-        icon: '',
-        sort_mode: 'manual',
-        products: products.filter(product => {
-          const candidate = safeText(product.category ?? product.category_name ?? product.product_type, '');
-          return candidate === categoryName;
-        })
-      };
-    }
-
-    async function loadCollection() {
-      try {
-        productsLoading = true;
-        renderProducts();
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const slug = safeText(urlParams.get('slug'));
-        const id = safeText(urlParams.get('id'));
-        const legacyCategory = safeText(urlParams.get('category'));
-
-        if (!slug && !id && !legacyCategory) {
-          showError('اسم المجموعة غير موجود');
-          return;
-        }
-
-        let collectionData = null;
-
-        if (slug) {
-          collectionData = await fetchCollectionBySlug(slug);
-        } else if (id) {
-          collectionData = await fetchCollectionById(id);
-        } else {
-          collectionData = await fetchLegacyCategoryProducts(legacyCategory);
-        }
-
-        currentCollection = collectionData;
-        currentCollectionSlug = safeText(collectionData.slug);
-        currentCollectionTitle = safeText(collectionData.title || legacyCategory || 'المجموعة');
-
-        // Update header سريعًا
-        allCollectionProducts = [];
-        filteredProducts = [];
-        updateCollectionInfo();
-
-        // Load products separately (only if we have a real collection id)
-        if (collectionData?.id) {
-          const sortMode = safeText(collectionData.sort_mode, 'manual');
-          const products = await fetchCollectionProductsById(collectionData.id, sortMode);
-
-          allCollectionProducts = products;
-          filteredProducts = [...allCollectionProducts];
-        } else {
-          // legacy already has products
-          allCollectionProducts = Array.isArray(collectionData.products) ? collectionData.products : [];
-          filteredProducts = [...allCollectionProducts];
-        }
-
-        productsLoading = false;
-        updateCollectionInfo();
-        renderProducts();
-        updateCartDisplay();
-      } catch (error) {
-        console.error('خطأ في تحميل المجموعة:', error);
-        productsLoading = false;
-        showError('حدث خطأ في تحميل المجموعة');
-      }
+      const rows = Array.isArray(result.data) ? result.data : [];
+      const pagination = result.pagination || {};
+      return { rows, pagination };
     }
 
     function updateCollectionInfo() {
-      const title = currentCollectionTitle || 'المجموعة';
+      const title = safeText(currentCollection?.title, 'المجموعة');
       const description = safeText(currentCollection?.description, '');
       const sortMode = safeText(currentCollection?.sort_mode, 'manual');
 
@@ -956,7 +772,7 @@
       }
 
       document.getElementById('productCount').textContent =
-        productsLoading ? 'جاري التحميل...' : `${allCollectionProducts.length || 0} منتج`;
+        productsLoading ? 'جاري التحميل...' : `${filteredProducts.length} منتج (المحمّل)`;
 
       document.getElementById('collectionSortBadge').textContent = getSortLabel(sortMode);
 
@@ -968,7 +784,7 @@
     function renderProducts() {
       const productsContainer = document.getElementById('products');
 
-      if (productsLoading) {
+      if (productsLoading && filteredProducts.length === 0) {
         productsContainer.innerHTML = `
           <div class="loading">
             <h3>📦 جاري تحميل منتجات المجموعة...</h3>
@@ -1046,19 +862,84 @@
       });
     }
 
+    function updateLoadMoreButton() {
+      const btn = document.getElementById('loadMoreBtn');
+
+      if (!currentCollection?.id) {
+        btn.disabled = true;
+        btn.textContent = 'تحميل المزيد';
+        return;
+      }
+
+      if (productsLoading) {
+        btn.disabled = true;
+        btn.textContent = 'جاري التحميل...';
+        return;
+      }
+
+      btn.disabled = !productsHasMore;
+      btn.textContent = productsHasMore ? 'تحميل المزيد' : 'لا يوجد المزيد';
+    }
+
+    async function loadMoreProducts() {
+      if (!currentCollection?.id) return;
+      if (productsLoading) return;
+      if (!productsHasMore) return;
+
+      try {
+        productsLoading = true;
+        updateLoadMoreButton();
+
+        const sortMode = safeText(currentCollection?.sort_mode, 'manual');
+        const { rows, pagination } = await fetchCollectionProductsPage(
+          currentCollection.id,
+          sortMode,
+          productsLimit,
+          productsOffset
+        );
+
+        // append
+        allCollectionProducts = [...allCollectionProducts, ...rows];
+        filteredProducts = [...allCollectionProducts];
+
+        productsTotal = Number(pagination?.total ?? productsTotal);
+        productsOffset = productsOffset + rows.length;
+
+        productsHasMore = productsTotal != null
+          ? productsOffset < productsTotal
+          : rows.length === productsLimit;
+
+        productsLoading = false;
+        updateCollectionInfo();
+        renderProducts();
+        updateLoadMoreButton();
+      } catch (error) {
+        console.error(error);
+        productsLoading = false;
+        updateLoadMoreButton();
+        // لا نكسر الصفحة، بس نطفي الزر
+        productsHasMore = false;
+        updateLoadMoreButton();
+      }
+    }
+
     function searchInCollection(query) {
-      if (!query.trim()) {
+      const q = String(query || '').trim().toLowerCase();
+      if (!q) {
         filteredProducts = [...allCollectionProducts];
       } else {
-        const searchQuery = query.toLowerCase();
-        filteredProducts = allCollectionProducts.filter(product =>
-          getProductTitle(product).toLowerCase().includes(searchQuery) ||
-          safeText(product.description).toLowerCase().includes(searchQuery) ||
-          safeText(product.category).toLowerCase().includes(searchQuery) ||
-          safeText(product.vendor).toLowerCase().includes(searchQuery) ||
-          safeText(product.sku).toLowerCase().includes(searchQuery)
-        );
+        filteredProducts = allCollectionProducts.filter(product => {
+          const hay = [
+            getProductTitle(product),
+            safeText(product.description),
+            safeText(product.category),
+            safeText(product.vendor),
+            safeText(product.sku)
+          ].join(' ').toLowerCase();
+          return hay.includes(q);
+        });
       }
+      updateCollectionInfo();
       renderProducts();
     }
 
@@ -1111,6 +992,36 @@
           </a>
         </div>
       `;
+    }
+
+    async function loadCollection() {
+      try {
+        productsLoading = true;
+        updateLoadMoreButton();
+        renderProducts();
+
+        currentCollection = await fetchCollectionMeta();
+        allCollectionProducts = [];
+        filteredProducts = [];
+
+        // reset pagination
+        productsOffset = 0;
+        productsTotal = null;
+        productsHasMore = true;
+
+        updateCollectionInfo();
+
+        // load first page
+        await loadMoreProducts();
+
+        updateCartDisplay();
+      } catch (error) {
+        console.error('خطأ في تحميل المجموعة:', error);
+        productsLoading = false;
+        productsHasMore = false;
+        updateLoadMoreButton();
+        showError('حدث خطأ في تحميل المجموعة');
+      }
     }
 
     document.addEventListener('DOMContentLoaded', function() {

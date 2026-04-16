@@ -134,9 +134,7 @@
       text-align:left;
     }
 
-    .nav-item.active{
-      background:#e9eaeb;
-    }
+    .nav-item.active{background:#e9eaeb}
 
     .main{
       grid-area:main;
@@ -223,22 +221,9 @@
       box-shadow:var(--shadow);
     }
 
-    .btn.primary{
-      background:#111;
-      color:#fff;
-      border-color:#111;
-    }
-
-    .btn.blue{
-      background:#2563eb;
-      color:#fff;
-      border-color:#2563eb;
-    }
-
-    .btn.danger{
-      color:#b91c1c;
-      border-color:#fca5a5;
-    }
+    .btn.primary{background:#111;color:#fff;border-color:#111}
+    .btn.blue{background:#2563eb;color:#fff;border-color:#2563eb}
+    .btn.danger{color:#b91c1c;border-color:#fca5a5}
 
     .layout{
       display:grid;
@@ -247,10 +232,7 @@
       align-items:start;
     }
 
-    .stack{
-      display:grid;
-      gap:18px;
-    }
+    .stack{display:grid;gap:18px}
 
     .card{
       background:var(--card);
@@ -278,17 +260,10 @@
       gap:8px;
     }
 
-    .card-body{
-      padding:18px;
-    }
+    .card-body{padding:18px}
 
-    .field{
-      margin-bottom:16px;
-    }
-
-    .field:last-child{
-      margin-bottom:0;
-    }
+    .field{margin-bottom:16px}
+    .field:last-child{margin-bottom:0}
 
     .field label{
       display:block;
@@ -300,9 +275,7 @@
       text-align:left;
     }
 
-    .field input,
-    .field select,
-    .field textarea{
+    .field input,.field select,.field textarea{
       width:100%;
       border:1px solid #d1d5db;
       border-radius:12px;
@@ -313,9 +286,7 @@
       color:#111827;
     }
 
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus{
+    .field input:focus,.field select:focus,.field textarea:focus{
       border-color:#9ca3af;
       box-shadow:0 0 0 4px rgba(156,163,175,.12);
     }
@@ -333,11 +304,7 @@
       line-height:1.6;
     }
 
-    .inline-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
+    .inline-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
     .image-preview{
       width:100%;
@@ -352,25 +319,10 @@
       margin-bottom:14px;
     }
 
-    .image-preview img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
+    .image-preview img{width:100%;height:100%;object-fit:cover;display:block}
+    .image-preview.empty{color:#9ca3af;font-size:15px;font-weight:700}
 
-    .image-preview.empty{
-      color:#9ca3af;
-      font-size:15px;
-      font-weight:700;
-    }
-
-    .status-row{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+    .status-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 
     .chip{
       display:inline-flex;
@@ -383,28 +335,11 @@
       font-weight:800;
     }
 
-    .chip.active{
-      color:#166534;
-      background:var(--green-bg);
-    }
+    .chip.active{color:#166534;background:var(--green-bg)}
+    .chip.draft{color:#92400e;background:var(--yellow-bg)}
+    .chip.archived{color:#374151;background:#e5e7eb}
 
-    .chip.draft{
-      color:#92400e;
-      background:var(--yellow-bg);
-    }
-
-    .chip.archived{
-      color:#374151;
-      background:#e5e7eb;
-    }
-
-    .tools{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-      position:relative;
-    }
+    .tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;position:relative}
 
     .dropdown{
       position:absolute;
@@ -420,10 +355,7 @@
       overflow:hidden;
     }
 
-    .dropdown.active{
-      display:block;
-    }
-
+    .dropdown.active{display:block}
     .dropdown button{
       width:100%;
       text-align:left;
@@ -435,17 +367,9 @@
       border-bottom:1px solid #f1f5f9;
     }
 
-    .dropdown button:last-child{
-      border-bottom:none;
-    }
-
-    .dropdown button:hover{
-      background:#f8fafc;
-    }
-
-    .dropdown .danger{
-      color:#b91c1c;
-    }
+    .dropdown button:last-child{border-bottom:none}
+    .dropdown button:hover{background:#f8fafc}
+    .dropdown .danger{color:#b91c1c}
 
     .products-toolbar{
       display:grid;
@@ -455,8 +379,7 @@
       margin-bottom:14px;
     }
 
-    .products-toolbar input,
-    .products-toolbar select{
+    .products-toolbar input,.products-toolbar select{
       height:40px;
       border-radius:12px;
       border:1px solid #d1d5db;
@@ -464,11 +387,6 @@
       padding:0 14px;
       font-size:14px;
       outline:none;
-    }
-
-    .products-toolbar input:focus,
-    .products-toolbar select:focus{
-      border-color:#9ca3af;
     }
 
     .selection-bar{
@@ -484,9 +402,7 @@
       flex-wrap:wrap;
     }
 
-    .selection-bar.active{
-      display:flex;
-    }
+    .selection-bar.active{display:flex}
 
     .selection-left{
       display:flex;
@@ -496,11 +412,7 @@
       font-weight:800;
     }
 
-    .selection-actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
+    .selection-actions{display:flex;gap:8px;flex-wrap:wrap}
 
     .table-wrap{
       overflow:auto;
@@ -523,34 +435,14 @@
       background:#fff;
     }
 
-    th{
-      font-size:13px;
-      color:#4b5563;
-      font-weight:800;
-      white-space:nowrap;
-    }
-
-    tr:hover td{
-      background:#fafafa;
-    }
-
-    tr.dragging td{
-      background:#eef2ff !important;
-    }
-
-    .check{
-      width:20px;
-      height:20px;
-    }
+    th{font-size:13px;color:#4b5563;font-weight:800;white-space:nowrap}
+    tr:hover td{background:#fafafa}
+    tr.dragging td{background:#eef2ff !important}
+    .check{width:20px;height:20px}
 
     .drag-handle{
-      width:32px;
-      height:32px;
-      border:none;
-      background:#f3f4f6;
-      border-radius:10px;
-      cursor:grab;
-      font-size:15px;
+      width:32px;height:32px;border:none;background:#f3f4f6;border-radius:10px;
+      cursor:grab;font-size:15px;
     }
 
     .product-cell{
@@ -563,40 +455,17 @@
     }
 
     .thumb{
-      width:56px;
-      height:56px;
-      border-radius:12px;
-      object-fit:cover;
-      background:#eee;
-      border:1px solid #e5e7eb;
-      flex-shrink:0;
+      width:56px;height:56px;border-radius:12px;object-fit:cover;background:#eee;
+      border:1px solid #e5e7eb;flex-shrink:0;
     }
 
     .thumb-placeholder{
-      width:56px;
-      height:56px;
-      border-radius:12px;
-      background:#f3f4f6;
-      border:1px solid #e5e7eb;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#9ca3af;
-      font-size:20px;
-      flex-shrink:0;
+      width:56px;height:56px;border-radius:12px;background:#f3f4f6;border:1px solid #e5e7eb;
+      display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:20px;flex-shrink:0;
     }
 
-    .product-name{
-      font-weight:800;
-      line-height:1.45;
-      margin-bottom:4px;
-    }
-
-    .product-sub{
-      font-size:13px;
-      color:var(--muted);
-      direction:rtl;
-    }
+    .product-name{font-weight:800;line-height:1.45;margin-bottom:4px}
+    .product-sub{font-size:13px;color:var(--muted);direction:rtl}
 
     .pill{
       display:inline-flex;
@@ -612,92 +481,36 @@
     }
 
     .mini-btn{
-      border:none;
-      background:#f3f4f6;
-      color:#111;
-      border-radius:10px;
-      height:34px;
-      padding:0 12px;
-      cursor:pointer;
-      font-weight:700;
+      border:none;background:#f3f4f6;color:#111;border-radius:10px;height:34px;
+      padding:0 12px;cursor:pointer;font-weight:700;
     }
-
-    .mini-btn.danger{
-      color:#b91c1c;
-      background:#fef2f2;
-    }
+    .mini-btn.danger{color:#b91c1c;background:#fef2f2}
 
     .empty{
-      padding:38px 20px;
-      text-align:center;
-      color:#6b7280;
-      font-weight:700;
-      line-height:1.7;
+      padding:38px 20px;text-align:center;color:#6b7280;font-weight:700;line-height:1.7;
     }
 
     .seo-preview{
-      border:1px solid #e5e7eb;
-      background:#f9fafb;
-      border-radius:14px;
-      padding:14px;
-      margin-bottom:14px;
+      border:1px solid #e5e7eb;background:#f9fafb;border-radius:14px;padding:14px;margin-bottom:14px;
     }
 
-    .seo-preview-title{
-      color:#1a0dab;
-      font-size:18px;
-      line-height:1.3;
-      margin-bottom:4px;
-      font-weight:500;
-    }
+    .seo-preview-title{color:#1a0dab;font-size:18px;line-height:1.3;margin-bottom:4px;font-weight:500}
+    .seo-preview-url{color:#006621;font-size:14px;margin-bottom:6px;word-break:break-all}
+    .seo-preview-desc{color:#4d5156;font-size:14px;line-height:1.5}
 
-    .seo-preview-url{
-      color:#006621;
-      font-size:14px;
-      margin-bottom:6px;
-      word-break:break-all;
-    }
+    .sidebar-card + .sidebar-card{margin-top:18px}
+    .sidebar-actions{display:grid;gap:10px}
 
-    .seo-preview-desc{
-      color:#4d5156;
-      font-size:14px;
-      line-height:1.5;
-    }
-
-    .sidebar-card + .sidebar-card{
-      margin-top:18px;
-    }
-
-    .sidebar-actions{
-      display:grid;
-      gap:10px;
-    }
-
-    .meta-list{
-      display:grid;
-      gap:10px;
-      font-size:14px;
-      color:#4b5563;
-    }
-
-    .meta-list strong{
-      color:#111827;
-    }
+    .meta-list{display:grid;gap:10px;font-size:14px;color:#4b5563}
+    .meta-list strong{color:#111827}
 
     .modal-backdrop{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.42);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:120;
-      padding:18px;
+      position:fixed;inset:0;background:rgba(0,0,0,.42);
+      display:none;align-items:center;justify-content:center;
+      z-index:120;padding:18px;
     }
 
-    .modal-backdrop.active{
-      display:flex;
-    }
+    .modal-backdrop.active{display:flex}
 
     .modal{
       width:min(1180px,100%);
@@ -711,53 +524,28 @@
     }
 
     .modal-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:18px 20px;
-      border-bottom:1px solid #e5e7eb;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:18px 20px;border-bottom:1px solid #e5e7eb;
     }
 
-    .modal-title{
-      font-size:18px;
-      font-weight:900;
-    }
+    .modal-title{font-size:18px;font-weight:900}
 
     .modal-close{
-      width:38px;
-      height:38px;
-      border:none;
-      background:#f3f4f6;
-      border-radius:12px;
-      cursor:pointer;
-      font-size:20px;
+      width:38px;height:38px;border:none;background:#f3f4f6;border-radius:12px;
+      cursor:pointer;font-size:20px;
     }
 
     .modal-toolbar{
-      padding:14px 20px;
-      border-bottom:1px solid #e5e7eb;
-      display:grid;
-      grid-template-columns:1fr 170px 170px auto auto;
-      gap:10px;
-      align-items:center;
+      padding:14px 20px;border-bottom:1px solid #e5e7eb;
+      display:grid;grid-template-columns:1fr 170px 170px auto auto;gap:10px;align-items:center;
     }
 
-    .modal-toolbar input,
-    .modal-toolbar select{
-      height:40px;
-      border-radius:12px;
-      border:1px solid #d1d5db;
-      background:#fff;
-      padding:0 14px;
-      font-size:14px;
-      outline:none;
+    .modal-toolbar input,.modal-toolbar select{
+      height:40px;border-radius:12px;border:1px solid #d1d5db;background:#fff;
+      padding:0 14px;font-size:14px;outline:none;
     }
 
-    .modal-body{
-      overflow:auto;
-      padding:0;
-    }
+    .modal-body{overflow:auto;padding:0}
 
     .modal-table{
       width:100%;
@@ -765,75 +553,37 @@
       min-width:980px;
     }
 
-    .modal-table th,
-    .modal-table td{
-      padding:14px 16px;
-      border-bottom:1px solid #e5e7eb;
-      text-align:left;
-      background:#fff;
+    .modal-table th,.modal-table td{
+      padding:14px 16px;border-bottom:1px solid #e5e7eb;text-align:left;background:#fff;
     }
 
     .modal-table th{
-      font-size:13px;
-      color:#4b5563;
-      font-weight:800;
-      white-space:nowrap;
-      position:sticky;
-      top:0;
-      z-index:2;
+      font-size:13px;color:#4b5563;font-weight:800;white-space:nowrap;
+      position:sticky;top:0;z-index:2;
     }
 
     .modal-foot{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:16px 20px;
-      border-top:1px solid #e5e7eb;
-      flex-wrap:wrap;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:16px 20px;border-top:1px solid #e5e7eb;flex-wrap:wrap;
     }
 
-    .browse-count{
-      font-weight:800;
-      color:#374151;
-    }
+    .browse-count{font-weight:800;color:#374151}
 
     .mobile-top{
-      display:none;
-      background:#111;
-      color:#fff;
-      padding:14px 14px 12px;
-      position:sticky;
-      top:0;
-      z-index:90;
+      display:none;background:#111;color:#fff;padding:14px 14px 12px;
+      position:sticky;top:0;z-index:90;
     }
-
     .mobile-top-row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:12px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;
     }
-
-    .mobile-title{
-      font-size:22px;
-      font-weight:900;
-      white-space:nowrap;
-    }
+    .mobile-title{font-size:22px;font-weight:900;white-space:nowrap}
 
     @media (max-width: 1180px){
-      .layout{
-        grid-template-columns:1fr;
-      }
+      .layout{grid-template-columns:1fr}
     }
 
     @media (max-width: 1100px){
-      .app{
-        grid-template-columns:1fr;
-        grid-template-rows:auto 1fr;
-        grid-template-areas:"main";
-      }
+      .app{grid-template-columns:1fr;grid-template-rows:auto 1fr;grid-template-areas:"main"}
       .topbar,.sidebar{display:none}
       .mobile-top{display:block}
       .main{padding:14px}
@@ -841,40 +591,17 @@
     }
 
     @media (max-width: 900px){
-      .products-toolbar{
-        grid-template-columns:1fr 1fr;
-      }
-
-      .modal-toolbar{
-        grid-template-columns:1fr 1fr;
-      }
+      .products-toolbar{grid-template-columns:1fr 1fr}
+      .modal-toolbar{grid-template-columns:1fr 1fr}
     }
 
     @media (max-width: 700px){
-      .inline-grid{
-        grid-template-columns:1fr;
-      }
-
-      .page-actions{
-        width:100%;
-      }
-
-      .page-actions .btn{
-        flex:1;
-      }
-
-      .products-toolbar{
-        grid-template-columns:1fr;
-      }
-
-      .selection-bar{
-        align-items:flex-start;
-      }
-
-      table,
-      .modal-table{
-        min-width:900px;
-      }
+      .inline-grid{grid-template-columns:1fr}
+      .page-actions{width:100%}
+      .page-actions .btn{flex:1}
+      .products-toolbar{grid-template-columns:1fr}
+      .selection-bar{align-items:flex-start}
+      table,.modal-table{min-width:900px}
     }
   </style>
 </head>
@@ -994,7 +721,7 @@
                   </select>
 
                   <button class="btn blue" type="button" onclick="openBrowseModal()">Browse</button>
-                  <button class="btn" type="button" onclick="refreshCollectionProducts()">Refresh</button>
+                  <button class="btn" type="button" onclick="refreshCollectionProducts(true)">Refresh</button>
                 </div>
 
                 <div id="selectionBar" class="selection-bar">
@@ -1031,6 +758,14 @@
                       </tr>
                     </tbody>
                   </table>
+                </div>
+
+                <div style="margin-top:12px; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                  <div id="collectionProductsPagerInfo" style="color:#6b7280;font-weight:700;">—</div>
+                  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn" type="button" id="collectionProductsPrevBtn" onclick="pageCollectionProducts(-1)" disabled>Previous</button>
+                    <button class="btn" type="button" id="collectionProductsNextBtn" onclick="pageCollectionProducts(1)" disabled>Next</button>
+                  </div>
                 </div>
               </div>
             </section>
@@ -1217,9 +952,15 @@
 
     let currentCollectionId = null;
     let currentCollection = null;
+
     let collectionProducts = [];
     let filteredCollectionProducts = [];
     let selectedCollectionProductIds = new Set();
+
+    // pagination for products inside collection (editor)
+    let collectionProductsOffset = 0;
+    const collectionProductsLimit = 200;
+    let collectionProductsTotal = 0;
 
     let browseProducts = [];
     let selectedBrowseProductIds = new Set();
@@ -1255,11 +996,7 @@
       if (!value) return '—';
       const date = new Date(value);
       if (Number.isNaN(date.getTime())) return '—';
-      return date.toLocaleString('en-GB', {
-        year: 'numeric',
-        month: 'short',
-        day: '2-digit'
-      });
+      return date.toLocaleString('en-GB', { year:'numeric', month:'short', day:'2-digit' });
     }
 
     function slugify(text = '') {
@@ -1378,7 +1115,7 @@
 
     function updateMetaSidebar() {
       qs('metaIdValue').textContent = currentCollectionId || 'New';
-      qs('metaProductsValue').textContent = collectionProducts.length;
+      qs('metaProductsValue').textContent = String(collectionProductsTotal || collectionProducts.length || 0);
       qs('metaSortValue').textContent = getSortLabel(qs('sortModeSelect').value);
       qs('metaCreatedValue').textContent = formatDate(currentCollection?.created_at);
       qs('metaUpdatedValue').textContent = formatDate(currentCollection?.updated_at);
@@ -1406,7 +1143,6 @@
       updateStatusChip();
       updateImagePreview();
       updateSeoPreview();
-      updateMetaSidebar();
 
       const title = safeText(collection?.title) || (currentCollectionId ? 'Edit collection' : 'Create collection');
       qs('pageTitle').textContent = title;
@@ -1467,9 +1203,7 @@
         currentCollection = result.data;
         currentCollectionId = result.data.id;
 
-        // بعد الحفظ نعمل refresh للمنتجات من endpoint المنفصل (المضمون)
         fillForm(result.data);
-        await refreshCollectionProducts();
 
         showAlert('Collection saved successfully', 'success');
 
@@ -1477,6 +1211,9 @@
         if (window.location.pathname + window.location.search !== targetUrl) {
           window.history.replaceState({}, '', targetUrl);
         }
+
+        // refresh products (paged)
+        await refreshCollectionProducts(true);
       } catch (error) {
         console.error(error);
         showAlert(error.message || 'Failed to save collection', 'error');
@@ -1493,7 +1230,9 @@
           fillForm(null);
           collectionProducts = [];
           filteredCollectionProducts = [];
+          collectionProductsTotal = 0;
           renderCollectionProducts();
+          updateMetaSidebar();
           return;
         }
 
@@ -1509,11 +1248,8 @@
         qs('pageTitle').textContent = `Loading collection #${numericId}...`;
         qs('mobileTopTitle').textContent = `Loading #${numericId}...`;
         qs('pageSub').textContent = 'Loading data from server...';
-        qs('metaIdValue').textContent = String(numericId);
-        qs('duplicateBtn').disabled = true;
-        qs('viewBtn').disabled = true;
 
-        // IMPORTANT: metadata only
+        // metadata only
         const metaResponse = await fetch(
           `${COLLECTIONS_API}/${encodeURIComponent(numericId)}?includeProducts=0`,
           { cache: 'no-store', headers: { Accept: 'application/json' } }
@@ -1529,24 +1265,34 @@
 
         fillForm(metaResult.data);
 
-        // Then products
-        await refreshCollectionProducts();
+        // products paged
+        await refreshCollectionProducts(true);
       } catch (error) {
         console.error(error);
-
-        const params = new URLSearchParams(window.location.search);
-        const rawId = params.get('id');
-
-        if (rawId) {
-          qs('pageTitle').textContent = 'Collection not found';
-          qs('pageSub').textContent = `Could not load collection id=${rawId}`;
-          showAlert(error.message || 'Failed to load collection', 'error');
-          return;
-        }
-
-        fillForm(null);
         showAlert(error.message || 'Failed to load collection', 'error');
       }
+    }
+
+    function renderCollectionProductsPager() {
+      const start = collectionProductsTotal === 0 ? 0 : collectionProductsOffset + 1;
+      const end = Math.min(collectionProductsOffset + collectionProductsLimit, collectionProductsTotal || collectionProducts.length);
+
+      qs('collectionProductsPagerInfo').textContent =
+        collectionProductsTotal
+          ? `${start}-${end} of ${collectionProductsTotal}`
+          : `${collectionProducts.length} loaded`;
+
+      qs('collectionProductsPrevBtn').disabled = collectionProductsOffset <= 0;
+      qs('collectionProductsNextBtn').disabled =
+        !collectionProductsTotal || (collectionProductsOffset + collectionProductsLimit >= collectionProductsTotal);
+    }
+
+    async function pageCollectionProducts(direction) {
+      if (!currentCollectionId) return;
+
+      const nextOffset = Math.max(0, collectionProductsOffset + (direction * collectionProductsLimit));
+      collectionProductsOffset = nextOffset;
+      await refreshCollectionProducts(false);
     }
 
     function renderCollectionProducts() {
@@ -1563,6 +1309,7 @@
         `;
         updateMetaSidebar();
         updateProductSelectionUi();
+        renderCollectionProductsPager();
         return;
       }
 
@@ -1612,7 +1359,7 @@
             <td>KWD ${safeNumber(product.price, 0).toFixed(3)}</td>
             <td>${safeNumber(product.stock, 0)}</td>
             <td>${getProductStatusBadge(product.status)}</td>
-            <td>${index + 1}</td>
+            <td>${collectionProductsOffset + index + 1}</td>
 
             <td>
               <button class="mini-btn danger" type="button" onclick="removeSingleProduct(${productId})">✕</button>
@@ -1623,6 +1370,7 @@
 
       updateMetaSidebar();
       updateProductSelectionUi();
+      renderCollectionProductsPager();
     }
 
     function filterCollectionProducts() {
@@ -1646,7 +1394,7 @@
       renderCollectionProducts();
     }
 
-    function handleSortModeChange() {
+    async function handleSortModeChange() {
       updateMetaSidebar();
 
       if (qs('sortModeSelect').value !== 'manual') {
@@ -1654,10 +1402,11 @@
       }
 
       if (currentCollectionId) {
-        saveCollection();
+        await saveCollection();
       }
 
-      renderCollectionProducts();
+      // reload products from server in that sort mode
+      await refreshCollectionProducts(true);
     }
 
     function toggleCollectionProductSelection(productId, checked) {
@@ -1691,15 +1440,27 @@
       qs('selectAllProductsCheckbox').checked = allSelected;
     }
 
-    async function refreshCollectionProducts() {
+    async function refreshCollectionProducts(reset = true) {
       if (!currentCollectionId) {
         renderCollectionProducts();
         return;
       }
 
       try {
+        if (reset) {
+          collectionProductsOffset = 0;
+          selectedCollectionProductIds.clear();
+        }
+
+        const sortMode = qs('sortModeSelect').value || 'manual';
+
+        const params = new URLSearchParams();
+        params.set('sort', sortMode);
+        params.set('limit', String(collectionProductsLimit));
+        params.set('offset', String(collectionProductsOffset));
+
         const response = await fetch(
-          `${COLLECTIONS_API}/${encodeURIComponent(currentCollectionId)}/products`,
+          `${COLLECTIONS_API}/${encodeURIComponent(currentCollectionId)}/products?${params.toString()}`,
           { cache: 'no-store', headers: { Accept: 'application/json' } }
         );
         const result = await response.json().catch(() => null);
@@ -1710,6 +1471,8 @@
 
         collectionProducts = Array.isArray(result.data) ? result.data : [];
         filteredCollectionProducts = [...collectionProducts];
+        collectionProductsTotal = Number(result.pagination?.total || collectionProducts.length);
+
         renderCollectionProducts();
       } catch (error) {
         console.error(error);
@@ -1753,16 +1516,6 @@
       }, 300);
     }
 
-    function buildBrowseSearchValue(rawValue, field) {
-      const value = safeText(rawValue);
-      if (!value) return '';
-      if (field === 'id') return value;
-      if (field === 'sku') return value;
-      if (field === 'barcode') return value;
-      if (field === 'title') return value;
-      return value;
-    }
-
     async function loadBrowseProducts(resetOffset = false) {
       try {
         if (resetOffset) browseOffset = 0;
@@ -1778,9 +1531,7 @@
         params.set('order', 'DESC');
 
         if (status) params.set('status', status);
-
-        const searchValue = buildBrowseSearchValue(search, searchField);
-        if (searchValue) params.set('search', searchValue);
+        if (search) params.set('search', search);
 
         const response = await fetch(`${PRODUCTS_API}?${params.toString()}`, { cache: 'no-store' });
         const result = await response.json();
@@ -1791,18 +1542,11 @@
 
         let rows = Array.isArray(result.data) ? result.data : [];
 
-        if (searchField === 'title' && searchValue) {
-          rows = rows.filter(item => safeText(item.product_name).toLowerCase().includes(searchValue.toLowerCase()));
-        }
-        if (searchField === 'id' && searchValue) {
-          rows = rows.filter(item => String(item.id) === searchValue);
-        }
-        if (searchField === 'sku' && searchValue) {
-          rows = rows.filter(item => safeText(item.sku).toLowerCase().includes(searchValue.toLowerCase()));
-        }
-        if (searchField === 'barcode' && searchValue) {
-          rows = rows.filter(item => safeText(item.sku).toLowerCase().includes(searchValue.toLowerCase()));
-        }
+        // client-side refinement by field
+        if (searchField === 'title' && search) rows = rows.filter(item => safeText(item.product_name).toLowerCase().includes(search.toLowerCase()));
+        if (searchField === 'id' && search) rows = rows.filter(item => String(item.id) === String(search));
+        if (searchField === 'sku' && search) rows = rows.filter(item => safeText(item.sku).toLowerCase().includes(search.toLowerCase()));
+        if (searchField === 'barcode' && search) rows = rows.filter(item => safeText(item.sku).toLowerCase().includes(search.toLowerCase()));
 
         browseProducts = rows;
         browseTotal = Number(result.pagination?.total || 0);
@@ -1811,9 +1555,7 @@
       } catch (error) {
         console.error(error);
         qs('browseProductsBody').innerHTML = `
-          <tr>
-            <td colspan="6" class="empty">Failed to load products</td>
-          </tr>
+          <tr><td colspan="6" class="empty">Failed to load products</td></tr>
         `;
         showAlert(error.message || 'Failed to load products', 'error');
       }
@@ -1823,11 +1565,7 @@
       const tbody = qs('browseProductsBody');
 
       if (!browseProducts.length) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="6" class="empty">No products found</td>
-          </tr>
-        `;
+        tbody.innerHTML = `<tr><td colspan="6" class="empty">No products found</td></tr>`;
         updateBrowseSelectionUi();
         renderBrowsePagination();
         return;
@@ -1842,7 +1580,6 @@
             <td>
               <input class="check" type="checkbox" ${selected ? 'checked' : ''} onchange="toggleBrowseSelection(${productId}, this.checked)">
             </td>
-
             <td>
               <div class="product-cell">
                 ${getProductThumb(product)}
@@ -1852,7 +1589,6 @@
                 </div>
               </div>
             </td>
-
             <td>KWD ${safeNumber(product.price, 0).toFixed(3)}</td>
             <td>${safeNumber(product.stock, 0)}</td>
             <td>${getProductStatusBadge(product.status)}</td>
@@ -1943,7 +1679,7 @@
 
         closeBrowseModal();
         selectedBrowseProductIds.clear();
-        await refreshCollectionProducts();
+        await refreshCollectionProducts(true);
         showAlert('Products added to collection successfully', 'success');
       } catch (error) {
         console.error(error);
@@ -1968,7 +1704,7 @@
         }
 
         selectedCollectionProductIds.delete(Number(productId));
-        await refreshCollectionProducts();
+        await refreshCollectionProducts(true);
         showAlert('Product removed from collection', 'success');
       } catch (error) {
         console.error(error);
@@ -1997,7 +1733,7 @@
         }
 
         clearProductSelection();
-        await refreshCollectionProducts();
+        await refreshCollectionProducts(true);
         showAlert('Selected products removed from collection', 'success');
       } catch (error) {
         console.error(error);
@@ -2019,7 +1755,6 @@
         }
 
         let position = 1;
-
         if (destination === 'position') {
           const input = window.prompt('Enter target position number', '1');
           if (input === null) return;
@@ -2039,9 +1774,7 @@
         }
 
         clearProductSelection();
-        collectionProducts = Array.isArray(result.data) ? result.data : collectionProducts;
-        filteredCollectionProducts = [...collectionProducts];
-        renderCollectionProducts();
+        await refreshCollectionProducts(true);
         showAlert('Products moved successfully', 'success');
       } catch (error) {
         console.error(error);
@@ -2086,13 +1819,14 @@
       const [draggedItem] = moved.splice(fromIndex, 1);
       moved.splice(toIndex, 0, draggedItem);
 
+      // update UI immediately
       collectionProducts = moved;
       filteredCollectionProducts = [...collectionProducts];
       renderCollectionProducts();
 
       const payloadItems = collectionProducts.map((item, index) => ({
         productId: Number(item.product_id || item.id),
-        sortOrder: index + 1
+        sortOrder: (collectionProductsOffset + index + 1)
       }));
 
       try {
@@ -2108,7 +1842,7 @@
           throw new Error(result?.error || 'Failed to reorder products');
         }
 
-        await refreshCollectionProducts();
+        await refreshCollectionProducts(true);
         showAlert('Manual order updated', 'success');
       } catch (error) {
         console.error(error);
@@ -2204,6 +1938,7 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       await loadCollection();
+      updateMetaSidebar();
     });
   </script>
 </body>
