@@ -1168,32 +1168,56 @@
       loadMoreBtn.style.display = visibleCount < filteredProducts.length ? 'inline-flex' : 'none';
     }
 
-    async function loadProducts() {
+
+  async function loadProducts() {
+    try {
+      const response = await fetch(PRODUCTS_API, {
+        cache: 'no-store',
+        headers: { Accept: 'application/json' }
+      });
+
+      const text = await response.text();
+      let result = null;
+
       try {
-        const response = await fetch(PRODUCTS_API, {
-          cache: 'no-store',
-          headers: { Accept: 'application/json' }
-        });
-
-        const result = await response.json().catch(() => null);
-
-        if (!response.ok || !result || !result.success) {
-          throw new Error(result?.error || `HTTP ${response.status}`);
-        }
-
-        allProducts = Array.isArray(result.data) ? result.data : [];
-        filteredProducts = [...allProducts];
-
-        buildCategoryFilters();
-        updateStats();
-        renderProducts();
-      } catch (error) {
-        console.error(error);
-        document.getElementById('products').innerHTML = `
-          <div class="loading">⚠️ حدث خطأ أثناء تحميل المنتجات</div>
-        `;
+        result = text ? JSON.parse(text) : null;
+      } catch {
+        throw new Error(`API returned non-JSON: ${text.slice(0, 180)}`);
       }
+
+      if (!response.ok) {
+        throw new Error(result?.error || result?.message || `HTTP ${response.status}`);
+      }
+
+      let products = [];
+
+      if (Array.isArray(result)) {
+        products = result;
+      } else if (Array.isArray(result?.data)) {
+        products = result.data;
+      } else if (Array.isArray(result?.products)) {
+        products = result.products;
+      } else if (Array.isArray(result?.items)) {
+        products = result.items;
+      } else if (Array.isArray(result?.data?.products)) {
+        products = result.data.products;
+      } else if (Array.isArray(result?.data?.items)) {
+        products = result.data.items;
+      }
+
+      allProducts = products;
+      filteredProducts = [...allProducts];
+
+      buildCategoryFilters();
+      updateStats();
+      renderProducts();
+    } catch (error) {
+      console.error('loadProducts error:', error);
+      document.getElementById('products').innerHTML = `
+        <div class="loading">⚠️ حدث خطأ أثناء تحميل المنتجات<br>${escapeHtml(error.message || '')}</div>
+      `;
     }
+  }
 
     document.addEventListener('DOMContentLoaded', () => {
       updateCartDisplay();
