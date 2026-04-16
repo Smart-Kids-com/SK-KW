@@ -471,6 +471,29 @@
       margin-bottom:4px;
     }
 
+    .collection-link-btn{
+      border:none;
+      background:transparent;
+      padding:0;
+      margin:0;
+      font:inherit;
+      font-weight:800;
+      color:inherit;
+      cursor:pointer;
+      text-align:right;
+      line-height:1.45;
+    }
+
+    .collection-link-btn:hover{
+      text-decoration:underline;
+    }
+
+    .collection-link-btn:focus-visible{
+      outline:2px solid #111827;
+      outline-offset:3px;
+      border-radius:8px;
+    }
+
     .collection-sub{
       font-size:13px;
       color:var(--muted);
@@ -1070,7 +1093,14 @@
             <div class="collection-cell">
               ${getImageHtml(row)}
               <div>
-                <div class="collection-name">${escapeHtml(row.title)}</div>
+                <div class="collection-name">
+                  <button
+                    type="button"
+                    class="collection-link-btn"
+                    onclick="goToEditCollection(${Number(row.id)})"
+                    title="Open collection"
+                  >${escapeHtml(row.title)}</button>
+                </div>
                 <div class="collection-sub">/${escapeHtml(row.slug || '')}</div>
               </div>
             </div>
@@ -1141,20 +1171,81 @@
       loadCollections();
     }
 
-    function goToCreateCollection() {
-      window.location.href = '/collection.html';
+    const COLLECTION_ROUTE_CANDIDATES = {
+      create: [
+        '/collection.html',
+        '/collection-create.html',
+        '/collections/create'
+      ],
+      edit(id) {
+        const encodedId = encodeURIComponent(id);
+        return [
+          `/collection.html?id=${encodedId}`,
+          `/collection-edit.html?id=${encodedId}`,
+          `/collections/edit?id=${encodedId}`,
+          `/collections/${encodedId}/edit`
+        ];
+      },
+      view(slug) {
+        const encodedSlug = encodeURIComponent(slug);
+        return [
+          `/collections/${encodedSlug}`,
+          `/collection-page.html?slug=${encodedSlug}`,
+          `/products-full.html?collection=${encodedSlug}`,
+          `/products-full.html?slug=${encodedSlug}`
+        ];
+      }
+    };
+
+    async function resolveFirstWorkingRoute(candidates) {
+      for (const candidate of candidates) {
+        try {
+          const response = await fetch(candidate, {
+            method: 'HEAD',
+            cache: 'no-store'
+          });
+
+          if (response.ok) {
+            return candidate;
+          }
+        } catch (_) {}
+      }
+
+      return candidates[0] || '/';
     }
 
-    function goToEditCollection(id) {
-      window.location.href = `/collection-edit.html?id=${encodeURIComponent(id)}`;
+    async function navigateToBestRoute(candidates, { newTab = false } = {}) {
+      const target = await resolveFirstWorkingRoute(candidates);
+
+      if (newTab) {
+        window.open(target, '_blank', 'noopener');
+        return;
+      }
+
+      window.location.href = target;
     }
 
-    function viewCollection(slug) {
-      if (!slug) {
+    async function goToCreateCollection() {
+      await navigateToBestRoute(COLLECTION_ROUTE_CANDIDATES.create);
+    }
+
+    async function goToEditCollection(id) {
+      if (!id && id !== 0) {
+        showAlert('Collection ID is missing', 'error');
+        return;
+      }
+
+      await navigateToBestRoute(COLLECTION_ROUTE_CANDIDATES.edit(id));
+    }
+
+    async function viewCollection(slug) {
+      const cleanSlug = safeText(slug);
+      if (!cleanSlug) {
         showAlert('Collection slug is missing', 'error');
         return;
       }
-      window.open(`/collection-edit.html?slug=${encodeURIComponent(slug)}`, '_blank');
+
+      await navigateToBestRoute(COLLECTION_ROUTE_CANDIDATES.view(cleanSlug), { newTab: true });
     }
 
     function toggleRowMenu(id) {
