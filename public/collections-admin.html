@@ -1083,14 +1083,14 @@
 
           <td>
             <div class="table-actions">
-              <button class="mini-btn" onclick="goToEditCollection(${Number(row.id)})">Edit</button>
-              <button class="mini-btn dark" onclick="viewCollection(${JSON.stringify(row.slug || '')})">View</button>
+              <button class="mini-btn" onclick="goToEditCollection(${Number(row.id)})">Edit collection</button>
+              <button class="mini-btn dark" onclick="viewCollection(${JSON.stringify(row.slug || '')})">View collection</button>
               <button class="mini-btn" onclick="toggleRowMenu(${Number(row.id)})">More</button>
 
               <div id="rowMenu-${Number(row.id)}" class="row-dropdown">
                 <button onclick="duplicateCollection(${Number(row.id)})">Duplicate</button>
-                <button onclick="goToEditCollection(${Number(row.id)})">Edit</button>
-                <button onclick="viewCollection(${JSON.stringify(row.slug || '')})">View</button>
+                <button onclick="goToEditCollection(${Number(row.id)})">Edit collection</button>
+                <button onclick="viewCollection(${JSON.stringify(row.slug || '')})">View collection</button>
                 <button class="danger" onclick="deleteCollection(${Number(row.id)}, ${JSON.stringify(row.title || '')})">Delete collection</button>
               </div>
             </div>
@@ -1142,7 +1142,7 @@
     }
 
     function goToCreateCollection() {
-      window.location.href = '/collection-edit.html';
+      window.location.href = '/collection.html';
     }
 
     function goToEditCollection(id) {
@@ -1154,7 +1154,7 @@
         showAlert('Collection slug is missing', 'error');
         return;
       }
-      window.open(`/collection.html?slug=${encodeURIComponent(slug)}`, '_blank');
+      window.open(`/collection-edit.html?slug=${encodeURIComponent(slug)}`, '_blank');
     }
 
     function toggleRowMenu(id) {
