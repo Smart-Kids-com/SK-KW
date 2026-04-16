@@ -1080,9 +1080,10 @@ router.get('/', async (req, res) => {
     let sql = `SELECT * FROM collections`;
     const params = [];
     const where = [];
+    let normalizedStatus = null;
 
     if (status) {
-      const normalizedStatus = parseStatusFilter(status);
+      normalizedStatus = parseStatusFilter(status);
       if (!normalizedStatus) {
         return res.status(400).json({ success: false, error: 'قيمة status غير صحيحة. القيم المسموحة: active, draft, archived' });
       }
@@ -1135,8 +1136,8 @@ router.get('/', async (req, res) => {
     if (where.length > 0) {
       countSql += ` WHERE ${where.join(' AND ')}`;
 
-      if (status) {
-        countParams.push(parseStatusFilter(status));
+      if (normalizedStatus) {
+        countParams.push(normalizedStatus);
       }
 
       if (search) {
