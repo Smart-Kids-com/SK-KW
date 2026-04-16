@@ -7,8 +7,10 @@ const db = require('../db/turso-manager');
  */
 const MAX_LIMIT = 50;
 const DEFAULT_LIMIT = 50;
+const MAX_COLLECTIONS_LIST_LIMIT = 200;
 const MAX_SEARCH_LEN = 80;
 const DB_OP_TIMEOUT_MS = 12_000;
+const COLLECTION_STATUSES = ['active', 'draft', 'archived'];
 
 function withTimeout(promise, ms, label = 'operation') {
   let timer;
@@ -36,9 +38,13 @@ function normalizeText(value = '') {
 }
 
 function normalizeStatus(status) {
-  const allowed = ['active', 'draft', 'archived'];
   const raw = String(status || '').trim().toLowerCase();
-  return allowed.includes(raw) ? raw : 'active';
+  return COLLECTION_STATUSES.includes(raw) ? raw : 'active';
+}
+
+function parseStatusFilter(status) {
+  const raw = String(status || '').trim().toLowerCase();
+  return COLLECTION_STATUSES.includes(raw) ? raw : null;
 }
 
 function normalizeSortMode(sortMode) {
@@ -75,11 +81,13 @@ function normalizeBooleanFlag(value, defaultValue = true) {
 }
 
 function parseIncludeProductsFlag(req, defaultValue = false) {
-  // includeProducts=0 => false
-  // includeProducts=1 => true
+  // القيم المقبولة للتفعيل: 1/true/yes/on، وللتعطيل: 0/false/no/off، وأي قيمة أخرى => defaultValue
   const raw = req.query.includeProducts;
   if (raw === undefined || raw === null || raw === '') return defaultValue;
-  return String(raw) !== '0';
+  const text = String(raw).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(text)) return true;
+  if (['0', 'false', 'no', 'off'].includes(text)) return false;
+  return defaultValue;
 }
 
 async function makeUniqueSlug(baseText = '', excludeId = null) {
@@ -1072,10 +1080,15 @@ router.get('/', async (req, res) => {
     let sql = `SELECT * FROM collections`;
     const params = [];
     const where = [];
+    let normalizedStatus = null;
 
     if (status) {
+      normalizedStatus = parseStatusFilter(status);
+      if (!normalizedStatus) {
+        return res.status(400).json({ success: false, error: 'قيمة status غير صحيحة. القيم المسموحة: active, draft, archived' });
+      }
       where.push(`status = ?`);
-      params.push(String(status));
+      params.push(normalizedStatus);
     }
 
     if (search) {
@@ -1104,7 +1117,7 @@ router.get('/', async (req, res) => {
     sql += ` ORDER BY ${sortColumn} ${sortOrder}`;
     sql += ` LIMIT ? OFFSET ?`;
 
-    const parsedLimit = Math.max(1, toInteger(limit, 25));
+    const parsedLimit = Math.min(MAX_COLLECTIONS_LIST_LIMIT, Math.max(1, toInteger(limit, 25)));
     const parsedOffset = Math.max(0, toInteger(offset, 0));
 
     params.push(parsedLimit, parsedOffset);
@@ -1123,7 +1136,9 @@ router.get('/', async (req, res) => {
     if (where.length > 0) {
       countSql += ` WHERE ${where.join(' AND ')}`;
 
-      if (status) countParams.push(String(status));
+      if (normalizedStatus) {
+        countParams.push(normalizedStatus);
+      }
 
       if (search) {
         const clipped = String(search).trim().slice(0, MAX_SEARCH_LEN);

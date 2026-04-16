@@ -3,6 +3,21 @@ const router = express.Router();
 const db = require('../db/turso-manager');
 
 /**
+ * Guardrails
+ */
+const CUSTOMER_STATUSES = ['active', 'new', 'inactive', 'blocked'];
+const DB_OP_TIMEOUT_MS = 25_000;
+const MAX_SEARCH_LEN = 80;
+
+function withTimeout(promise, ms, label = 'operation') {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+/**
  * Helpers
  */
 function normalizeText(value = '') {
@@ -20,9 +35,13 @@ function toNumber(value, fallback = 0) {
 }
 
 function normalizeStatus(status = '') {
-  const allowed = ['active', 'new', 'inactive', 'blocked'];
   const value = String(status || '').trim().toLowerCase();
-  return allowed.includes(value) ? value : '';
+  return CUSTOMER_STATUSES.includes(value) ? value : '';
+}
+
+function parseCustomerStatusFilter(status) {
+  const raw = String(status || '').trim().toLowerCase();
+  return CUSTOMER_STATUSES.includes(raw) ? raw : null;
 }
 
 function normalizeBooleanFlag(value, defaultValue = 0) {
@@ -52,30 +71,38 @@ function deriveCustomerStatus(customer) {
 }
 
 async function getCustomerById(id) {
-  return await db.get(`SELECT * FROM customers WHERE id = ?`, [id]);
+  return await withTimeout(
+    db.get(`SELECT * FROM customers WHERE id = ?`, [id]),
+    DB_OP_TIMEOUT_MS,
+    'getCustomerById'
+  );
 }
 
 async function ensureCustomersTable() {
-  await db.run(`
-    CREATE TABLE IF NOT EXISTS customers (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      full_name TEXT NOT NULL,
-      email TEXT,
-      phone TEXT,
-      city TEXT,
-      area TEXT,
-      status TEXT DEFAULT 'new',
-      total_orders INTEGER DEFAULT 0,
-      total_spent REAL DEFAULT 0,
-      accepts_marketing INTEGER DEFAULT 0,
-      marketing_opt_in INTEGER DEFAULT 0,
-      last_order_at TEXT,
-      is_blocked INTEGER DEFAULT 0,
-      notes TEXT,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+  await withTimeout(
+    db.run(`
+      CREATE TABLE IF NOT EXISTS customers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        full_name TEXT NOT NULL,
+        email TEXT,
+        phone TEXT,
+        city TEXT,
+        area TEXT,
+        status TEXT DEFAULT 'new',
+        total_orders INTEGER DEFAULT 0,
+        total_spent REAL DEFAULT 0,
+        accepts_marketing INTEGER DEFAULT 0,
+        marketing_opt_in INTEGER DEFAULT 0,
+        last_order_at TEXT,
+        is_blocked INTEGER DEFAULT 0,
+        notes TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `),
+    DB_OP_TIMEOUT_MS,
+    'ensureCustomersTable'
+  );
 }
 
 /**
@@ -85,7 +112,11 @@ router.get('/stats/summary', async (req, res) => {
   try {
     await ensureCustomersTable();
 
-    const rows = await db.all(`SELECT * FROM customers`);
+    const rows = await withTimeout(
+      db.all(`SELECT * FROM customers`),
+      DB_OP_TIMEOUT_MS,
+      'listCustomersForStats'
+    );
     const customers = Array.isArray(rows) ? rows : [];
 
     let totalCustomers = customers.length;
@@ -182,43 +213,49 @@ router.post('/', async (req, res) => {
       });
     }
 
-    await db.run(
-      `INSERT INTO customers
-      (
-        full_name,
-        email,
-        phone,
-        city,
-        area,
-        status,
-        total_orders,
-        total_spent,
-        accepts_marketing,
-        marketing_opt_in,
-        last_order_at,
-        is_blocked,
-        notes
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        fullName,
-        email,
-        phone,
-        city,
-        area,
-        status,
-        totalOrders,
-        totalSpent,
-        acceptsMarketing,
-        marketingOptIn,
-        lastOrderAt || null,
-        isBlocked,
-        notes
-      ]
+    await withTimeout(
+      db.run(
+        `INSERT INTO customers
+        (
+          full_name,
+          email,
+          phone,
+          city,
+          area,
+          status,
+          total_orders,
+          total_spent,
+          accepts_marketing,
+          marketing_opt_in,
+          last_order_at,
+          is_blocked,
+          notes
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          fullName,
+          email,
+          phone,
+          city,
+          area,
+          status,
+          totalOrders,
+          totalSpent,
+          acceptsMarketing,
+          marketingOptIn,
+          lastOrderAt || null,
+          isBlocked,
+          notes
+        ]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'insertCustomer'
     );
 
-    const created = await db.get(
-      `SELECT * FROM customers ORDER BY id DESC LIMIT 1`
+    const created = await withTimeout(
+      db.get(`SELECT * FROM customers ORDER BY id DESC LIMIT 1`),
+      DB_OP_TIMEOUT_MS,
+      'selectCreatedCustomer'
     );
 
     return res.status(201).json({
@@ -341,11 +378,15 @@ router.put('/:id', async (req, res) => {
     updateFields.push('updated_at = CURRENT_TIMESTAMP');
     updateValues.push(id);
 
-    await db.run(
-      `UPDATE customers
-       SET ${updateFields.join(', ')}
-       WHERE id = ?`,
-      updateValues
+    await withTimeout(
+      db.run(
+        `UPDATE customers
+         SET ${updateFields.join(', ')}
+         WHERE id = ?`,
+        updateValues
+      ),
+      DB_OP_TIMEOUT_MS,
+      'updateCustomer'
     );
 
     const updated = await getCustomerById(id);
@@ -383,7 +424,11 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
-    await db.run(`DELETE FROM customers WHERE id = ?`, [req.params.id]);
+    await withTimeout(
+      db.run(`DELETE FROM customers WHERE id = ?`, [req.params.id]),
+      DB_OP_TIMEOUT_MS,
+      'deleteCustomer'
+    );
 
     return res.json({
       success: true,
@@ -418,7 +463,23 @@ router.get('/', async (req, res) => {
       order = 'DESC'
     } = req.query;
 
-    const rows = await db.all(`SELECT * FROM customers`);
+    let normalizedStatusFilter = null;
+
+    if (status) {
+      normalizedStatusFilter = parseCustomerStatusFilter(status);
+      if (!normalizedStatusFilter) {
+        return res.status(400).json({
+          success: false,
+          error: 'قيمة status غير صحيحة. القيم المسموحة: active, new, inactive, blocked'
+        });
+      }
+    }
+
+    const rows = await withTimeout(
+      db.all(`SELECT * FROM customers`),
+      DB_OP_TIMEOUT_MS,
+      'listCustomers'
+    );
     let customers = Array.isArray(rows) ? rows : [];
 
     customers = customers.map(customer => ({
@@ -426,25 +487,24 @@ router.get('/', async (req, res) => {
       status: deriveCustomerStatus(customer)
     }));
 
-    if (status) {
-      const normalizedStatus = normalizeStatus(status);
-      if (normalizedStatus) {
-        customers = customers.filter(customer => customer.status === normalizedStatus);
-      }
+    if (normalizedStatusFilter) {
+      customers = customers.filter(customer => customer.status === normalizedStatusFilter);
     }
 
     if (search) {
-      const q = String(search).trim().toLowerCase();
-      customers = customers.filter(customer => {
-        const haystack = [
-          customer.full_name,
-          customer.email,
-          customer.phone,
-          customer.city,
-          customer.area
-        ].map(v => String(v || '').toLowerCase()).join(' ');
-        return haystack.includes(q);
-      });
+      const clipped = String(search).trim().slice(0, MAX_SEARCH_LEN).toLowerCase();
+      if (clipped) {
+        customers = customers.filter(customer => {
+          const haystack = [
+            customer.full_name,
+            customer.email,
+            customer.phone,
+            customer.city,
+            customer.area
+          ].map(v => String(v || '').toLowerCase()).join(' ');
+          return haystack.includes(clipped);
+        });
+      }
     }
 
     const sortKey = String(sort || 'created_at');
@@ -497,6 +557,14 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ خطأ في جلب العملاء:', error);
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({
+        success: false,
+        error: 'الاستعلام استغرق وقتاً طويلاً. حاول مرة أخرى لاحقاً.'
+      });
+    }
+
     return res.status(500).json({
       success: false,
       error: 'فشل في جلب العملاء'
