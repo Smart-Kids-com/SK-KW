@@ -1360,14 +1360,23 @@
     function applyThemeSettings(settings) {
       if (!settings || !Object.keys(settings).length) return;
 
-      // Inject dynamic CSS variables
+      // Validate hex color before injecting into CSS to prevent CSS injection
+      const HEX_RE = /^#[0-9a-fA-F]{6}$/;
+      function safeHex(val) { return HEX_RE.test(String(val || '')) ? val : null; }
+
+      // Inject dynamic CSS variables (only validated hex values)
+      const primaryColor   = safeHex(settings.primaryColor);
+      const topbarColor    = safeHex(settings.topbarColor);
+      const secondaryColor = safeHex(settings.secondaryColor);
+      const accentColor    = safeHex(settings.accentColor);
+
       let css = ':root {';
-      if (settings.primaryColor)   css += `--bg:${settings.primaryColor};--bg-2:${settings.primaryColor};--deep-purple:${settings.primaryColor};`;
-      if (settings.secondaryColor) css += `--blue:${settings.secondaryColor};`;
-      if (settings.accentColor)    css += `--accent:${settings.accentColor};`;
+      if (primaryColor)   css += `--bg:${primaryColor};--bg-2:${primaryColor};--deep-purple:${primaryColor};`;
+      if (secondaryColor) css += `--blue:${secondaryColor};`;
+      if (accentColor)    css += `--accent:${accentColor};`;
       css += '}';
-      if (settings.topbarColor)    css += `.topbar{background:${settings.topbarColor}!important;}`;
-      if (settings.primaryColor)   css += `.drawer{background:${settings.primaryColor}!important;}`;
+      if (topbarColor)  css += `.topbar{background:${topbarColor}!important;}`;
+      if (primaryColor) css += `.drawer{background:${primaryColor}!important;}`;
 
       let styleTag = document.getElementById('theme-dynamic-vars');
       if (!styleTag) {
@@ -1377,24 +1386,29 @@
       }
       styleTag.textContent = css;
 
-      // Topbar text
+      // Topbar text — use textContent to prevent XSS
       if (settings.announcementText) {
         const bar = document.querySelector('.topbar');
         if (bar) {
-          const icon = settings.announcementIcon || '←';
-          bar.innerHTML = `<span>${icon}</span><span>${settings.announcementText}</span>`;
+          const iconSpan = document.createElement('span');
+          iconSpan.textContent = settings.announcementIcon || '←';
+          const textSpan = document.createElement('span');
+          textSpan.textContent = settings.announcementText;
+          bar.innerHTML = '';
+          bar.appendChild(iconSpan);
+          bar.appendChild(textSpan);
         }
       }
 
-      // Logo
-      if (settings.logoUrl) {
+      // Logo — only allow http/https URLs
+      if (settings.logoUrl && /^https?:\/\//i.test(settings.logoUrl)) {
         document.querySelectorAll('.logo-wrap img, .drawer-logo img').forEach(img => {
           img.src = settings.logoUrl;
         });
       }
 
-      // WhatsApp floating button
-      if (settings.whatsappNumber) {
+      // WhatsApp floating button — only allow digits
+      if (settings.whatsappNumber && /^\d{7,15}$/.test(settings.whatsappNumber)) {
         const wa = document.querySelector('.whatsapp-float');
         if (wa) wa.href = `https://wa.me/${settings.whatsappNumber}`;
       }
