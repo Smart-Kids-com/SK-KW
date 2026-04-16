@@ -104,10 +104,39 @@ async function getProductImages(productId) {
   );
 }
 
-async function enrichProduct(product) {
-  if (!product) return null;
+async function getImagesMapForProductIds(productIds = []) {
+  const validIds = productIds
+    .map(id => Number(id))
+    .filter(id => Number.isFinite(id));
 
-  const images = await getProductImages(product.id);
+  if (!validIds.length) {
+    return new Map();
+  }
+
+  const placeholders = validIds.map(() => '?').join(',');
+  const rows = await db.all(
+    `SELECT id, product_id, image_url, sort_order, created_at
+     FROM product_images
+     WHERE product_id IN (${placeholders})
+     ORDER BY product_id ASC, sort_order ASC, id ASC`,
+    validIds
+  );
+
+  const map = new Map();
+
+  for (const row of rows) {
+    const key = Number(row.product_id);
+    if (!map.has(key)) {
+      map.set(key, []);
+    }
+    map.get(key).push(row);
+  }
+
+  return map;
+}
+
+function enrichProductWithImages(product, images = []) {
+  if (!product) return null;
 
   return {
     ...product,
@@ -117,21 +146,10 @@ async function enrichProduct(product) {
   };
 }
 
-async function makeUniqueSlug(baseText = '', excludeId = null) {
-  const base = slugify(baseText) || `product-${Date.now()}`;
-  let candidate = base;
-  let index = 2;
-
-  while (true) {
-    const existing = excludeId
-      ? await db.get(`SELECT id FROM products WHERE slug = ? AND id != ?`, [candidate, excludeId])
-      : await db.get(`SELECT id FROM products WHERE slug = ?`, [candidate]);
-
-    if (!existing) return candidate;
-
-    candidate = `${base}-${index}`;
-    index += 1;
-  }
+async function enrichProduct(product) {
+  if (!product) return null;
+  const images = await getProductImages(product.id);
+  return enrichProductWithImages(product, images);
 }
 
 function normalizeIncomingProductBody(body = {}) {
@@ -155,14 +173,42 @@ function normalizeIncomingProductBody(body = {}) {
   };
 }
 
-async function enrichProducts(products = []) {
-  const enriched = [];
+async function makeUniqueSlug(baseText = '', excludeId = null) {
+  const base = slugify(baseText) || `product-${Date.now()}`;
+  let candidate = base;
+  let index = 2;
 
-  for (const product of products) {
-    enriched.push(await enrichProduct(product));
+  while (true) {
+    const existing = excludeId
+      ? await db.get(
+          `SELECT id FROM products WHERE slug = ? AND id != ?`,
+          [candidate, excludeId]
+        )
+      : await db.get(
+          `SELECT id FROM products WHERE slug = ?`,
+          [candidate]
+        );
+
+    if (!existing) return candidate;
+
+    candidate = `${base}-${index}`;
+    index += 1;
   }
+}
 
-  return enriched;
+async function enrichProducts(products = []) {
+  if (!Array.isArray(products) || !products.length) return [];
+
+  const ids = products
+    .map(product => Number(product.id))
+    .filter(id => Number.isFinite(id));
+
+  const imagesMap = await getImagesMapForProductIds(ids);
+
+  return products.map(product => {
+    const images = imagesMap.get(Number(product.id)) || [];
+    return enrichProductWithImages(product, images);
+  });
 }
 
 /**
@@ -253,7 +299,7 @@ router.post('/', async (req, res) => {
       images
     } = normalizeIncomingProductBody(req.body);
 
-    if (!productName || normalizeText(productName) === '') {
+    if (!normalizeText(productName)) {
       return res.status(400).json({
         success: false,
         error: 'اسم المنتج مطلوب'
@@ -426,12 +472,6 @@ router.put('/:id', async (req, res) => {
 
     if (slug !== undefined) {
       const finalSlug = await makeUniqueSlug(slug, id);
-      if (!finalSlug) {
-        return res.status(400).json({
-          success: false,
-          error: 'الـ slug غير صحيح'
-        });
-      }
 
       const existingSlug = await db.get(
         `SELECT id FROM products WHERE slug = ? AND id != ?`,
@@ -738,11 +778,12 @@ router.get('/', async (req, res) => {
 
     const sortColumn = validSortColumns.includes(sort) ? sort : 'created_at';
     const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    const parsedLimit = Math.max(1, toInteger(limit, 50));
+    const parsedOffset = Math.max(0, toInteger(offset, 0));
 
     sql += ` ORDER BY ${sortColumn} ${sortOrder}`;
     sql += ` LIMIT ? OFFSET ?`;
-
-    params.push(toInteger(limit, 50), toInteger(offset, 0));
+    params.push(parsedLimit, parsedOffset);
 
     const products = await db.all(sql, params);
     const enrichedProducts = await enrichProducts(products);
@@ -753,7 +794,9 @@ router.get('/', async (req, res) => {
     if (where.length > 0) {
       countSql += ` WHERE ${where.join(' AND ')}`;
 
-      if (status) countParams.push(status);
+      if (status) {
+        countParams.push(status);
+      }
 
       if (search) {
         const searchValue = `%${String(search).trim()}%`;
@@ -772,8 +815,6 @@ router.get('/', async (req, res) => {
 
     const countResult = await db.get(countSql, countParams);
     const total = Number(countResult?.total || 0);
-    const parsedLimit = toInteger(limit, 50);
-    const parsedOffset = toInteger(offset, 0);
 
     return res.json({
       success: true,
@@ -782,7 +823,7 @@ router.get('/', async (req, res) => {
         total,
         limit: parsedLimit,
         offset: parsedOffset,
-        totalPages: parsedLimit > 0 ? Math.ceil(total / parsedLimit) : 0
+        totalPages: Math.ceil(total / parsedLimit)
       }
     });
   } catch (error) {
