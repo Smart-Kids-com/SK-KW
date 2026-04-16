@@ -1286,19 +1286,32 @@
       el.scrollBy({ left: dir * amount, behavior: 'smooth' });
     }
 
-    async function fetchJson(url) {
-      const response = await fetch(url, {
-        cache: 'no-store',
-        headers: { Accept: 'application/json' }
-      });
+    async function fetchJson(url, timeoutMs = 15000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-      const result = await response.json().catch(() => null);
+      try {
+        const response = await fetch(url, {
+          cache: 'no-store',
+          signal: controller.signal,
+          headers: { Accept: 'application/json' }
+        });
 
-      if (!response.ok || !result || !result.success) {
-        throw new Error(result?.error || `HTTP ${response.status}`);
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok || !result || !result.success) {
+          throw new Error(result?.error || `HTTP ${response.status}`);
+        }
+
+        return result.data;
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          throw new Error(`Request timeout: ${url}`);
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
       }
-
-      return result.data;
     }
 
     async function fetchAllProducts() {
@@ -1313,8 +1326,8 @@
 
     async function fetchAllCollections() {
       try {
-        const data = await fetchJson(`${COLLECTIONS_API}?limit=${HOME_COLLECTIONS_LIMIT}&offset=0&sort=created_at&order=DESC`);
-        return Array.isArray(data) ? data.filter(item => String(item.status || 'active').toLowerCase() !== 'archived') : [];
+        const data = await fetchJson(`${COLLECTIONS_API}?status=active&limit=${HOME_COLLECTIONS_LIMIT}&offset=0&sort=created_at&order=DESC`);
+        return Array.isArray(data) ? data : [];
       } catch (error) {
         console.warn('Failed to fetch collections', error);
         return [];
