@@ -15,8 +15,13 @@ function slugify(text = '') {
 }
 
 function normalizeStatus(status) {
-  const allowed = ['active', 'draft', 'archived'];
-  return allowed.includes(status) ? status : 'active';
+  const raw = String(status ?? '').trim().toLowerCase();
+
+  if (['active', 'published', 'true', '1', 'yes'].includes(raw)) return 'active';
+  if (['draft', 'false', '0', 'no', 'unpublished', 'inactive'].includes(raw)) return 'draft';
+  if (['archived'].includes(raw)) return 'archived';
+
+  return 'active';
 }
 
 function toNumber(value, fallback = 0) {
@@ -112,7 +117,6 @@ async function enrichProduct(product) {
   };
 }
 
-
 async function makeUniqueSlug(baseText = '', excludeId = null) {
   const base = slugify(baseText) || `product-${Date.now()}`;
   let candidate = base;
@@ -140,7 +144,7 @@ function normalizeIncomingProductBody(body = {}) {
     salePrice: body.salePrice ?? body.sale_price ?? body.compare_at_price ?? 0,
     imageUrl: body.imageUrl ?? body.image_url ?? body.image ?? '',
     stock: body.stock ?? body.inventory ?? body.inventory_quantity ?? 0,
-    status: body.status ?? body.published ?? 'draft',
+    status: body.status ?? body.published ?? 'active',
     productType: body.productType ?? body.product_type ?? body.type ?? '',
     vendor: body.vendor ?? '',
     category: body.category ?? body.collection ?? '',
@@ -615,10 +619,7 @@ router.delete('/:id', async (req, res) => {
     }
 
     await db.run(`DELETE FROM product_images WHERE product_id = ?`, [id]);
-    await db.run(
-      `DELETE FROM products WHERE id = ?`,
-      [id]
-    );
+    await db.run(`DELETE FROM products WHERE id = ?`, [id]);
 
     return res.json({
       success: true,
@@ -751,7 +752,9 @@ router.get('/', async (req, res) => {
 
     if (where.length > 0) {
       countSql += ` WHERE ${where.join(' AND ')}`;
+
       if (status) countParams.push(status);
+
       if (search) {
         const searchValue = `%${String(search).trim()}%`;
         countParams.push(
@@ -779,7 +782,7 @@ router.get('/', async (req, res) => {
         total,
         limit: parsedLimit,
         offset: parsedOffset,
-        totalPages: Math.ceil(total / parsedLimit)
+        totalPages: parsedLimit > 0 ? Math.ceil(total / parsedLimit) : 0
       }
     });
   } catch (error) {

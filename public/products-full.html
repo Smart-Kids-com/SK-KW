@@ -814,20 +814,20 @@
     </div>
 
     <div class="side-menu__footer">
-  <div class="side-menu__social">
-    <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.webp" alt="Facebook"></a>
-    <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.webp" alt="Instagram"></a>
-    <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.webp" alt="Pinterest"></a>
-    <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.webp" alt="TikTok"></a>
-    <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.webp" alt="Snapchat"></a>
-    <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.webp" alt="YouTube"></a>
-  </div>
-</div>
-</aside>
+      <div class="side-menu__social">
+        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.webp" alt="Facebook"></a>
+        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.webp" alt="Instagram"></a>
+        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.webp" alt="Pinterest"></a>
+        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.webp" alt="TikTok"></a>
+        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.webp" alt="Snapchat"></a>
+        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.webp" alt="YouTube"></a>
+      </div>
+    </div>
+  </aside>
 
-<a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
-  <img src="/icon-whatsapp.webp" alt="WhatsApp" class="whatsapp-icon-img">
-</a>
+  <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
+    <img src="/icon-whatsapp.webp" alt="WhatsApp" class="whatsapp-icon-img">
+  </a>
 
   <div class="toast" id="cartToast">
     <div class="toast-inner">
@@ -1168,56 +1168,32 @@
       loadMoreBtn.style.display = visibleCount < filteredProducts.length ? 'inline-flex' : 'none';
     }
 
-
-  async function loadProducts() {
-    try {
-      const response = await fetch(PRODUCTS_API, {
-        cache: 'no-store',
-        headers: { Accept: 'application/json' }
-      });
-
-      const text = await response.text();
-      let result = null;
-
+    async function loadProducts() {
       try {
-        result = text ? JSON.parse(text) : null;
-      } catch {
-        throw new Error(`API returned non-JSON: ${text.slice(0, 180)}`);
+        const response = await fetch(PRODUCTS_API, {
+          cache: 'no-store',
+          headers: { Accept: 'application/json' }
+        });
+
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok || !result || !result.success) {
+          throw new Error(result?.error || `HTTP ${response.status}`);
+        }
+
+        allProducts = Array.isArray(result.data) ? result.data : [];
+        filteredProducts = [...allProducts];
+
+        buildCategoryFilters();
+        updateStats();
+        renderProducts();
+      } catch (error) {
+        console.error('loadProducts error:', error);
+        document.getElementById('products').innerHTML = `
+          <div class="loading">⚠️ حدث خطأ أثناء تحميل المنتجات</div>
+        `;
       }
-
-      if (!response.ok) {
-        throw new Error(result?.error || result?.message || `HTTP ${response.status}`);
-      }
-
-      let products = [];
-
-      if (Array.isArray(result)) {
-        products = result;
-      } else if (Array.isArray(result?.data)) {
-        products = result.data;
-      } else if (Array.isArray(result?.products)) {
-        products = result.products;
-      } else if (Array.isArray(result?.items)) {
-        products = result.items;
-      } else if (Array.isArray(result?.data?.products)) {
-        products = result.data.products;
-      } else if (Array.isArray(result?.data?.items)) {
-        products = result.data.items;
-      }
-
-      allProducts = products;
-      filteredProducts = [...allProducts];
-
-      buildCategoryFilters();
-      updateStats();
-      renderProducts();
-    } catch (error) {
-      console.error('loadProducts error:', error);
-      document.getElementById('products').innerHTML = `
-        <div class="loading">⚠️ حدث خطأ أثناء تحميل المنتجات<br>${escapeHtml(error.message || '')}</div>
-      `;
     }
-  }
 
     document.addEventListener('DOMContentLoaded', () => {
       updateCartDisplay();
