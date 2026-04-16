@@ -238,19 +238,99 @@
     document.head.appendChild(style);
   }
 
+  const SOCIAL_MAP = [
+    { key: 'snapchatUrl',   label: 'Snapchat',  img: '/icon-snapchat.webp'  },
+    { key: 'pinterestUrl',  label: 'Pinterest', img: '/icon-pinterest.webp' },
+    { key: 'tiktokUrl',     label: 'TikTok',    img: '/icon-tiktok.webp'    },
+    { key: 'youtubeUrl',    label: 'YouTube',   img: '/icon-youtube.webp'   },
+    { key: 'instagramUrl',  label: 'Instagram', img: '/icon-instagram.webp' },
+    { key: 'facebookUrl',   label: 'Facebook',  img: '/icon-facebook.webp'  },
+  ];
+
+  function applyThemeToFooter(mountPoint, settings) {
+    if (!settings) return;
+
+    // Allow only http/https URLs to prevent javascript: XSS
+    function safeUrl(val) {
+      const s = String(val || '').trim();
+      return /^https?:\/\//i.test(s) ? s : null;
+    }
+
+    // Social links — only override if at least one social setting is configured
+    const activeSocials = SOCIAL_MAP
+      .map(s => ({ ...s, url: safeUrl(settings[s.key]) }))
+      .filter(s => s.url);
+    if (activeSocials.length > 0) {
+      const socialContainer = mountPoint.querySelector('.site-footer__social');
+      if (socialContainer) {
+        socialContainer.innerHTML = '';
+        activeSocials.forEach(s => {
+          const a   = document.createElement('a');
+          a.href    = s.url;
+          a.target  = '_blank';
+          a.rel     = 'noopener';
+          a.setAttribute('aria-label', s.label);
+          const img = document.createElement('img');
+          img.src   = s.img;
+          img.alt   = s.label;
+          a.appendChild(img);
+          socialContainer.appendChild(a);
+        });
+      }
+    }
+
+    // Company name — text only
+    if (settings.footerCompany) {
+      const el = mountPoint.querySelector('.site-footer__company');
+      if (el) el.textContent = settings.footerCompany;
+    }
+
+    // Copyright — text only
+    if (settings.footerCopyright) {
+      const el = mountPoint.querySelector('.site-footer__copyright');
+      if (el) el.textContent = settings.footerCopyright;
+    }
+
+    // Site link — only http/https
+    const siteUrl = safeUrl(settings.footerSiteUrl);
+    if (siteUrl) {
+      const el = mountPoint.querySelector('.site-footer__site-link');
+      if (el) {
+        el.href        = siteUrl;
+        el.textContent = siteUrl.replace(/^https?:\/\//, '');
+      }
+    }
+
+    // Social section title — text only
+    if (settings.footerSocialTitle) {
+      const el = mountPoint.querySelector('.site-footer__newsletter-title');
+      if (el) el.textContent = settings.footerSocialTitle;
+    }
+  }
+
   async function loadFooter() {
     const mountPoint = document.getElementById('site-footer');
     if (!mountPoint) return;
 
     try {
       const response = await fetch('./footer.html', { cache: 'no-store' });
-      if (!response.ok) {
-        throw new Error('Failed to load footer.html');
-      }
-
+      if (!response.ok) throw new Error('Failed to load footer.html');
       const html = await response.text();
       injectFooterStyles();
       mountPoint.innerHTML = html;
+
+      // Load theme settings and apply to footer (non-blocking failure)
+      try {
+        const settingsRes = await fetch('/api/theme/settings', { cache: 'no-store' });
+        if (settingsRes.ok) {
+          const settingsData = await settingsRes.json();
+          if (settingsData && settingsData.success) {
+            applyThemeToFooter(mountPoint, settingsData.data || {});
+          }
+        }
+      } catch {
+        // Keep static footer on theme API error
+      }
     } catch (error) {
       console.error('Footer load error:', error);
     }
