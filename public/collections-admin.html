@@ -465,33 +465,22 @@
       flex-shrink:0;
     }
 
-    .collection-name{
-      font-weight:800;
-      line-height:1.45;
-      margin-bottom:4px;
-    }
-
-    .collection-link-btn{
+    .collection-name-btn{
       border:none;
       background:transparent;
       padding:0;
-      margin:0;
+      margin:0 0 4px;
       font:inherit;
       font-weight:800;
-      color:inherit;
-      cursor:pointer;
-      text-align:right;
       line-height:1.45;
+      cursor:pointer;
+      color:#111827;
+      text-align:right;
+      display:inline-block;
     }
 
-    .collection-link-btn:hover{
+    .collection-name-btn:hover{
       text-decoration:underline;
-    }
-
-    .collection-link-btn:focus-visible{
-      outline:2px solid #111827;
-      outline-offset:3px;
-      border-radius:8px;
     }
 
     .collection-sub{
@@ -908,6 +897,10 @@
 
   <script>
     const API_BASE = '/api/collections';
+    const ADMIN_CREATE_PATH = '/collection.html';
+    const ADMIN_EDIT_PATH = '/collection-edit.html';
+    const FRONTEND_VIEW_PATH = '/collection.html';
+
     let currentTab = 'all';
     let currentOffset = 0;
     let currentLimit = 25;
@@ -1093,14 +1086,7 @@
             <div class="collection-cell">
               ${getImageHtml(row)}
               <div>
-                <div class="collection-name">
-                  <button
-                    type="button"
-                    class="collection-link-btn"
-                    onclick="goToEditCollection(${Number(row.id)})"
-                    title="Open collection"
-                  >${escapeHtml(row.title)}</button>
-                </div>
+                <button class="collection-name-btn" type="button" onclick="goToEditCollection(${Number(row.id)})">${escapeHtml(row.title)}</button>
                 <div class="collection-sub">/${escapeHtml(row.slug || '')}</div>
               </div>
             </div>
@@ -1113,15 +1099,15 @@
 
           <td>
             <div class="table-actions">
-              <button class="mini-btn" onclick="goToEditCollection(${Number(row.id)})">Edit collection</button>
-              <button class="mini-btn dark" onclick="viewCollection(${JSON.stringify(row.slug || '')})">View collection</button>
-              <button class="mini-btn" onclick="toggleRowMenu(${Number(row.id)})">More</button>
+              <button class="mini-btn" type="button" onclick="goToEditCollection(${Number(row.id)})">Edit collection</button>
+              <button class="mini-btn dark" type="button" onclick="viewCollection(${Number(row.id)}, ${JSON.stringify(row.slug || '')})">View collection</button>
+              <button class="mini-btn" type="button" onclick="toggleRowMenu(${Number(row.id)})">More</button>
 
               <div id="rowMenu-${Number(row.id)}" class="row-dropdown">
-                <button onclick="duplicateCollection(${Number(row.id)})">Duplicate</button>
-                <button onclick="goToEditCollection(${Number(row.id)})">Edit collection</button>
-                <button onclick="viewCollection(${JSON.stringify(row.slug || '')})">View collection</button>
-                <button class="danger" onclick="deleteCollection(${Number(row.id)}, ${JSON.stringify(row.title || '')})">Delete collection</button>
+                <button type="button" onclick="duplicateCollection(${Number(row.id)})">Duplicate</button>
+                <button type="button" onclick="goToEditCollection(${Number(row.id)})">Edit collection</button>
+                <button type="button" onclick="viewCollection(${Number(row.id)}, ${JSON.stringify(row.slug || '')})">View collection</button>
+                <button type="button" class="danger" onclick="deleteCollection(${Number(row.id)}, ${JSON.stringify(row.title || '')})">Delete collection</button>
               </div>
             </div>
           </td>
@@ -1171,81 +1157,25 @@
       loadCollections();
     }
 
-    const COLLECTION_ROUTE_CANDIDATES = {
-      create: [
-        '/collection.html',
-        '/collection-create.html',
-        '/collections/create'
-      ],
-      edit(id) {
-        const encodedId = encodeURIComponent(id);
-        return [
-          `/collection.html?id=${encodedId}`,
-          `/collection-edit.html?id=${encodedId}`,
-          `/collections/edit?id=${encodedId}`,
-          `/collections/${encodedId}/edit`
-        ];
-      },
-      view(slug) {
-        const encodedSlug = encodeURIComponent(slug);
-        return [
-          `/collections/${encodedSlug}`,
-          `/collection-page.html?slug=${encodedSlug}`,
-          `/products-full.html?collection=${encodedSlug}`,
-          `/products-full.html?slug=${encodedSlug}`
-        ];
-      }
-    };
-
-    async function resolveFirstWorkingRoute(candidates) {
-      for (const candidate of candidates) {
-        try {
-          const response = await fetch(candidate, {
-            method: 'HEAD',
-            cache: 'no-store'
-          });
-
-          if (response.ok) {
-            return candidate;
-          }
-        } catch (_) {}
-      }
-
-      return candidates[0] || '/';
+    function goToCreateCollection() {
+      window.location.href = ADMIN_CREATE_PATH;
     }
 
-    async function navigateToBestRoute(candidates, { newTab = false } = {}) {
-      const target = await resolveFirstWorkingRoute(candidates);
-
-      if (newTab) {
-        window.open(target, '_blank', 'noopener');
-        return;
-      }
-
-      window.location.href = target;
-    }
-
-    async function goToCreateCollection() {
-      await navigateToBestRoute(COLLECTION_ROUTE_CANDIDATES.create);
-    }
-
-    async function goToEditCollection(id) {
+    function goToEditCollection(id) {
       if (!id && id !== 0) {
-        showAlert('Collection ID is missing', 'error');
+        showAlert('Collection id is missing', 'error');
         return;
       }
-
-      await navigateToBestRoute(COLLECTION_ROUTE_CANDIDATES.edit(id));
+      window.location.href = `${ADMIN_EDIT_PATH}?id=${encodeURIComponent(id)}`;
     }
 
-    async function viewCollection(slug) {
+    function viewCollection(id, slug) {
+      closeMenus();
       const cleanSlug = safeText(slug);
-      if (!cleanSlug) {
-        showAlert('Collection slug is missing', 'error');
-        return;
-      }
-
-      await navigateToBestRoute(COLLECTION_ROUTE_CANDIDATES.view(cleanSlug), { newTab: true });
+      const url = cleanSlug
+        ? `${FRONTEND_VIEW_PATH}?slug=${encodeURIComponent(cleanSlug)}`
+        : `${FRONTEND_VIEW_PATH}?id=${encodeURIComponent(id)}`;
+      window.open(url, '_blank');
     }
 
     function toggleRowMenu(id) {
