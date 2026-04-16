@@ -1344,18 +1344,164 @@
       return Array.from(map.values());
     }
 
+    /* ─── Theme Integration ──────────────────────────────── */
+
+    async function fetchThemeSettings() {
+      try { return await fetchJson('/api/theme/settings'); } catch { return {}; }
+    }
+
+    async function fetchHomeSections() {
+      try {
+        const data = await fetchJson('/api/theme/pages/home');
+        return Array.isArray(data.sections) ? data.sections : [];
+      } catch { return []; }
+    }
+
+    function applyThemeSettings(settings) {
+      if (!settings || !Object.keys(settings).length) return;
+
+      // Inject dynamic CSS variables
+      let css = ':root {';
+      if (settings.primaryColor)   css += `--bg:${settings.primaryColor};--bg-2:${settings.primaryColor};--deep-purple:${settings.primaryColor};`;
+      if (settings.secondaryColor) css += `--blue:${settings.secondaryColor};`;
+      if (settings.accentColor)    css += `--accent:${settings.accentColor};`;
+      css += '}';
+      if (settings.topbarColor)    css += `.topbar{background:${settings.topbarColor}!important;}`;
+      if (settings.primaryColor)   css += `.drawer{background:${settings.primaryColor}!important;}`;
+
+      let styleTag = document.getElementById('theme-dynamic-vars');
+      if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = 'theme-dynamic-vars';
+        document.head.appendChild(styleTag);
+      }
+      styleTag.textContent = css;
+
+      // Topbar text
+      if (settings.announcementText) {
+        const bar = document.querySelector('.topbar');
+        if (bar) {
+          const icon = settings.announcementIcon || '←';
+          bar.innerHTML = `<span>${icon}</span><span>${settings.announcementText}</span>`;
+        }
+      }
+
+      // Logo
+      if (settings.logoUrl) {
+        document.querySelectorAll('.logo-wrap img, .drawer-logo img').forEach(img => {
+          img.src = settings.logoUrl;
+        });
+      }
+
+      // WhatsApp floating button
+      if (settings.whatsappNumber) {
+        const wa = document.querySelector('.whatsapp-float');
+        if (wa) wa.href = `https://wa.me/${settings.whatsappNumber}`;
+      }
+    }
+
+    // Build hero from theme hero_slider section (custom image slides)
+    function buildHeroFromSlides(sectionSettings) {
+      const slides = Array.isArray(sectionSettings.slides)
+        ? sectionSettings.slides.filter(s => s && s.imageUrl)
+        : [];
+      if (!slides.length) return false;
+
+      const track = document.getElementById('heroTrack');
+      const dots  = document.getElementById('heroDots');
+      heroState.items   = slides;
+      heroState.current = 0;
+
+      track.innerHTML = slides.map(slide => `
+        <div class="hero-slide">
+          <a class="hero-card" href="${escapeHtml(slide.link || '#')}">
+            <div class="hero-image">
+              <img src="${escapeHtml(slide.imageUrl)}"
+                alt="${escapeHtml(slide.buttonText || '')}" loading="eager"
+                style="width:100%;height:100%;object-fit:cover;">
+            </div>
+            ${slide.buttonText
+              ? `<div class="hero-info"><div class="hero-btn">${escapeHtml(slide.buttonText)}</div></div>`
+              : ''}
+          </a>
+        </div>`).join('');
+
+      dots.innerHTML = slides.map((_, i) => `
+        <button class="hero-dot ${i === 0 ? 'active' : ''}" type="button"
+          data-dot-index="${i}" aria-label="Slide ${i + 1}"></button>`).join('');
+
+      dots.querySelectorAll('[data-dot-index]').forEach(dot => {
+        dot.addEventListener('click', () => {
+          goToHeroSlide(Number(dot.dataset.dotIndex || 0));
+          restartHeroAuto();
+        });
+      });
+
+      updateHeroUi();
+      const autoplay  = sectionSettings.autoplay !== false;
+      const interval  = Number(sectionSettings.interval) || 4000;
+      if (autoplay && slides.length > 1) {
+        clearInterval(heroState.timer);
+        heroState.timer = setInterval(nextHero, interval);
+      }
+      return true;
+    }
+
+    // Inject banner sections into the page after the hero
+    function injectBannerSections(themeSections) {
+      const banners = themeSections.filter(
+        s => s.type === 'banner' && Number(s.is_visible) === 1 && s.settings && s.settings.imageUrl
+      );
+      if (!banners.length) return;
+
+      const main = document.querySelector('main.page');
+      const hero = main && main.querySelector('.hero');
+      if (!main || !hero) return;
+
+      let anchor = hero;
+      for (const banner of banners) {
+        const s   = banner.settings;
+        const div = document.createElement('div');
+        div.style.cssText = 'margin:8px 0;';
+        div.innerHTML = `
+          <a href="${escapeHtml(s.link || '#')}"
+            style="display:block;border-radius:12px;overflow:hidden;">
+            <img src="${escapeHtml(s.imageUrl)}"
+              alt="${escapeHtml(s.text || 'Banner')}"
+              style="width:100%;display:block;">
+          </a>`;
+        anchor.insertAdjacentElement('afterend', div);
+        anchor = div;
+      }
+    }
+
     async function initPage() {
-      const [products, collections] = await Promise.all([
+      const [products, collections, themeSettings, themeSections] = await Promise.all([
         fetchAllProducts(),
-        fetchAllCollections()
+        fetchAllCollections(),
+        fetchThemeSettings(),
+        fetchHomeSections(),
       ]);
 
-      allProducts = uniqueProducts(products);
+      allProducts   = uniqueProducts(products);
       allCollections = collections;
 
+      // Apply colors, logo, topbar text, WhatsApp from theme
+      applyThemeSettings(themeSettings);
+
+      // Inject banner sections after hero
+      injectBannerSections(themeSections);
+
       updateCartCount();
-      buildHero(allProducts);
-      fillTrack('latestTrack', allProducts, 'products');
+
+      // Hero: use custom slides if configured, else fall back to products
+      const heroSection  = themeSections.find(
+        s => s.type === 'hero_slider' && Number(s.is_visible) === 1
+      );
+      const usedThemeHero = heroSection && buildHeroFromSlides(heroSection.settings || {});
+      if (!usedThemeHero) buildHero(allProducts);
+
+      fillTrack('latestTrack',     allProducts,    'products');
       fillTrack('collectionsTrack', allCollections, 'collections');
     }
 

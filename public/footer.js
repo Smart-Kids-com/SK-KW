@@ -238,19 +238,82 @@
     document.head.appendChild(style);
   }
 
+  const SOCIAL_MAP = [
+    { key: 'snapchatUrl',   label: 'Snapchat',  img: '/icon-snapchat.webp'  },
+    { key: 'pinterestUrl',  label: 'Pinterest', img: '/icon-pinterest.webp' },
+    { key: 'tiktokUrl',     label: 'TikTok',    img: '/icon-tiktok.webp'    },
+    { key: 'youtubeUrl',    label: 'YouTube',   img: '/icon-youtube.webp'   },
+    { key: 'instagramUrl',  label: 'Instagram', img: '/icon-instagram.webp' },
+    { key: 'facebookUrl',   label: 'Facebook',  img: '/icon-facebook.webp'  },
+  ];
+
+  function applyThemeToFooter(mountPoint, settings) {
+    if (!settings) return;
+
+    // Social links — only override if at least one social setting is configured
+    const activeSocials = SOCIAL_MAP.filter(s => settings[s.key]);
+    if (activeSocials.length > 0) {
+      const socialContainer = mountPoint.querySelector('.site-footer__social');
+      if (socialContainer) {
+        socialContainer.innerHTML = activeSocials.map(s =>
+          `<a href="${settings[s.key]}" target="_blank" rel="noopener" aria-label="${s.label}">
+            <img src="${s.img}" alt="${s.label}">
+           </a>`
+        ).join('');
+      }
+    }
+
+    // Company name
+    if (settings.footerCompany) {
+      const el = mountPoint.querySelector('.site-footer__company');
+      if (el) el.textContent = settings.footerCompany;
+    }
+
+    // Copyright
+    if (settings.footerCopyright) {
+      const el = mountPoint.querySelector('.site-footer__copyright');
+      if (el) el.textContent = settings.footerCopyright;
+    }
+
+    // Site link
+    if (settings.footerSiteUrl) {
+      const el = mountPoint.querySelector('.site-footer__site-link');
+      if (el) {
+        el.href = settings.footerSiteUrl;
+        el.textContent = settings.footerSiteUrl.replace(/^https?:\/\//, '');
+      }
+    }
+
+    // Social section title
+    if (settings.footerSocialTitle) {
+      const el = mountPoint.querySelector('.site-footer__newsletter-title');
+      if (el) el.textContent = settings.footerSocialTitle;
+    }
+  }
+
   async function loadFooter() {
     const mountPoint = document.getElementById('site-footer');
     if (!mountPoint) return;
 
     try {
       const response = await fetch('./footer.html', { cache: 'no-store' });
-      if (!response.ok) {
-        throw new Error('Failed to load footer.html');
-      }
-
+      if (!response.ok) throw new Error('Failed to load footer.html');
       const html = await response.text();
       injectFooterStyles();
       mountPoint.innerHTML = html;
+
+      // Load theme settings and apply to footer (non-blocking failure)
+      try {
+        const settingsRes = await fetch('/api/theme/settings', { cache: 'no-store' });
+        if (settingsRes.ok) {
+          const settingsData = await settingsRes.json();
+          if (settingsData && settingsData.success) {
+            applyThemeToFooter(mountPoint, settingsData.data || {});
+          }
+        }
+      } catch {
+        // Keep static footer on theme API error
+      }
     } catch (error) {
       console.error('Footer load error:', error);
     }
