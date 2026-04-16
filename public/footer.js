@@ -250,41 +250,58 @@
   function applyThemeToFooter(mountPoint, settings) {
     if (!settings) return;
 
+    // Allow only http/https URLs to prevent javascript: XSS
+    function safeUrl(val) {
+      const s = String(val || '').trim();
+      return /^https?:\/\//i.test(s) ? s : null;
+    }
+
     // Social links — only override if at least one social setting is configured
-    const activeSocials = SOCIAL_MAP.filter(s => settings[s.key]);
+    const activeSocials = SOCIAL_MAP
+      .map(s => ({ ...s, url: safeUrl(settings[s.key]) }))
+      .filter(s => s.url);
     if (activeSocials.length > 0) {
       const socialContainer = mountPoint.querySelector('.site-footer__social');
       if (socialContainer) {
-        socialContainer.innerHTML = activeSocials.map(s =>
-          `<a href="${settings[s.key]}" target="_blank" rel="noopener" aria-label="${s.label}">
-            <img src="${s.img}" alt="${s.label}">
-           </a>`
-        ).join('');
+        socialContainer.innerHTML = '';
+        activeSocials.forEach(s => {
+          const a   = document.createElement('a');
+          a.href    = s.url;
+          a.target  = '_blank';
+          a.rel     = 'noopener';
+          a.setAttribute('aria-label', s.label);
+          const img = document.createElement('img');
+          img.src   = s.img;
+          img.alt   = s.label;
+          a.appendChild(img);
+          socialContainer.appendChild(a);
+        });
       }
     }
 
-    // Company name
+    // Company name — text only
     if (settings.footerCompany) {
       const el = mountPoint.querySelector('.site-footer__company');
       if (el) el.textContent = settings.footerCompany;
     }
 
-    // Copyright
+    // Copyright — text only
     if (settings.footerCopyright) {
       const el = mountPoint.querySelector('.site-footer__copyright');
       if (el) el.textContent = settings.footerCopyright;
     }
 
-    // Site link
-    if (settings.footerSiteUrl) {
+    // Site link — only http/https
+    const siteUrl = safeUrl(settings.footerSiteUrl);
+    if (siteUrl) {
       const el = mountPoint.querySelector('.site-footer__site-link');
       if (el) {
-        el.href = settings.footerSiteUrl;
-        el.textContent = settings.footerSiteUrl.replace(/^https?:\/\//, '');
+        el.href        = siteUrl;
+        el.textContent = siteUrl.replace(/^https?:\/\//, '');
       }
     }
 
-    // Social section title
+    // Social section title — text only
     if (settings.footerSocialTitle) {
       const el = mountPoint.querySelector('.site-footer__newsletter-title');
       if (el) el.textContent = settings.footerSocialTitle;
