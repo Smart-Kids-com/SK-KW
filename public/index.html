@@ -1326,6 +1326,7 @@
 
     async function fetchAllCollections() {
       try {
+        // Uses status=active at API level; API is the authoritative filter
         const data = await fetchJson(`${COLLECTIONS_API}?status=active&limit=${HOME_COLLECTIONS_LIMIT}&offset=0&sort=created_at&order=DESC`);
         return Array.isArray(data) ? data : [];
       } catch (error) {

@@ -32,7 +32,6 @@
       min-height:100vh;
       direction:ltr;
     }
-
     a{text-decoration:none;color:inherit}
     button,input,select,textarea{font-family:inherit}
 
@@ -283,6 +282,19 @@
       white-space:pre-wrap;
     }
 
+    .modal-backdrop{
+      position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;
+      display:none;align-items:center;justify-content:center;
+    }
+    .modal-backdrop.open{display:flex}
+    .modal{
+      background:#fff;border-radius:20px;padding:24px;
+      width:min(96vw,460px);box-shadow:0 24px 60px rgba(0,0,0,.22);
+      direction:ltr;
+    }
+    .modal-title{font-size:18px;font-weight:900;margin-bottom:18px}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+
     @media (max-width: 1100px){
       .app{
         grid-template-columns:1fr;
@@ -444,6 +456,34 @@
         </div>
       </div>
     </main>
+  </div><!-- /.app -->
+
+  <!-- Add Section Modal -->
+  <div class="modal-backdrop" id="addSectionBackdrop">
+    <div class="modal">
+      <div class="modal-title">Add New Section</div>
+
+      <div class="field">
+        <label for="modalSectionType">Section type</label>
+        <select id="modalSectionType">
+          <option value="hero_slider">hero_slider</option>
+          <option value="featured_collection">featured_collection</option>
+          <option value="featured_products">featured_products</option>
+          <option value="banner">banner</option>
+          <option value="rich_text">rich_text</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="modalSectionTitle">Section title</label>
+        <input id="modalSectionTitle" type="text" placeholder="Section title" />
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" onclick="closeAddSectionModal()">Cancel</button>
+        <button class="btn primary" onclick="confirmAddSection()">Add section</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -454,6 +494,44 @@
     let themeSettings = {};
     let currentSections = [];
     let selectedSectionId = null;
+
+    async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 20000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+      try {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+          cache: options.cache || 'no-store',
+          headers: {
+            Accept: 'application/json',
+            ...(options.headers || {})
+          }
+        });
+
+        const text = await response.text();
+        let result = null;
+
+        if (text) {
+          try {
+            result = JSON.parse(text);
+          } catch {
+            const preview = text.slice(0, 180).replace(/\s+/g, ' ').trim();
+            throw new Error(`Non-JSON response from ${url}: ${preview || 'empty'}`);
+          }
+        }
+
+        return { response, result };
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          throw new Error(`Request timeout: ${url}`);
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
 
     function showAlert(message, type = 'success') {
       const el = document.getElementById('alert');
@@ -533,11 +611,10 @@
     }
 
     async function loadPage() {
-      const response = await fetch(`${THEME_API}/pages/${PAGE_KEY}`);
-      const result = await response.json();
+      const { response, result } = await fetchJsonWithTimeout(`${THEME_API}/pages/${PAGE_KEY}`);
 
       if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to load theme page');
+        throw new Error(result?.error || 'Failed to load theme page');
       }
 
       pageData = result.data;
@@ -545,11 +622,10 @@
     }
 
     async function loadSettings() {
-      const response = await fetch(`${THEME_API}/settings`);
-      const result = await response.json();
+      const { response, result } = await fetchJsonWithTimeout(`${THEME_API}/settings`);
 
       if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to load theme settings');
+        throw new Error(result?.error || 'Failed to load theme settings');
       }
 
       themeSettings = result.data || {};
@@ -645,32 +721,42 @@
       }
     }
 
-    async function addSectionPrompt() {
-      const type = prompt(
-        'Enter section type:\nhero_slider\nfeatured_collection\nfeatured_products\nbanner\nrich_text',
-        'hero_slider'
-      );
+    function addSectionPrompt() {
+      const typeEl = document.getElementById('modalSectionType');
+      const titleEl = document.getElementById('modalSectionTitle');
+      typeEl.value = 'hero_slider';
+      titleEl.value = '';
+      document.getElementById('addSectionBackdrop').classList.add('open');
+      titleEl.focus();
+    }
 
-      if (!type) return;
+    function closeAddSectionModal() {
+      document.getElementById('addSectionBackdrop').classList.remove('open');
+    }
 
-      const cleanType = String(type).trim();
-      const title = prompt('Section title', cleanType) || cleanType;
+    async function confirmAddSection() {
+      const cleanType = document.getElementById('modalSectionType').value;
+      const title = document.getElementById('modalSectionTitle').value.trim() || cleanType;
+
+      closeAddSectionModal();
 
       try {
-        const response = await fetch(`${THEME_API}/pages/${PAGE_KEY}/sections`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: cleanType,
-            title,
-            is_visible: 1,
-            settings: defaultSettingsForType(cleanType)
-          })
-        });
+        const { response, result } = await fetchJsonWithTimeout(
+          `${THEME_API}/pages/${PAGE_KEY}/sections`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: cleanType,
+              title,
+              is_visible: 1,
+              settings: defaultSettingsForType(cleanType)
+            })
+          }
+        );
 
-        const result = await response.json();
         if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to create section');
+          throw new Error(result?.error || 'Failed to create section');
         }
 
         await refreshTheme(false);
@@ -698,20 +784,22 @@
       }
 
       try {
-        const response = await fetch(`${THEME_API}/sections/${section.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: document.getElementById('sectionTitle').value.trim(),
-            type: document.getElementById('sectionType').value,
-            is_visible: Number(document.getElementById('sectionVisible').value),
-            settings: parsed.value
-          })
-        });
+        const { response, result } = await fetchJsonWithTimeout(
+          `${THEME_API}/sections/${section.id}`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: document.getElementById('sectionTitle').value.trim(),
+              type: document.getElementById('sectionType').value,
+              is_visible: Number(document.getElementById('sectionVisible').value),
+              settings: parsed.value
+            })
+          }
+        );
 
-        const result = await response.json();
         if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to save section');
+          throw new Error(result?.error || 'Failed to save section');
         }
 
         await refreshTheme(false);
@@ -735,13 +823,13 @@
       if (!confirm(`Delete section "${section.title}"?`)) return;
 
       try {
-        const response = await fetch(`${THEME_API}/sections/${section.id}`, {
-          method: 'DELETE'
-        });
+        const { response, result } = await fetchJsonWithTimeout(
+          `${THEME_API}/sections/${section.id}`,
+          { method: 'DELETE' }
+        );
 
-        const result = await response.json();
         if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to delete section');
+          throw new Error(result?.error || 'Failed to delete section');
         }
 
         selectedSectionId = null;
@@ -761,13 +849,13 @@
       }
 
       try {
-        const response = await fetch(`${THEME_API}/sections/${section.id}/duplicate`, {
-          method: 'POST'
-        });
+        const { response, result } = await fetchJsonWithTimeout(
+          `${THEME_API}/sections/${section.id}/duplicate`,
+          { method: 'POST' }
+        );
 
-        const result = await response.json();
         if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to duplicate section');
+          throw new Error(result?.error || 'Failed to duplicate section');
         }
 
         await refreshTheme(false);
@@ -786,17 +874,19 @@
       if (!section) return;
 
       try {
-        const response = await fetch(`${THEME_API}/sections/${section.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            is_visible: Number(section.is_visible || 0) ? 0 : 1
-          })
-        });
+        const { response, result } = await fetchJsonWithTimeout(
+          `${THEME_API}/sections/${section.id}`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              is_visible: Number(section.is_visible || 0) ? 0 : 1
+            })
+          }
+        );
 
-        const result = await response.json();
         if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to toggle visibility');
+          throw new Error(result?.error || 'Failed to toggle visibility');
         }
 
         await refreshTheme(false);
@@ -807,15 +897,17 @@
     }
 
     async function reorderSections(newIds) {
-      const response = await fetch(`${THEME_API}/pages/${PAGE_KEY}/reorder`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sectionIds: newIds })
-      });
+      const { response, result } = await fetchJsonWithTimeout(
+        `${THEME_API}/pages/${PAGE_KEY}/reorder`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sectionIds: newIds })
+        }
+      );
 
-      const result = await response.json();
       if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to reorder sections');
+        throw new Error(result?.error || 'Failed to reorder sections');
       }
 
       currentSections = result.data || [];
@@ -864,15 +956,17 @@
           }
         };
 
-        const response = await fetch(`${THEME_API}/settings`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+        const { response, result } = await fetchJsonWithTimeout(
+          `${THEME_API}/settings`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          }
+        );
 
-        const result = await response.json();
         if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to save theme settings');
+          throw new Error(result?.error || 'Failed to save theme settings');
         }
 
         themeSettings = result.data || {};
@@ -886,6 +980,14 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       refreshTheme();
+
+      document.getElementById('addSectionBackdrop').addEventListener('click', (e) => {
+        if (e.target.id === 'addSectionBackdrop') closeAddSectionModal();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeAddSectionModal();
+      });
     });
   </script>
 </body>
