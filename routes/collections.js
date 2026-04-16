@@ -3,6 +3,23 @@ const router = express.Router();
 const db = require('../db/turso-manager');
 
 /**
+ * Guardrails (prevent Vercel timeouts + huge payloads)
+ */
+const MAX_LIMIT = 50;
+const DEFAULT_LIMIT = 50;
+const MAX_SEARCH_LEN = 80;
+const DB_OP_TIMEOUT_MS = 12_000;
+
+function withTimeout(promise, ms, label = 'operation') {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+  });
+
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+/**
  * Helpers
  */
 function slugify(text = '') {
@@ -20,7 +37,8 @@ function normalizeText(value = '') {
 
 function normalizeStatus(status) {
   const allowed = ['active', 'draft', 'archived'];
-  return allowed.includes(status) ? status : 'active';
+  const raw = String(status || '').trim().toLowerCase();
+  return allowed.includes(raw) ? raw : 'active';
 }
 
 function normalizeSortMode(sortMode) {
@@ -34,16 +52,13 @@ function normalizeSortMode(sortMode) {
     'newest',
     'oldest'
   ];
-  return allowed.includes(sortMode) ? sortMode : 'manual';
+
+  const raw = String(sortMode || '').trim();
+  return allowed.includes(raw) ? raw : 'manual';
 }
 
 function toInteger(value, fallback = 0) {
   const n = parseInt(value, 10);
-  return Number.isFinite(n) ? n : fallback;
-}
-
-function toNumber(value, fallback = 0) {
-  const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
 }
 
@@ -59,7 +74,7 @@ function normalizeBooleanFlag(value, defaultValue = true) {
   return defaultValue ? 1 : 0;
 }
 
-function parseIncludeProductsFlag(req, defaultValue = true) {
+function parseIncludeProductsFlag(req, defaultValue = false) {
   // includeProducts=0 => false
   // includeProducts=1 => true
   const raw = req.query.includeProducts;
@@ -74,8 +89,16 @@ async function makeUniqueSlug(baseText = '', excludeId = null) {
 
   while (true) {
     const existing = excludeId
-      ? await db.get(`SELECT id FROM collections WHERE slug = ? AND id != ?`, [candidate, excludeId])
-      : await db.get(`SELECT id FROM collections WHERE slug = ?`, [candidate]);
+      ? await withTimeout(
+          db.get(`SELECT id FROM collections WHERE slug = ? AND id != ?`, [candidate, excludeId]),
+          DB_OP_TIMEOUT_MS,
+          'makeUniqueSlug(exclude)'
+        )
+      : await withTimeout(
+          db.get(`SELECT id FROM collections WHERE slug = ?`, [candidate]),
+          DB_OP_TIMEOUT_MS,
+          'makeUniqueSlug'
+        );
 
     if (!existing) return candidate;
 
@@ -106,27 +129,56 @@ function normalizeIncomingCollectionBody(body = {}) {
 }
 
 async function getCollectionById(id) {
-  // NOTE: تركت SELECT * زي ما هو عندك
-  return await db.get(`SELECT * FROM collections WHERE id = ?`, [id]);
+  return await withTimeout(
+    db.get(`SELECT * FROM collections WHERE id = ?`, [id]),
+    DB_OP_TIMEOUT_MS,
+    'getCollectionById'
+  );
+}
+
+async function getCollectionBySlug(slug) {
+  return await withTimeout(
+    db.get(`SELECT * FROM collections WHERE slug = ?`, [slug]),
+    DB_OP_TIMEOUT_MS,
+    'getCollectionBySlug'
+  );
 }
 
 async function getCollectionProductCount(collectionId) {
-  const row = await db.get(
-    `SELECT COUNT(*) as count FROM collection_products WHERE collection_id = ?`,
-    [collectionId]
+  const row = await withTimeout(
+    db.get(`SELECT COUNT(*) as count FROM collection_products WHERE collection_id = ?`, [collectionId]),
+    DB_OP_TIMEOUT_MS,
+    'getCollectionProductCount'
   );
   return Number(row?.count || 0);
 }
 
-async function getCollectionProducts(collectionId, sortMode = 'manual') {
-  let orderBy = 'cp.sort_order ASC, cp.id ASC';
+function getOrderByForCollectionProducts(sortMode = 'manual') {
+  const normalized = normalizeSortMode(sortMode);
 
-  if (sortMode === 'title_asc') orderBy = 'p.product_name ASC, p.id ASC';
-  if (sortMode === 'title_desc') orderBy = 'p.product_name DESC, p.id DESC';
-  if (sortMode === 'price_desc') orderBy = 'p.price DESC, p.id DESC';
-  if (sortMode === 'price_asc') orderBy = 'p.price ASC, p.id ASC';
-  if (sortMode === 'newest') orderBy = 'p.created_at DESC, p.id DESC';
-  if (sortMode === 'oldest') orderBy = 'p.created_at ASC, p.id ASC';
+  if (normalized === 'title_asc') return 'p.product_name ASC, p.id ASC';
+  if (normalized === 'title_desc') return 'p.product_name DESC, p.id DESC';
+  if (normalized === 'price_desc') return 'p.price DESC, p.id DESC';
+  if (normalized === 'price_asc') return 'p.price ASC, p.id ASC';
+  if (normalized === 'newest') return 'p.created_at DESC, p.id DESC';
+  if (normalized === 'oldest') return 'p.created_at ASC, p.id ASC';
+
+  // manual / default
+  return 'cp.sort_order ASC, cp.id ASC';
+}
+
+async function getCollectionProductsPaged(collectionId, sortMode = 'manual', limit = DEFAULT_LIMIT, offset = 0) {
+  const orderBy = getOrderByForCollectionProducts(sortMode);
+
+  const parsedLimit = Math.min(MAX_LIMIT, Math.max(1, toInteger(limit, DEFAULT_LIMIT)));
+  const parsedOffset = Math.max(0, toInteger(offset, 0));
+
+  const countRow = await withTimeout(
+    db.get(`SELECT COUNT(*) as total FROM collection_products WHERE collection_id = ?`, [collectionId]),
+    DB_OP_TIMEOUT_MS,
+    'countCollectionProducts'
+  );
+  const total = Number(countRow?.total || 0);
 
   const sql = `
     SELECT
@@ -156,23 +208,47 @@ async function getCollectionProducts(collectionId, sortMode = 'manual') {
     INNER JOIN products p ON p.id = cp.product_id
     WHERE cp.collection_id = ?
     ORDER BY ${orderBy}
+    LIMIT ? OFFSET ?
   `;
 
-  return await db.all(sql, [collectionId]);
+  const rows = await withTimeout(
+    db.all(sql, [collectionId, parsedLimit, parsedOffset]),
+    DB_OP_TIMEOUT_MS,
+    'getCollectionProductsPaged'
+  );
+
+  return {
+    rows: Array.isArray(rows) ? rows : [],
+    pagination: {
+      total,
+      limit: parsedLimit,
+      offset: parsedOffset,
+      totalPages: parsedLimit ? Math.ceil(total / parsedLimit) : 1
+    }
+  };
 }
 
-async function enrichCollection(collection, includeProducts = true) {
+async function enrichCollection(collection, includeProducts = false) {
   if (!collection) return null;
 
   const productCount = await getCollectionProductCount(collection.id);
-  const products = includeProducts
-    ? await getCollectionProducts(collection.id, collection.sort_mode || 'manual')
-    : [];
+
+  // لا نرجّع products افتراضيًا (مهم لـ Serverless)
+  if (!includeProducts) {
+    return {
+      ...collection,
+      product_count: productCount,
+      products: []
+    };
+  }
+
+  // لو حد طلب includeProducts=1: نرجّع أول صفحة فقط لتجنب payload ضخم
+  const { rows } = await getCollectionProductsPaged(collection.id, collection.sort_mode || 'manual', 50, 0);
 
   return {
     ...collection,
     product_count: productCount,
-    products
+    products: rows
   };
 }
 
@@ -186,8 +262,14 @@ async function normalizeProductIds(productIds = []) {
   const uniqueIds = [...new Set(ids)];
   const valid = [];
 
+  // NOTE: بطيء لو ids كثيرة جدًا، لكن في editor عادة معقول.
+  // لو احتجنا نسرّعه: نجيبهم ب IN(...) مرة واحدة.
   for (const productId of uniqueIds) {
-    const product = await db.get(`SELECT id FROM products WHERE id = ?`, [productId]);
+    const product = await withTimeout(
+      db.get(`SELECT id FROM products WHERE id = ?`, [productId]),
+      DB_OP_TIMEOUT_MS,
+      'normalizeProductIds(checkProduct)'
+    );
     if (product) valid.push(productId);
   }
 
@@ -195,16 +277,21 @@ async function normalizeProductIds(productIds = []) {
 }
 
 async function reindexCollectionProducts(collectionId) {
-  const rows = await db.all(
-    `SELECT id FROM collection_products WHERE collection_id = ? ORDER BY sort_order ASC, id ASC`,
-    [collectionId]
+  const rows = await withTimeout(
+    db.all(
+      `SELECT id FROM collection_products WHERE collection_id = ? ORDER BY sort_order ASC, id ASC`,
+      [collectionId]
+    ),
+    DB_OP_TIMEOUT_MS,
+    'reindexCollectionProducts(select)'
   );
 
   let index = 1;
   for (const row of rows) {
-    await db.run(
-      `UPDATE collection_products SET sort_order = ? WHERE id = ?`,
-      [index, row.id]
+    await withTimeout(
+      db.run(`UPDATE collection_products SET sort_order = ? WHERE id = ?`, [index, row.id]),
+      DB_OP_TIMEOUT_MS,
+      'reindexCollectionProducts(update)'
     );
     index += 1;
   }
@@ -215,25 +302,37 @@ async function addProductsToCollection(collectionId, productIds = [], position =
   if (!ids.length) return;
 
   if (position === 'top') {
-    const existingRows = await db.all(
-      `SELECT id, sort_order FROM collection_products WHERE collection_id = ? ORDER BY sort_order ASC, id ASC`,
-      [collectionId]
+    const existingRows = await withTimeout(
+      db.all(
+        `SELECT id, sort_order FROM collection_products WHERE collection_id = ? ORDER BY sort_order ASC, id ASC`,
+        [collectionId]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'addProductsToCollection(existingRows)'
     );
 
     const shiftBy = ids.length;
     for (const row of existingRows) {
-      await db.run(
-        `UPDATE collection_products SET sort_order = ? WHERE id = ?`,
-        [toInteger(row.sort_order, 0) + shiftBy, row.id]
+      await withTimeout(
+        db.run(
+          `UPDATE collection_products SET sort_order = ? WHERE id = ?`,
+          [toInteger(row.sort_order, 0) + shiftBy, row.id]
+        ),
+        DB_OP_TIMEOUT_MS,
+        'addProductsToCollection(shift)'
       );
     }
 
     let order = 1;
     for (const productId of ids) {
-      await db.run(
-        `INSERT OR IGNORE INTO collection_products (collection_id, product_id, sort_order)
-         VALUES (?, ?, ?)`,
-        [collectionId, productId, order]
+      await withTimeout(
+        db.run(
+          `INSERT OR IGNORE INTO collection_products (collection_id, product_id, sort_order)
+           VALUES (?, ?, ?)`,
+          [collectionId, productId, order]
+        ),
+        DB_OP_TIMEOUT_MS,
+        'addProductsToCollection(insertTop)'
       );
       order += 1;
     }
@@ -242,18 +341,26 @@ async function addProductsToCollection(collectionId, productIds = [], position =
     return;
   }
 
-  const maxRow = await db.get(
-    `SELECT MAX(sort_order) as maxOrder FROM collection_products WHERE collection_id = ?`,
-    [collectionId]
+  const maxRow = await withTimeout(
+    db.get(
+      `SELECT MAX(sort_order) as maxOrder FROM collection_products WHERE collection_id = ?`,
+      [collectionId]
+    ),
+    DB_OP_TIMEOUT_MS,
+    'addProductsToCollection(maxOrder)'
   );
 
   let nextOrder = Number(maxRow?.maxOrder || 0) + 1;
 
   for (const productId of ids) {
-    await db.run(
-      `INSERT OR IGNORE INTO collection_products (collection_id, product_id, sort_order)
-       VALUES (?, ?, ?)`,
-      [collectionId, productId, nextOrder]
+    await withTimeout(
+      db.run(
+        `INSERT OR IGNORE INTO collection_products (collection_id, product_id, sort_order)
+         VALUES (?, ?, ?)`,
+        [collectionId, productId, nextOrder]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'addProductsToCollection(insertBottom)'
     );
     nextOrder += 1;
   }
@@ -266,11 +373,19 @@ async function addProductsToCollection(collectionId, productIds = [], position =
  */
 router.get('/stats/summary', async (req, res) => {
   try {
-    const totalCollections = await db.get(`SELECT COUNT(*) as count FROM collections`);
-    const activeCollections = await db.get(`SELECT COUNT(*) as count FROM collections WHERE status = 'active'`);
-    const draftCollections = await db.get(`SELECT COUNT(*) as count FROM collections WHERE status = 'draft'`);
-    const archivedCollections = await db.get(`SELECT COUNT(*) as count FROM collections WHERE status = 'archived'`);
-    const totalLinks = await db.get(`SELECT COUNT(*) as count FROM collection_products`);
+    const [
+      totalCollections,
+      activeCollections,
+      draftCollections,
+      archivedCollections,
+      totalLinks
+    ] = await Promise.all([
+      withTimeout(db.get(`SELECT COUNT(*) as count FROM collections`), DB_OP_TIMEOUT_MS, 'countCollections(total)'),
+      withTimeout(db.get(`SELECT COUNT(*) as count FROM collections WHERE status = 'active'`), DB_OP_TIMEOUT_MS, 'countCollections(active)'),
+      withTimeout(db.get(`SELECT COUNT(*) as count FROM collections WHERE status = 'draft'`), DB_OP_TIMEOUT_MS, 'countCollections(draft)'),
+      withTimeout(db.get(`SELECT COUNT(*) as count FROM collections WHERE status = 'archived'`), DB_OP_TIMEOUT_MS, 'countCollections(archived)'),
+      withTimeout(db.get(`SELECT COUNT(*) as count FROM collection_products`), DB_OP_TIMEOUT_MS, 'countCollectionProducts(total)')
+    ]);
 
     return res.json({
       success: true,
@@ -284,44 +399,39 @@ router.get('/stats/summary', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ خطأ في جلب إحصائيات المجموعات:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في جلب إحصائيات المجموعات'
-    });
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({ success: false, error: 'الاستعلام استغرق وقتًا طويلاً.' });
+    }
+
+    return res.status(500).json({ success: false, error: 'فشل في جلب إحصائيات المجموعات' });
   }
 });
 
 /**
  * GET /api/collections/slug/:slug
- * Optional query: includeProducts=0|1 (default 1)
+ * Optional query: includeProducts=0|1 (default 0)
  */
 router.get('/slug/:slug', async (req, res) => {
   try {
-    const collection = await db.get(
-      `SELECT * FROM collections WHERE slug = ?`,
-      [req.params.slug]
-    );
+    const collection = await getCollectionBySlug(req.params.slug);
 
     if (!collection) {
-      return res.status(404).json({
-        success: false,
-        error: 'المجموعة غير موجودة'
-      });
+      return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
-    const includeProducts = parseIncludeProductsFlag(req, true);
+    const includeProducts = parseIncludeProductsFlag(req, false);
     const enriched = await enrichCollection(collection, includeProducts);
 
-    return res.json({
-      success: true,
-      data: enriched
-    });
+    return res.json({ success: true, data: enriched });
   } catch (error) {
     console.error('❌ خطأ في جلب المجموعة بالـ slug:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في جلب المجموعة'
-    });
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({ success: false, error: 'الاستعلام استغرق وقتًا طويلاً.' });
+    }
+
+    return res.status(500).json({ success: false, error: 'فشل في جلب المجموعة' });
   }
 });
 
@@ -346,10 +456,7 @@ router.post('/', async (req, res) => {
     } = normalizeIncomingCollectionBody(req.body);
 
     if (!title || normalizeText(title) === '') {
-      return res.status(400).json({
-        success: false,
-        error: 'عنوان المجموعة مطلوب'
-      });
+      return res.status(400).json({ success: false, error: 'عنوان المجموعة مطلوب' });
     }
 
     const finalTitle = normalizeText(title);
@@ -358,67 +465,69 @@ router.post('/', async (req, res) => {
     const finalSortMode = normalizeSortMode(sortMode);
     const finalProductIds = await normalizeProductIds(productIds);
 
-    await db.run(
-      `INSERT INTO collections
-      (
-        title,
-        slug,
-        description,
-        image_url,
-        sort_mode,
-        status,
-        theme_template,
-        seo_title,
-        seo_description,
-        online_store,
-        pos_excluded
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        finalTitle,
-        finalSlug,
-        normalizeText(description),
-        normalizeText(imageUrl),
-        finalSortMode,
-        finalStatus,
-        normalizeText(themeTemplate) || 'default-collection',
-        normalizeText(seoTitle),
-        normalizeText(seoDescription),
-        normalizeBooleanFlag(onlineStore, true),
-        normalizeBooleanFlag(posExcluded, true)
-      ]
+    await withTimeout(
+      db.run(
+        `INSERT INTO collections
+        (
+          title,
+          slug,
+          description,
+          image_url,
+          sort_mode,
+          status,
+          theme_template,
+          seo_title,
+          seo_description,
+          online_store,
+          pos_excluded
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          finalTitle,
+          finalSlug,
+          normalizeText(description),
+          normalizeText(imageUrl),
+          finalSortMode,
+          finalStatus,
+          normalizeText(themeTemplate) || 'default-collection',
+          normalizeText(seoTitle),
+          normalizeText(seoDescription),
+          normalizeBooleanFlag(onlineStore, true),
+          normalizeBooleanFlag(posExcluded, true)
+        ]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'insertCollection'
     );
 
-    const savedCollection = await db.get(
-      `SELECT * FROM collections WHERE slug = ? ORDER BY id DESC LIMIT 1`,
-      [finalSlug]
-    );
+    const savedCollection = await getCollectionBySlug(finalSlug);
 
     if (savedCollection && finalProductIds.length) {
       let order = 1;
       for (const productId of finalProductIds) {
-        await db.run(
-          `INSERT OR IGNORE INTO collection_products (collection_id, product_id, sort_order)
-           VALUES (?, ?, ?)`,
-          [savedCollection.id, productId, order]
+        await withTimeout(
+          db.run(
+            `INSERT OR IGNORE INTO collection_products (collection_id, product_id, sort_order)
+             VALUES (?, ?, ?)`,
+            [savedCollection.id, productId, order]
+          ),
+          DB_OP_TIMEOUT_MS,
+          'insertCollectionProduct'
         );
         order += 1;
       }
     }
 
-    const enriched = await enrichCollection(savedCollection, true);
-
-    return res.status(201).json({
-      success: true,
-      message: 'تم إنشاء المجموعة بنجاح',
-      data: enriched
-    });
+    const enriched = await enrichCollection(savedCollection, false);
+    return res.status(201).json({ success: true, message: 'تم إنشاء المجموعة بنجاح', data: enriched });
   } catch (error) {
     console.error('❌ خطأ في إنشاء المجموعة:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في إنشاء المجموعة'
-    });
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({ success: false, error: 'الاستعلام استغرق وقتًا طويلاً.' });
+    }
+
+    return res.status(500).json({ success: false, error: 'فشل في إنشاء المجموعة' });
   }
 });
 
@@ -431,112 +540,123 @@ router.post('/:id/duplicate', async (req, res) => {
 
     const collection = await getCollectionById(id);
     if (!collection) {
-      return res.status(404).json({
-        success: false,
-        error: 'المجموعة غير موجودة'
-      });
+      return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
     const duplicatedTitle = `${collection.title} - Copy`;
     const duplicatedSlug = await makeUniqueSlug(duplicatedTitle);
 
-    await db.run(
-      `INSERT INTO collections
-      (
-        title,
-        slug,
-        description,
-        image_url,
-        sort_mode,
-        status,
-        theme_template,
-        seo_title,
-        seo_description,
-        online_store,
-        pos_excluded
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        duplicatedTitle,
-        duplicatedSlug,
-        collection.description || '',
-        collection.image_url || '',
-        collection.sort_mode || 'manual',
-        collection.status || 'draft',
-        collection.theme_template || 'default-collection',
-        collection.seo_title || '',
-        collection.seo_description || '',
-        toInteger(collection.online_store, 1),
-        toInteger(collection.pos_excluded, 1)
-      ]
+    await withTimeout(
+      db.run(
+        `INSERT INTO collections
+        (
+          title,
+          slug,
+          description,
+          image_url,
+          sort_mode,
+          status,
+          theme_template,
+          seo_title,
+          seo_description,
+          online_store,
+          pos_excluded
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          duplicatedTitle,
+          duplicatedSlug,
+          collection.description || '',
+          collection.image_url || '',
+          collection.sort_mode || 'manual',
+          collection.status || 'draft',
+          collection.theme_template || 'default-collection',
+          collection.seo_title || '',
+          collection.seo_description || '',
+          toInteger(collection.online_store, 1),
+          toInteger(collection.pos_excluded, 1)
+        ]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'duplicateCollection(insert)'
     );
 
-    const duplicatedCollection = await db.get(
-      `SELECT * FROM collections WHERE slug = ?`,
-      [duplicatedSlug]
-    );
+    const duplicatedCollection = await getCollectionBySlug(duplicatedSlug);
 
-    const linkedProducts = await db.all(
-      `SELECT product_id, sort_order
-       FROM collection_products
-       WHERE collection_id = ?
-       ORDER BY sort_order ASC, id ASC`,
-      [collection.id]
+    const linkedProducts = await withTimeout(
+      db.all(
+        `SELECT product_id, sort_order
+         FROM collection_products
+         WHERE collection_id = ?
+         ORDER BY sort_order ASC, id ASC`,
+        [collection.id]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'duplicateCollection(selectLinks)'
     );
 
     for (const row of linkedProducts) {
-      await db.run(
-        `INSERT INTO collection_products (collection_id, product_id, sort_order)
-         VALUES (?, ?, ?)`,
-        [duplicatedCollection.id, row.product_id, row.sort_order]
+      await withTimeout(
+        db.run(
+          `INSERT INTO collection_products (collection_id, product_id, sort_order)
+           VALUES (?, ?, ?)`,
+          [duplicatedCollection.id, row.product_id, row.sort_order]
+        ),
+        DB_OP_TIMEOUT_MS,
+        'duplicateCollection(insertLink)'
       );
     }
 
-    const enriched = await enrichCollection(duplicatedCollection, true);
-
-    return res.status(201).json({
-      success: true,
-      message: 'تم عمل نسخة من المجموعة بنجاح',
-      data: enriched
-    });
+    const enriched = await enrichCollection(duplicatedCollection, false);
+    return res.status(201).json({ success: true, message: 'تم عمل نسخة من المجموعة بنجاح', data: enriched });
   } catch (error) {
     console.error('❌ خطأ في نسخ المجموعة:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في نسخ المجموعة'
-    });
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({ success: false, error: 'الاستعلام استغرق وقتًا طويلاً.' });
+    }
+
+    return res.status(500).json({ success: false, error: 'فشل في نسخ المجموعة' });
   }
 });
 
 /**
  * GET /api/collections/:id/products
+ * Query: sort, limit, offset
  */
 router.get('/:id/products', async (req, res) => {
   try {
     const collection = await getCollectionById(req.params.id);
 
     if (!collection) {
-      return res.status(404).json({
-        success: false,
-        error: 'المجموعة غير موجودة'
-      });
+      return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
-    const products = await getCollectionProducts(
-      collection.id,
-      normalizeSortMode(req.query.sort || collection.sort_mode || 'manual')
-    );
+    const sortMode = normalizeSortMode(req.query.sort || collection.sort_mode || 'manual');
+    const limit = req.query.limit ?? DEFAULT_LIMIT;
+    const offset = req.query.offset ?? 0;
+
+    const { rows, pagination } = await getCollectionProductsPaged(collection.id, sortMode, limit, offset);
 
     return res.json({
       success: true,
-      data: products
+      data: rows,
+      pagination: {
+        ...pagination,
+        sort: sortMode
+      }
     });
   } catch (error) {
     console.error('❌ خطأ في جلب منتجات المجموعة:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في جلب منتجات المجموعة'
-    });
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({
+        success: false,
+        error: 'الاستعلام استغرق وقتًا طويلاً. حاول تقليل limit.'
+      });
+    }
+
+    return res.status(500).json({ success: false, error: 'فشل في جلب منتجات المجموعة' });
   }
 });
 
@@ -550,26 +670,28 @@ router.post('/:id/products/add', async (req, res) => {
 
     const collection = await getCollectionById(id);
     if (!collection) {
-      return res.status(404).json({
-        success: false,
-        error: 'المجموعة غير موجودة'
-      });
+      return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
     await addProductsToCollection(id, productIds, position === 'top' ? 'top' : 'bottom');
-    const products = await getCollectionProducts(id, 'manual');
+
+    // رجّع أول صفحة فقط بدل ما ترجع كل المنتجات (مهم للأداء)
+    const { rows, pagination } = await getCollectionProductsPaged(id, 'manual', DEFAULT_LIMIT, 0);
 
     return res.json({
       success: true,
       message: 'تمت إضافة المنتجات إلى المجموعة',
-      data: products
+      data: rows,
+      pagination
     });
   } catch (error) {
     console.error('❌ خطأ في إضافة منتجات للمجموعة:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في إضافة المنتجات إلى المجموعة'
-    });
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({ success: false, error: 'الاستعلام استغرق وقتًا طويلاً.' });
+    }
+
+    return res.status(500).json({ success: false, error: 'فشل في إضافة المنتجات إلى المجموعة' });
   }
 });
 
@@ -583,40 +705,34 @@ router.post('/:id/products/remove', async (req, res) => {
 
     const collection = await getCollectionById(id);
     if (!collection) {
-      return res.status(404).json({
-        success: false,
-        error: 'المجموعة غير موجودة'
-      });
+      return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
     const ids = await normalizeProductIds(productIds);
 
     if (!ids.length) {
-      return res.status(400).json({
-        success: false,
-        error: 'لم يتم تحديد منتجات للحذف'
-      });
+      return res.status(400).json({ success: false, error: 'لم يتم تحديد منتجات للحذف' });
     }
 
     for (const productId of ids) {
-      await db.run(
-        `DELETE FROM collection_products WHERE collection_id = ? AND product_id = ?`,
-        [id, productId]
+      await withTimeout(
+        db.run(`DELETE FROM collection_products WHERE collection_id = ? AND product_id = ?`, [id, productId]),
+        DB_OP_TIMEOUT_MS,
+        'removeCollectionProduct'
       );
     }
 
     await reindexCollectionProducts(id);
 
-    return res.json({
-      success: true,
-      message: 'تم حذف المنتجات من المجموعة'
-    });
+    return res.json({ success: true, message: 'تم حذف المنتجات من المجموعة' });
   } catch (error) {
     console.error('❌ خطأ في حذف منتجات من المجموعة:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في حذف المنتجات من المجموعة'
-    });
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({ success: false, error: 'الاستعلام استغرق وقتًا طويلاً.' });
+    }
+
+    return res.status(500).json({ success: false, error: 'فشل في حذف المنتجات من المجموعة' });
   }
 });
 
@@ -630,17 +746,11 @@ router.post('/:id/products/reorder', async (req, res) => {
 
     const collection = await getCollectionById(id);
     if (!collection) {
-      return res.status(404).json({
-        success: false,
-        error: 'المجموعة غير موجودة'
-      });
+      return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
     if (!Array.isArray(items) || !items.length) {
-      return res.status(400).json({
-        success: false,
-        error: 'بيانات الترتيب غير صحيحة'
-      });
+      return res.status(400).json({ success: false, error: 'بيانات الترتيب غير صحيحة' });
     }
 
     for (const item of items) {
@@ -648,29 +758,37 @@ router.post('/:id/products/reorder', async (req, res) => {
       const sortOrder = toInteger(item.sortOrder, 0);
       if (!productId || !sortOrder) continue;
 
-      await db.run(
-        `UPDATE collection_products
-         SET sort_order = ?
-         WHERE collection_id = ? AND product_id = ?`,
-        [sortOrder, id, productId]
+      await withTimeout(
+        db.run(
+          `UPDATE collection_products
+           SET sort_order = ?
+           WHERE collection_id = ? AND product_id = ?`,
+          [sortOrder, id, productId]
+        ),
+        DB_OP_TIMEOUT_MS,
+        'reorderCollectionProducts(update)'
       );
     }
 
     await reindexCollectionProducts(id);
 
-    const products = await getCollectionProducts(id, 'manual');
+    // رجّع أول صفحة فقط
+    const { rows, pagination } = await getCollectionProductsPaged(id, 'manual', DEFAULT_LIMIT, 0);
 
     return res.json({
       success: true,
       message: 'تم تحديث ترتيب المنتجات',
-      data: products
+      data: rows,
+      pagination
     });
   } catch (error) {
     console.error('❌ خطأ في إعادة ترتيب المنتجات:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في إعادة ترتيب المنتجات'
-    });
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({ success: false, error: 'الاستعلام استغرق وقتًا طويلاً.' });
+    }
+
+    return res.status(500).json({ success: false, error: 'فشل في إعادة ترتيب المنتجات' });
   }
 });
 
@@ -684,27 +802,25 @@ router.post('/:id/products/move', async (req, res) => {
 
     const collection = await getCollectionById(id);
     if (!collection) {
-      return res.status(404).json({
-        success: false,
-        error: 'المجموعة غير موجودة'
-      });
+      return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
     const ids = await normalizeProductIds(productIds);
 
     if (!ids.length) {
-      return res.status(400).json({
-        success: false,
-        error: 'لم يتم تحديد منتجات للنقل'
-      });
+      return res.status(400).json({ success: false, error: 'لم يتم تحديد منتجات للنقل' });
     }
 
-    const currentRows = await db.all(
-      `SELECT product_id
-       FROM collection_products
-       WHERE collection_id = ?
-       ORDER BY sort_order ASC, id ASC`,
-      [id]
+    const currentRows = await withTimeout(
+      db.all(
+        `SELECT product_id
+         FROM collection_products
+         WHERE collection_id = ?
+         ORDER BY sort_order ASC, id ASC`,
+        [id]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'moveCollectionProducts(selectCurrent)'
     );
 
     let orderedIds = currentRows.map(row => Number(row.product_id));
@@ -722,61 +838,65 @@ router.post('/:id/products/move', async (req, res) => {
 
     let order = 1;
     for (const productId of orderedIds) {
-      await db.run(
-        `UPDATE collection_products
-         SET sort_order = ?
-         WHERE collection_id = ? AND product_id = ?`,
-        [order, id, productId]
+      await withTimeout(
+        db.run(
+          `UPDATE collection_products
+           SET sort_order = ?
+           WHERE collection_id = ? AND product_id = ?`,
+          [order, id, productId]
+        ),
+        DB_OP_TIMEOUT_MS,
+        'moveCollectionProducts(updateOrder)'
       );
       order += 1;
     }
 
     await reindexCollectionProducts(id);
 
-    const products = await getCollectionProducts(id, 'manual');
+    // رجّع أول صفحة فقط
+    const { rows, pagination } = await getCollectionProductsPaged(id, 'manual', DEFAULT_LIMIT, 0);
 
     return res.json({
       success: true,
       message: 'تم نقل المنتجات بنجاح',
-      data: products
+      data: rows,
+      pagination
     });
   } catch (error) {
     console.error('❌ خطأ في نقل المنتجات داخل المجموعة:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في نقل المنتجات'
-    });
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({ success: false, error: 'الاستعلام استغرق وقتًا طويلاً.' });
+    }
+
+    return res.status(500).json({ success: false, error: 'فشل في نقل المنتجات' });
   }
 });
 
 /**
  * GET /api/collections/:id
- * Optional query: includeProducts=0|1 (default 1)
+ * Optional query: includeProducts=0|1 (default 0)
  */
 router.get('/:id', async (req, res) => {
   try {
     const collection = await getCollectionById(req.params.id);
 
     if (!collection) {
-      return res.status(404).json({
-        success: false,
-        error: 'المجموعة غير موجودة'
-      });
+      return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
-    const includeProducts = parseIncludeProductsFlag(req, true);
+    const includeProducts = parseIncludeProductsFlag(req, false);
     const enriched = await enrichCollection(collection, includeProducts);
 
-    return res.json({
-      success: true,
-      data: enriched
-    });
+    return res.json({ success: true, data: enriched });
   } catch (error) {
     console.error('❌ خطأ في جلب المجموعة:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في جلب المجموعة'
-    });
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({ success: false, error: 'الاستعلام اس��غرق وقتًا طويلاً.' });
+    }
+
+    return res.status(500).json({ success: false, error: 'فشل في جلب المجموعة' });
   }
 });
 
@@ -802,10 +922,7 @@ router.put('/:id', async (req, res) => {
 
     const collection = await getCollectionById(id);
     if (!collection) {
-      return res.status(404).json({
-        success: false,
-        error: 'المجموعة غير موجودة'
-      });
+      return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
     const updateFields = [];
@@ -814,10 +931,7 @@ router.put('/:id', async (req, res) => {
     if (title !== undefined && req.body.title !== undefined) {
       const finalTitle = normalizeText(title);
       if (!finalTitle) {
-        return res.status(400).json({
-          success: false,
-          error: 'عنوان المجموعة غير صحيح'
-        });
+        return res.status(400).json({ success: false, error: 'عنوان المجموعة غير صحيح' });
       }
       updateFields.push('title = ?');
       updateValues.push(finalTitle);
@@ -875,36 +989,35 @@ router.put('/:id', async (req, res) => {
     }
 
     if (!updateFields.length) {
-      return res.status(400).json({
-        success: false,
-        error: 'لا توجد بيانات للتحديث'
-      });
+      return res.status(400).json({ success: false, error: 'لا توجد بيانات للتحديث' });
     }
 
     updateFields.push('updated_at = CURRENT_TIMESTAMP');
     updateValues.push(id);
 
-    await db.run(
-      `UPDATE collections
-       SET ${updateFields.join(', ')}
-       WHERE id = ?`,
-      updateValues
+    await withTimeout(
+      db.run(
+        `UPDATE collections
+         SET ${updateFields.join(', ')}
+         WHERE id = ?`,
+        updateValues
+      ),
+      DB_OP_TIMEOUT_MS,
+      'updateCollection'
     );
 
     const updated = await getCollectionById(id);
-    const enriched = await enrichCollection(updated, true);
+    const enriched = await enrichCollection(updated, false);
 
-    return res.json({
-      success: true,
-      message: 'تم تحديث المجموعة بنجاح',
-      data: enriched
-    });
+    return res.json({ success: true, message: 'تم تحديث المجموعة بنجاح', data: enriched });
   } catch (error) {
     console.error('❌ خطأ في تحديث المجموعة:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في تحديث المجموعة'
-    });
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({ success: false, error: 'الاستعلام استغرق وقتًا طويلاً.' });
+    }
+
+    return res.status(500).json({ success: false, error: 'فشل في تحديث المجموعة' });
   }
 });
 
@@ -916,14 +1029,11 @@ router.delete('/:id', async (req, res) => {
     const collection = await getCollectionById(req.params.id);
 
     if (!collection) {
-      return res.status(404).json({
-        success: false,
-        error: 'المجموعة غير موجودة'
-      });
+      return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
-    await db.run(`DELETE FROM collection_products WHERE collection_id = ?`, [req.params.id]);
-    await db.run(`DELETE FROM collections WHERE id = ?`, [req.params.id]);
+    await withTimeout(db.run(`DELETE FROM collection_products WHERE collection_id = ?`, [req.params.id]), DB_OP_TIMEOUT_MS, 'deleteCollectionLinks');
+    await withTimeout(db.run(`DELETE FROM collections WHERE id = ?`, [req.params.id]), DB_OP_TIMEOUT_MS, 'deleteCollection');
 
     return res.json({
       success: true,
@@ -935,15 +1045,18 @@ router.delete('/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ خطأ في حذف المجموعة:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في حذف المجموعة'
-    });
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({ success: false, error: 'الاستعلام استغرق وقتًا طويلاً.' });
+    }
+
+    return res.status(500).json({ success: false, error: 'فشل في حذف المجموعة' });
   }
 });
 
 /**
  * GET /api/collections
+ * Returns collections metadata + product_count only (no products list).
  */
 router.get('/', async (req, res) => {
   try {
@@ -962,11 +1075,11 @@ router.get('/', async (req, res) => {
 
     if (status) {
       where.push(`status = ?`);
-      params.push(status);
+      params.push(String(status));
     }
 
     if (search) {
-      const clipped = String(search).trim().slice(0, 80);
+      const clipped = String(search).trim().slice(0, MAX_SEARCH_LEN);
       const searchValue = `%${clipped}%`;
 
       where.push(`(
@@ -996,9 +1109,10 @@ router.get('/', async (req, res) => {
 
     params.push(parsedLimit, parsedOffset);
 
-    const collections = await db.all(sql, params);
-    const enrichedCollections = [];
+    const collections = await withTimeout(db.all(sql, params), DB_OP_TIMEOUT_MS, 'listCollections');
 
+    // enrich with product_count only (fast enough)
+    const enrichedCollections = [];
     for (const collection of collections) {
       enrichedCollections.push(await enrichCollection(collection, false));
     }
@@ -1009,16 +1123,16 @@ router.get('/', async (req, res) => {
     if (where.length > 0) {
       countSql += ` WHERE ${where.join(' AND ')}`;
 
-      if (status) countParams.push(status);
+      if (status) countParams.push(String(status));
 
       if (search) {
-        const clipped = String(search).trim().slice(0, 80);
+        const clipped = String(search).trim().slice(0, MAX_SEARCH_LEN);
         const searchValue = `%${clipped}%`;
         countParams.push(searchValue, searchValue, searchValue, searchValue, searchValue);
       }
     }
 
-    const countResult = await db.get(countSql, countParams);
+    const countResult = await withTimeout(db.get(countSql, countParams), DB_OP_TIMEOUT_MS, 'countCollections');
     const total = Number(countResult?.total || 0);
 
     return res.json({
@@ -1033,10 +1147,12 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ خطأ في جلب المجموعات:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في جلب المجموعات'
-    });
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({ success: false, error: 'الاستعلام استغرق وقتًا طويلاً.' });
+    }
+
+    return res.status(500).json({ success: false, error: 'فشل في جلب المجموعات' });
   }
 });
 

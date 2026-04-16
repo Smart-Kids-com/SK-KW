@@ -9,7 +9,6 @@
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
       --purple-dark: #6a4c93;
       --purple-light: #9b59b6;
@@ -42,11 +41,7 @@
       font-weight: 700;
     }
 
-    .topbar-arrow {
-      font-size: 1.2rem;
-      line-height: 1;
-      flex: 0 0 auto;
-    }
+    .topbar-arrow { font-size: 1.2rem; line-height: 1; flex: 0 0 auto; }
 
     .site-header {
       background: #fff;
@@ -133,9 +128,7 @@
       flex-direction: column;
     }
 
-    body.menu-open .side-menu {
-      transform: translateX(0);
-    }
+    body.menu-open .side-menu { transform: translateX(0); }
 
     .side-menu__head {
       min-height: 82px;
@@ -248,10 +241,7 @@
       font-weight: 800;
     }
 
-    .page-title p {
-      opacity: .95;
-      font-size: 1rem;
-    }
+    .page-title p { opacity: .95; font-size: 1rem; }
 
     .collections-grid {
       display: grid;
@@ -280,12 +270,6 @@
     .collection-card:hover {
       transform: translateY(-6px);
       box-shadow: 0 14px 34px rgba(0,0,0,0.22);
-    }
-
-    .collection-icon {
-      font-size: 2.2rem;
-      margin-bottom: 0.65rem;
-      display: none;
     }
 
     .collection-title {
@@ -367,55 +351,24 @@
         min-height: 82px;
         padding: 10px 12px;
       }
-
       .site-header-logo img,
-      .side-menu__logo img {
-        max-height: 54px;
-      }
+      .side-menu__logo img { max-height: 54px; }
 
       .site-menu-btn,
-      .site-icon-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 1.5rem;
-      }
+      .site-icon-btn { width: 40px; height: 40px; font-size: 1.5rem; }
 
-      .container {
-        padding: 1.5rem 1rem 2rem;
-      }
+      .container { padding: 1.5rem 1rem 2rem; }
+      .page-title h1 { font-size: 1.45rem; }
 
-      .page-title h1 {
-        font-size: 1.45rem;
-      }
-
-      .collections-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.9rem;
-      }
-
-      .collection-card {
-        padding: 1rem;
-        min-height: 220px;
-      }
-
-      .collection-title {
-        font-size: 0.95rem;
-      }
-
-      .collection-description {
-        font-size: 0.82rem;
-        min-height: 48px;
-      }
-
-      .browse-btn {
-        font-size: .9rem;
-      }
+      .collections-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; }
+      .collection-card { padding: 1rem; min-height: 220px; }
+      .collection-title { font-size: 0.95rem; }
+      .collection-description { font-size: 0.82rem; min-height: 48px; }
+      .browse-btn { font-size: .9rem; }
     }
 
     @media (max-width: 420px) {
-      .collections-grid {
-        grid-template-columns: 1fr 1fr;
-      }
+      .collections-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
@@ -515,16 +468,12 @@
       const slug = safeText(collection.slug);
       const id = safeText(collection.id);
 
-      if (slug) {
-        return `./collection.html?slug=${encodeURIComponent(slug)}`;
-      }
-
+      if (slug) return `./collection.html?slug=${encodeURIComponent(slug)}`;
       return `./collection.html?id=${encodeURIComponent(id)}`;
     }
 
     async function fetchCollectionsFromApi() {
-      // NOTE: collections endpoint enriches with product_count without fetching products (fast)
-      const response = await fetch(`${COLLECTIONS_API}?limit=200&offset=0&sort=created_at&order=DESC`, {
+      const response = await fetch(`${COLLECTIONS_API}?limit=120&offset=0&sort=created_at&order=DESC`, {
         cache: 'no-store',
         headers: { Accept: 'application/json' }
       });
@@ -537,14 +486,10 @@
 
       const collections = Array.isArray(result.data) ? result.data : [];
 
-      // Improvements:
-      // - show only active & draft by default, hide archived
-      // - normalize product_count number
       return collections
         .filter(item => String(item.status || 'active').toLowerCase() !== 'archived')
         .map((item) => ({
           ...item,
-          icon: safeText(item.icon, ''), // (even if not used now)
           description: safeText(item.description, ''),
           product_count: Number(item.product_count || 0)
         }));
@@ -576,14 +521,10 @@
         const url = getCollectionUrl(collection);
         const title = safeText(collection.title, 'مجموعة');
         const description = safeText(collection.description, '');
-        const icon = safeText(collection.icon, '');
         const count = Number(collection.product_count || 0);
 
-        // FIX: do NOT embed JSON into onclick (can break HTML/JS if slug contains quotes)
-        // We use data attributes instead.
         return `
-          <div class="collection-card" data-slug="${escapeHtml(collection.slug || '')}" data-id="${escapeHtml(String(collection.id || ''))}">
-            ${icon ? `<span class="collection-icon" style="display:block;">${escapeHtml(icon)}</span>` : ``}
+          <div class="collection-card" data-url="${escapeHtml(url)}">
             <h3 class="collection-title">${escapeHtml(title)}</h3>
             ${description ? `<p class="collection-description" style="display:block;">${escapeHtml(description)}</p>` : ``}
             <div class="collection-count">${count} منتج</div>
@@ -592,22 +533,12 @@
         `;
       }).join('');
 
-      // Attach click handlers safely
       grid.querySelectorAll('.collection-card').forEach(card => {
         card.addEventListener('click', (e) => {
-          // Allow clicking the inner <a> to work normally
-          const anchor = e.target.closest('a');
-          if (anchor) return;
-
-          const slug = safeText(card.getAttribute('data-slug'));
-          const id = safeText(card.getAttribute('data-id'));
-
-          if (slug) {
-            window.location.href = `./collection.html?slug=${encodeURIComponent(slug)}`;
-            return;
-          }
-
-          window.location.href = `./collection.html?id=${encodeURIComponent(id)}`;
+          const a = e.target.closest('a');
+          if (a) return;
+          const url = safeText(card.getAttribute('data-url'));
+          if (url) window.location.href = url;
         });
       });
     }
@@ -623,13 +554,8 @@
       `;
     }
 
-    function openMenu() {
-      document.body.classList.add('menu-open');
-    }
-
-    function closeMenu() {
-      document.body.classList.remove('menu-open');
-    }
+    function openMenu() { document.body.classList.add('menu-open'); }
+    function closeMenu() { document.body.classList.remove('menu-open'); }
 
     document.addEventListener('DOMContentLoaded', () => {
       loadCollections();
