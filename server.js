@@ -389,14 +389,6 @@ app.get('/collection-edit.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'collection-edit.html'));
 });
 
-app.get('/collections.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'collections.html'));
-});
-
-app.get('/collection.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'collection.html'));
-});
-
 app.get('/product-edit.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'product-edit.html'));
 });
