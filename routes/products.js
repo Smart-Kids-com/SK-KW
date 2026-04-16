@@ -95,12 +95,16 @@ function normalizeImages(images, fallbackImageUrl = '') {
 }
 
 /**
- * Guardrails (prevent Vercel timeouts + huge payloads)
+ * Guardrails
+ *
+ * IMPORTANT:
+ * - allow larger limits safely for admin/export/loader
+ * - images enrichment is optional (includeImages=1), default off for speed
  */
-const MAX_LIMIT = 30;
-const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 1000;
+const DEFAULT_LIMIT = 50;
 const MAX_SEARCH_LEN = 80;
-const DB_OP_TIMEOUT_MS = 12_000;
+const DB_OP_TIMEOUT_MS = 25_000;
 
 function withTimeout(promise, ms, label = 'operation') {
   let timer;
@@ -109,6 +113,14 @@ function withTimeout(promise, ms, label = 'operation') {
   });
 
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+function parseBooleanFlag(value, defaultValue = false) {
+  if (value === undefined || value === null || value === '') return defaultValue;
+  const s = String(value).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(s)) return true;
+  if (['0', 'false', 'no', 'off'].includes(s)) return false;
+  return defaultValue;
 }
 
 /**
@@ -171,6 +183,17 @@ function enrichProductWithImages(product, images = []) {
   };
 }
 
+function enrichProductWithoutImages(product) {
+  if (!product) return null;
+
+  // IMPORTANT: do not add images array at all to keep payload smaller
+  return {
+    ...product,
+    tags_list: parseTags(product.tags),
+    primary_image: product.image_url || ''
+  };
+}
+
 async function enrichProduct(product) {
   if (!product) return null;
   const images = await getProductImages(product.id);
@@ -190,6 +213,13 @@ async function enrichProducts(products = []) {
     const images = imagesMap.get(Number(product.id)) || [];
     return enrichProductWithImages(product, images);
   });
+}
+
+async function enrichProductsMaybe(products = [], includeImages = false) {
+  if (!includeImages) {
+    return products.map(enrichProductWithoutImages);
+  }
+  return await enrichProducts(products);
 }
 
 function normalizeIncomingProductBody(body = {}) {
@@ -275,6 +305,7 @@ router.get('/stats/summary', async (req, res) => {
 
 /**
  * GET /api/products/slug/:slug
+ * (always include images for product page)
  */
 router.get('/slug/:slug', async (req, res) => {
   try {
@@ -496,9 +527,7 @@ router.put('/:id', async (req, res) => {
 
     if (productName !== undefined) {
       const finalName = normalizeText(productName);
-      if (!finalName) {
-        return res.status(400).json({ success: false, error: 'اسم المنتج غير صحيح' });
-      }
+      if (!finalName) return res.status(400).json({ success: false, error: 'اسم المنتج غير صحيح' });
       updateFields.push('product_name = ?');
       updateValues.push(finalName);
     }
@@ -511,9 +540,7 @@ router.put('/:id', async (req, res) => {
         DB_OP_TIMEOUT_MS,
         'checkSlugUniqueOnUpdate'
       );
-      if (existingSlug) {
-        return res.status(409).json({ success: false, error: 'الـ slug مستخدم بالفعل' });
-      }
+      if (existingSlug) return res.status(409).json({ success: false, error: 'الـ slug مستخدم بالفعل' });
 
       updateFields.push('slug = ?');
       updateValues.push(finalSlug);
@@ -528,9 +555,7 @@ router.put('/:id', async (req, res) => {
           DB_OP_TIMEOUT_MS,
           'checkSkuUniqueOnUpdate'
         );
-        if (existingSku) {
-          return res.status(409).json({ success: false, error: 'SKU مستخدم بالفعل' });
-        }
+        if (existingSku) return res.status(409).json({ success: false, error: 'SKU مستخدم بالفعل' });
       }
 
       updateFields.push('sku = ?');
@@ -552,21 +577,18 @@ router.put('/:id', async (req, res) => {
     }
 
     if (salePrice !== undefined) {
-      const finalSalePrice = toNumber(salePrice, 0);
       updateFields.push('sale_price = ?');
-      updateValues.push(finalSalePrice);
+      updateValues.push(toNumber(salePrice, 0));
     }
 
     if (stock !== undefined) {
-      const finalStock = toInteger(stock, 0);
       updateFields.push('stock = ?');
-      updateValues.push(finalStock);
+      updateValues.push(toInteger(stock, 0));
     }
 
     if (status !== undefined) {
-      const finalStatus = normalizeStatus(status);
       updateFields.push('status = ?');
-      updateValues.push(finalStatus);
+      updateValues.push(normalizeStatus(status));
     }
 
     if (productType !== undefined) {
@@ -708,10 +730,12 @@ router.delete('/:id', async (req, res) => {
 
 /**
  * GET /api/products/:id
+ * Supports ?includeImages=1 (default 1 for single)
  */
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const includeImages = parseBooleanFlag(req.query.includeImages, true);
 
     const product = await withTimeout(
       db.get(
@@ -733,7 +757,10 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ success: false, error: 'المنتج غير موجود' });
     }
 
-    const enrichedProduct = await enrichProduct(product);
+    const enrichedProduct = includeImages
+      ? await enrichProduct(product)
+      : enrichProductWithoutImages(product);
+
     return res.json({ success: true, data: enrichedProduct });
   } catch (error) {
     console.error('❌ خطأ في جلب المنتج:', error);
@@ -743,12 +770,6 @@ router.get('/:id', async (req, res) => {
 
 /**
  * GET /api/products
- *
- * Fixes:
- * - avoid SELECT *
- * - cap limit
- * - guard search length
- * - optional cursor pagination (created_at/id)
  */
 router.get('/', async (req, res) => {
   try {
@@ -760,8 +781,11 @@ router.get('/', async (req, res) => {
       sort = 'created_at',
       order = 'DESC',
       cursorCreatedAt,
-      cursorId
+      cursorId,
+      includeImages
     } = req.query;
+
+    const includeImagesFlag = parseBooleanFlag(includeImages, false);
 
     const validSortColumns = [
       'created_at',
@@ -850,8 +874,10 @@ router.get('/', async (req, res) => {
     let sql =
       `SELECT
         id, product_name, slug, sku,
+        description,
         price, sale_price, image_url, stock, status,
         product_type, vendor, category, tags,
+        seo_title, seo_description,
         created_at, updated_at
        FROM products`;
 
@@ -870,11 +896,22 @@ router.get('/', async (req, res) => {
     }
 
     const products = await withTimeout(db.all(sql, params), DB_OP_TIMEOUT_MS, 'listProducts');
-    const enriched = await enrichProducts(products);
+    const enriched = await enrichProductsMaybe(products, includeImagesFlag);
 
-    // totalPages/total اختياريين — هنحسبهم فقط لما مش بنستخدم cursor
+    // IMPORTANT:
+    // - COUNT(*) can be expensive under load, and is not required for UI to function.
+    // - We'll compute it only when:
+    //   - not using cursor
+    //   - limit is moderate
+    //   - search is empty or short
+    const shouldCount =
+      !useCursor &&
+      parsedLimit <= 200 &&
+      !searchValue;
+
     let total = null;
-    if (!useCursor) {
+
+    if (shouldCount) {
       try {
         let countSql = `SELECT COUNT(*) as total FROM products`;
         const countParams = [];
@@ -894,7 +931,7 @@ router.get('/', async (req, res) => {
 
         const countResult = await withTimeout(db.get(countSql, countParams), DB_OP_TIMEOUT_MS, 'countProducts');
         total = Number(countResult?.total || 0);
-      } catch (e) {
+      } catch (_) {
         total = null;
       }
     }

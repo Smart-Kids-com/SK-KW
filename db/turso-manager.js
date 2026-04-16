@@ -6,11 +6,20 @@ const { SYSTEM_CONFIG } = require('../config/system');
 const USE_TURSO = !!process.env.DATABASE_URL;
 const DB_PATH = path.join(__dirname, '.', SYSTEM_CONFIG.DATABASE_CONFIG.NAME);
 
-const TURSO_OP_TIMEOUT_MS = Number(process.env.TURSO_OP_TIMEOUT_MS || 12_000);
-const TURSO_INIT_TIMEOUT_MS = Number(process.env.TURSO_INIT_TIMEOUT_MS || 5_000);
+// IMPORTANT: make timeouts more forgiving in production
+const TURSO_OP_TIMEOUT_MS = Number(process.env.TURSO_OP_TIMEOUT_MS || 25_000);
+const TURSO_INIT_TIMEOUT_MS = Number(process.env.TURSO_INIT_TIMEOUT_MS || 8_000);
+
+// Retry once on timeouts (and some transient errors)
+const TURSO_RETRY_ON_TIMEOUT = String(process.env.TURSO_RETRY_ON_TIMEOUT ?? '1') !== '0';
+const TURSO_RETRY_DELAY_MS = Number(process.env.TURSO_RETRY_DELAY_MS || 180);
 
 let client = null;
 let clientInitPromise = null;
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 function withTimeout(promise, ms, label = 'operation') {
   let timer;
@@ -19,6 +28,27 @@ function withTimeout(promise, ms, label = 'operation') {
   });
 
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+function isTimeoutError(err) {
+  const msg = String(err?.message || '').toLowerCase();
+  return msg.includes('timed out') || msg.includes('timeout') || msg.includes('aborted');
+}
+
+async function withRetry(fn, label = 'operation') {
+  try {
+    return await fn();
+  } catch (err) {
+    if (!TURSO_RETRY_ON_TIMEOUT || !isTimeoutError(err)) {
+      throw err;
+    }
+
+    console.warn(`⚠️ ${label}: timeout detected, retrying once after ${TURSO_RETRY_DELAY_MS}ms...`);
+    await sleep(TURSO_RETRY_DELAY_MS);
+
+    // retry once
+    return await fn();
+  }
 }
 
 class DatabaseManager {
@@ -43,7 +73,10 @@ class DatabaseManager {
       (async () => {
         console.log('🌐 اتصال بـ Turso (إنتاج)');
         const c = createClient({ url, authToken });
+
+        // validate connection
         await c.execute({ sql: 'SELECT 1 as ok', args: [] });
+
         client = c;
         console.log('✅ تم الاتصال بـ Turso بنجاح');
         return client;
@@ -78,9 +111,7 @@ class DatabaseManager {
   }
 
   async close() {
-    if (this.useTurso) {
-      return;
-    }
+    if (this.useTurso) return;
 
     return new Promise((resolve, reject) => {
       if (this.db) {
@@ -103,9 +134,8 @@ class DatabaseManager {
     if (this.useTurso) {
       try {
         const c = await this.ensureTursoClient();
-        const result = await withTimeout(
-          c.execute({ sql, args: params }),
-          TURSO_OP_TIMEOUT_MS,
+        const result = await withRetry(
+          () => withTimeout(c.execute({ sql, args: params }), TURSO_OP_TIMEOUT_MS, 'Turso run'),
           'Turso run'
         );
         return { id: result.lastInsertRowid, changes: result.rowsAffected };
@@ -127,9 +157,8 @@ class DatabaseManager {
     if (this.useTurso) {
       try {
         const c = await this.ensureTursoClient();
-        const result = await withTimeout(
-          c.execute({ sql, args: params }),
-          TURSO_OP_TIMEOUT_MS,
+        const result = await withRetry(
+          () => withTimeout(c.execute({ sql, args: params }), TURSO_OP_TIMEOUT_MS, 'Turso get'),
           'Turso get'
         );
         return result.rows.length > 0 ? result.rows[0] : null;
@@ -151,9 +180,8 @@ class DatabaseManager {
     if (this.useTurso) {
       try {
         const c = await this.ensureTursoClient();
-        const result = await withTimeout(
-          c.execute({ sql, args: params }),
-          TURSO_OP_TIMEOUT_MS,
+        const result = await withRetry(
+          () => withTimeout(c.execute({ sql, args: params }), TURSO_OP_TIMEOUT_MS, 'Turso all'),
           'Turso all'
         );
         return result.rows;
@@ -175,15 +203,25 @@ class DatabaseManager {
     if (this.useTurso) {
       try {
         const c = await this.ensureTursoClient();
-        await withTimeout(c.execute('BEGIN TRANSACTION'), TURSO_OP_TIMEOUT_MS, 'Turso BEGIN');
+
+        await withRetry(
+          () => withTimeout(c.execute('BEGIN TRANSACTION'), TURSO_OP_TIMEOUT_MS, 'Turso BEGIN'),
+          'Turso BEGIN'
+        );
 
         try {
           const result = await callback();
-          await withTimeout(c.execute('COMMIT'), TURSO_OP_TIMEOUT_MS, 'Turso COMMIT');
+          await withRetry(
+            () => withTimeout(c.execute('COMMIT'), TURSO_OP_TIMEOUT_MS, 'Turso COMMIT'),
+            'Turso COMMIT'
+          );
           return result;
         } catch (err) {
           try {
-            await withTimeout(c.execute('ROLLBACK'), TURSO_OP_TIMEOUT_MS, 'Turso ROLLBACK');
+            await withRetry(
+              () => withTimeout(c.execute('ROLLBACK'), TURSO_OP_TIMEOUT_MS, 'Turso ROLLBACK'),
+              'Turso ROLLBACK'
+            );
           } catch (rollbackErr) {
             console.error('❌ خطأ Turso (ROLLBACK):', rollbackErr);
           }
@@ -333,24 +371,33 @@ class DatabaseManager {
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
       )`,
 
+      // Orders indexes
       `CREATE INDEX IF NOT EXISTS idx_order_number ON ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}(order_number)`,
       `CREATE INDEX IF NOT EXISTS idx_order_status ON ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}(status)`,
       `CREATE INDEX IF NOT EXISTS idx_order_created_at ON ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS}(created_at)`,
       `CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON ${SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS}(order_id)`,
 
+      // Products indexes (important for performance)
       `CREATE INDEX IF NOT EXISTS idx_products_status ON products(status)`,
       `CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at)`,
+      `CREATE INDEX IF NOT EXISTS idx_products_updated_at ON products(updated_at)`,
+      `CREATE INDEX IF NOT EXISTS idx_products_status_created_at ON products(status, created_at)`,
       `CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug)`,
       `CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku)`,
+      `CREATE INDEX IF NOT EXISTS idx_products_product_name ON products(product_name)`,
 
+      // Product images indexes
       `CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON product_images(product_id)`,
       `CREATE INDEX IF NOT EXISTS idx_product_images_sort_order ON product_images(sort_order)`,
+      `CREATE INDEX IF NOT EXISTS idx_product_images_product_sort ON product_images(product_id, sort_order, id)`,
 
+      // Collections indexes
       `CREATE INDEX IF NOT EXISTS idx_collections_slug ON collections(slug)`,
       `CREATE INDEX IF NOT EXISTS idx_collections_status ON collections(status)`,
       `CREATE INDEX IF NOT EXISTS idx_collection_products_collection_id ON collection_products(collection_id)`,
       `CREATE INDEX IF NOT EXISTS idx_collection_products_product_id ON collection_products(product_id)`,
-      `CREATE INDEX IF NOT EXISTS idx_collection_products_sort_order ON collection_products(sort_order)`
+      `CREATE INDEX IF NOT EXISTS idx_collection_products_sort_order ON collection_products(sort_order)`,
+      `CREATE INDEX IF NOT EXISTS idx_collection_products_collection_sort ON collection_products(collection_id, sort_order, id)`
     ];
 
     for (const sql of sqlCommands) {
