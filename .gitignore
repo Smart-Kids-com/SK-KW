@@ -47,3 +47,6 @@ BRANDING_APPLY_REPORT.txt
 local.txt
 remote.txt
 tree-needed.txt
+
+# SQLite database files
+db/*.db
