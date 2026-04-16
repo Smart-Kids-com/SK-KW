@@ -2,6 +2,30 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/turso-manager');
 
+/**
+ * Guardrails
+ */
+const DB_OP_TIMEOUT_MS = 25_000;
+const MAX_SETTINGS_KEYS = 50;
+const ALLOWED_SECTION_TYPES = [
+  'hero_slider',
+  'featured_collection',
+  'featured_products',
+  'banner',
+  'rich_text'
+];
+
+function withTimeout(promise, ms, label = 'operation') {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(
+      () => reject(new Error(`${label} timed out after ${ms}ms`)),
+      ms
+    );
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
 function normalizeText(value = '') {
   return String(value || '').trim();
 }
@@ -40,57 +64,81 @@ function stringifySettings(settings) {
 }
 
 async function ensureThemeTables() {
-  await db.run(`
-    CREATE TABLE IF NOT EXISTS theme_pages (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      page_key TEXT NOT NULL UNIQUE,
-      title TEXT NOT NULL,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+  await withTimeout(
+    db.run(`
+      CREATE TABLE IF NOT EXISTS theme_pages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        page_key TEXT NOT NULL UNIQUE,
+        title TEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `),
+    DB_OP_TIMEOUT_MS,
+    'createThemePagesTable'
+  );
 
-  await db.run(`
-    CREATE TABLE IF NOT EXISTS theme_sections (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      page_id INTEGER NOT NULL,
-      type TEXT NOT NULL,
-      title TEXT NOT NULL,
-      settings_json TEXT NOT NULL DEFAULT '{}',
-      sort_order INTEGER NOT NULL DEFAULT 0,
-      is_visible INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (page_id) REFERENCES theme_pages(id) ON DELETE CASCADE
-    )
-  `);
+  await withTimeout(
+    db.run(`
+      CREATE TABLE IF NOT EXISTS theme_sections (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        page_id INTEGER NOT NULL,
+        type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        settings_json TEXT NOT NULL DEFAULT '{}',
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        is_visible INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (page_id) REFERENCES theme_pages(id) ON DELETE CASCADE
+      )
+    `),
+    DB_OP_TIMEOUT_MS,
+    'createThemeSectionsTable'
+  );
 
-  await db.run(`
-    CREATE TABLE IF NOT EXISTS theme_settings (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      setting_key TEXT NOT NULL UNIQUE,
-      setting_value TEXT NOT NULL DEFAULT '',
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+  await withTimeout(
+    db.run(`
+      CREATE TABLE IF NOT EXISTS theme_settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        setting_key TEXT NOT NULL UNIQUE,
+        setting_value TEXT NOT NULL DEFAULT '',
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `),
+    DB_OP_TIMEOUT_MS,
+    'createThemeSettingsTable'
+  );
 
-  await db.run(`
-    INSERT OR IGNORE INTO theme_pages (page_key, title)
-    VALUES ('home', 'Homepage')
-  `);
+  await withTimeout(
+    db.run(`
+      INSERT OR IGNORE INTO theme_pages (page_key, title)
+      VALUES ('home', 'Homepage')
+    `),
+    DB_OP_TIMEOUT_MS,
+    'seedHomePage'
+  );
 }
 
 async function getPageByKey(pageKey) {
-  return await db.get(`SELECT * FROM theme_pages WHERE page_key = ?`, [pageKey]);
+  return await withTimeout(
+    db.get(`SELECT * FROM theme_pages WHERE page_key = ?`, [pageKey]),
+    DB_OP_TIMEOUT_MS,
+    'getPageByKey'
+  );
 }
 
 async function getSectionsForPage(pageId) {
-  const rows = await db.all(
-    `SELECT * FROM theme_sections
-     WHERE page_id = ?
-     ORDER BY sort_order ASC, id ASC`,
-    [pageId]
+  const rows = await withTimeout(
+    db.all(
+      `SELECT * FROM theme_sections
+       WHERE page_id = ?
+       ORDER BY sort_order ASC, id ASC`,
+      [pageId]
+    ),
+    DB_OP_TIMEOUT_MS,
+    'getSectionsForPage'
   );
 
   return rows.map(row => ({
@@ -101,18 +149,26 @@ async function getSectionsForPage(pageId) {
 }
 
 async function reindexSections(pageId) {
-  const rows = await db.all(
-    `SELECT id FROM theme_sections WHERE page_id = ? ORDER BY sort_order ASC, id ASC`,
-    [pageId]
+  const rows = await withTimeout(
+    db.all(
+      `SELECT id FROM theme_sections WHERE page_id = ? ORDER BY sort_order ASC, id ASC`,
+      [pageId]
+    ),
+    DB_OP_TIMEOUT_MS,
+    'reindexSectionsSelect'
   );
 
   let i = 1;
   for (const row of rows) {
-    await db.run(
-      `UPDATE theme_sections
-       SET sort_order = ?, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?`,
-      [i, row.id]
+    await withTimeout(
+      db.run(
+        `UPDATE theme_sections
+         SET sort_order = ?, updated_at = CURRENT_TIMESTAMP
+         WHERE id = ?`,
+        [i, row.id]
+      ),
+      DB_OP_TIMEOUT_MS,
+      `reindexSection#${row.id}`
     );
     i += 1;
   }
@@ -217,30 +273,49 @@ router.post('/pages/:pageKey/sections', async (req, res) => {
       });
     }
 
-    const lastRow = await db.get(
-      `SELECT MAX(sort_order) as maxOrder FROM theme_sections WHERE page_id = ?`,
-      [page.id]
+    if (!ALLOWED_SECTION_TYPES.includes(type)) {
+      return res.status(400).json({
+        success: false,
+        error: `نوع القسم غير صحيح. الأنواع المسموحة: ${ALLOWED_SECTION_TYPES.join(', ')}`
+      });
+    }
+
+    const lastRow = await withTimeout(
+      db.get(
+        `SELECT MAX(sort_order) as maxOrder FROM theme_sections WHERE page_id = ?`,
+        [page.id]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'getMaxSortOrder'
     );
 
     const nextOrder = Number(lastRow?.maxOrder || 0) + 1;
 
-    await db.run(
-      `INSERT INTO theme_sections
-      (page_id, type, title, settings_json, sort_order, is_visible)
-      VALUES (?, ?, ?, ?, ?, ?)`,
-      [
-        page.id,
-        type,
-        title,
-        stringifySettings(settings),
-        nextOrder,
-        isVisible
-      ]
+    await withTimeout(
+      db.run(
+        `INSERT INTO theme_sections
+        (page_id, type, title, settings_json, sort_order, is_visible)
+        VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          page.id,
+          type,
+          title,
+          stringifySettings(settings),
+          nextOrder,
+          isVisible
+        ]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'insertSection'
     );
 
-    const created = await db.get(
-      `SELECT * FROM theme_sections WHERE page_id = ? ORDER BY id DESC LIMIT 1`,
-      [page.id]
+    const created = await withTimeout(
+      db.get(
+        `SELECT * FROM theme_sections WHERE page_id = ? ORDER BY id DESC LIMIT 1`,
+        [page.id]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'selectCreatedSection'
     );
 
     return res.status(201).json({
@@ -267,7 +342,11 @@ router.post('/pages/:pageKey/sections', async (req, res) => {
 router.put('/sections/:id', async (req, res) => {
   try {
     const sectionId = req.params.id;
-    const section = await db.get(`SELECT * FROM theme_sections WHERE id = ?`, [sectionId]);
+    const section = await withTimeout(
+      db.get(`SELECT * FROM theme_sections WHERE id = ?`, [sectionId]),
+      DB_OP_TIMEOUT_MS,
+      'getSectionById'
+    );
 
     if (!section) {
       return res.status(404).json({
@@ -280,8 +359,15 @@ router.put('/sections/:id', async (req, res) => {
     const values = [];
 
     if (req.body.type !== undefined) {
+      const newType = normalizeText(req.body.type);
+      if (!ALLOWED_SECTION_TYPES.includes(newType)) {
+        return res.status(400).json({
+          success: false,
+          error: `نوع القسم غير صحيح. الأنواع المسموحة: ${ALLOWED_SECTION_TYPES.join(', ')}`
+        });
+      }
       updateFields.push('type = ?');
-      values.push(normalizeText(req.body.type));
+      values.push(newType);
     }
 
     if (req.body.title !== undefined) {
@@ -314,18 +400,30 @@ router.put('/sections/:id', async (req, res) => {
     updateFields.push('updated_at = CURRENT_TIMESTAMP');
     values.push(sectionId);
 
-    await db.run(
-      `UPDATE theme_sections
-       SET ${updateFields.join(', ')}
-       WHERE id = ?`,
-      values
+    await withTimeout(
+      db.run(
+        `UPDATE theme_sections
+         SET ${updateFields.join(', ')}
+         WHERE id = ?`,
+        values
+      ),
+      DB_OP_TIMEOUT_MS,
+      'updateSection'
     );
 
-    const updated = await db.get(`SELECT * FROM theme_sections WHERE id = ?`, [sectionId]);
+    const updated = await withTimeout(
+      db.get(`SELECT * FROM theme_sections WHERE id = ?`, [sectionId]),
+      DB_OP_TIMEOUT_MS,
+      'getUpdatedSection'
+    );
 
     await reindexSections(updated.page_id);
 
-    const refreshed = await db.get(`SELECT * FROM theme_sections WHERE id = ?`, [sectionId]);
+    const refreshed = await withTimeout(
+      db.get(`SELECT * FROM theme_sections WHERE id = ?`, [sectionId]),
+      DB_OP_TIMEOUT_MS,
+      'getRefreshedSection'
+    );
 
     return res.json({
       success: true,
@@ -351,7 +449,11 @@ router.put('/sections/:id', async (req, res) => {
 router.delete('/sections/:id', async (req, res) => {
   try {
     const sectionId = req.params.id;
-    const section = await db.get(`SELECT * FROM theme_sections WHERE id = ?`, [sectionId]);
+    const section = await withTimeout(
+      db.get(`SELECT * FROM theme_sections WHERE id = ?`, [sectionId]),
+      DB_OP_TIMEOUT_MS,
+      'getSectionById'
+    );
 
     if (!section) {
       return res.status(404).json({
@@ -360,7 +462,12 @@ router.delete('/sections/:id', async (req, res) => {
       });
     }
 
-    await db.run(`DELETE FROM theme_sections WHERE id = ?`, [sectionId]);
+    await withTimeout(
+      db.run(`DELETE FROM theme_sections WHERE id = ?`, [sectionId]),
+      DB_OP_TIMEOUT_MS,
+      'deleteSection'
+    );
+
     await reindexSections(section.page_id);
 
     return res.json({
@@ -382,7 +489,11 @@ router.delete('/sections/:id', async (req, res) => {
 router.post('/sections/:id/duplicate', async (req, res) => {
   try {
     const sectionId = req.params.id;
-    const section = await db.get(`SELECT * FROM theme_sections WHERE id = ?`, [sectionId]);
+    const section = await withTimeout(
+      db.get(`SELECT * FROM theme_sections WHERE id = ?`, [sectionId]),
+      DB_OP_TIMEOUT_MS,
+      'getSectionById'
+    );
 
     if (!section) {
       return res.status(404).json({
@@ -391,30 +502,42 @@ router.post('/sections/:id/duplicate', async (req, res) => {
       });
     }
 
-    const lastRow = await db.get(
-      `SELECT MAX(sort_order) as maxOrder FROM theme_sections WHERE page_id = ?`,
-      [section.page_id]
+    const lastRow = await withTimeout(
+      db.get(
+        `SELECT MAX(sort_order) as maxOrder FROM theme_sections WHERE page_id = ?`,
+        [section.page_id]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'getMaxSortOrderForDuplicate'
     );
 
     const nextOrder = Number(lastRow?.maxOrder || 0) + 1;
 
-    await db.run(
-      `INSERT INTO theme_sections
-      (page_id, type, title, settings_json, sort_order, is_visible)
-      VALUES (?, ?, ?, ?, ?, ?)`,
-      [
-        section.page_id,
-        section.type,
-        `${section.title} - Copy`,
-        section.settings_json || '{}',
-        nextOrder,
-        Number(section.is_visible || 0)
-      ]
+    await withTimeout(
+      db.run(
+        `INSERT INTO theme_sections
+        (page_id, type, title, settings_json, sort_order, is_visible)
+        VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          section.page_id,
+          section.type,
+          `${section.title} - Copy`,
+          section.settings_json || '{}',
+          nextOrder,
+          Number(section.is_visible || 0)
+        ]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'insertDuplicateSection'
     );
 
-    const created = await db.get(
-      `SELECT * FROM theme_sections WHERE page_id = ? ORDER BY id DESC LIMIT 1`,
-      [section.page_id]
+    const created = await withTimeout(
+      db.get(
+        `SELECT * FROM theme_sections WHERE page_id = ? ORDER BY id DESC LIMIT 1`,
+        [section.page_id]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'selectDuplicatedSection'
     );
 
     return res.status(201).json({
@@ -451,7 +574,10 @@ router.post('/pages/:pageKey/reorder', async (req, res) => {
       });
     }
 
-    const sectionIds = Array.isArray(req.body.sectionIds) ? req.body.sectionIds : [];
+    const rawIds = Array.isArray(req.body.sectionIds) ? req.body.sectionIds : [];
+    const sectionIds = rawIds
+      .map(id => parseInt(id, 10))
+      .filter(id => Number.isFinite(id) && id > 0);
 
     if (!sectionIds.length) {
       return res.status(400).json({
@@ -462,11 +588,15 @@ router.post('/pages/:pageKey/reorder', async (req, res) => {
 
     let order = 1;
     for (const sectionId of sectionIds) {
-      await db.run(
-        `UPDATE theme_sections
-         SET sort_order = ?, updated_at = CURRENT_TIMESTAMP
-         WHERE id = ? AND page_id = ?`,
-        [order, sectionId, page.id]
+      await withTimeout(
+        db.run(
+          `UPDATE theme_sections
+           SET sort_order = ?, updated_at = CURRENT_TIMESTAMP
+           WHERE id = ? AND page_id = ?`,
+          [order, sectionId, page.id]
+        ),
+        DB_OP_TIMEOUT_MS,
+        `reorderSection#${sectionId}`
       );
       order += 1;
     }
@@ -493,7 +623,11 @@ router.post('/pages/:pageKey/reorder', async (req, res) => {
  */
 router.get('/settings', async (req, res) => {
   try {
-    const rows = await db.all(`SELECT * FROM theme_settings ORDER BY id ASC`);
+    const rows = await withTimeout(
+      db.all(`SELECT * FROM theme_settings ORDER BY id ASC`),
+      DB_OP_TIMEOUT_MS,
+      'getThemeSettings'
+    );
     const settings = {};
 
     for (const row of rows) {
@@ -520,23 +654,32 @@ router.get('/settings', async (req, res) => {
 router.put('/settings', async (req, res) => {
   try {
     const settings = req.body.settings || {};
+    const entries = Object.entries(settings).slice(0, MAX_SETTINGS_KEYS);
 
-    for (const [key, value] of Object.entries(settings)) {
+    for (const [key, value] of entries) {
       const settingKey = normalizeText(key);
       if (!settingKey) continue;
 
-      await db.run(
-        `INSERT INTO theme_settings (setting_key, setting_value)
-         VALUES (?, ?)
-         ON CONFLICT(setting_key)
-         DO UPDATE SET
-           setting_value = excluded.setting_value,
-           updated_at = CURRENT_TIMESTAMP`,
-        [settingKey, String(value ?? '')]
+      await withTimeout(
+        db.run(
+          `INSERT INTO theme_settings (setting_key, setting_value)
+           VALUES (?, ?)
+           ON CONFLICT(setting_key)
+           DO UPDATE SET
+             setting_value = excluded.setting_value,
+             updated_at = CURRENT_TIMESTAMP`,
+          [settingKey, String(value ?? '')]
+        ),
+        DB_OP_TIMEOUT_MS,
+        `upsertSetting:${settingKey}`
       );
     }
 
-    const rows = await db.all(`SELECT * FROM theme_settings ORDER BY id ASC`);
+    const rows = await withTimeout(
+      db.all(`SELECT * FROM theme_settings ORDER BY id ASC`),
+      DB_OP_TIMEOUT_MS,
+      'getThemeSettingsAfterSave'
+    );
     const output = {};
     for (const row of rows) {
       output[row.setting_key] = row.setting_value;

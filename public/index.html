@@ -1286,19 +1286,32 @@
       el.scrollBy({ left: dir * amount, behavior: 'smooth' });
     }
 
-    async function fetchJson(url) {
-      const response = await fetch(url, {
-        cache: 'no-store',
-        headers: { Accept: 'application/json' }
-      });
+    async function fetchJson(url, timeoutMs = 15000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-      const result = await response.json().catch(() => null);
+      try {
+        const response = await fetch(url, {
+          cache: 'no-store',
+          signal: controller.signal,
+          headers: { Accept: 'application/json' }
+        });
 
-      if (!response.ok || !result || !result.success) {
-        throw new Error(result?.error || `HTTP ${response.status}`);
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok || !result || !result.success) {
+          throw new Error(result?.error || `HTTP ${response.status}`);
+        }
+
+        return result.data;
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          throw new Error(`Request timeout: ${url}`);
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
       }
-
-      return result.data;
     }
 
     async function fetchAllProducts() {
@@ -1313,8 +1326,9 @@
 
     async function fetchAllCollections() {
       try {
-        const data = await fetchJson(`${COLLECTIONS_API}?limit=${HOME_COLLECTIONS_LIMIT}&offset=0&sort=created_at&order=DESC`);
-        return Array.isArray(data) ? data.filter(item => String(item.status || 'active').toLowerCase() !== 'archived') : [];
+        // Uses status=active at API level; API is the authoritative filter
+        const data = await fetchJson(`${COLLECTIONS_API}?status=active&limit=${HOME_COLLECTIONS_LIMIT}&offset=0&sort=created_at&order=DESC`);
+        return Array.isArray(data) ? data : [];
       } catch (error) {
         console.warn('Failed to fetch collections', error);
         return [];
@@ -1330,18 +1344,178 @@
       return Array.from(map.values());
     }
 
+    /* ─── Theme Integration ──────────────────────────────── */
+
+    async function fetchThemeSettings() {
+      try { return await fetchJson('/api/theme/settings'); } catch { return {}; }
+    }
+
+    async function fetchHomeSections() {
+      try {
+        const data = await fetchJson('/api/theme/pages/home');
+        return Array.isArray(data.sections) ? data.sections : [];
+      } catch { return []; }
+    }
+
+    function applyThemeSettings(settings) {
+      if (!settings || !Object.keys(settings).length) return;
+
+      // Validate hex color before injecting into CSS to prevent CSS injection
+      const HEX_RE = /^#[0-9a-fA-F]{6}$/;
+      function safeHex(val) { return HEX_RE.test(String(val || '')) ? val : null; }
+
+      // Inject dynamic CSS variables (only validated hex values)
+      const primaryColor   = safeHex(settings.primaryColor);
+      const topbarColor    = safeHex(settings.topbarColor);
+      const secondaryColor = safeHex(settings.secondaryColor);
+      const accentColor    = safeHex(settings.accentColor);
+
+      let css = ':root {';
+      if (primaryColor)   css += `--bg:${primaryColor};--bg-2:${primaryColor};--deep-purple:${primaryColor};`;
+      if (secondaryColor) css += `--blue:${secondaryColor};`;
+      if (accentColor)    css += `--accent:${accentColor};`;
+      css += '}';
+      if (topbarColor)  css += `.topbar{background:${topbarColor}!important;}`;
+      if (primaryColor) css += `.drawer{background:${primaryColor}!important;}`;
+
+      let styleTag = document.getElementById('theme-dynamic-vars');
+      if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = 'theme-dynamic-vars';
+        document.head.appendChild(styleTag);
+      }
+      styleTag.textContent = css;
+
+      // Topbar text — use textContent to prevent XSS
+      if (settings.announcementText) {
+        const bar = document.querySelector('.topbar');
+        if (bar) {
+          const iconSpan = document.createElement('span');
+          iconSpan.textContent = settings.announcementIcon || '←';
+          const textSpan = document.createElement('span');
+          textSpan.textContent = settings.announcementText;
+          bar.innerHTML = '';
+          bar.appendChild(iconSpan);
+          bar.appendChild(textSpan);
+        }
+      }
+
+      // Logo — only allow http/https URLs
+      if (settings.logoUrl && /^https?:\/\//i.test(settings.logoUrl)) {
+        document.querySelectorAll('.logo-wrap img, .drawer-logo img').forEach(img => {
+          img.src = settings.logoUrl;
+        });
+      }
+
+      // WhatsApp floating button — only allow digits
+      if (settings.whatsappNumber && /^\d{7,15}$/.test(settings.whatsappNumber)) {
+        const wa = document.querySelector('.whatsapp-float');
+        if (wa) wa.href = `https://wa.me/${settings.whatsappNumber}`;
+      }
+    }
+
+    // Build hero from theme hero_slider section (custom image slides)
+    function buildHeroFromSlides(sectionSettings) {
+      const slides = Array.isArray(sectionSettings.slides)
+        ? sectionSettings.slides.filter(s => s && s.imageUrl)
+        : [];
+      if (!slides.length) return false;
+
+      const track = document.getElementById('heroTrack');
+      const dots  = document.getElementById('heroDots');
+      heroState.items   = slides;
+      heroState.current = 0;
+
+      track.innerHTML = slides.map(slide => `
+        <div class="hero-slide">
+          <a class="hero-card" href="${escapeHtml(slide.link || '#')}">
+            <div class="hero-image">
+              <img src="${escapeHtml(slide.imageUrl)}"
+                alt="${escapeHtml(slide.buttonText || '')}" loading="eager"
+                style="width:100%;height:100%;object-fit:cover;">
+            </div>
+            ${slide.buttonText
+              ? `<div class="hero-info"><div class="hero-btn">${escapeHtml(slide.buttonText)}</div></div>`
+              : ''}
+          </a>
+        </div>`).join('');
+
+      dots.innerHTML = slides.map((_, i) => `
+        <button class="hero-dot ${i === 0 ? 'active' : ''}" type="button"
+          data-dot-index="${i}" aria-label="Slide ${i + 1}"></button>`).join('');
+
+      dots.querySelectorAll('[data-dot-index]').forEach(dot => {
+        dot.addEventListener('click', () => {
+          goToHeroSlide(Number(dot.dataset.dotIndex || 0));
+          restartHeroAuto();
+        });
+      });
+
+      updateHeroUi();
+      const autoplay  = sectionSettings.autoplay !== false;
+      const interval  = Number(sectionSettings.interval) || 4000;
+      if (autoplay && slides.length > 1) {
+        clearInterval(heroState.timer);
+        heroState.timer = setInterval(nextHero, interval);
+      }
+      return true;
+    }
+
+    // Inject banner sections into the page after the hero
+    function injectBannerSections(themeSections) {
+      const banners = themeSections.filter(
+        s => s.type === 'banner' && Number(s.is_visible) === 1 && s.settings && s.settings.imageUrl
+      );
+      if (!banners.length) return;
+
+      const main = document.querySelector('main.page');
+      const hero = main && main.querySelector('.hero');
+      if (!main || !hero) return;
+
+      let anchor = hero;
+      for (const banner of banners) {
+        const s   = banner.settings;
+        const div = document.createElement('div');
+        div.style.cssText = 'margin:8px 0;';
+        div.innerHTML = `
+          <a href="${escapeHtml(s.link || '#')}"
+            style="display:block;border-radius:12px;overflow:hidden;">
+            <img src="${escapeHtml(s.imageUrl)}"
+              alt="${escapeHtml(s.text || 'Banner')}"
+              style="width:100%;display:block;">
+          </a>`;
+        anchor.insertAdjacentElement('afterend', div);
+        anchor = div;
+      }
+    }
+
     async function initPage() {
-      const [products, collections] = await Promise.all([
+      const [products, collections, themeSettings, themeSections] = await Promise.all([
         fetchAllProducts(),
-        fetchAllCollections()
+        fetchAllCollections(),
+        fetchThemeSettings(),
+        fetchHomeSections(),
       ]);
 
-      allProducts = uniqueProducts(products);
+      allProducts   = uniqueProducts(products);
       allCollections = collections;
 
+      // Apply colors, logo, topbar text, WhatsApp from theme
+      applyThemeSettings(themeSettings);
+
+      // Inject banner sections after hero
+      injectBannerSections(themeSections);
+
       updateCartCount();
-      buildHero(allProducts);
-      fillTrack('latestTrack', allProducts, 'products');
+
+      // Hero: use custom slides if configured, else fall back to products
+      const heroSection  = themeSections.find(
+        s => s.type === 'hero_slider' && Number(s.is_visible) === 1
+      );
+      const usedThemeHero = heroSection && buildHeroFromSlides(heroSection.settings || {});
+      if (!usedThemeHero) buildHero(allProducts);
+
+      fillTrack('latestTrack',     allProducts,    'products');
       fillTrack('collectionsTrack', allCollections, 'collections');
     }
 

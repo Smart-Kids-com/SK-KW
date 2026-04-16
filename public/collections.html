@@ -473,7 +473,7 @@
     }
 
     async function fetchCollectionsFromApi() {
-      const response = await fetch(`${COLLECTIONS_API}?limit=120&offset=0&sort=created_at&order=DESC`, {
+      const response = await fetch(`${COLLECTIONS_API}?status=active&limit=120&offset=0&sort=created_at&order=DESC`, {
         cache: 'no-store',
         headers: { Accept: 'application/json' }
       });
