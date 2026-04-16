@@ -7,7 +7,8 @@ function getCandidates() {
     return window.DATA_URL_CANDIDATES;
   }
 
-  return ["/api/products?status=active&limit=1000"];
+  // IMPORTANT: includeImages=0 keeps payload fast even with large limits
+  return ["/api/products?status=active&limit=800&includeImages=0"];
 }
 
 function safeCssEscape(v) {
@@ -31,7 +32,7 @@ function safeNumber(value, fallback = 0) {
   return Number.isFinite(n) ? n : fallback;
 }
 
-async function fetchJsonWithFallback(urls, timeoutMs = 20000) {
+async function fetchJsonWithFallback(urls, timeoutMs = 25000) {
   let lastErr = null;
 
   const withTimeout = (promise) =>

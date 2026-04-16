@@ -548,7 +548,6 @@
     function normalizeProduct(raw) {
       if (!raw || typeof raw !== 'object') return null;
 
-      const images = Array.isArray(raw.images) ? raw.images : [];
       const productName =
         raw.product_name ??
         raw.productName ??
@@ -587,7 +586,7 @@
         raw.imageUrl ??
         raw.image ??
         raw.thumbnail ??
-        (images[0]?.image_url || images[0]?.url || '');
+        '';
 
       const tagsList = Array.isArray(raw.tags_list)
         ? raw.tags_list
@@ -616,8 +615,7 @@
         seo_description: raw.seo_description ?? raw.seoDescription ?? raw.meta_description ?? '',
         primary_image: imageUrl,
         image_url: imageUrl,
-        tags_list: tagsList,
-        images
+        tags_list: tagsList
       };
     }
 
@@ -671,7 +669,7 @@
       ) || fallbackLength;
     }
 
-    async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 15000) {
+    async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 20000) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -750,6 +748,9 @@
         params.append('limit', '50');
         params.append('offset', '0');
 
+        // IMPORTANT: keep list fast, do NOT load images in list
+        params.append('includeImages', '0');
+
         const { response, result } = await fetchJsonWithTimeout(`${API_BASE}?${params.toString()}`);
 
         if (!response.ok) {
@@ -762,10 +763,6 @@
         renderProducts(currentProducts);
         updatePagination(currentProducts, getTotalFromResponse(result, currentProducts.length));
         updateSelectionUi();
-
-        if (!currentProducts.length) {
-          console.warn('Products response received but no rows matched expected structure:', result);
-        }
       } catch (error) {
         console.error('loadProducts error:', error);
         tbody.innerHTML = `
@@ -881,10 +878,7 @@
           tags: Array.isArray(product.tags_list) ? product.tags_list : [],
           seoTitle: product.seo_title || '',
           seoDescription: product.seo_description || '',
-          images: Array.isArray(product.images) ? product.images.map(img => ({
-            image_url: img.image_url || img.url || '',
-            sort_order: img.sort_order || 0
-          })) : []
+          images: [] // list calls don't include images; keep duplication simple
         };
 
         const { response, result } = await fetchJsonWithTimeout(API_BASE, {
@@ -1167,10 +1161,11 @@
     async function fetchImportLookup() {
       showAlert('جاري تجهيز بيانات المطابقة...', 'warning');
 
+      // IMPORTANT: do not request images during import lookup
       const { response, result } = await fetchJsonWithTimeout(
-        `${API_BASE}?limit=500&offset=0`,
+        `${API_BASE}?limit=500&offset=0&includeImages=0`,
         {},
-        15000
+        20000
       );
 
       if (!response.ok) {
@@ -1237,28 +1232,12 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
           },
-          15000
+          20000
         ));
 
         if (!response.ok || !(result?.success ?? true)) {
           throw new Error(result?.error || result?.message || `Failed to update ${payload.productName}`);
         }
-
-        const updatedRecord = normalizeProduct({
-          ...existing,
-          ...requestBody,
-          id: existing.id,
-          product_name: requestBody.productName,
-          sale_price: requestBody.salePrice,
-          product_type: requestBody.productType,
-          image_url: requestBody.imageUrl,
-          primary_image: requestBody.imageUrl,
-          tags_list: requestBody.tags
-        });
-
-        lookup.byId.set(String(existing.id), updatedRecord);
-        if (updatedRecord.slug) lookup.bySlug.set(String(updatedRecord.slug).trim().toLowerCase(), updatedRecord);
-        if (updatedRecord.sku) lookup.bySku.set(String(updatedRecord.sku).trim().toLowerCase(), updatedRecord);
 
         return 'updated';
       }
@@ -1270,27 +1249,12 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(requestBody)
         },
-        15000
+        20000
       ));
 
       if (!response.ok || !(result?.success ?? true)) {
         throw new Error(result?.error || result?.message || `Failed to create ${payload.productName}`);
       }
-
-      const createdData = normalizeProduct(result?.data || result?.product || {
-        ...requestBody,
-        id: result?.id || result?.data?.id || '',
-        product_name: requestBody.productName,
-        sale_price: requestBody.salePrice,
-        product_type: requestBody.productType,
-        image_url: requestBody.imageUrl,
-        primary_image: requestBody.imageUrl,
-        tags_list: requestBody.tags
-      });
-
-      if (createdData?.id) lookup.byId.set(String(createdData.id), createdData);
-      if (createdData?.slug) lookup.bySlug.set(String(createdData.slug).trim().toLowerCase(), createdData);
-      if (createdData?.sku) lookup.bySku.set(String(createdData.sku).trim().toLowerCase(), createdData);
 
       return 'created';
     }
@@ -1380,7 +1344,6 @@
         return;
       }
 
-      console.log('IMPORT FILE:', file);
       showAlert(`جاري رفع الملف: ${file.name}`, 'warning');
 
       try {
@@ -1398,11 +1361,13 @@
 
         showAlert(message, result.failed ? 'warning' : 'success');
 
-        if (result.failedRows?.length) {
-          console.warn('Import issues:', result.failedRows);
-        }
+        // IMPORTANT: do NOT do a heavy refresh immediately after many writes.
+        // We do a light refresh of the list only, and let summary refresh on next manual refresh.
+        try {
+          await loadProducts();
+        } catch (_) {}
 
-        await refreshPageData(false);
+        showAlert('تم الاستيراد. اضغط Refresh إذا أردت تحديث الإحصائيات أيضًا.', 'success');
       } catch (error) {
         console.error('IMPORT ERROR:', error);
         showAlert(error.message || 'Import failed', 'error');
