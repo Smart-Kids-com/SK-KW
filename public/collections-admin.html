@@ -543,7 +543,7 @@
       position:absolute;
       top:40px;
       right:0;
-      min-width:180px;
+      min-width:210px;
       background:#fff;
       border:1px solid #d1d5db;
       border-radius:14px;
@@ -756,14 +756,14 @@
       </div>
     </header>
 
-   <aside class="sidebar">
-  <div class="side-group">
-    <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
-    <a class="nav-item" href="/orders-admin.html"><span>📦 Orders</span><span class="badge-count" id="ordersCountBadge">—</span></a>
-    <a class="nav-item" href="/products-admin"><span>🏷️ Products</span></a>
-    <a class="nav-item active" href="/collections-admin"><span>🗂️ Collections</span></a>
-  </div>
-</aside>
+    <aside class="sidebar">
+      <div class="side-group">
+        <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
+        <a class="nav-item" href="/orders-admin.html"><span>📦 Orders</span><span class="badge-count" id="ordersCountBadge">—</span></a>
+        <a class="nav-item" href="/products-admin"><span>🏷️ Products</span></a>
+        <a class="nav-item active" href="/collections-admin"><span>🗂️ Collections</span></a>
+      </div>
+    </aside>
 
     <main class="main">
       <div class="page">
@@ -897,9 +897,8 @@
 
   <script>
     const API_BASE = '/api/collections';
-    const ADMIN_CREATE_PATH = '/collection.html';
+    const ADMIN_CREATE_PATH = '/collection-edit.html';
     const ADMIN_EDIT_PATH = '/collection-edit.html';
-    const FRONTEND_VIEW_PATH = '/collection.html';
 
     let currentTab = 'all';
     let currentOffset = 0;
@@ -1071,48 +1070,52 @@
         return;
       }
 
-      tbody.innerHTML = currentRows.map(row => `
-        <tr>
-          <td>
-            <input
-              class="check"
-              type="checkbox"
-              ${selectedCollectionIds.has(Number(row.id)) ? 'checked' : ''}
-              onchange="toggleRowSelection(${Number(row.id)}, this.checked)"
-            >
-          </td>
+      tbody.innerHTML = currentRows.map(row => {
+        const id = Number(row.id);
+        const status = String(row.status || 'active').toLowerCase();
+        const hideLabel = status === 'archived' ? 'Unhide from site' : 'Hide from site';
 
-          <td>
-            <div class="collection-cell">
-              ${getImageHtml(row)}
-              <div>
-                <button class="collection-name-btn" type="button" onclick="goToEditCollection(${Number(row.id)})">${escapeHtml(row.title)}</button>
-                <div class="collection-sub">/${escapeHtml(row.slug || '')}</div>
+        return `
+          <tr>
+            <td>
+              <input
+                class="check"
+                type="checkbox"
+                ${selectedCollectionIds.has(id) ? 'checked' : ''}
+                onchange="toggleRowSelection(${id}, this.checked)"
+              >
+            </td>
+
+            <td>
+              <div class="collection-cell">
+                ${getImageHtml(row)}
+                <div>
+                  <button class="collection-name-btn" type="button" onclick="goToEditCollection(${id})">${escapeHtml(row.title)}</button>
+                  <div class="collection-sub">/${escapeHtml(row.slug || '')}</div>
+                </div>
               </div>
-            </div>
-          </td>
+            </td>
 
-          <td>${Number(row.product_count || 0)}</td>
-          <td>${getStatusBadge(row.status)}</td>
-          <td>${escapeHtml(getSortLabel(row.sort_mode))}</td>
-          <td>${escapeHtml(formatDate(row.updated_at || row.created_at))}</td>
+            <td>${Number(row.product_count || 0)}</td>
+            <td>${getStatusBadge(row.status)}</td>
+            <td>${escapeHtml(getSortLabel(row.sort_mode))}</td>
+            <td>${escapeHtml(formatDate(row.updated_at || row.created_at))}</td>
 
-          <td>
-            <div class="table-actions">
-              <button class="mini-btn" type="button" onclick="goToEditCollection(${Number(row.id)})">Edit collection</button>
-              <button class="mini-btn dark" type="button" onclick="viewCollection(${Number(row.id)}, ${JSON.stringify(row.slug || '')})">View collection</button>
-              <button class="mini-btn" type="button" onclick="toggleRowMenu(${Number(row.id)})">More</button>
+            <td>
+              <div class="table-actions">
+                <button class="mini-btn dark" type="button" onclick="goToEditCollection(${id})">Edit collection</button>
+                <button class="mini-btn" type="button" onclick="toggleRowMenu(${id})">More</button>
 
-              <div id="rowMenu-${Number(row.id)}" class="row-dropdown">
-                <button type="button" onclick="duplicateCollection(${Number(row.id)})">Duplicate</button>
-                <button type="button" onclick="goToEditCollection(${Number(row.id)})">Edit collection</button>
-                <button type="button" onclick="viewCollection(${Number(row.id)}, ${JSON.stringify(row.slug || '')})">View collection</button>
-                <button type="button" class="danger" onclick="deleteCollection(${Number(row.id)}, ${JSON.stringify(row.title || '')})">Delete collection</button>
+                <div id="rowMenu-${id}" class="row-dropdown">
+                  <button type="button" onclick="duplicateCollection(${id})">Duplicate</button>
+                  <button type="button" onclick="toggleHideCollection(${id}, ${JSON.stringify(status)})">${hideLabel}</button>
+                  <button type="button" class="danger" onclick="deleteCollection(${id}, ${JSON.stringify(row.title || '')})">Delete collection</button>
+                </div>
               </div>
-            </div>
-          </td>
-        </tr>
-      `).join('');
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function renderPagination() {
@@ -1162,20 +1165,11 @@
     }
 
     function goToEditCollection(id) {
-      if (!id && id !== 0) {
+      if (id === undefined || id === null) {
         showAlert('Collection id is missing', 'error');
         return;
       }
       window.location.href = `${ADMIN_EDIT_PATH}?id=${encodeURIComponent(id)}`;
-    }
-
-    function viewCollection(id, slug) {
-      closeMenus();
-      const cleanSlug = safeText(slug);
-      const url = cleanSlug
-        ? `${FRONTEND_VIEW_PATH}?slug=${encodeURIComponent(cleanSlug)}`
-        : `${FRONTEND_VIEW_PATH}?id=${encodeURIComponent(id)}`;
-      window.open(url, '_blank');
     }
 
     function toggleRowMenu(id) {
@@ -1199,11 +1193,8 @@
 
     function toggleRowSelection(id, checked) {
       const numericId = Number(id);
-      if (checked) {
-        selectedCollectionIds.add(numericId);
-      } else {
-        selectedCollectionIds.delete(numericId);
-      }
+      if (checked) selectedCollectionIds.add(numericId);
+      else selectedCollectionIds.delete(numericId);
       updateSelectionUI();
     }
 
@@ -1260,6 +1251,41 @@
       }
     }
 
+    async function toggleHideCollection(id, currentStatus) {
+      try {
+        closeMenus();
+
+        const normalized = String(currentStatus || 'active').toLowerCase();
+        const nextStatus = normalized === 'archived' ? 'active' : 'archived';
+
+        const confirmed = window.confirm(
+          nextStatus === 'archived'
+            ? 'Hide this collection from the site? (Move to Archived)'
+            : 'Unhide this collection and make it Active again?'
+        );
+        if (!confirmed) return;
+
+        const response = await fetch(`${API_BASE}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: nextStatus })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result?.error || 'Failed to update collection status');
+        }
+
+        showAlert(nextStatus === 'archived' ? 'Collection hidden from site' : 'Collection is visible on site', 'success');
+        await loadSummary();
+        await loadCollections();
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message || 'Failed to hide/unhide collection', 'error');
+      }
+    }
+
     async function deleteCollection(id, title) {
       try {
         closeMenus();
@@ -1301,10 +1327,7 @@
         if (!confirmed) return;
 
         for (const id of ids) {
-          const response = await fetch(`${API_BASE}/${id}`, {
-            method: 'DELETE'
-          });
-
+          const response = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
           const result = await response.json();
           if (!response.ok || !result.success) {
             throw new Error(result?.error || `Failed to delete collection ${id}`);
@@ -1341,17 +1364,9 @@
       mobile?.addEventListener('input', e => handler(e.target.value));
       search?.addEventListener('input', e => handler(e.target.value));
 
-      desktop?.addEventListener('keydown', e => {
-        if (e.key === 'Enter') applyFilters();
-      });
-
-      mobile?.addEventListener('keydown', e => {
-        if (e.key === 'Enter') applyFilters();
-      });
-
-      search?.addEventListener('keydown', e => {
-        if (e.key === 'Enter') applyFilters();
-      });
+      desktop?.addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
+      mobile?.addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
+      search?.addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
 
       qs('sortSelect')?.addEventListener('change', applyFilters);
       qs('limitSelect')?.addEventListener('change', applyFilters);
