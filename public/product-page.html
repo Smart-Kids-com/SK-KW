@@ -1111,6 +1111,7 @@
     const viewEl = document.getElementById("view");
 
     const API_BASE = "/api/products";
+    const ARCHIVED_STATUS = "archived";
 
     function escapeHtml(str) {
       return String(str ?? "")
@@ -1598,6 +1599,11 @@
 
         if (!product) {
           showError("المنتج غير موجود");
+          return;
+        }
+
+        if (String(product?.status || "").toLowerCase() === ARCHIVED_STATUS) {
+          showError("هذا المنتج غير متاح حالياً للعرض");
           return;
         }
 

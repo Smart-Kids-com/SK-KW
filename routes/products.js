@@ -14,6 +14,8 @@ function slugify(text = '') {
     .replace(/-+/g, '-');
 }
 
+const PRODUCT_STATUSES = ['active', 'draft', 'archived'];
+
 function normalizeStatus(status) {
   const raw = String(status ?? '').trim().toLowerCase();
 
@@ -22,6 +24,11 @@ function normalizeStatus(status) {
   if (['archived'].includes(raw)) return 'archived';
 
   return 'active';
+}
+
+function parseProductStatusFilter(status) {
+  const raw = String(status || '').trim().toLowerCase();
+  return PRODUCT_STATUSES.includes(raw) ? raw : null;
 }
 
 function toNumber(value, fallback = 0) {
@@ -808,10 +815,15 @@ router.get('/', async (req, res) => {
 
     const where = [];
     const params = [];
+    let normalizedStatus = null;
 
     if (status) {
+      normalizedStatus = parseProductStatusFilter(status);
+      if (!normalizedStatus) {
+        return res.status(400).json({ success: false, error: 'قيمة status غير صحيحة. القيم المسموحة: active, draft, archived' });
+      }
       where.push(`status = ?`);
-      params.push(status);
+      params.push(normalizedStatus);
     }
 
     let searchValue = null;
@@ -919,7 +931,7 @@ router.get('/', async (req, res) => {
         if (where.length > 0) {
           countSql += ` WHERE ${where.join(' AND ')}`;
 
-          if (status) countParams.push(status);
+          if (normalizedStatus) countParams.push(normalizedStatus);
 
           if (searchValue) {
             countParams.push(
