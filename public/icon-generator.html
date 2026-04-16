@@ -97,18 +97,18 @@
             document.getElementById('iconContainer').appendChild(container);
         });
 
-        // إنشاء favicon.ico
+        // إنشاء favicon.icon
         function generateFavicon() {
-            const canvas = generateIcon(32, 'favicon.ico');
+            const canvas = generateIcon(32, 'favicon.icon');
             const btn = document.createElement('button');
             btn.className = 'download-btn';
-            btn.textContent = 'Download favicon.ico';
-            btn.onclick = () => downloadCanvas(canvas, 'favicon.ico');
+            btn.textContent = 'Download favicon.icon';
+            btn.onclick = () => downloadCanvas(canvas, 'favicon.icon');
             
             const container = document.createElement('div');
             container.className = 'icon-item';
             const title = document.createElement('h3');
-            title.textContent = 'favicon.ico';
+            title.textContent = 'favicon.icon';
             
             container.appendChild(title);
             container.appendChild(canvas);
