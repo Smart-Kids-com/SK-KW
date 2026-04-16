@@ -601,6 +601,7 @@
 
   <script>
     const COLLECTIONS_API = '/api/collections';
+    const ARCHIVED_STATUS = 'archived';
 
     let currentCollection = null;
     let allCollectionProducts = [];
@@ -717,6 +718,10 @@
 
       if (!response.ok || !result || !result.success) {
         throw new Error(result?.error || `HTTP ${response.status}`);
+      }
+
+      if (String(result.data?.status || '').toLowerCase() === ARCHIVED_STATUS) {
+        throw new Error('هذه المجموعة مؤرشفة وغير متاحة للعرض');
       }
 
       return result.data;

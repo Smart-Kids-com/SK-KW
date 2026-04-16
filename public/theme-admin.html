@@ -1,892 +1,1370 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Theme Editor - Smart Kids Kuwait</title>
+  <title>محرر الثيم — Smart Kids Kuwait</title>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --bg:#f3f3f3;
-      --card:#ffffff;
-      --line:#e5e7eb;
-      --text:#202223;
-      --muted:#6d7175;
-      --top:#111213;
-      --side:#f6f6f7;
-      --green:#16a34a;
-      --green-bg:#dcfce7;
-      --blue:#2563eb;
-      --blue-bg:#dbeafe;
-      --red:#dc2626;
-      --red-bg:#fee2e2;
-      --yellow:#f59e0b;
-      --yellow-bg:#fef3c7;
-      --shadow:0 1px 2px rgba(0,0,0,.08);
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand: #4f1d6b;
+      --brand-mid: #6b2a8e;
+      --brand-light: #f3eeff;
+      --brand-border: #c4a0e8;
+      --bg: #f7f6fa;
+      --white: #ffffff;
+      --border: #e4e2ea;
+      --text: #1a1027;
+      --muted: #6b7280;
+      --success: #10b981;
+      --error: #ef4444;
+      --topbar-h: 62px;
+      --sidebar-w: 236px;
+      --radius: 12px;
     }
 
-    body{
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      min-height:100vh;
-      direction:ltr;
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
     }
 
-    a{text-decoration:none;color:inherit}
-    button,input,select,textarea{font-family:inherit}
+    a { text-decoration: none; color: inherit; }
+    button, input, select, textarea { font-family: inherit; }
 
-    .app{
-      min-height:100vh;
-      display:grid;
-      grid-template-columns:290px 1fr;
-      grid-template-rows:72px 1fr;
-      grid-template-areas:
-        "top top"
-        "side main";
+    /* ── Topbar ──────────────────────────────────────────── */
+    .topbar {
+      position: fixed; top: 0; inset-inline: 0;
+      height: var(--topbar-h);
+      background: var(--brand);
+      color: #fff;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 22px; gap: 14px; z-index: 100;
     }
 
-    .topbar{
-      grid-area:top;
-      background:var(--top);
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      padding:0 18px;
-      position:sticky;
-      top:0;
-      z-index:50;
+    .brand {
+      font-size: 17px; font-weight: 800;
+      display: flex; align-items: center; gap: 10px;
     }
 
-    .brand{font-size:20px;font-weight:800;white-space:nowrap}
-    .top-right{display:flex;align-items:center;gap:14px;white-space:nowrap}
-    .avatar{
-      width:34px;height:34px;border-radius:999px;background:#2a2b2d;
-      display:flex;align-items:center;justify-content:center;font-size:16px;
+    .brand-logo {
+      width: 36px; height: 36px; background: rgba(255,255,255,.18);
+      border-radius: 8px; display: flex; align-items: center;
+      justify-content: center; font-size: 18px; flex-shrink: 0;
     }
 
-    .sidebar{
-      grid-area:side;background:var(--side);border-right:1px solid #ddd;
-      padding:14px 14px 20px;overflow:auto;
+    .top-actions { display: flex; align-items: center; gap: 8px; }
+
+    .btn-top {
+      height: 38px; padding: 0 16px; border-radius: 8px; border: 0;
+      cursor: pointer; font-size: 13px; font-weight: 700;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: opacity .15s;
+    }
+    .btn-top:hover { opacity: .85; }
+    .btn-top.primary { background: #fff; color: var(--brand); }
+    .btn-top.ghost { background: rgba(255,255,255,.15); color: #fff; }
+
+    /* ── Layout ──────────────────────────────────────────── */
+    .layout {
+      display: flex; padding-top: var(--topbar-h); min-height: 100vh;
     }
 
-    .nav-item{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding:11px 12px;border-radius:12px;color:#111;font-weight:600;
-      margin-bottom:4px;direction:ltr;text-align:left;
-    }
-    .nav-item.active{background:#e9eaeb}
-    .nav-sub{padding-left:42px;color:#444;font-weight:500}
-
-    .main{grid-area:main;padding:20px;overflow:auto}
-    .page{max-width:1480px;margin:0 auto}
-
-    .alert{
-      display:none;margin-bottom:14px;padding:14px 16px;border-radius:14px;font-weight:700;
-      border:1px solid transparent;background:#fff;direction:rtl;text-align:right;white-space:pre-line;
-    }
-    .alert.active{display:block}
-    .alert.success{background:#dcfce7;border-color:#86efac;color:#166534}
-    .alert.error{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
-    .alert.warning{background:#fef3c7;border-color:#fcd34d;color:#92400e}
-
-    .page-head{
-      display:flex;align-items:center;justify-content:space-between;gap:16px;
-      margin-bottom:16px;flex-wrap:wrap;
-    }
-    .page-title{font-size:22px;font-weight:900;display:flex;align-items:center;gap:10px}
-    .page-actions{display:flex;gap:10px;flex-wrap:wrap}
-
-    .btn{
-      height:40px;border-radius:12px;border:1px solid #d1d5db;background:#fff;color:#111;
-      padding:0 14px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);
-    }
-    .btn.primary{background:#111;color:#fff;border-color:#111}
-    .btn.green{background:#16a34a;color:#fff;border-color:#16a34a}
-    .btn.red{background:#fff;color:#b91c1c;border-color:#fca5a5}
-    .btn.small{height:34px;padding:0 12px;font-size:13px}
-
-    .layout{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap:16px;
-      align-items:start;
+    /* ── Sidebar ─────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--white);
+      border-inline-start: 1px solid var(--border);
+      position: fixed; top: var(--topbar-h); bottom: 0; inset-inline-end: 0;
+      overflow-y: auto; padding: 18px 12px 24px;
     }
 
-    .card{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:18px;
-      overflow:hidden;
-      box-shadow:var(--shadow);
+    .sidebar-section { margin-bottom: 24px; }
+
+    .sidebar-label {
+      font-size: 10.5px; font-weight: 800; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .08em;
+      padding: 0 8px; margin-bottom: 6px;
     }
 
-    .card-head{
-      padding:14px 16px;
-      border-bottom:1px solid var(--line);
-      font-size:16px;
-      font-weight:800;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
+    .tab-btn {
+      display: flex; align-items: center; gap: 10px; width: 100%;
+      padding: 11px 12px; border: 0; border-radius: 10px;
+      background: transparent; color: var(--text); font-size: 14px;
+      font-weight: 600; cursor: pointer; text-align: start;
+      margin-bottom: 3px; transition: background .15s;
+    }
+    .tab-btn:hover { background: var(--bg); }
+    .tab-btn.active { background: var(--brand-light); color: var(--brand); }
+    .tab-icon { font-size: 17px; width: 22px; flex-shrink: 0; }
+
+    /* ── Main ────────────────────────────────────────────── */
+    .main {
+      flex: 1; margin-inline-end: var(--sidebar-w);
+      padding: 24px; overflow-y: auto; min-height: 0;
     }
 
-    .card-body{padding:16px}
+    /* ── Tab panels ──────────────────────────────────────── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
 
-    .toolbar{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
+    /* ── Panel header ────────────────────────────────────── */
+    .panel-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 22px; flex-wrap: wrap; gap: 12px;
+    }
+    .panel-title {
+      font-size: 21px; font-weight: 900;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .panel-subtitle { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+    /* ── Global alert ────────────────────────────────────── */
+    .global-alert {
+      display: none; padding: 12px 16px; border-radius: 10px;
+      font-weight: 700; font-size: 14px; margin-bottom: 18px;
+    }
+    .global-alert.show { display: block; }
+    .global-alert.success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+    .global-alert.error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    /* ── Cards ───────────────────────────────────────────── */
+    .card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 15px; font-weight: 800; margin-bottom: 18px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--border);
     }
 
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:7px;
-      margin-bottom:14px;
+    /* ── Form fields ─────────────────────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 16px;
+    }
+    .form-full { grid-column: 1 / -1; }
+
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+
+    .form-group label {
+      font-size: 13px; font-weight: 700; color: var(--text);
+    }
+    .form-hint { font-size: 11.5px; color: var(--muted); }
+
+    .form-input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 14px; color: var(--text);
+      background: var(--white); transition: border-color .15s, box-shadow .15s;
+    }
+    .form-input:focus {
+      outline: none; border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(79,29,107,.12);
+    }
+    textarea.form-input { resize: vertical; }
+
+    /* ── Color picker ────────────────────────────────────── */
+    .color-row { display: flex; align-items: center; gap: 8px; }
+    .color-swatch {
+      width: 44px; height: 44px; border-radius: 8px;
+      border: 1px solid var(--border); overflow: hidden;
+      flex-shrink: 0; cursor: pointer;
+    }
+    .color-swatch input[type="color"] {
+      width: 100%; height: 100%; border: 0; padding: 0;
+      cursor: pointer; display: block;
     }
 
-    .field label{
-      font-size:13px;
-      color:#4b5563;
-      font-weight:700;
+    /* ── Image preview ───────────────────────────────────── */
+    .img-preview {
+      width: 100%; max-height: 160px; object-fit: contain;
+      border-radius: 8px; border: 1px solid var(--border);
+      margin-top: 8px; background: var(--bg); display: none;
+    }
+    .img-preview.show { display: block; }
+
+    /* ── Buttons ─────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 18px; border-radius: 8px; border: 0;
+      font-size: 13.5px; font-weight: 700; cursor: pointer;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn:hover { opacity: .87; }
+    .btn:active { transform: scale(.98); }
+    .btn.primary  { background: var(--brand); color: #fff; }
+    .btn.secondary {
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn.danger   { background: #fee2e2; color: var(--error); }
+    .btn.sm       { padding: 7px 13px; font-size: 13px; }
+    .btn.xs       { padding: 5px 10px; font-size: 12px; }
+
+    /* ── Toggle switch ───────────────────────────────────── */
+    .toggle-row {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
+    }
+    .toggle-label { font-size: 13px; font-weight: 700; }
+    .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: #d1d5db;
+      border-radius: 24px; cursor: pointer; transition: background .2s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute; width: 18px; height: 18px;
+      border-radius: 50%; background: #fff; top: 3px; inset-inline-end: 3px;
+      transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .toggle input:checked + .toggle-slider { background: var(--brand); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    /* ── Sections tab ────────────────────────────────────── */
+    .sections-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px; align-items: start;
     }
 
-    .field input,
-    .field select,
-    .field textarea{
-      width:100%;
-      min-height:42px;
-      border-radius:12px;
-      border:1px solid #d1d5db;
-      background:#fff;
-      padding:10px 14px;
-      font-size:14px;
-      outline:none;
+    /* Sections list */
+    .sections-list-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .sections-list-head {
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      font-weight: 800; font-size: 14.5px; background: var(--bg);
+    }
+    .sections-count {
+      font-size: 12px; color: var(--muted); font-weight: 600;
     }
 
-    .field textarea{
-      min-height:220px;
-      resize:vertical;
-      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-      line-height:1.5;
+    .section-item {
+      padding: 13px 14px; border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: background .12s;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-item:last-child { border-bottom: 0; }
+    .section-item:hover:not(.active) { background: var(--bg); }
+    .section-item.active { background: var(--brand-light); }
+
+    .section-icon { font-size: 20px; flex-shrink: 0; }
+    .section-meta { flex: 1; min-width: 0; }
+    .section-name {
+      font-weight: 700; font-size: 13.5px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .section-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .section-btns {
+      display: flex; gap: 3px; flex-shrink: 0;
+    }
+    .sec-btn {
+      width: 28px; height: 28px; border: 0; border-radius: 7px;
+      background: transparent; color: var(--muted); cursor: pointer;
+      font-size: 14px; display: flex; align-items: center;
+      justify-content: center; transition: background .12s, color .12s;
+    }
+    .sec-btn:hover { background: var(--border); color: var(--text); }
+    .sec-btn.danger:hover { background: #fee2e2; color: var(--error); }
+
+    /* Section editor */
+    .section-editor-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; min-height: 220px;
+    }
+    .editor-empty {
+      padding: 48px 24px; text-align: center; color: var(--muted); font-size: 14px;
+    }
+    .editor-empty .big { font-size: 40px; margin-bottom: 12px; }
+
+    .editor-head {
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      font-weight: 800; font-size: 14.5px; background: var(--bg);
+      gap: 10px;
+    }
+    .editor-head-left { display: flex; align-items: center; gap: 8px; }
+    .editor-body { padding: 18px; }
+
+    /* Slides in hero_slider editor */
+    .slides-wrap { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+    .slide-item {
+      border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+    }
+    .slide-head {
+      background: var(--bg); padding: 10px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-weight: 700; font-size: 13px;
+    }
+    .slide-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.45); z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      background: var(--white); border-radius: 16px; padding: 26px;
+      width: min(95vw, 500px); box-shadow: 0 24px 48px rgba(0,0,0,.22);
+    }
+    .modal-title { font-size: 19px; font-weight: 900; margin-bottom: 20px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+
+    /* Type grid */
+    .type-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 10px; margin-bottom: 16px;
+    }
+    .type-card {
+      border: 2px solid var(--border); border-radius: 10px;
+      padding: 14px 10px; cursor: pointer; text-align: center;
+      transition: all .15s;
+    }
+    .type-card:hover { border-color: var(--brand-mid); background: var(--brand-light); }
+    .type-card.selected { border-color: var(--brand); background: var(--brand-light); }
+    .type-card-icon { font-size: 30px; margin-bottom: 6px; }
+    .type-card-name { font-size: 13px; font-weight: 800; }
+    .type-card-desc { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    /* Visibility badge */
+    .badge {
+      display: inline-flex; align-items: center; padding: 2px 8px;
+      border-radius: 999px; font-size: 11px; font-weight: 700;
+    }
+    .badge.on  { background: #d1fae5; color: #065f46; }
+    .badge.off { background: #f3f4f6; color: var(--muted); }
+
+    /* Divider */
+    .divider {
+      height: 1px; background: var(--border); margin: 18px 0;
     }
 
-    .section-list{
-      display:grid;
-      gap:12px;
+    /* Spinner */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.35);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin .7s linear infinite; display: inline-block;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .section-item{
-      border:1px solid #e5e7eb;
-      background:#fff;
-      border-radius:16px;
-      padding:14px;
+    /* Responsive */
+    @media (max-width: 1000px) {
+      .sections-layout { grid-template-columns: 1fr; }
     }
-
-    .section-item.active{
-      border-color:#111827;
-      box-shadow:0 0 0 2px rgba(17,24,39,.08);
+    @media (max-width: 820px) {
+      .sidebar { display: none; }
+      .main { margin-inline-end: 0; }
     }
-
-    .section-row{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .section-meta{
-      min-width:0;
-      flex:1;
-    }
-
-    .section-title{
-      font-size:16px;
-      font-weight:900;
-      margin-bottom:6px;
-      line-height:1.4;
-    }
-
-    .section-sub{
-      color:#6b7280;
-      font-size:13px;
-      line-height:1.5;
-      word-break:break-word;
-    }
-
-    .section-badges{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-width:66px;
-      height:28px;
-      padding:0 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:800;
-    }
-
-    .badge.visible{color:#166534;background:var(--green-bg)}
-    .badge.hidden{color:#92400e;background:var(--yellow-bg)}
-    .badge.type{color:#1d4ed8;background:var(--blue-bg)}
-
-    .section-actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    .empty{
-      padding:34px 20px;
-      text-align:center;
-      color:#6b7280;
-      font-weight:700;
-    }
-
-    .inline-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-
-    .helper{
-      font-size:12px;
-      color:#6b7280;
-      line-height:1.6;
-      background:#f9fafb;
-      border:1px solid #e5e7eb;
-      padding:10px 12px;
-      border-radius:12px;
-    }
-
-    .preview-box{
-      border:1px dashed #cbd5e1;
-      border-radius:16px;
-      padding:14px;
-      background:#fafafa;
-      color:#475569;
-      line-height:1.7;
-      font-size:14px;
-      white-space:pre-wrap;
-    }
-
-    @media (max-width: 1100px){
-      .app{
-        grid-template-columns:1fr;
-        grid-template-rows:72px 1fr;
-        grid-template-areas:
-          "top"
-          "main";
-      }
-      .sidebar{display:none}
-      .layout{grid-template-columns:1fr}
-    }
-
-    @media (max-width: 700px){
-      .main{padding:14px}
-      .page-actions{width:100%}
-      .page-actions .btn{flex:1}
-      .inline-grid{grid-template-columns:1fr}
-      .section-row{flex-direction:column}
-      .section-actions{justify-content:flex-start}
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <div class="brand">Theme Editor</div>
-      <div class="top-right">
-        <div class="avatar">🎨</div>
-        <div style="font-weight:800">Homepage Builder</div>
-      </div>
-    </header>
 
+  <!-- ── Global Alert ──────────────────────────────────── -->
+  <div class="global-alert" id="globalAlert"></div>
+
+  <!-- ── Topbar ────────────────────────────────────────── -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-logo">🎨</div>
+      <span>محرر الثيم — Smart Kids Kuwait</span>
+    </div>
+    <div class="top-actions">
+      <button class="btn-top ghost" onclick="saveAllSettings()">💾 حفظ الكل</button>
+      <a href="/" target="_blank" class="btn-top ghost">👁 عرض الموقع</a>
+      <a href="/admin-enhanced" class="btn-top primary">← لوحة التحكم</a>
+    </div>
+  </div>
+
+  <!-- ── Layout ─────────────────────────────────────────── -->
+  <div class="layout">
+
+    <!-- Sidebar -->
     <aside class="sidebar">
-      <a class="nav-item" href="/admin-enhanced"><span>🏠 Dashboard</span></a>
-      <a class="nav-item" href="/products-admin"><span>🏷️ Products</span></a>
-      <a class="nav-item nav-sub" href="/collections-admin"><span>Collections</span></a>
-      <a class="nav-item" href="/customers-admin"><span>👥 Customers</span></a>
-      <a class="nav-item active" href="/theme-admin"><span>🎨 Theme Editor</span></a>
-      <a class="nav-item nav-sub" href="#"><span>Homepage</span></a>
+      <div class="sidebar-section">
+        <div class="sidebar-label">إعدادات المظهر</div>
+        <button class="tab-btn active" data-tab="colors">
+          <span class="tab-icon">🎨</span><span>الألوان والمظهر</span>
+        </button>
+        <button class="tab-btn" data-tab="header">
+          <span class="tab-icon">📢</span><span>الهيدر والإعلان</span>
+        </button>
+        <button class="tab-btn" data-tab="social">
+          <span class="tab-icon">🌐</span><span>التواصل الاجتماعي</span>
+        </button>
+        <button class="tab-btn" data-tab="footer">
+          <span class="tab-icon">📄</span><span>الفوتر</span>
+        </button>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">الصفحات</div>
+        <button class="tab-btn" data-tab="sections">
+          <span class="tab-icon">🏠</span><span>الصفحة الرئيسية</span>
+        </button>
+      </div>
     </aside>
 
+    <!-- Main Content -->
     <main class="main">
-      <div class="page">
-        <div id="alert" class="alert"></div>
+      <div class="global-alert" id="mainAlert" style="margin-bottom:18px;"></div>
 
-        <div class="page-head">
-          <div class="page-title">🎨 Homepage Theme Editor</div>
-          <div class="page-actions">
-            <button class="btn" onclick="refreshTheme()">Refresh</button>
-            <button class="btn green" onclick="addSectionPrompt()">Add section</button>
-            <button class="btn primary" onclick="saveThemeSettings()">Save theme settings</button>
+      <!-- ══ TAB: COLORS ══════════════════════════════════ -->
+      <div class="tab-panel active" id="tab-colors">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">🎨 الألوان والمظهر</div>
+            <div class="panel-subtitle">تحكم في ألوان وهوية الموقع البصرية</div>
+          </div>
+          <button class="btn primary" onclick="saveTab('colors')">💾 حفظ الألوان</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🎨 ألوان الموقع</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>اللون الأساسي للموقع</label>
+              <div class="color-row">
+                <div class="color-swatch"><input type="color" id="c_primaryColor"></div>
+                <input type="text" class="form-input" id="ct_primaryColor" maxlength="7" placeholder="#4a0d57">
+              </div>
+              <span class="form-hint">لون خلفية الصفحة والقوائم الجانبية</span>
+            </div>
+
+            <div class="form-group">
+              <label>لون شريط الإعلان (Topbar)</label>
+              <div class="color-row">
+                <div class="color-swatch"><input type="color" id="c_topbarColor"></div>
+                <input type="text" class="form-input" id="ct_topbarColor" maxlength="7" placeholder="#3c0646">
+              </div>
+              <span class="form-hint">الشريط البنفسجي الداكن أعلى الصفحة</span>
+            </div>
+
+            <div class="form-group">
+              <label>لون الروابط والأيقونات</label>
+              <div class="color-row">
+                <div class="color-swatch"><input type="color" id="c_secondaryColor"></div>
+                <input type="text" class="form-input" id="ct_secondaryColor" maxlength="7" placeholder="#3160e0">
+              </div>
+              <span class="form-hint">لون زر القائمة وأيقونات الهيدر</span>
+            </div>
+
+            <div class="form-group">
+              <label>لون زر إضافة للسلة</label>
+              <div class="color-row">
+                <div class="color-swatch"><input type="color" id="c_accentColor"></div>
+                <input type="text" class="form-input" id="ct_accentColor" maxlength="7" placeholder="#ffd54a">
+              </div>
+              <span class="form-hint">لون زر "أضف للسلة" في المنتجات</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ TAB: HEADER ══════════════════════════════════ -->
+      <div class="tab-panel" id="tab-header">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">📢 الهيدر والإعلان</div>
+            <div class="panel-subtitle">اللوقو وشريط الإعلان العلوي</div>
+          </div>
+          <button class="btn primary" onclick="saveTab('header')">💾 حفظ الهيدر</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🖼 اللوقو</div>
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label>رابط صورة اللوقو</label>
+              <input type="text" class="form-input" id="f_logoUrl"
+                placeholder="https://cdn.example.com/logo.png"
+                oninput="previewImg('logo-preview', this.value)">
+              <span class="form-hint">رابط مباشر للصورة — PNG أو SVG أو WebP</span>
+              <img id="logo-preview" class="img-preview" alt="معاينة اللوقو">
+            </div>
           </div>
         </div>
 
-        <div class="layout">
-          <section class="card">
-            <div class="card-head">
-              <span>Homepage sections</span>
-              <div class="toolbar">
-                <button class="btn small" onclick="refreshTheme()">Reload</button>
-                <button class="btn small" onclick="addSectionPrompt()">+ Section</button>
-              </div>
+        <div class="card">
+          <div class="card-title">📣 شريط الإعلان العلوي</div>
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label>نص الشريط</label>
+              <input type="text" class="form-input" id="f_announcementText"
+                placeholder="التوصيل مجاناً للطلبات بقيمة 20 د.ك أو أكثر">
+              <span class="form-hint">النص الذي يظهر في الشريط الداكن أعلى الموقع</span>
             </div>
-            <div class="card-body">
-              <div id="sectionsList" class="section-list">
-                <div class="empty">Loading sections...</div>
-              </div>
+            <div class="form-group">
+              <label>رمز / إيموجي قبل النص</label>
+              <input type="text" class="form-input" id="f_announcementIcon"
+                placeholder="🚚" maxlength="5">
+              <span class="form-hint">إيموجي أو رمز اختياري</span>
             </div>
-          </section>
-
-          <aside>
-            <section class="card" style="margin-bottom:16px;">
-              <div class="card-head">Section editor</div>
-              <div class="card-body">
-                <div id="editorEmpty" class="empty">Select a section to edit</div>
-
-                <div id="editorWrap" style="display:none;">
-                  <div class="field">
-                    <label for="sectionTitle">Section title</label>
-                    <input id="sectionTitle" type="text" />
-                  </div>
-
-                  <div class="inline-grid">
-                    <div class="field">
-                      <label for="sectionType">Section type</label>
-                      <select id="sectionType">
-                        <option value="hero_slider">hero_slider</option>
-                        <option value="featured_collection">featured_collection</option>
-                        <option value="featured_products">featured_products</option>
-                        <option value="banner">banner</option>
-                        <option value="rich_text">rich_text</option>
-                      </select>
-                    </div>
-
-                    <div class="field">
-                      <label for="sectionVisible">Visibility</label>
-                      <select id="sectionVisible">
-                        <option value="1">Visible</option>
-                        <option value="0">Hidden</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div class="field">
-                    <label for="sectionSettings">Settings JSON</label>
-                    <textarea id="sectionSettings"></textarea>
-                  </div>
-
-                  <div class="helper" style="margin-bottom:14px;">
-                    أمثلة سريعة حسب النوع:
-                    {"title":"عنوان","subtitle":"نص فرعي","buttonText":"تسوق الآن","buttonLink":"/collections"}
-                    أو
-                    {"collectionSlug":"books","limit":8}
-                    أو
-                    {"imageUrl":"https://...","link":"/collections/offers"}
-                  </div>
-
-                  <div class="toolbar">
-                    <button class="btn primary" onclick="saveCurrentSection()">Save section</button>
-                    <button class="btn" onclick="duplicateCurrentSection()">Duplicate</button>
-                    <button class="btn red" onclick="deleteCurrentSection()">Delete</button>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section class="card" style="margin-bottom:16px;">
-              <div class="card-head">Theme settings</div>
-              <div class="card-body">
-                <div class="field">
-                  <label for="themePrimaryColor">Primary color</label>
-                  <input id="themePrimaryColor" type="text" placeholder="#16a34a" />
-                </div>
-
-                <div class="field">
-                  <label for="themeSecondaryColor">Secondary color</label>
-                  <input id="themeSecondaryColor" type="text" placeholder="#111827" />
-                </div>
-
-                <div class="field">
-                  <label for="themeHomepageTitle">Homepage title</label>
-                  <input id="themeHomepageTitle" type="text" placeholder="Smart Kids Kuwait" />
-                </div>
-
-                <div class="field">
-                  <label for="themeAnnouncementText">Announcement text</label>
-                  <input id="themeAnnouncementText" type="text" placeholder="نص الشريط العلوي" />
-                </div>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">Selected section preview</div>
-              <div class="card-body">
-                <div id="sectionPreview" class="preview-box">No section selected</div>
-              </div>
-            </section>
-          </aside>
+          </div>
         </div>
       </div>
+
+      <!-- ══ TAB: SOCIAL ══════════════════════════════════ -->
+      <div class="tab-panel" id="tab-social">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">🌐 التواصل الاجتماعي</div>
+            <div class="panel-subtitle">روابط حسابات السوشيال ميديا والواتساب</div>
+          </div>
+          <button class="btn primary" onclick="saveTab('social')">💾 حفظ الروابط</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📱 واتساب</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>رقم واتساب</label>
+              <input type="text" class="form-input" id="f_whatsappNumber"
+                placeholder="96566635393">
+              <span class="form-hint">الرقم الكامل بدون + (مثال: 96566635393)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📲 منصات التواصل</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>📘 فيسبوك</label>
+              <input type="text" class="form-input" id="f_facebookUrl"
+                placeholder="https://www.facebook.com/...">
+            </div>
+            <div class="form-group">
+              <label>📸 إنستاغرام</label>
+              <input type="text" class="form-input" id="f_instagramUrl"
+                placeholder="https://www.instagram.com/...">
+            </div>
+            <div class="form-group">
+              <label>🎵 تيك توك</label>
+              <input type="text" class="form-input" id="f_tiktokUrl"
+                placeholder="https://www.tiktok.com/@...">
+            </div>
+            <div class="form-group">
+              <label>👻 سناب شات</label>
+              <input type="text" class="form-input" id="f_snapchatUrl"
+                placeholder="https://www.snapchat.com/add/...">
+            </div>
+            <div class="form-group">
+              <label>▶️ يوتيوب</label>
+              <input type="text" class="form-input" id="f_youtubeUrl"
+                placeholder="https://www.youtube.com/@...">
+            </div>
+            <div class="form-group">
+              <label>📌 بينترست</label>
+              <input type="text" class="form-input" id="f_pinterestUrl"
+                placeholder="https://www.pinterest.com/...">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ TAB: FOOTER ══════════════════════════════════ -->
+      <div class="tab-panel" id="tab-footer">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">📄 الفوتر</div>
+            <div class="panel-subtitle">نصوص وروابط أسفل الصفحة</div>
+          </div>
+          <button class="btn primary" onclick="saveTab('footer')">💾 حفظ الفوتر</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📝 نصوص الفوتر</div>
+          <div class="form-grid">
+            <div class="form-group form-full">
+              <label>اسم الشركة</label>
+              <input type="text" class="form-input" id="f_footerCompany"
+                placeholder="INNOVATORS GULF TRADING W.L.L">
+            </div>
+            <div class="form-group form-full">
+              <label>نص حقوق الملكية</label>
+              <input type="text" class="form-input" id="f_footerCopyright"
+                placeholder="© 2026, الأطفال المبتكرون الكويت Smart Kids Kuwait">
+            </div>
+            <div class="form-group form-full">
+              <label>رابط الموقع الرسمي</label>
+              <input type="text" class="form-input" id="f_footerSiteUrl"
+                placeholder="https://smartkidskw.com">
+            </div>
+            <div class="form-group form-full">
+              <label>عنوان قسم السوشيال ميديا</label>
+              <input type="text" class="form-input" id="f_footerSocialTitle"
+                placeholder="تابعونا على منصات التواصل الإجتماعي">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ TAB: SECTIONS ════════════════════════════════ -->
+      <div class="tab-panel" id="tab-sections">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">🏠 أقسام الصفحة الرئيسية</div>
+            <div class="panel-subtitle">أضف وعدّل وأعد ترتيب أقسام الصفحة الرئيسية</div>
+          </div>
+          <button class="btn primary" onclick="openAddModal()">+ إضافة قسم</button>
+        </div>
+
+        <div class="sections-layout">
+          <!-- Sections list -->
+          <div>
+            <div class="sections-list-card">
+              <div class="sections-list-head">
+                <span>الأقسام</span>
+                <span class="sections-count" id="sectionsCount"></span>
+              </div>
+              <div id="sectionsBody">
+                <div class="editor-empty">جارٍ التحميل...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section editor -->
+          <div id="editorWrap">
+            <div class="section-editor-card">
+              <div class="editor-empty">
+                <div class="big">👈</div>
+                <div>اختر قسماً من القائمة لتعديله</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </main>
   </div>
 
+  <!-- ══ Add Section Modal ════════════════════════════════ -->
+  <div class="modal-backdrop" id="addModal">
+    <div class="modal">
+      <div class="modal-title">➕ إضافة قسم جديد</div>
+
+      <div class="form-group" style="margin-bottom:16px;">
+        <label>اسم القسم</label>
+        <input type="text" class="form-input" id="newSectionTitle"
+          placeholder="مثال: السلايدر الرئيسي">
+      </div>
+
+      <div class="type-grid" id="typeGrid"></div>
+
+      <div class="modal-actions">
+        <button class="btn primary" onclick="confirmAddSection()">➕ إضافة</button>
+        <button class="btn secondary" onclick="closeAddModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    /* ============================================================
+       Config & State
+    ============================================================ */
     const THEME_API = '/api/theme';
-    const PAGE_KEY = 'home';
+    const PAGE_KEY  = 'home';
 
-    let pageData = null;
     let themeSettings = {};
-    let currentSections = [];
+    let sections = [];
     let selectedSectionId = null;
+    let selectedNewType = null;
 
-    function showAlert(message, type = 'success') {
-      const el = document.getElementById('alert');
-      el.textContent = message;
-      el.className = `alert active ${type}`;
-      setTimeout(() => el.classList.remove('active'), 4000);
+    const SECTION_TYPES = [
+      { type: 'hero_slider',          icon: '🎠', name: 'سلايدر رئيسي',    desc: 'صور متحركة في أعلى الصفحة' },
+      { type: 'banner',               icon: '🖼️', name: 'بانر صورة',        desc: 'صورة واسعة مع رابط' },
+      { type: 'featured_collection',  icon: '🗂️', name: 'مجموعة مميزة',   desc: 'عرض منتجات مجموعة محددة' },
+      { type: 'featured_products',    icon: '🛍️', name: 'منتجات مميزة',   desc: 'عرض منتجات مختارة' },
+      { type: 'rich_text',            icon: '📝', name: 'نص وعنوان',        desc: 'محتوى نصي حر' },
+    ];
+
+    /* ============================================================
+       Helpers
+    ============================================================ */
+    function escapeHtml(str) {
+      return String(str || '')
+        .replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;').replaceAll('"', '&quot;');
     }
 
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+    function showAlert(msg, type = 'success') {
+      const el = document.getElementById('mainAlert');
+      el.className = `global-alert show ${type}`;
+      el.textContent = msg;
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => el.classList.remove('show'), 4500);
     }
 
-    function prettifyJson(value) {
+    function previewImg(id, url) {
+      const img = document.getElementById(id);
+      if (!img) return;
+      if (url && url.match(/^https?:\/\//)) {
+        img.src = url; img.classList.add('show');
+      } else { img.classList.remove('show'); }
+    }
+
+    /* Color picker <-> text input sync */
+    function bindColor(key) {
+      const picker = document.getElementById(`c_${key}`);
+      const text   = document.getElementById(`ct_${key}`);
+      if (!picker || !text) return;
+      picker.addEventListener('input', () => { text.value = picker.value; });
+      text.addEventListener('input', () => {
+        if (/^#[0-9a-fA-F]{6}$/.test(text.value)) picker.value = text.value;
+      });
+    }
+
+    function getColor(key) {
+      const t = document.getElementById(`ct_${key}`);
+      const p = document.getElementById(`c_${key}`);
+      return (t && /^#[0-9a-fA-F]{6}$/.test(t.value)) ? t.value : (p ? p.value : '');
+    }
+
+    function setColor(key, val) {
+      const p = document.getElementById(`c_${key}`);
+      const t = document.getElementById(`ct_${key}`);
+      if (p && val) p.value = val;
+      if (t && val) t.value = val;
+    }
+
+    function getField(id) {
+      const el = document.getElementById(`f_${id}`);
+      return el ? el.value.trim() : '';
+    }
+
+    function setField(id, val) {
+      const el = document.getElementById(`f_${id}`);
+      if (el) el.value = val || '';
+    }
+
+    /* ============================================================
+       Tab Switching
+    ============================================================ */
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.tab === tabId));
+      document.querySelectorAll('.tab-panel').forEach(p =>
+        p.classList.toggle('active', p.id === `tab-${tabId}`));
+      if (tabId === 'sections') loadSections();
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn =>
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+
+    /* ============================================================
+       API
+    ============================================================ */
+    async function apiFetch(url, opts = {}) {
+      const ctrl  = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 22000);
       try {
-        return JSON.stringify(value || {}, null, 2);
-      } catch {
-        return '{}';
-      }
+        const res  = await fetch(url, {
+          ...opts, signal: ctrl.signal,
+          headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) }
+        });
+        const data = await res.json().catch(() => ({}));
+        return { ok: res.ok, data };
+      } finally { clearTimeout(timer); }
     }
 
-    function parseJsonSafe(text) {
-      try {
-        return { ok: true, value: JSON.parse(text || '{}') };
-      } catch (error) {
-        return { ok: false, error };
-      }
-    }
-
-    function getSelectedSection() {
-      return currentSections.find(section => Number(section.id) === Number(selectedSectionId)) || null;
-    }
-
-    function defaultSettingsForType(type) {
-      switch (type) {
-        case 'hero_slider':
-          return {
-            title: 'عنوان رئيسي',
-            subtitle: 'نص فرعي للقسم',
-            buttonText: 'تسوق الآن',
-            buttonLink: '/collections',
-            imageUrl: ''
-          };
-        case 'featured_collection':
-          return {
-            title: 'مجموعة مميزة',
-            collectionSlug: '',
-            limit: 8,
-            layout: 'grid'
-          };
-        case 'featured_products':
-          return {
-            title: 'منتجات مختارة',
-            productIds: [],
-            layout: 'slider'
-          };
-        case 'banner':
-          return {
-            title: 'بانر',
-            imageUrl: '',
-            link: '',
-            height: 'medium'
-          };
-        case 'rich_text':
-          return {
-            title: 'عنوان نصي',
-            text: 'اكتب النص هنا',
-            align: 'center'
-          };
-        default:
-          return {};
-      }
-    }
-
-    async function loadPage() {
-      const response = await fetch(`${THEME_API}/pages/${PAGE_KEY}`);
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to load theme page');
-      }
-
-      pageData = result.data;
-      currentSections = Array.isArray(result.data.sections) ? result.data.sections : [];
-    }
-
+    /* ============================================================
+       Load & Populate Settings
+    ============================================================ */
     async function loadSettings() {
-      const response = await fetch(`${THEME_API}/settings`);
-      const result = await response.json();
+      const { ok, data } = await apiFetch(`${THEME_API}/settings`);
+      if (!ok || !data.success) return;
+      themeSettings = data.data || {};
+      populateForms();
+    }
 
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to load theme settings');
+    function populateForms() {
+      const s = themeSettings;
+      setColor('primaryColor',   s.primaryColor   || '#4a0d57');
+      setColor('topbarColor',    s.topbarColor     || '#3c0646');
+      setColor('secondaryColor', s.secondaryColor  || '#3160e0');
+      setColor('accentColor',    s.accentColor     || '#ffd54a');
+
+      setField('logoUrl',           s.logoUrl           || '');
+      setField('announcementText',  s.announcementText  || '');
+      setField('announcementIcon',  s.announcementIcon  || '');
+
+      setField('whatsappNumber', s.whatsappNumber || '');
+      setField('facebookUrl',    s.facebookUrl    || '');
+      setField('instagramUrl',   s.instagramUrl   || '');
+      setField('tiktokUrl',      s.tiktokUrl      || '');
+      setField('snapchatUrl',    s.snapchatUrl    || '');
+      setField('youtubeUrl',     s.youtubeUrl     || '');
+      setField('pinterestUrl',   s.pinterestUrl   || '');
+
+      setField('footerCompany',     s.footerCompany     || '');
+      setField('footerCopyright',   s.footerCopyright   || '');
+      setField('footerSiteUrl',     s.footerSiteUrl     || '');
+      setField('footerSocialTitle', s.footerSocialTitle || '');
+
+      if (s.logoUrl) previewImg('logo-preview', s.logoUrl);
+    }
+
+    /* ============================================================
+       Save Settings
+    ============================================================ */
+    function collectTab(tab) {
+      if (tab === 'colors') return {
+        primaryColor:   getColor('primaryColor'),
+        topbarColor:    getColor('topbarColor'),
+        secondaryColor: getColor('secondaryColor'),
+        accentColor:    getColor('accentColor'),
+      };
+      if (tab === 'header') return {
+        logoUrl:           getField('logoUrl'),
+        announcementText:  getField('announcementText'),
+        announcementIcon:  getField('announcementIcon'),
+      };
+      if (tab === 'social') return {
+        whatsappNumber: getField('whatsappNumber'),
+        facebookUrl:    getField('facebookUrl'),
+        instagramUrl:   getField('instagramUrl'),
+        tiktokUrl:      getField('tiktokUrl'),
+        snapchatUrl:    getField('snapchatUrl'),
+        youtubeUrl:     getField('youtubeUrl'),
+        pinterestUrl:   getField('pinterestUrl'),
+      };
+      if (tab === 'footer') return {
+        footerCompany:     getField('footerCompany'),
+        footerCopyright:   getField('footerCopyright'),
+        footerSiteUrl:     getField('footerSiteUrl'),
+        footerSocialTitle: getField('footerSocialTitle'),
+      };
+      return {};
+    }
+
+    async function saveSettingsObj(settings) {
+      const { ok, data } = await apiFetch(`${THEME_API}/settings`, {
+        method: 'PUT',
+        body: JSON.stringify({ settings })
+      });
+      if (ok && data.success) {
+        Object.assign(themeSettings, settings);
+        return true;
       }
-
-      themeSettings = result.data || {};
+      return false;
     }
 
-    function renderThemeSettings() {
-      document.getElementById('themePrimaryColor').value = themeSettings.primaryColor || '';
-      document.getElementById('themeSecondaryColor').value = themeSettings.secondaryColor || '';
-      document.getElementById('themeHomepageTitle').value = themeSettings.homepageTitle || '';
-      document.getElementById('themeAnnouncementText').value = themeSettings.announcementText || '';
+    async function saveTab(tab) {
+      const settings = collectTab(tab);
+      const ok = await saveSettingsObj(settings);
+      ok
+        ? showAlert('✅ تم الحفظ بنجاح! التغييرات ستظهر على الموقع عند التحديث', 'success')
+        : showAlert('❌ فشل الحفظ — حاول مجدداً', 'error');
     }
 
-    function renderSections() {
-      const container = document.getElementById('sectionsList');
+    async function saveAllSettings() {
+      const settings = {
+        ...collectTab('colors'),
+        ...collectTab('header'),
+        ...collectTab('social'),
+        ...collectTab('footer'),
+      };
+      const ok = await saveSettingsObj(settings);
+      ok
+        ? showAlert('✅ تم حفظ جميع إعدادات الثيم بنجاح!', 'success')
+        : showAlert('❌ فشل الحفظ — حاول مجدداً', 'error');
+    }
 
-      if (!currentSections.length) {
-        container.innerHTML = `<div class="empty">No sections yet. Add your first section.</div>`;
+    /* ============================================================
+       Sections — List
+    ============================================================ */
+    async function loadSections() {
+      const { ok, data } = await apiFetch(`${THEME_API}/pages/${PAGE_KEY}`);
+      if (!ok || !data.success) return;
+      sections = data.data.sections || [];
+      renderSectionsList();
+    }
+
+    function typeInfo(type) {
+      return SECTION_TYPES.find(t => t.type === type) || { icon: '📦', name: type };
+    }
+
+    function renderSectionsList() {
+      const body  = document.getElementById('sectionsBody');
+      const count = document.getElementById('sectionsCount');
+      count.textContent = sections.length ? `${sections.length} قسم` : '';
+
+      if (!sections.length) {
+        body.innerHTML = `<div class="editor-empty">لا توجد أقسام بعد.<br>اضغط "+ إضافة قسم" لإنشاء أول قسم.</div>`;
         return;
       }
 
-      container.innerHTML = currentSections.map((section, index) => {
-        const isActive = Number(section.id) === Number(selectedSectionId);
-        const isVisible = Number(section.is_visible || 0) === 1;
-        const settingsPreview = JSON.stringify(section.settings || {}).slice(0, 120);
-
+      body.innerHTML = sections.map(s => {
+        const ti       = typeInfo(s.type);
+        const isActive = Number(s.id) === Number(selectedSectionId);
+        const visible  = Number(s.is_visible) === 1;
         return `
-          <div class="section-item ${isActive ? 'active' : ''}">
-            <div class="section-row">
-              <div class="section-meta" onclick="selectSection(${section.id})" style="cursor:pointer;">
-                <div class="section-title">${escapeHtml(section.title || 'Section')}</div>
-                <div class="section-sub">${escapeHtml(settingsPreview || '{}')}</div>
-                <div class="section-badges">
-                  <span class="badge type">${escapeHtml(section.type || '-')}</span>
-                  <span class="badge ${isVisible ? 'visible' : 'hidden'}">${isVisible ? 'Visible' : 'Hidden'}</span>
-                  <span class="badge type">#${index + 1}</span>
-                </div>
-              </div>
-
-              <div class="section-actions">
-                <button class="btn small" onclick="moveSectionUp(${section.id})">↑</button>
-                <button class="btn small" onclick="moveSectionDown(${section.id})">↓</button>
-                <button class="btn small" onclick="selectSection(${section.id})">Edit</button>
-                <button class="btn small" onclick="toggleSectionVisibility(${section.id})">${isVisible ? 'Hide' : 'Show'}</button>
+          <div class="section-item ${isActive ? 'active' : ''}" onclick="selectSection(${s.id})">
+            <div class="section-icon">${ti.icon}</div>
+            <div class="section-meta">
+              <div class="section-name">${escapeHtml(s.title)}</div>
+              <div class="section-sub">
+                ${ti.name}
+                &nbsp;·&nbsp;
+                <span class="badge ${visible ? 'on' : 'off'}">${visible ? 'ظاهر' : 'مخفي'}</span>
               </div>
             </div>
-          </div>
-        `;
+            <div class="section-btns" onclick="event.stopPropagation()">
+              <button class="sec-btn" title="لأعلى"  onclick="moveSection(${s.id},'up')">↑</button>
+              <button class="sec-btn" title="لأسفل" onclick="moveSection(${s.id},'down')">↓</button>
+              <button class="sec-btn" title="${visible ? 'إخفاء' : 'إظهار'}"
+                onclick="toggleVisible(${s.id})">${visible ? '👁' : '🚫'}</button>
+              <button class="sec-btn danger" title="حذف" onclick="deleteSection(${s.id})">🗑</button>
+            </div>
+          </div>`;
       }).join('');
     }
 
-    function renderEditor() {
-      const section = getSelectedSection();
-      const editorEmpty = document.getElementById('editorEmpty');
-      const editorWrap = document.getElementById('editorWrap');
-      const preview = document.getElementById('sectionPreview');
+    function selectSection(id) {
+      selectedSectionId = id;
+      const section = sections.find(s => Number(s.id) === Number(id));
+      renderSectionsList();
+      if (section) renderEditor(section);
+    }
 
-      if (!section) {
-        editorEmpty.style.display = 'block';
-        editorWrap.style.display = 'none';
-        preview.textContent = 'No section selected';
-        return;
+    /* ============================================================
+       Section Editor — per-type visual fields
+    ============================================================ */
+    function renderEditor(section) {
+      const ti = typeInfo(section.type);
+      document.getElementById('editorWrap').innerHTML = `
+        <div class="section-editor-card">
+          <div class="editor-head">
+            <div class="editor-head-left">
+              <span style="font-size:20px;">${ti.icon}</span>
+              <span>${escapeHtml(section.title)}</span>
+            </div>
+            <button class="btn primary sm" onclick="saveSection(${section.id})">💾 حفظ</button>
+          </div>
+          <div class="editor-body">
+            <div class="form-group" style="margin-bottom:14px;">
+              <label>اسم القسم</label>
+              <input type="text" class="form-input" id="ed_title"
+                value="${escapeHtml(section.title)}">
+            </div>
+            <div class="form-group" style="margin-bottom:14px;">
+              <label>حالة القسم</label>
+              <select class="form-input" id="ed_visible">
+                <option value="1" ${Number(section.is_visible) === 1 ? 'selected' : ''}>✅ ظاهر على الموقع</option>
+                <option value="0" ${Number(section.is_visible) === 0 ? 'selected' : ''}>🚫 مخفي</option>
+              </select>
+            </div>
+            <div class="divider"></div>
+            <div id="ed_typeFields">${buildTypeFields(section)}</div>
+          </div>
+        </div>`;
+    }
+
+    function buildTypeFields(section) {
+      const s = section.settings || {};
+      switch (section.type) {
+        case 'hero_slider':         return buildHeroSliderFields(s);
+        case 'banner':              return buildBannerFields(s);
+        case 'featured_collection': return buildFeaturedCollectionFields(s);
+        case 'featured_products':   return buildFeaturedProductsFields(s);
+        case 'rich_text':           return buildRichTextField(s);
+        default: return '';
       }
-
-      editorEmpty.style.display = 'none';
-      editorWrap.style.display = 'block';
-
-      document.getElementById('sectionTitle').value = section.title || '';
-      document.getElementById('sectionType').value = section.type || 'rich_text';
-      document.getElementById('sectionVisible').value = String(Number(section.is_visible || 0));
-      document.getElementById('sectionSettings').value = prettifyJson(section.settings || {});
-      preview.textContent = prettifyJson(section);
     }
 
-    function selectSection(sectionId) {
-      selectedSectionId = Number(sectionId);
-      renderSections();
-      renderEditor();
+    /* ── hero_slider ─────────────────────────────────────── */
+    function buildHeroSliderFields(s) {
+      const slides = Array.isArray(s.slides) ? s.slides : [];
+      return `
+        <div style="font-weight:800;font-size:14px;margin-bottom:10px;">🖼 الشرائح (Slides)</div>
+        <div id="slidesList" class="slides-wrap">
+          ${slides.map((sl, i) => slideItemHtml(sl, i)).join('') ||
+            '<div style="color:var(--muted);font-size:13px;padding:4px 0;">لا توجد شرائح — اضغط "+ إضافة شريحة"</div>'}
+        </div>
+        <button class="btn secondary sm" onclick="addSlide()" style="margin-bottom:18px;">
+          + إضافة شريحة
+        </button>
+        <div class="divider"></div>
+        <div class="form-grid" style="margin-top:14px;">
+          <div class="form-group">
+            <label>تشغيل تلقائي</label>
+            <select class="form-input" id="ed_autoplay">
+              <option value="true"  ${s.autoplay !== false ? 'selected' : ''}>✅ نعم</option>
+              <option value="false" ${s.autoplay === false  ? 'selected' : ''}>🚫 لا</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>مدة التبديل (بالثواني)</label>
+            <input type="number" class="form-input" id="ed_interval"
+              value="${Math.round((Number(s.interval) || 4000) / 1000)}" min="1" max="30">
+          </div>
+        </div>`;
     }
 
-    async function refreshTheme(showMessage = false) {
-      try {
-        await Promise.all([loadPage(), loadSettings()]);
-        if (selectedSectionId && !currentSections.some(s => Number(s.id) === Number(selectedSectionId))) {
-          selectedSectionId = null;
+    function slideItemHtml(slide, i) {
+      return `
+        <div class="slide-item">
+          <div class="slide-head">
+            <span>🖼 شريحة ${i + 1}</span>
+            <button class="sec-btn danger" onclick="removeSlide(this)" title="حذف الشريحة">🗑</button>
+          </div>
+          <div class="slide-body">
+            <div class="form-group">
+              <label>رابط الصورة</label>
+              <input type="text" class="form-input slide-imageUrl"
+                placeholder="https://..." value="${escapeHtml(slide.imageUrl || '')}">
+            </div>
+            <div class="form-group">
+              <label>الرابط عند الضغط على الشريحة</label>
+              <input type="text" class="form-input slide-link"
+                placeholder="/collections/..." value="${escapeHtml(slide.link || '')}">
+            </div>
+            <div class="form-group">
+              <label>نص الزر (اختياري)</label>
+              <input type="text" class="form-input slide-buttonText"
+                placeholder="تسوق الآن" value="${escapeHtml(slide.buttonText || '')}">
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function addSlide() {
+      const list = document.getElementById('slidesList');
+      const idx  = list.querySelectorAll('.slide-item').length;
+      // Clear "no slides" placeholder if present
+      list.querySelectorAll('div:not(.slide-item)').forEach(el => el.remove());
+      list.insertAdjacentHTML('beforeend', slideItemHtml({ imageUrl: '', link: '', buttonText: '' }, idx));
+    }
+
+    function removeSlide(btn) {
+      btn.closest('.slide-item').remove();
+      document.querySelectorAll('#slidesList .slide-item').forEach((item, i) => {
+        const head = item.querySelector('.slide-head span');
+        if (head) head.textContent = `🖼 شريحة ${i + 1}`;
+      });
+    }
+
+    /* ── banner ──────────────────────────────────────────── */
+    function buildBannerFields(s) {
+      return `
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>رابط صورة البانر</label>
+          <input type="text" class="form-input" id="ed_imageUrl"
+            value="${escapeHtml(s.imageUrl || '')}" placeholder="https://..."
+            oninput="previewImg('banner-preview', this.value)">
+          <img id="banner-preview" class="img-preview ${s.imageUrl ? 'show' : ''}"
+            src="${escapeHtml(s.imageUrl || '')}" alt="Banner">
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>الرابط عند الضغط</label>
+            <input type="text" class="form-input" id="ed_link"
+              value="${escapeHtml(s.link || '')}" placeholder="/collections/...">
+          </div>
+          <div class="form-group">
+            <label>نص فوق البانر (اختياري)</label>
+            <input type="text" class="form-input" id="ed_text"
+              value="${escapeHtml(s.text || '')}" placeholder="عروض حصرية">
+          </div>
+          <div class="form-group">
+            <label>نص الزر (اختياري)</label>
+            <input type="text" class="form-input" id="ed_buttonText"
+              value="${escapeHtml(s.buttonText || '')}" placeholder="تسوق الآن">
+          </div>
+        </div>`;
+    }
+
+    /* ── featured_collection ─────────────────────────────── */
+    function buildFeaturedCollectionFields(s) {
+      return `
+        <div class="form-grid">
+          <div class="form-group">
+            <label>عنوان القسم على الموقع</label>
+            <input type="text" class="form-input" id="ed_fcTitle"
+              value="${escapeHtml(s.title || '')}" placeholder="تصفح المجموعات">
+          </div>
+          <div class="form-group">
+            <label>Slug المجموعة (اختياري)</label>
+            <input type="text" class="form-input" id="ed_collectionSlug"
+              value="${escapeHtml(s.collectionSlug || '')}" placeholder="summer-sale">
+            <span class="form-hint">اتركه فارغاً لعرض جميع المجموعات</span>
+          </div>
+          <div class="form-group">
+            <label>عدد العناصر</label>
+            <input type="number" class="form-input" id="ed_fcLimit"
+              value="${Number(s.limit) || 10}" min="1" max="50">
+          </div>
+        </div>`;
+    }
+
+    /* ── featured_products ───────────────────────────────── */
+    function buildFeaturedProductsFields(s) {
+      const sortVal = `${s.sort || 'created_at'}_${s.order || 'DESC'}`;
+      return `
+        <div class="form-grid">
+          <div class="form-group">
+            <label>عنوان القسم</label>
+            <input type="text" class="form-input" id="ed_fpTitle"
+              value="${escapeHtml(s.title || '')}" placeholder="أحدث المنتجات">
+          </div>
+          <div class="form-group">
+            <label>وسم التصفية (Tag) — اختياري</label>
+            <input type="text" class="form-input" id="ed_fpTag"
+              value="${escapeHtml(s.tag || '')}" placeholder="new-arrival">
+            <span class="form-hint">اتركه فارغاً لعرض جميع المنتجات</span>
+          </div>
+          <div class="form-group">
+            <label>عدد المنتجات</label>
+            <input type="number" class="form-input" id="ed_fpLimit"
+              value="${Number(s.limit) || 8}" min="1" max="50">
+          </div>
+          <div class="form-group">
+            <label>ترتيب العرض</label>
+            <select class="form-input" id="ed_fpSort">
+              <option value="created_at_DESC" ${sortVal === 'created_at_DESC' ? 'selected' : ''}>الأحدث أولاً</option>
+              <option value="created_at_ASC"  ${sortVal === 'created_at_ASC'  ? 'selected' : ''}>الأقدم أولاً</option>
+              <option value="price_ASC"        ${sortVal === 'price_ASC'        ? 'selected' : ''}>السعر: من الأقل</option>
+              <option value="price_DESC"       ${sortVal === 'price_DESC'       ? 'selected' : ''}>السعر: من الأعلى</option>
+            </select>
+          </div>
+        </div>`;
+    }
+
+    /* ── rich_text ───────────────────────────────────────── */
+    function buildRichTextField(s) {
+      return `
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>العنوان</label>
+          <input type="text" class="form-input" id="ed_rtTitle"
+            value="${escapeHtml(s.title || '')}" placeholder="عنوان القسم">
+        </div>
+        <div class="form-group">
+          <label>المحتوى النصي</label>
+          <textarea class="form-input" id="ed_rtContent" rows="5"
+            placeholder="اكتب المحتوى هنا...">${escapeHtml(s.content || '')}</textarea>
+        </div>`;
+    }
+
+    /* ============================================================
+       Collect Section Settings from DOM
+    ============================================================ */
+    function collectSectionSettings(section) {
+      switch (section.type) {
+        case 'hero_slider': {
+          const slides = [];
+          document.querySelectorAll('#slidesList .slide-item').forEach(item => {
+            slides.push({
+              imageUrl:   item.querySelector('.slide-imageUrl')?.value.trim()   || '',
+              link:       item.querySelector('.slide-link')?.value.trim()        || '',
+              buttonText: item.querySelector('.slide-buttonText')?.value.trim()  || '',
+            });
+          });
+          return {
+            slides,
+            autoplay: document.getElementById('ed_autoplay')?.value !== 'false',
+            interval: Number(document.getElementById('ed_interval')?.value || 4) * 1000,
+          };
         }
-        renderThemeSettings();
-        renderSections();
-        renderEditor();
-        if (showMessage) showAlert('تم تحديث بيانات الثيم', 'success');
-      } catch (error) {
-        console.error(error);
-        showAlert(error.message || 'Theme load failed', 'error');
-      }
-    }
-
-    async function addSectionPrompt() {
-      const type = prompt(
-        'Enter section type:\nhero_slider\nfeatured_collection\nfeatured_products\nbanner\nrich_text',
-        'hero_slider'
-      );
-
-      if (!type) return;
-
-      const cleanType = String(type).trim();
-      const title = prompt('Section title', cleanType) || cleanType;
-
-      try {
-        const response = await fetch(`${THEME_API}/pages/${PAGE_KEY}/sections`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: cleanType,
-            title,
-            is_visible: 1,
-            settings: defaultSettingsForType(cleanType)
-          })
-        });
-
-        const result = await response.json();
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to create section');
+        case 'banner':
+          return {
+            imageUrl:   document.getElementById('ed_imageUrl')?.value.trim()   || '',
+            link:       document.getElementById('ed_link')?.value.trim()        || '',
+            text:       document.getElementById('ed_text')?.value.trim()        || '',
+            buttonText: document.getElementById('ed_buttonText')?.value.trim()  || '',
+          };
+        case 'featured_collection':
+          return {
+            title:          document.getElementById('ed_fcTitle')?.value.trim()          || '',
+            collectionSlug: document.getElementById('ed_collectionSlug')?.value.trim()   || '',
+            limit:          Number(document.getElementById('ed_fcLimit')?.value)          || 10,
+          };
+        case 'featured_products': {
+          const raw = document.getElementById('ed_fpSort')?.value || 'created_at_DESC';
+          const lastUnd = raw.lastIndexOf('_');
+          return {
+            title: document.getElementById('ed_fpTitle')?.value.trim() || '',
+            tag:   document.getElementById('ed_fpTag')?.value.trim()   || '',
+            limit: Number(document.getElementById('ed_fpLimit')?.value) || 8,
+            sort:  raw.substring(0, lastUnd)   || 'created_at',
+            order: raw.substring(lastUnd + 1)  || 'DESC',
+          };
         }
-
-        await refreshTheme(false);
-        selectedSectionId = Number(result.data.id);
-        renderSections();
-        renderEditor();
-        showAlert('تمت إضافة section جديدة', 'success');
-      } catch (error) {
-        console.error(error);
-        showAlert(error.message || 'Create section failed', 'error');
+        case 'rich_text':
+          return {
+            title:   document.getElementById('ed_rtTitle')?.value.trim()   || '',
+            content: document.getElementById('ed_rtContent')?.value.trim() || '',
+          };
+        default: return {};
       }
     }
 
-    async function saveCurrentSection() {
-      const section = getSelectedSection();
-      if (!section) {
-        showAlert('اختر section أولًا', 'warning');
-        return;
-      }
-
-      const parsed = parseJsonSafe(document.getElementById('sectionSettings').value);
-      if (!parsed.ok) {
-        showAlert('JSON غير صالح داخل settings', 'error');
-        return;
-      }
-
-      try {
-        const response = await fetch(`${THEME_API}/sections/${section.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: document.getElementById('sectionTitle').value.trim(),
-            type: document.getElementById('sectionType').value,
-            is_visible: Number(document.getElementById('sectionVisible').value),
-            settings: parsed.value
-          })
-        });
-
-        const result = await response.json();
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to save section');
-        }
-
-        await refreshTheme(false);
-        selectedSectionId = Number(section.id);
-        renderSections();
-        renderEditor();
-        showAlert('تم حفظ section بنجاح', 'success');
-      } catch (error) {
-        console.error(error);
-        showAlert(error.message || 'Save failed', 'error');
-      }
-    }
-
-    async function deleteCurrentSection() {
-      const section = getSelectedSection();
-      if (!section) {
-        showAlert('اختر section أولًا', 'warning');
-        return;
-      }
-
-      if (!confirm(`Delete section "${section.title}"?`)) return;
-
-      try {
-        const response = await fetch(`${THEME_API}/sections/${section.id}`, {
-          method: 'DELETE'
-        });
-
-        const result = await response.json();
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to delete section');
-        }
-
-        selectedSectionId = null;
-        await refreshTheme(false);
-        showAlert('تم حذف section', 'success');
-      } catch (error) {
-        console.error(error);
-        showAlert(error.message || 'Delete failed', 'error');
-      }
-    }
-
-    async function duplicateCurrentSection() {
-      const section = getSelectedSection();
-      if (!section) {
-        showAlert('اختر section أولًا', 'warning');
-        return;
-      }
-
-      try {
-        const response = await fetch(`${THEME_API}/sections/${section.id}/duplicate`, {
-          method: 'POST'
-        });
-
-        const result = await response.json();
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to duplicate section');
-        }
-
-        await refreshTheme(false);
-        selectedSectionId = Number(result.data.id);
-        renderSections();
-        renderEditor();
-        showAlert('تم نسخ section', 'success');
-      } catch (error) {
-        console.error(error);
-        showAlert(error.message || 'Duplicate failed', 'error');
-      }
-    }
-
-    async function toggleSectionVisibility(sectionId) {
-      const section = currentSections.find(s => Number(s.id) === Number(sectionId));
+    /* ============================================================
+       Save Section
+    ============================================================ */
+    async function saveSection(sectionId) {
+      const section = sections.find(s => Number(s.id) === Number(sectionId));
       if (!section) return;
 
-      try {
-        const response = await fetch(`${THEME_API}/sections/${section.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            is_visible: Number(section.is_visible || 0) ? 0 : 1
-          })
-        });
+      const title     = document.getElementById('ed_title')?.value.trim()   || section.title;
+      const isVisible = Number(document.getElementById('ed_visible')?.value ?? 1);
+      const settings  = collectSectionSettings(section);
 
-        const result = await response.json();
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to toggle visibility');
-        }
-
-        await refreshTheme(false);
-      } catch (error) {
-        console.error(error);
-        showAlert(error.message || 'Visibility update failed', 'error');
-      }
-    }
-
-    async function reorderSections(newIds) {
-      const response = await fetch(`${THEME_API}/pages/${PAGE_KEY}/reorder`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sectionIds: newIds })
+      const { ok, data } = await apiFetch(`${THEME_API}/sections/${sectionId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ title, is_visible: isVisible, settings }),
       });
 
-      const result = await response.json();
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Failed to reorder sections');
-      }
-
-      currentSections = result.data || [];
-      renderSections();
-      renderEditor();
-    }
-
-    async function moveSectionUp(sectionId) {
-      const ids = currentSections.map(s => Number(s.id));
-      const index = ids.indexOf(Number(sectionId));
-      if (index <= 0) return;
-
-      [ids[index - 1], ids[index]] = [ids[index], ids[index - 1]];
-
-      try {
-        await reorderSections(ids);
-      } catch (error) {
-        console.error(error);
-        showAlert(error.message || 'Move up failed', 'error');
-      }
-    }
-
-    async function moveSectionDown(sectionId) {
-      const ids = currentSections.map(s => Number(s.id));
-      const index = ids.indexOf(Number(sectionId));
-      if (index === -1 || index >= ids.length - 1) return;
-
-      [ids[index], ids[index + 1]] = [ids[index + 1], ids[index]];
-
-      try {
-        await reorderSections(ids);
-      } catch (error) {
-        console.error(error);
-        showAlert(error.message || 'Move down failed', 'error');
-      }
-    }
-
-    async function saveThemeSettings() {
-      try {
-        const payload = {
-          settings: {
-            primaryColor: document.getElementById('themePrimaryColor').value.trim(),
-            secondaryColor: document.getElementById('themeSecondaryColor').value.trim(),
-            homepageTitle: document.getElementById('themeHomepageTitle').value.trim(),
-            announcementText: document.getElementById('themeAnnouncementText').value.trim()
-          }
-        };
-
-        const response = await fetch(`${THEME_API}/settings`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-        if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to save theme settings');
+      if (ok && data.success) {
+        const idx = sections.findIndex(s => Number(s.id) === Number(sectionId));
+        if (idx !== -1) {
+          sections[idx] = {
+            ...sections[idx], title, is_visible: isVisible,
+            settings: data.data?.settings ?? settings,
+          };
         }
-
-        themeSettings = result.data || {};
-        renderThemeSettings();
-        showAlert('تم حفظ إعدادات الثيم', 'success');
-      } catch (error) {
-        console.error(error);
-        showAlert(error.message || 'Save theme settings failed', 'error');
+        renderSectionsList();
+        showAlert('✅ تم حفظ القسم بنجاح!', 'success');
+      } else {
+        showAlert('❌ فشل الحفظ: ' + (data.error || 'خطأ'), 'error');
       }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      refreshTheme();
+    /* ============================================================
+       Section Actions
+    ============================================================ */
+    async function moveSection(id, dir) {
+      const idx = sections.findIndex(s => Number(s.id) === Number(id));
+      if (idx === -1) return;
+
+      const newOrder = [...sections];
+      if (dir === 'up' && idx > 0)
+        [newOrder[idx], newOrder[idx - 1]] = [newOrder[idx - 1], newOrder[idx]];
+      else if (dir === 'down' && idx < sections.length - 1)
+        [newOrder[idx], newOrder[idx + 1]] = [newOrder[idx + 1], newOrder[idx]];
+      else return;
+
+      const { ok, data } = await apiFetch(`${THEME_API}/pages/${PAGE_KEY}/reorder`, {
+        method: 'POST',
+        body: JSON.stringify({ sectionIds: newOrder.map(s => s.id) }),
+      });
+      if (ok && data.success) { sections = data.data; renderSectionsList(); }
+    }
+
+    async function toggleVisible(id) {
+      const section = sections.find(s => Number(s.id) === Number(id));
+      if (!section) return;
+      const newVis = Number(section.is_visible) === 1 ? 0 : 1;
+
+      const { ok, data } = await apiFetch(`${THEME_API}/sections/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ is_visible: newVis }),
+      });
+      if (ok && data.success) {
+        const idx = sections.findIndex(s => Number(s.id) === Number(id));
+        if (idx !== -1) sections[idx].is_visible = newVis;
+        renderSectionsList();
+
+        // Refresh editor if this is the selected section
+        if (Number(selectedSectionId) === Number(id)) {
+          renderEditor({ ...sections[idx] });
+        }
+        showAlert(newVis ? '✅ تم إظهار القسم' : '🚫 تم إخفاء القسم', 'success');
+      }
+    }
+
+    async function deleteSection(id) {
+      if (!confirm('هل أنت متأكد من حذف هذا القسم؟')) return;
+      const { ok, data } = await apiFetch(`${THEME_API}/sections/${id}`, { method: 'DELETE' });
+      if (ok && data.success) {
+        sections = sections.filter(s => Number(s.id) !== Number(id));
+        if (Number(selectedSectionId) === Number(id)) {
+          selectedSectionId = null;
+          document.getElementById('editorWrap').innerHTML = `
+            <div class="section-editor-card">
+              <div class="editor-empty">
+                <div class="big">👈</div>
+                <div>اختر قسماً من القائمة لتعديله</div>
+              </div>
+            </div>`;
+        }
+        renderSectionsList();
+        showAlert('✅ تم حذف القسم', 'success');
+      }
+    }
+
+    /* ============================================================
+       Add Section Modal
+    ============================================================ */
+    function openAddModal() {
+      selectedNewType = null;
+      document.getElementById('newSectionTitle').value = '';
+      document.getElementById('typeGrid').innerHTML = SECTION_TYPES.map(t => `
+        <div class="type-card" data-type="${t.type}"
+          onclick="pickType('${t.type}', this)">
+          <div class="type-card-icon">${t.icon}</div>
+          <div class="type-card-name">${t.name}</div>
+          <div class="type-card-desc">${t.desc}</div>
+        </div>`).join('');
+      document.getElementById('addModal').classList.add('show');
+    }
+
+    function pickType(type, el) {
+      selectedNewType = type;
+      document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      const titleEl = document.getElementById('newSectionTitle');
+      if (!titleEl.value) {
+        const ti = SECTION_TYPES.find(t => t.type === type);
+        if (ti) titleEl.value = ti.name;
+      }
+    }
+
+    function closeAddModal() {
+      document.getElementById('addModal').classList.remove('show');
+    }
+
+    async function confirmAddSection() {
+      if (!selectedNewType) { alert('اختر نوع القسم أولاً'); return; }
+      const title = document.getElementById('newSectionTitle').value.trim() || selectedNewType;
+
+      const { ok, data } = await apiFetch(`${THEME_API}/pages/${PAGE_KEY}/sections`, {
+        method: 'POST',
+        body: JSON.stringify({ type: selectedNewType, title, is_visible: 1 }),
+      });
+
+      if (ok && data.success) {
+        sections.push(data.data);
+        renderSectionsList();
+        closeAddModal();
+        selectSection(data.data.id);
+        showAlert('✅ تم إضافة القسم — عدّله الآن وأضف تفاصيله', 'success');
+      } else {
+        showAlert('❌ ' + (data.error || 'فشل إضافة القسم'), 'error');
+      }
+    }
+
+    document.getElementById('addModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('addModal')) closeAddModal();
     });
+
+    /* ============================================================
+       Init
+    ============================================================ */
+    ['primaryColor', 'topbarColor', 'secondaryColor', 'accentColor'].forEach(bindColor);
+    loadSettings();
   </script>
 </body>
 </html>

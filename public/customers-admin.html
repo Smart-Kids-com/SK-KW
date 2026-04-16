@@ -409,6 +409,44 @@
     let filtersVisible = true;
     let currentSortIndex = 0;
 
+    async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 20000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+      try {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+          cache: options.cache || 'no-store',
+          headers: {
+            Accept: 'application/json',
+            ...(options.headers || {})
+          }
+        });
+
+        const text = await response.text();
+        let result = null;
+
+        if (text) {
+          try {
+            result = JSON.parse(text);
+          } catch {
+            const shortPreview = text.slice(0, 180).replace(/\s+/g, ' ').trim();
+            throw new Error(`Non-JSON response from ${url}: ${shortPreview || 'empty response'}`);
+          }
+        }
+
+        return { response, result, text };
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          throw new Error(`Request timeout: ${url}`);
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
     const sortOptions = [
       'created_at-DESC',
       'created_at-ASC',
@@ -502,10 +540,9 @@
 
     async function loadOrdersCount() {
       try {
-        const response = await fetch(`${ORDERS_API}?limit=1&offset=0`);
-        const result = await response.json();
-        if (!response.ok || !result.success) return;
-        document.getElementById('ordersCountBadge').textContent = result.pagination?.total ?? '—';
+        const { response, result } = await fetchJsonWithTimeout(`${ORDERS_API}?limit=1&offset=0`);
+        if (!response.ok) return;
+        document.getElementById('ordersCountBadge').textContent = result?.pagination?.total ?? '—';
       } catch (_) {}
     }
 
@@ -533,20 +570,10 @@
         params.append('limit', '50');
         params.append('offset', '0');
 
-        const response = await fetch(`${CUSTOMERS_API}?${params.toString()}`, {
-          cache: 'no-store',
-          headers: { 'Accept': 'application/json' }
-        });
-
-        let result;
-        try {
-          result = await response.json();
-        } catch {
-          throw new Error('Customers API returned non-JSON response');
-        }
+        const { response, result } = await fetchJsonWithTimeout(`${CUSTOMERS_API}?${params.toString()}`);
 
         if (!response.ok || !result.success) {
-          throw new Error(result.error || 'Failed to load customers');
+          throw new Error(result?.error || 'Failed to load customers');
         }
 
         currentCustomers = Array.isArray(result.data) ? result.data : [];
@@ -562,11 +589,7 @@
 
     async function loadSummary() {
       try {
-        const response = await fetch(`${CUSTOMERS_API}/stats/summary`, {
-          headers: { 'Accept': 'application/json' }
-        });
-        const result = await response.json();
-
+        const { response, result } = await fetchJsonWithTimeout(`${CUSTOMERS_API}/stats/summary`);
         if (!response.ok || !result.success) return;
 
         document.getElementById('summaryTotalCustomers').textContent = result.data.totalCustomers || 0;
