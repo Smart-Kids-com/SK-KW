@@ -7,6 +7,7 @@ const db = require('../db/turso-manager');
  */
 const MAX_LIMIT = 50;
 const DEFAULT_LIMIT = 50;
+const MAX_COLLECTIONS_LIST_LIMIT = 200;
 const MAX_SEARCH_LEN = 80;
 const DB_OP_TIMEOUT_MS = 12_000;
 
@@ -79,7 +80,10 @@ function parseIncludeProductsFlag(req, defaultValue = false) {
   // includeProducts=1 => true
   const raw = req.query.includeProducts;
   if (raw === undefined || raw === null || raw === '') return defaultValue;
-  return String(raw) !== '0';
+  const text = String(raw).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(text)) return true;
+  if (['0', 'false', 'no', 'off'].includes(text)) return false;
+  return defaultValue;
 }
 
 async function makeUniqueSlug(baseText = '', excludeId = null) {
@@ -1074,8 +1078,12 @@ router.get('/', async (req, res) => {
     const where = [];
 
     if (status) {
+      const normalizedStatus = normalizeStatus(status);
+      if (normalizedStatus !== String(status).trim().toLowerCase()) {
+        return res.status(400).json({ success: false, error: 'قيمة status غير صحيحة' });
+      }
       where.push(`status = ?`);
-      params.push(String(status));
+      params.push(normalizedStatus);
     }
 
     if (search) {
@@ -1104,7 +1112,7 @@ router.get('/', async (req, res) => {
     sql += ` ORDER BY ${sortColumn} ${sortOrder}`;
     sql += ` LIMIT ? OFFSET ?`;
 
-    const parsedLimit = Math.max(1, toInteger(limit, 25));
+    const parsedLimit = Math.min(MAX_COLLECTIONS_LIST_LIMIT, Math.max(1, toInteger(limit, 25)));
     const parsedOffset = Math.max(0, toInteger(offset, 0));
 
     params.push(parsedLimit, parsedOffset);
@@ -1123,7 +1131,9 @@ router.get('/', async (req, res) => {
     if (where.length > 0) {
       countSql += ` WHERE ${where.join(' AND ')}`;
 
-      if (status) countParams.push(String(status));
+      if (status) {
+        countParams.push(normalizeStatus(status));
+      }
 
       if (search) {
         const clipped = String(search).trim().slice(0, MAX_SEARCH_LEN);
