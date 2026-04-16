@@ -94,13 +94,37 @@ function normalizeImages(images, fallbackImageUrl = '') {
   return result;
 }
 
+/**
+ * Guardrails (prevent Vercel timeouts + huge payloads)
+ */
+const MAX_LIMIT = 30;
+const DEFAULT_LIMIT = 20;
+const MAX_SEARCH_LEN = 80;
+const DB_OP_TIMEOUT_MS = 12_000;
+
+function withTimeout(promise, ms, label = 'operation') {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+  });
+
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+/**
+ * Images
+ */
 async function getProductImages(productId) {
-  return await db.all(
-    `SELECT id, product_id, image_url, sort_order, created_at
-     FROM product_images
-     WHERE product_id = ?
-     ORDER BY sort_order ASC, id ASC`,
-    [productId]
+  return await withTimeout(
+    db.all(
+      `SELECT id, product_id, image_url, sort_order, created_at
+       FROM product_images
+       WHERE product_id = ?
+       ORDER BY sort_order ASC, id ASC`,
+      [productId]
+    ),
+    DB_OP_TIMEOUT_MS,
+    'getProductImages'
   );
 }
 
@@ -114,21 +138,22 @@ async function getImagesMapForProductIds(productIds = []) {
   }
 
   const placeholders = validIds.map(() => '?').join(',');
-  const rows = await db.all(
-    `SELECT id, product_id, image_url, sort_order, created_at
-     FROM product_images
-     WHERE product_id IN (${placeholders})
-     ORDER BY product_id ASC, sort_order ASC, id ASC`,
-    validIds
+  const rows = await withTimeout(
+    db.all(
+      `SELECT id, product_id, image_url, sort_order, created_at
+       FROM product_images
+       WHERE product_id IN (${placeholders})
+       ORDER BY product_id ASC, sort_order ASC, id ASC`,
+      validIds
+    ),
+    DB_OP_TIMEOUT_MS,
+    'getImagesMapForProductIds'
   );
 
   const map = new Map();
-
   for (const row of rows) {
     const key = Number(row.product_id);
-    if (!map.has(key)) {
-      map.set(key, []);
-    }
+    if (!map.has(key)) map.set(key, []);
     map.get(key).push(row);
   }
 
@@ -150,6 +175,21 @@ async function enrichProduct(product) {
   if (!product) return null;
   const images = await getProductImages(product.id);
   return enrichProductWithImages(product, images);
+}
+
+async function enrichProducts(products = []) {
+  if (!Array.isArray(products) || !products.length) return [];
+
+  const ids = products
+    .map(product => Number(product.id))
+    .filter(id => Number.isFinite(id));
+
+  const imagesMap = await getImagesMapForProductIds(ids);
+
+  return products.map(product => {
+    const images = imagesMap.get(Number(product.id)) || [];
+    return enrichProductWithImages(product, images);
+  });
 }
 
 function normalizeIncomingProductBody(body = {}) {
@@ -180,13 +220,15 @@ async function makeUniqueSlug(baseText = '', excludeId = null) {
 
   while (true) {
     const existing = excludeId
-      ? await db.get(
-          `SELECT id FROM products WHERE slug = ? AND id != ?`,
-          [candidate, excludeId]
+      ? await withTimeout(
+          db.get(`SELECT id FROM products WHERE slug = ? AND id != ?`, [candidate, excludeId]),
+          DB_OP_TIMEOUT_MS,
+          'makeUniqueSlug(exclude)'
         )
-      : await db.get(
-          `SELECT id FROM products WHERE slug = ?`,
-          [candidate]
+      : await withTimeout(
+          db.get(`SELECT id FROM products WHERE slug = ?`, [candidate]),
+          DB_OP_TIMEOUT_MS,
+          'makeUniqueSlug'
         );
 
     if (!existing) return candidate;
@@ -196,31 +238,24 @@ async function makeUniqueSlug(baseText = '', excludeId = null) {
   }
 }
 
-async function enrichProducts(products = []) {
-  if (!Array.isArray(products) || !products.length) return [];
-
-  const ids = products
-    .map(product => Number(product.id))
-    .filter(id => Number.isFinite(id));
-
-  const imagesMap = await getImagesMapForProductIds(ids);
-
-  return products.map(product => {
-    const images = imagesMap.get(Number(product.id)) || [];
-    return enrichProductWithImages(product, images);
-  });
-}
-
 /**
  * GET /api/products/stats/summary
  */
 router.get('/stats/summary', async (req, res) => {
   try {
-    const totalProducts = await db.get(`SELECT COUNT(*) as count FROM products`);
-    const activeProducts = await db.get(`SELECT COUNT(*) as count FROM products WHERE status = 'active'`);
-    const draftProducts = await db.get(`SELECT COUNT(*) as count FROM products WHERE status = 'draft'`);
-    const archivedProducts = await db.get(`SELECT COUNT(*) as count FROM products WHERE status = 'archived'`);
-    const totalStock = await db.get(`SELECT SUM(stock) as total FROM products`);
+    const [
+      totalProducts,
+      activeProducts,
+      draftProducts,
+      archivedProducts,
+      totalStock
+    ] = await Promise.all([
+      withTimeout(db.get(`SELECT COUNT(*) as count FROM products`), DB_OP_TIMEOUT_MS, 'count(total)'),
+      withTimeout(db.get(`SELECT COUNT(*) as count FROM products WHERE status = 'active'`), DB_OP_TIMEOUT_MS, 'count(active)'),
+      withTimeout(db.get(`SELECT COUNT(*) as count FROM products WHERE status = 'draft'`), DB_OP_TIMEOUT_MS, 'count(draft)'),
+      withTimeout(db.get(`SELECT COUNT(*) as count FROM products WHERE status = 'archived'`), DB_OP_TIMEOUT_MS, 'count(archived)'),
+      withTimeout(db.get(`SELECT SUM(stock) as total FROM products`), DB_OP_TIMEOUT_MS, 'sum(stock)')
+    ]);
 
     return res.json({
       success: true,
@@ -234,10 +269,7 @@ router.get('/stats/summary', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ خطأ في جلب إحصائيات المنتجات:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في جلب إحصائيات المنتجات'
-    });
+    return res.status(500).json({ success: false, error: 'فشل في جلب إحصائيات المنتجات' });
   }
 });
 
@@ -248,30 +280,31 @@ router.get('/slug/:slug', async (req, res) => {
   try {
     const { slug } = req.params;
 
-    const product = await db.get(
-      `SELECT * FROM products WHERE slug = ?`,
-      [slug]
+    const product = await withTimeout(
+      db.get(
+        `SELECT
+          id, product_name, slug, sku, description,
+          price, sale_price, image_url, stock, status,
+          product_type, vendor, category, tags,
+          seo_title, seo_description,
+          created_at, updated_at
+         FROM products
+         WHERE slug = ?`,
+        [slug]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'getProductBySlug'
     );
 
     if (!product) {
-      return res.status(404).json({
-        success: false,
-        error: 'المنتج غير موجود'
-      });
+      return res.status(404).json({ success: false, error: 'المنتج غير موجود' });
     }
 
     const enrichedProduct = await enrichProduct(product);
-
-    return res.json({
-      success: true,
-      data: enrichedProduct
-    });
+    return res.json({ success: true, data: enrichedProduct });
   } catch (error) {
     console.error('❌ خطأ في جلب المنتج بالـ slug:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في جلب المنتج'
-    });
+    return res.status(500).json({ success: false, error: 'فشل في جلب المنتج' });
   }
 });
 
@@ -300,18 +333,12 @@ router.post('/', async (req, res) => {
     } = normalizeIncomingProductBody(req.body);
 
     if (!normalizeText(productName)) {
-      return res.status(400).json({
-        success: false,
-        error: 'اسم المنتج مطلوب'
-      });
+      return res.status(400).json({ success: false, error: 'اسم المنتج مطلوب' });
     }
 
     const finalPrice = toNumber(price, NaN);
     if (!Number.isFinite(finalPrice) || finalPrice < 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'السعر غير صحيح'
-      });
+      return res.status(400).json({ success: false, error: 'السعر غير صحيح' });
     }
 
     const finalSalePrice = toNumber(salePrice, 0);
@@ -322,82 +349,86 @@ router.post('/', async (req, res) => {
     const finalImages = normalizeImages(images, imageUrl);
     const primaryImage = finalImages.length ? finalImages[0].image_url : normalizeText(imageUrl);
 
-    const existingSlug = await db.get(
-      `SELECT id FROM products WHERE slug = ?`,
-      [finalSlug]
+    const existingSlug = await withTimeout(
+      db.get(`SELECT id FROM products WHERE slug = ?`, [finalSlug]),
+      DB_OP_TIMEOUT_MS,
+      'checkSlugUnique'
     );
-
     if (existingSlug) {
-      return res.status(409).json({
-        success: false,
-        error: 'الـ slug مستخدم بالفعل'
-      });
+      return res.status(409).json({ success: false, error: 'الـ slug مستخدم بالفعل' });
     }
 
     if (finalSku) {
-      const existingSku = await db.get(
-        `SELECT id FROM products WHERE sku = ?`,
-        [finalSku]
+      const existingSku = await withTimeout(
+        db.get(`SELECT id FROM products WHERE sku = ?`, [finalSku]),
+        DB_OP_TIMEOUT_MS,
+        'checkSkuUnique'
       );
-
       if (existingSku) {
-        return res.status(409).json({
-          success: false,
-          error: 'SKU مستخدم بالفعل'
-        });
+        return res.status(409).json({ success: false, error: 'SKU مستخدم بالفعل' });
       }
     }
 
-    await db.run(
-      `INSERT INTO products
-      (
-        product_name,
-        slug,
-        sku,
-        description,
-        price,
-        sale_price,
-        image_url,
-        stock,
-        status,
-        product_type,
-        vendor,
-        category,
-        tags,
-        seo_title,
-        seo_description
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        normalizeText(productName),
-        finalSlug,
-        finalSku,
-        description || '',
-        finalPrice,
-        finalSalePrice,
-        primaryImage || '',
-        finalStock,
-        finalStatus,
-        normalizeText(productType),
-        normalizeText(vendor),
-        normalizeText(category),
-        normalizeTags(tags),
-        normalizeText(seoTitle),
-        normalizeText(seoDescription)
-      ]
+    await withTimeout(
+      db.run(
+        `INSERT INTO products
+        (
+          product_name, slug, sku, description,
+          price, sale_price, image_url, stock, status,
+          product_type, vendor, category, tags,
+          seo_title, seo_description
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          normalizeText(productName),
+          finalSlug,
+          finalSku,
+          description || '',
+          finalPrice,
+          finalSalePrice,
+          primaryImage || '',
+          finalStock,
+          finalStatus,
+          normalizeText(productType),
+          normalizeText(vendor),
+          normalizeText(category),
+          normalizeTags(tags),
+          normalizeText(seoTitle),
+          normalizeText(seoDescription)
+        ]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'insertProduct'
     );
 
-    const savedProduct = await db.get(
-      `SELECT * FROM products WHERE slug = ? ORDER BY id DESC LIMIT 1`,
-      [finalSlug]
+    const savedProduct = await withTimeout(
+      db.get(
+        `SELECT
+          id, product_name, slug, sku, description,
+          price, sale_price, image_url, stock, status,
+          product_type, vendor, category, tags,
+          seo_title, seo_description,
+          created_at, updated_at
+         FROM products
+         WHERE slug = ?
+         ORDER BY id DESC
+         LIMIT 1`,
+        [finalSlug]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'selectSavedProduct'
     );
 
     if (savedProduct && finalImages.length) {
       for (const image of finalImages) {
-        await db.run(
-          `INSERT INTO product_images (product_id, image_url, sort_order)
-           VALUES (?, ?, ?)`,
-          [savedProduct.id, image.image_url, image.sort_order]
+        await withTimeout(
+          db.run(
+            `INSERT INTO product_images (product_id, image_url, sort_order)
+             VALUES (?, ?, ?)`,
+            [savedProduct.id, image.image_url, image.sort_order]
+          ),
+          DB_OP_TIMEOUT_MS,
+          'insertProductImage'
         );
       }
     }
@@ -411,10 +442,7 @@ router.post('/', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ خطأ في إنشاء المنتج:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في إنشاء المنتج'
-    });
+    return res.status(500).json({ success: false, error: 'فشل في إنشاء المنتج' });
   }
 });
 
@@ -443,16 +471,24 @@ router.put('/:id', async (req, res) => {
       images
     } = normalizeIncomingProductBody(req.body);
 
-    const product = await db.get(
-      `SELECT * FROM products WHERE id = ?`,
-      [id]
+    const product = await withTimeout(
+      db.get(
+        `SELECT
+          id, product_name, slug, sku, description,
+          price, sale_price, image_url, stock, status,
+          product_type, vendor, category, tags,
+          seo_title, seo_description,
+          created_at, updated_at
+         FROM products
+         WHERE id = ?`,
+        [id]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'getProductForUpdate'
     );
 
     if (!product) {
-      return res.status(404).json({
-        success: false,
-        error: 'المنتج غير موجود'
-      });
+      return res.status(404).json({ success: false, error: 'المنتج غير موجود' });
     }
 
     const updateFields = [];
@@ -461,10 +497,7 @@ router.put('/:id', async (req, res) => {
     if (productName !== undefined) {
       const finalName = normalizeText(productName);
       if (!finalName) {
-        return res.status(400).json({
-          success: false,
-          error: 'اسم المنتج غير صحيح'
-        });
+        return res.status(400).json({ success: false, error: 'اسم المنتج غير صحيح' });
       }
       updateFields.push('product_name = ?');
       updateValues.push(finalName);
@@ -473,16 +506,13 @@ router.put('/:id', async (req, res) => {
     if (slug !== undefined) {
       const finalSlug = await makeUniqueSlug(slug, id);
 
-      const existingSlug = await db.get(
-        `SELECT id FROM products WHERE slug = ? AND id != ?`,
-        [finalSlug, id]
+      const existingSlug = await withTimeout(
+        db.get(`SELECT id FROM products WHERE slug = ? AND id != ?`, [finalSlug, id]),
+        DB_OP_TIMEOUT_MS,
+        'checkSlugUniqueOnUpdate'
       );
-
       if (existingSlug) {
-        return res.status(409).json({
-          success: false,
-          error: 'الـ slug مستخدم بالفعل'
-        });
+        return res.status(409).json({ success: false, error: 'الـ slug مستخدم بالفعل' });
       }
 
       updateFields.push('slug = ?');
@@ -493,16 +523,13 @@ router.put('/:id', async (req, res) => {
       const finalSku = normalizeText(sku) || null;
 
       if (finalSku) {
-        const existingSku = await db.get(
-          `SELECT id FROM products WHERE sku = ? AND id != ?`,
-          [finalSku, id]
+        const existingSku = await withTimeout(
+          db.get(`SELECT id FROM products WHERE sku = ? AND id != ?`, [finalSku, id]),
+          DB_OP_TIMEOUT_MS,
+          'checkSkuUniqueOnUpdate'
         );
-
         if (existingSku) {
-          return res.status(409).json({
-            success: false,
-            error: 'SKU مستخدم بالفعل'
-          });
+          return res.status(409).json({ success: false, error: 'SKU مستخدم بالفعل' });
         }
       }
 
@@ -518,10 +545,7 @@ router.put('/:id', async (req, res) => {
     if (price !== undefined) {
       const finalPrice = toNumber(price, NaN);
       if (!Number.isFinite(finalPrice) || finalPrice < 0) {
-        return res.status(400).json({
-          success: false,
-          error: 'السعر غير صحيح'
-        });
+        return res.status(400).json({ success: false, error: 'السعر غير صحيح' });
       }
       updateFields.push('price = ?');
       updateValues.push(finalPrice);
@@ -591,51 +615,60 @@ router.put('/:id', async (req, res) => {
     updateFields.push('updated_at = CURRENT_TIMESTAMP');
 
     if (updateFields.length === 1) {
-      return res.status(400).json({
-        success: false,
-        error: 'لا توجد بيانات للتحديث'
-      });
+      return res.status(400).json({ success: false, error: 'لا توجد بيانات للتحديث' });
     }
 
     updateValues.push(id);
 
-    await db.run(
-      `UPDATE products
-       SET ${updateFields.join(', ')}
-       WHERE id = ?`,
-      updateValues
+    await withTimeout(
+      db.run(
+        `UPDATE products
+         SET ${updateFields.join(', ')}
+         WHERE id = ?`,
+        updateValues
+      ),
+      DB_OP_TIMEOUT_MS,
+      'updateProduct'
     );
 
     if (finalImages !== null) {
-      await db.run(`DELETE FROM product_images WHERE product_id = ?`, [id]);
+      await withTimeout(db.run(`DELETE FROM product_images WHERE product_id = ?`, [id]), DB_OP_TIMEOUT_MS, 'deleteProductImages');
 
       for (const image of finalImages) {
-        await db.run(
-          `INSERT INTO product_images (product_id, image_url, sort_order)
-           VALUES (?, ?, ?)`,
-          [id, image.image_url, image.sort_order]
+        await withTimeout(
+          db.run(
+            `INSERT INTO product_images (product_id, image_url, sort_order)
+             VALUES (?, ?, ?)`,
+            [id, image.image_url, image.sort_order]
+          ),
+          DB_OP_TIMEOUT_MS,
+          'insertProductImageOnUpdate'
         );
       }
     }
 
-    const updatedProduct = await db.get(
-      `SELECT * FROM products WHERE id = ?`,
-      [id]
+    const updatedProduct = await withTimeout(
+      db.get(
+        `SELECT
+          id, product_name, slug, sku, description,
+          price, sale_price, image_url, stock, status,
+          product_type, vendor, category, tags,
+          seo_title, seo_description,
+          created_at, updated_at
+         FROM products
+         WHERE id = ?`,
+        [id]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'getUpdatedProduct'
     );
 
     const enrichedProduct = await enrichProduct(updatedProduct);
 
-    return res.json({
-      success: true,
-      message: 'تم تحديث المنتج بنجاح',
-      data: enrichedProduct
-    });
+    return res.json({ success: true, message: 'تم تحديث المنتج بنجاح', data: enrichedProduct });
   } catch (error) {
     console.error('❌ خطأ في تحديث المنتج:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في تحديث المنتج'
-    });
+    return res.status(500).json({ success: false, error: 'فشل في تحديث المنتج' });
   }
 });
 
@@ -646,20 +679,18 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const product = await db.get(
-      `SELECT * FROM products WHERE id = ?`,
-      [id]
+    const product = await withTimeout(
+      db.get(`SELECT id, product_name FROM products WHERE id = ?`, [id]),
+      DB_OP_TIMEOUT_MS,
+      'getProductForDelete'
     );
 
     if (!product) {
-      return res.status(404).json({
-        success: false,
-        error: 'المنتج غير موجود'
-      });
+      return res.status(404).json({ success: false, error: 'المنتج غير موجود' });
     }
 
-    await db.run(`DELETE FROM product_images WHERE product_id = ?`, [id]);
-    await db.run(`DELETE FROM products WHERE id = ?`, [id]);
+    await withTimeout(db.run(`DELETE FROM product_images WHERE product_id = ?`, [id]), DB_OP_TIMEOUT_MS, 'deleteImages');
+    await withTimeout(db.run(`DELETE FROM products WHERE id = ?`, [id]), DB_OP_TIMEOUT_MS, 'deleteProduct');
 
     return res.json({
       success: true,
@@ -671,10 +702,7 @@ router.delete('/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ خطأ في حذف المنتج:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في حذف المنتج'
-    });
+    return res.status(500).json({ success: false, error: 'فشل في حذف المنتج' });
   }
 });
 
@@ -685,83 +713,55 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const product = await db.get(
-      `SELECT * FROM products WHERE id = ?`,
-      [id]
+    const product = await withTimeout(
+      db.get(
+        `SELECT
+          id, product_name, slug, sku, description,
+          price, sale_price, image_url, stock, status,
+          product_type, vendor, category, tags,
+          seo_title, seo_description,
+          created_at, updated_at
+         FROM products
+         WHERE id = ?`,
+        [id]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'getProductById'
     );
 
     if (!product) {
-      return res.status(404).json({
-        success: false,
-        error: 'المنتج غير موجود'
-      });
+      return res.status(404).json({ success: false, error: 'المنتج غير موجود' });
     }
 
     const enrichedProduct = await enrichProduct(product);
-
-    return res.json({
-      success: true,
-      data: enrichedProduct
-    });
+    return res.json({ success: true, data: enrichedProduct });
   } catch (error) {
     console.error('❌ خطأ في جلب المنتج:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في جلب المنتج'
-    });
+    return res.status(500).json({ success: false, error: 'فشل في جلب المنتج' });
   }
 });
 
 /**
  * GET /api/products
+ *
+ * Fixes:
+ * - avoid SELECT *
+ * - cap limit
+ * - guard search length
+ * - optional cursor pagination (created_at/id)
  */
 router.get('/', async (req, res) => {
   try {
     const {
       status,
       search,
-      limit = 50,
+      limit = DEFAULT_LIMIT,
       offset = 0,
       sort = 'created_at',
-      order = 'DESC'
+      order = 'DESC',
+      cursorCreatedAt,
+      cursorId
     } = req.query;
-
-    let sql = `SELECT * FROM products`;
-    const params = [];
-    const where = [];
-
-    if (status) {
-      where.push(`status = ?`);
-      params.push(status);
-    }
-
-    if (search) {
-      where.push(`(
-        product_name LIKE ?
-        OR sku LIKE ?
-        OR slug LIKE ?
-        OR description LIKE ?
-        OR product_type LIKE ?
-        OR vendor LIKE ?
-        OR category LIKE ?
-        OR tags LIKE ?
-      )`);
-      const searchValue = `%${String(search).trim()}%`;
-      params.push(
-        searchValue,
-        searchValue,
-        searchValue,
-        searchValue,
-        searchValue,
-        searchValue,
-        searchValue,
-        searchValue
-      );
-    }
-
-    if (where.length > 0) {
-      sql += ` WHERE ${where.join(' AND ')}`;
-    }
 
     const validSortColumns = [
       'created_at',
@@ -778,29 +778,35 @@ router.get('/', async (req, res) => {
 
     const sortColumn = validSortColumns.includes(sort) ? sort : 'created_at';
     const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-    const parsedLimit = Math.max(1, toInteger(limit, 50));
+
+    const parsedLimit = Math.min(MAX_LIMIT, Math.max(1, toInteger(limit, DEFAULT_LIMIT)));
     const parsedOffset = Math.max(0, toInteger(offset, 0));
 
-    sql += ` ORDER BY ${sortColumn} ${sortOrder}`;
-    sql += ` LIMIT ? OFFSET ?`;
-    params.push(parsedLimit, parsedOffset);
+    const where = [];
+    const params = [];
 
-    const products = await db.all(sql, params);
-    const enrichedProducts = await enrichProducts(products);
+    if (status) {
+      where.push(`status = ?`);
+      params.push(status);
+    }
 
-    let countSql = `SELECT COUNT(*) as total FROM products`;
-    const countParams = [];
-
-    if (where.length > 0) {
-      countSql += ` WHERE ${where.join(' AND ')}`;
-
-      if (status) {
-        countParams.push(status);
-      }
-
-      if (search) {
-        const searchValue = `%${String(search).trim()}%`;
-        countParams.push(
+    let searchValue = null;
+    if (search) {
+      const s = String(search).trim();
+      if (s.length > 0) {
+        const clipped = s.slice(0, MAX_SEARCH_LEN);
+        searchValue = `%${clipped}%`;
+        where.push(`(
+          product_name LIKE ?
+          OR sku LIKE ?
+          OR slug LIKE ?
+          OR description LIKE ?
+          OR product_type LIKE ?
+          OR vendor LIKE ?
+          OR category LIKE ?
+          OR tags LIKE ?
+        )`);
+        params.push(
           searchValue,
           searchValue,
           searchValue,
@@ -813,25 +819,110 @@ router.get('/', async (req, res) => {
       }
     }
 
-    const countResult = await db.get(countSql, countParams);
-    const total = Number(countResult?.total || 0);
+    const useCursor =
+      cursorCreatedAt &&
+      sortColumn === 'created_at' &&
+      (sortOrder === 'DESC' || sortOrder === 'ASC');
+
+    if (useCursor) {
+      const cid = Number(cursorId);
+      const hasValidId = Number.isFinite(cid) && cid > 0;
+
+      if (sortOrder === 'DESC') {
+        if (hasValidId) {
+          where.push(`(created_at < ? OR (created_at = ? AND id < ?))`);
+          params.push(cursorCreatedAt, cursorCreatedAt, cid);
+        } else {
+          where.push(`created_at < ?`);
+          params.push(cursorCreatedAt);
+        }
+      } else {
+        if (hasValidId) {
+          where.push(`(created_at > ? OR (created_at = ? AND id > ?))`);
+          params.push(cursorCreatedAt, cursorCreatedAt, cid);
+        } else {
+          where.push(`created_at > ?`);
+          params.push(cursorCreatedAt);
+        }
+      }
+    }
+
+    let sql =
+      `SELECT
+        id, product_name, slug, sku,
+        price, sale_price, image_url, stock, status,
+        product_type, vendor, category, tags,
+        created_at, updated_at
+       FROM products`;
+
+    if (where.length > 0) {
+      sql += ` WHERE ${where.join(' AND ')}`;
+    }
+
+    sql += ` ORDER BY ${sortColumn} ${sortOrder}, id ${sortOrder}`;
+
+    if (!useCursor) {
+      sql += ` LIMIT ? OFFSET ?`;
+      params.push(parsedLimit, parsedOffset);
+    } else {
+      sql += ` LIMIT ?`;
+      params.push(parsedLimit);
+    }
+
+    const products = await withTimeout(db.all(sql, params), DB_OP_TIMEOUT_MS, 'listProducts');
+    const enriched = await enrichProducts(products);
+
+    // totalPages/total اختياريين — هنحسبهم فقط لما مش بنستخدم cursor
+    let total = null;
+    if (!useCursor) {
+      try {
+        let countSql = `SELECT COUNT(*) as total FROM products`;
+        const countParams = [];
+
+        if (where.length > 0) {
+          countSql += ` WHERE ${where.join(' AND ')}`;
+
+          if (status) countParams.push(status);
+
+          if (searchValue) {
+            countParams.push(
+              searchValue, searchValue, searchValue, searchValue,
+              searchValue, searchValue, searchValue, searchValue
+            );
+          }
+        }
+
+        const countResult = await withTimeout(db.get(countSql, countParams), DB_OP_TIMEOUT_MS, 'countProducts');
+        total = Number(countResult?.total || 0);
+      } catch (e) {
+        total = null;
+      }
+    }
 
     return res.json({
       success: true,
-      data: enrichedProducts,
+      data: enriched,
       pagination: {
-        total,
         limit: parsedLimit,
-        offset: parsedOffset,
-        totalPages: Math.ceil(total / parsedLimit)
+        offset: useCursor ? null : parsedOffset,
+        total,
+        totalPages: total != null ? Math.ceil(total / parsedLimit) : null,
+        cursor: enriched.length
+          ? { created_at: enriched[enriched.length - 1].created_at, id: enriched[enriched.length - 1].id }
+          : null
       }
     });
   } catch (error) {
     console.error('❌ خطأ في جلب المنتجات:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في جلب المنتجات'
-    });
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({
+        success: false,
+        error: 'الاستعلام استغرق وقتًا طويلاً. حاول تقليل limit أو تعطيل search أو استخدام cursor.'
+      });
+    }
+
+    return res.status(500).json({ success: false, error: 'فشل في جلب المنتجات' });
   }
 });
 
