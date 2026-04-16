@@ -10,6 +10,7 @@ const DEFAULT_LIMIT = 50;
 const MAX_COLLECTIONS_LIST_LIMIT = 200;
 const MAX_SEARCH_LEN = 80;
 const DB_OP_TIMEOUT_MS = 12_000;
+const COLLECTION_STATUSES = ['active', 'draft', 'archived'];
 
 function withTimeout(promise, ms, label = 'operation') {
   let timer;
@@ -37,9 +38,13 @@ function normalizeText(value = '') {
 }
 
 function normalizeStatus(status) {
-  const allowed = ['active', 'draft', 'archived'];
   const raw = String(status || '').trim().toLowerCase();
-  return allowed.includes(raw) ? raw : 'active';
+  return COLLECTION_STATUSES.includes(raw) ? raw : 'active';
+}
+
+function parseStatusFilter(status) {
+  const raw = String(status || '').trim().toLowerCase();
+  return COLLECTION_STATUSES.includes(raw) ? raw : null;
 }
 
 function normalizeSortMode(sortMode) {
@@ -76,8 +81,7 @@ function normalizeBooleanFlag(value, defaultValue = true) {
 }
 
 function parseIncludeProductsFlag(req, defaultValue = false) {
-  // includeProducts=0 => false
-  // includeProducts=1 => true
+  // القيم المقبولة للتفعيل: 1/true/yes/on، وللتعطيل: 0/false/no/off، وأي قيمة أخرى => defaultValue
   const raw = req.query.includeProducts;
   if (raw === undefined || raw === null || raw === '') return defaultValue;
   const text = String(raw).trim().toLowerCase();
@@ -1078,9 +1082,9 @@ router.get('/', async (req, res) => {
     const where = [];
 
     if (status) {
-      const normalizedStatus = normalizeStatus(status);
-      if (normalizedStatus !== String(status).trim().toLowerCase()) {
-        return res.status(400).json({ success: false, error: 'قيمة status غير صحيحة' });
+      const normalizedStatus = parseStatusFilter(status);
+      if (!normalizedStatus) {
+        return res.status(400).json({ success: false, error: 'قيمة status غير صحيحة. القيم المسموحة: active, draft, archived' });
       }
       where.push(`status = ?`);
       params.push(normalizedStatus);
@@ -1132,7 +1136,7 @@ router.get('/', async (req, res) => {
       countSql += ` WHERE ${where.join(' AND ')}`;
 
       if (status) {
-        countParams.push(normalizeStatus(status));
+        countParams.push(parseStatusFilter(status));
       }
 
       if (search) {
