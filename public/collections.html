@@ -523,7 +523,8 @@
     }
 
     async function fetchCollectionsFromApi() {
-      const response = await fetch(`${COLLECTIONS_API}?limit=1000&offset=0&sort=created_at&order=DESC`, {
+      // NOTE: collections endpoint enriches with product_count without fetching products (fast)
+      const response = await fetch(`${COLLECTIONS_API}?limit=200&offset=0&sort=created_at&order=DESC`, {
         cache: 'no-store',
         headers: { Accept: 'application/json' }
       });
@@ -536,11 +537,14 @@
 
       const collections = Array.isArray(result.data) ? result.data : [];
 
+      // Improvements:
+      // - show only active & draft by default, hide archived
+      // - normalize product_count number
       return collections
         .filter(item => String(item.status || 'active').toLowerCase() !== 'archived')
         .map((item) => ({
           ...item,
-          icon: safeText(item.icon, ''),
+          icon: safeText(item.icon, ''), // (even if not used now)
           description: safeText(item.description, ''),
           product_count: Number(item.product_count || 0)
         }));
@@ -575,25 +579,37 @@
         const icon = safeText(collection.icon, '');
         const count = Number(collection.product_count || 0);
 
+        // FIX: do NOT embed JSON into onclick (can break HTML/JS if slug contains quotes)
+        // We use data attributes instead.
         return `
-          <div class="collection-card" onclick="openCollection(${JSON.stringify(collection.slug || '')}, ${JSON.stringify(String(collection.id || ''))})">
+          <div class="collection-card" data-slug="${escapeHtml(collection.slug || '')}" data-id="${escapeHtml(String(collection.id || ''))}">
             ${icon ? `<span class="collection-icon" style="display:block;">${escapeHtml(icon)}</span>` : ``}
             <h3 class="collection-title">${escapeHtml(title)}</h3>
             ${description ? `<p class="collection-description" style="display:block;">${escapeHtml(description)}</p>` : ``}
             <div class="collection-count">${count} منتج</div>
-            <a href="${url}" class="browse-btn" onclick="event.stopPropagation()">تصفح المجموعة</a>
+            <a href="${url}" class="browse-btn">تصفح المجموعة</a>
           </div>
         `;
       }).join('');
-    }
 
-    function openCollection(slug, id) {
-      if (slug) {
-        window.location.href = `./collection.html?slug=${encodeURIComponent(slug)}`;
-        return;
-      }
+      // Attach click handlers safely
+      grid.querySelectorAll('.collection-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          // Allow clicking the inner <a> to work normally
+          const anchor = e.target.closest('a');
+          if (anchor) return;
 
-      window.location.href = `./collection.html?id=${encodeURIComponent(id)}`;
+          const slug = safeText(card.getAttribute('data-slug'));
+          const id = safeText(card.getAttribute('data-id'));
+
+          if (slug) {
+            window.location.href = `./collection.html?slug=${encodeURIComponent(slug)}`;
+            return;
+          }
+
+          window.location.href = `./collection.html?id=${encodeURIComponent(id)}`;
+        });
+      });
     }
 
     function showError(message = '') {

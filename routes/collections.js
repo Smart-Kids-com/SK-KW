@@ -34,7 +34,6 @@ function normalizeSortMode(sortMode) {
     'newest',
     'oldest'
   ];
-
   return allowed.includes(sortMode) ? sortMode : 'manual';
 }
 
@@ -58,6 +57,14 @@ function normalizeBooleanFlag(value, defaultValue = true) {
   if (['0', 'false', 'no', 'off'].includes(text)) return 0;
 
   return defaultValue ? 1 : 0;
+}
+
+function parseIncludeProductsFlag(req, defaultValue = true) {
+  // includeProducts=0 => false
+  // includeProducts=1 => true
+  const raw = req.query.includeProducts;
+  if (raw === undefined || raw === null || raw === '') return defaultValue;
+  return String(raw) !== '0';
 }
 
 async function makeUniqueSlug(baseText = '', excludeId = null) {
@@ -99,6 +106,7 @@ function normalizeIncomingCollectionBody(body = {}) {
 }
 
 async function getCollectionById(id) {
+  // NOTE: تركت SELECT * زي ما هو عندك
   return await db.get(`SELECT * FROM collections WHERE id = ?`, [id]);
 }
 
@@ -107,7 +115,6 @@ async function getCollectionProductCount(collectionId) {
     `SELECT COUNT(*) as count FROM collection_products WHERE collection_id = ?`,
     [collectionId]
   );
-
   return Number(row?.count || 0);
 }
 
@@ -286,6 +293,7 @@ router.get('/stats/summary', async (req, res) => {
 
 /**
  * GET /api/collections/slug/:slug
+ * Optional query: includeProducts=0|1 (default 1)
  */
 router.get('/slug/:slug', async (req, res) => {
   try {
@@ -301,7 +309,8 @@ router.get('/slug/:slug', async (req, res) => {
       });
     }
 
-    const enriched = await enrichCollection(collection, true);
+    const includeProducts = parseIncludeProductsFlag(req, true);
+    const enriched = await enrichCollection(collection, includeProducts);
 
     return res.json({
       success: true,
@@ -548,7 +557,6 @@ router.post('/:id/products/add', async (req, res) => {
     }
 
     await addProductsToCollection(id, productIds, position === 'top' ? 'top' : 'bottom');
-
     const products = await getCollectionProducts(id, 'manual');
 
     return res.json({
@@ -638,7 +646,6 @@ router.post('/:id/products/reorder', async (req, res) => {
     for (const item of items) {
       const productId = toInteger(item.productId, 0);
       const sortOrder = toInteger(item.sortOrder, 0);
-
       if (!productId || !sortOrder) continue;
 
       await db.run(
@@ -669,21 +676,11 @@ router.post('/:id/products/reorder', async (req, res) => {
 
 /**
  * POST /api/collections/:id/products/move
- * body:
- * {
- *   productIds: [1,2,3],
- *   destination: 'top' | 'bottom' | 'position',
- *   position: 4
- * }
  */
 router.post('/:id/products/move', async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      productIds = [],
-      destination = 'top',
-      position = 1
-    } = req.body || {};
+    const { productIds = [], destination = 'top', position = 1 } = req.body || {};
 
     const collection = await getCollectionById(id);
     if (!collection) {
@@ -754,6 +751,7 @@ router.post('/:id/products/move', async (req, res) => {
 
 /**
  * GET /api/collections/:id
+ * Optional query: includeProducts=0|1 (default 1)
  */
 router.get('/:id', async (req, res) => {
   try {
@@ -766,7 +764,8 @@ router.get('/:id', async (req, res) => {
       });
     }
 
-    const enriched = await enrichCollection(collection, true);
+    const includeProducts = parseIncludeProductsFlag(req, true);
+    const enriched = await enrichCollection(collection, includeProducts);
 
     return res.json({
       success: true,
@@ -951,7 +950,7 @@ router.get('/', async (req, res) => {
     const {
       status,
       search,
-      limit = 50,
+      limit = 25,
       offset = 0,
       sort = 'created_at',
       order = 'DESC'
@@ -967,6 +966,9 @@ router.get('/', async (req, res) => {
     }
 
     if (search) {
+      const clipped = String(search).trim().slice(0, 80);
+      const searchValue = `%${clipped}%`;
+
       where.push(`(
         title LIKE ?
         OR slug LIKE ?
@@ -975,34 +977,21 @@ router.get('/', async (req, res) => {
         OR seo_description LIKE ?
       )`);
 
-      const searchValue = `%${String(search).trim()}%`;
-      params.push(
-        searchValue,
-        searchValue,
-        searchValue,
-        searchValue,
-        searchValue
-      );
+      params.push(searchValue, searchValue, searchValue, searchValue, searchValue);
     }
 
     if (where.length > 0) {
       sql += ` WHERE ${where.join(' AND ')}`;
     }
 
-    const validSortColumns = [
-      'created_at',
-      'updated_at',
-      'title',
-      'status'
-    ];
-
+    const validSortColumns = ['created_at', 'updated_at', 'title', 'status'];
     const sortColumn = validSortColumns.includes(sort) ? sort : 'created_at';
     const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
     sql += ` ORDER BY ${sortColumn} ${sortOrder}`;
     sql += ` LIMIT ? OFFSET ?`;
 
-    const parsedLimit = Math.max(1, toInteger(limit, 50));
+    const parsedLimit = Math.max(1, toInteger(limit, 25));
     const parsedOffset = Math.max(0, toInteger(offset, 0));
 
     params.push(parsedLimit, parsedOffset);
@@ -1023,14 +1012,9 @@ router.get('/', async (req, res) => {
       if (status) countParams.push(status);
 
       if (search) {
-        const searchValue = `%${String(search).trim()}%`;
-        countParams.push(
-          searchValue,
-          searchValue,
-          searchValue,
-          searchValue,
-          searchValue
-        );
+        const clipped = String(search).trim().slice(0, 80);
+        const searchValue = `%${clipped}%`;
+        countParams.push(searchValue, searchValue, searchValue, searchValue, searchValue);
       }
     }
 
