@@ -54,10 +54,10 @@ const SYSTEM_CONFIG = {
   // معلومات الاتصال
   CONTACT_INFO: {
     PHONE: '+965-XXXXXXXX',
-    EMAIL: 'info@smartkids.com.kw',
+    EMAIL: 'smartkidssss24@gmail.com',
     ADDRESS: 'الكويت',
     SOCIAL_MEDIA: {
-      INSTAGRAM: '@smartkids_kuwait',
+      INSTAGRAM: '@kuwaitsmartkids',
       WHATSAPP: '+965-66635393'
     }
   },
@@ -94,14 +94,15 @@ const HELPERS = {
   },
   
   // تنسيق التاريخ
-  formatDate: (dateString) => {
-    return new Date(dateString).toLocaleDateString('ar-EG');
-  },
-  
-  // تنسيق التاريخ والوقت
-  formatDateTime: (dateString) => {
-    return new Date(dateString).toLocaleString('ar-EG');
-  },
+formatDate: (dateString) => {
+  return new Date(dateString).toLocaleDateString('ar-KW');
+},
+
+// تنسيق التاريخ والوقت
+formatDateTime: (dateString) => {
+  return new Date(dateString).toLocaleString('ar-KW');
+},
+
   
   // إنشاء رقم طلب فريد
   generateOrderNumber: () => {
