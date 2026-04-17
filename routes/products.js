@@ -101,17 +101,10 @@ function normalizeImages(images, fallbackImageUrl = '') {
   return result;
 }
 
-/**
- * Guardrails
- *
- * IMPORTANT:
- * - allow larger limits safely for admin/export/loader
- * - images enrichment is optional (includeImages=1), default off for speed
- */
 const MAX_LIMIT = 1000;
 const DEFAULT_LIMIT = 50;
 const MAX_SEARCH_LEN = 80;
-const DB_OP_TIMEOUT_MS = 25_000;
+const DB_OP_TIMEOUT_MS = 15000;
 
 function withTimeout(promise, ms, label = 'operation') {
   let timer;
@@ -193,7 +186,6 @@ function enrichProductWithImages(product, images = []) {
 function enrichProductWithoutImages(product) {
   if (!product) return null;
 
-  // IMPORTANT: do not add images array at all to keep payload smaller
   return {
     ...product,
     tags_list: parseTags(product.tags),
@@ -312,7 +304,6 @@ router.get('/stats/summary', async (req, res) => {
 
 /**
  * GET /api/products/slug/:slug
- * (always include images for product page)
  */
 router.get('/slug/:slug', async (req, res) => {
   try {
@@ -737,7 +728,6 @@ router.delete('/:id', async (req, res) => {
 
 /**
  * GET /api/products/:id
- * Supports ?includeImages=1 (default 1 for single)
  */
 router.get('/:id', async (req, res) => {
   try {
@@ -777,6 +767,7 @@ router.get('/:id', async (req, res) => {
 
 /**
  * GET /api/products
+ * نسخة خفيفة جدًا حتى لا تعلق في Turso
  */
 router.get('/', async (req, res) => {
   try {
@@ -788,8 +779,6 @@ router.get('/', async (req, res) => {
       offset = 0,
       sort = 'id',
       order = 'DESC',
-      cursorCreatedAt,
-      cursorId,
       includeImages
     } = req.query;
 
@@ -809,7 +798,7 @@ router.get('/', async (req, res) => {
       'category'
     ];
 
-    const sortColumn = validSortColumns.includes(sort) ? sort : 'id';
+    const sortColumn = validSortColumns.includes(String(sort)) ? String(sort) : 'id';
     const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
     const parsedLimit = Math.min(MAX_LIMIT, Math.max(1, toInteger(limit, DEFAULT_LIMIT)));
@@ -817,10 +806,9 @@ router.get('/', async (req, res) => {
 
     const where = [];
     const params = [];
-    let normalizedStatus = null;
 
     if (status) {
-      normalizedStatus = parseProductStatusFilter(status);
+      const normalizedStatus = parseProductStatusFilter(status);
       if (!normalizedStatus) {
         return res.status(400).json({
           success: false,
@@ -831,13 +819,10 @@ router.get('/', async (req, res) => {
       params.push(normalizedStatus);
     }
 
-    let searchValue = null;
     if (search) {
       const s = String(search).trim();
-      if (s.length > 0) {
-        const clipped = s.slice(0, MAX_SEARCH_LEN);
-        searchValue = `%${clipped}%`;
-
+      if (s) {
+        const clipped = `%${s.slice(0, MAX_SEARCH_LEN)}%`;
         const mode = String(searchMode || 'fast').trim().toLowerCase();
         const isFull = mode === 'full';
 
@@ -852,16 +837,7 @@ router.get('/', async (req, res) => {
             OR category LIKE ?
             OR tags LIKE ?
           )`);
-          params.push(
-            searchValue,
-            searchValue,
-            searchValue,
-            searchValue,
-            searchValue,
-            searchValue,
-            searchValue,
-            searchValue
-          );
+          params.push(clipped, clipped, clipped, clipped, clipped, clipped, clipped, clipped);
         } else {
           where.push(`(
             product_name LIKE ?
@@ -870,127 +846,56 @@ router.get('/', async (req, res) => {
             OR category LIKE ?
             OR tags LIKE ?
           )`);
-          params.push(
-            searchValue,
-            searchValue,
-            searchValue,
-            searchValue,
-            searchValue
-          );
-        }
-      }
-    }
-
-    const useCursor =
-      cursorCreatedAt &&
-      sortColumn === 'created_at' &&
-      (sortOrder === 'DESC' || sortOrder === 'ASC');
-
-    if (useCursor) {
-      const cid = Number(cursorId);
-      const hasValidId = Number.isFinite(cid) && cid > 0;
-
-      if (sortOrder === 'DESC') {
-        if (hasValidId) {
-          where.push(`(created_at < ? OR (created_at = ? AND id < ?))`);
-          params.push(cursorCreatedAt, cursorCreatedAt, cid);
-        } else {
-          where.push(`created_at < ?`);
-          params.push(cursorCreatedAt);
-        }
-      } else {
-        if (hasValidId) {
-          where.push(`(created_at > ? OR (created_at = ? AND id > ?))`);
-          params.push(cursorCreatedAt, cursorCreatedAt, cid);
-        } else {
-          where.push(`created_at > ?`);
-          params.push(cursorCreatedAt);
+          params.push(clipped, clipped, clipped, clipped, clipped);
         }
       }
     }
 
     let sql =
       `SELECT
-        id, product_name, slug, sku,
-        price, sale_price, image_url, stock, status,
-        product_type, vendor, category, tags,
-        seo_title, seo_description,
-        created_at, updated_at
+        id,
+        product_name,
+        slug,
+        sku,
+        price,
+        sale_price,
+        image_url,
+        stock,
+        status,
+        product_type,
+        vendor,
+        category,
+        tags,
+        seo_title,
+        seo_description,
+        created_at,
+        updated_at
        FROM products`;
 
-    if (where.length > 0) {
+    if (where.length) {
       sql += ` WHERE ${where.join(' AND ')}`;
     }
 
     sql += ` ORDER BY ${sortColumn} ${sortOrder}, id ${sortOrder}`;
+    sql += ` LIMIT ${parsedLimit} OFFSET ${parsedOffset}`;
 
-    if (!useCursor) {
-      sql += ` LIMIT ? OFFSET ?`;
-      params.push(parsedLimit, parsedOffset);
-    } else {
-      sql += ` LIMIT ?`;
-      params.push(parsedLimit);
-    }
+    const products = await withTimeout(
+      db.all(sql, params),
+      DB_OP_TIMEOUT_MS,
+      'listProducts'
+    );
 
-    const products = await withTimeout(db.all(sql, params), DB_OP_TIMEOUT_MS, 'listProducts');
-    const enriched = await enrichProductsMaybe(products, includeImagesFlag);
-
-    const shouldCount =
-      !useCursor &&
-      parsedLimit <= 200 &&
-      !searchValue;
-
-    let total = null;
-
-    if (shouldCount) {
-      try {
-        let countSql = `SELECT COUNT(*) as total FROM products`;
-        const countParams = [];
-
-        if (where.length > 0) {
-          countSql += ` WHERE ${where.join(' AND ')}`;
-
-          if (normalizedStatus) countParams.push(normalizedStatus);
-
-          if (searchValue) {
-            if (String(searchMode || 'fast').toLowerCase() === 'full') {
-              countParams.push(
-                searchValue, searchValue, searchValue, searchValue,
-                searchValue, searchValue, searchValue, searchValue
-              );
-            } else {
-              countParams.push(
-                searchValue, searchValue, searchValue, searchValue, searchValue
-              );
-            }
-          }
-        }
-
-        const countResult = await withTimeout(
-          db.get(countSql, countParams),
-          DB_OP_TIMEOUT_MS,
-          'countProducts'
-        );
-        total = Number(countResult?.total || 0);
-      } catch (_) {
-        total = null;
-      }
-    }
+    const enriched = await enrichProductsMaybe(Array.isArray(products) ? products : [], includeImagesFlag);
 
     return res.json({
       success: true,
       data: enriched,
       pagination: {
         limit: parsedLimit,
-        offset: useCursor ? null : parsedOffset,
-        total,
-        totalPages: total != null ? Math.ceil(total / parsedLimit) : null,
-        cursor: enriched.length
-          ? {
-              created_at: enriched[enriched.length - 1].created_at,
-              id: enriched[enriched.length - 1].id
-            }
-          : null
+        offset: parsedOffset,
+        total: null,
+        totalPages: null,
+        cursor: null
       }
     });
   } catch (error) {
@@ -999,13 +904,13 @@ router.get('/', async (req, res) => {
     if (String(error?.message || '').includes('timed out')) {
       return res.status(503).json({
         success: false,
-        error: 'الاستعلام استغرق وقتًا طويلاً. حاول تقليل limit أو تعطيل search أو استخدام cursor.'
+        error: 'الاستعلام استغرق وقتًا طويلاً'
       });
     }
 
     return res.status(500).json({
       success: false,
-      error: 'فشل في جلب المنتجات'
+      error: error.message || 'فشل في جلب المنتجات'
     });
   }
 });
