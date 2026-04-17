@@ -254,9 +254,7 @@
 
     .product { background: transparent; border-radius: 18px; overflow: visible; transition: transform .2s ease; }
     .product:hover { transform: translateY(-4px); }
-
     .product-link { display: block; color: inherit; }
-
     .product-media { position: relative; margin-bottom: 12px; }
 
     .product-image {
@@ -377,6 +375,7 @@
       justify-content:center;
       margin: 0 0 1.7rem;
     }
+
     .load-more-btn{
       min-height:48px;
       padding: 12px 18px;
@@ -387,6 +386,7 @@
       font-weight:800;
       cursor:pointer;
     }
+
     .load-more-btn:disabled{
       opacity:.6;
       cursor:not-allowed;
@@ -451,18 +451,12 @@
       padding:12px;
     }
 
-    .toast-thumb{
-      width:72px;height:72px;border-radius:14px;overflow:hidden;background:#f1f1f1;border:1px solid #eee;
-    }
-
+    .toast-thumb{ width:72px;height:72px;border-radius:14px;overflow:hidden;background:#f1f1f1;border:1px solid #eee; }
     .toast-thumb img{ width:100%;height:100%;object-fit:cover;display:block; }
 
     .toast-content{ min-width:0; }
-
     .toast-title{ font-size:1rem;font-weight:800;color:#384;margin-bottom:4px; }
-
     .toast-name{ font-size:.96rem;color:#111;line-height:1.5;margin-bottom:8px; }
-
     .toast-actions{ display:flex;gap:8px;flex-wrap:wrap; }
 
     .toast-actions a{
@@ -477,32 +471,6 @@
     .toast-close{
       width:36px;height:36px;border:0;border-radius:999px;
       background:#f5f2f8;color:#6f6380;cursor:pointer;font-size:1.2rem;
-    }
-
-    @media (max-width: 768px) {
-      .header { min-height: 82px; grid-template-columns: 52px 1fr 92px; padding: 10px 12px; }
-      .header-logo img { max-height: 54px; }
-      .header-icon-btn { width: 40px; height: 40px; font-size: 1.45rem; }
-
-      .collection-hero { padding: 12px 12px 16px; border-radius: 0 0 18px 18px; }
-      .products { gap: 18px 14px; }
-
-      .product-title { font-size: .98rem; }
-      .product-vendor { font-size: .86rem; }
-      .product-price { font-size: .95rem; }
-      .add-to-cart, .view-details { min-height: 54px; font-size: .92rem; border-radius: 12px; }
-
-      .offer-badge { min-height: 38px; font-size: .92rem; padding: 0 14px; bottom: 10px; right: 10px; }
-
-      .toast-inner{ grid-template-columns:60px 1fr 36px; }
-      .toast-thumb{ width:60px; height:60px; }
-    }
-
-    @media (max-width: 520px) {
-      .nav { gap: .6rem; }
-      .nav a { padding: 9px 14px; font-size: .82rem; }
-      .product-title { min-height: 3em; }
-      .price-stack { min-height: 50px; }
     }
   </style>
 </head>
@@ -602,6 +570,7 @@
   <script>
     const COLLECTIONS_API = '/api/collections';
     const ARCHIVED_STATUS = 'archived';
+    const FETCH_TIMEOUT_MS = 35000;
 
     let currentCollection = null;
     let allCollectionProducts = [];
@@ -609,10 +578,10 @@
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
     let toastTimer = null;
 
-    // pagination
+    // pagination (smaller to reduce DB load/timeouts)
     let productsLoading = true;
     let productsOffset = 0;
-    const productsLimit = 50;
+    const productsLimit = 20;
     let productsTotal = null;
     let productsHasMore = false;
 
@@ -636,11 +605,8 @@
     }
 
     function getCollectionIcon(collection) { return safeText(collection?.icon, ''); }
-
     function getProductTitle(product) { return safeText(product.product_name ?? product.name ?? product.title, 'منتج'); }
-
     function getProductVendor(product) { return safeText(product.vendor, ''); }
-
     function extractPrice(product) { return safeNumber(product.price ?? product.sale_price ?? product.regular_price, 0); }
 
     function getComparePrice(product) {
@@ -702,6 +668,23 @@
       clearTimeout(toastTimer);
     }
 
+    async function fetchJsonWithTimeout(url, timeoutMs = FETCH_TIMEOUT_MS) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+      try {
+        const response = await fetch(url, {
+          cache: 'no-store',
+          headers: { Accept: 'application/json' },
+          signal: controller.signal
+        });
+        const result = await response.json().catch(() => null);
+        return { response, result };
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
     async function fetchCollectionMeta() {
       const urlParams = new URLSearchParams(window.location.search);
       const slug = safeText(urlParams.get('slug'));
@@ -713,8 +696,7 @@
         ? `${COLLECTIONS_API}/slug/${encodeURIComponent(slug)}?includeProducts=0`
         : `${COLLECTIONS_API}/${encodeURIComponent(id)}?includeProducts=0`;
 
-      const response = await fetch(endpoint, { cache: 'no-store', headers: { Accept: 'application/json' } });
-      const result = await response.json().catch(() => null);
+      const { response, result } = await fetchJsonWithTimeout(endpoint);
 
       if (!response.ok || !result || !result.success) {
         throw new Error(result?.error || `HTTP ${response.status}`);
@@ -733,12 +715,10 @@
       params.set('limit', String(limit));
       params.set('offset', String(offset));
 
-      const response = await fetch(
-        `${COLLECTIONS_API}/${encodeURIComponent(collectionId)}/products?${params.toString()}`,
-        { cache: 'no-store', headers: { Accept: 'application/json' } }
+      const { response, result } = await fetchJsonWithTimeout(
+        `${COLLECTIONS_API}/${encodeURIComponent(collectionId)}/products?${params.toString()}`
       );
 
-      const result = await response.json().catch(() => null);
       if (!response.ok || !result || !result.success) {
         throw new Error(result?.error || `HTTP ${response.status}`);
       }
@@ -903,7 +883,6 @@
           productsOffset
         );
 
-        // append
         allCollectionProducts = [...allCollectionProducts, ...rows];
         filteredProducts = [...allCollectionProducts];
 
@@ -921,10 +900,12 @@
       } catch (error) {
         console.error(error);
         productsLoading = false;
-        updateLoadMoreButton();
-        // لا نكسر الصفحة، بس نطفي الزر
         productsHasMore = false;
         updateLoadMoreButton();
+        showError(error?.name === 'AbortError'
+          ? 'انتهى وقت تحميل المنتجات (Timeout). حاول مرة أخرى.'
+          : (error?.message || 'حدث خطأ أثناء تحميل المنتجات')
+        );
       }
     }
 
@@ -999,42 +980,39 @@
       `;
     }
 
-    async function loadCollection() {
+    async function init() {
       try {
         productsLoading = true;
         updateLoadMoreButton();
+        updateCartDisplay();
         renderProducts();
 
         currentCollection = await fetchCollectionMeta();
+        productsOffset = 0;
+        productsTotal = null;
         allCollectionProducts = [];
         filteredProducts = [];
 
-        // reset pagination
-        productsOffset = 0;
-        productsTotal = null;
+        // first page
         productsHasMore = true;
-
-        updateCollectionInfo();
-
-        // load first page
-        await loadMoreProducts();
-
-        updateCartDisplay();
-      } catch (error) {
-        console.error('خطأ في تحميل المجموعة:', error);
         productsLoading = false;
-        productsHasMore = false;
+        updateCollectionInfo();
+        renderProducts();
         updateLoadMoreButton();
-        showError('حدث خطأ في تحميل المجموعة');
+
+        await loadMoreProducts();
+      } catch (error) {
+        console.error(error);
+        productsLoading = false;
+        updateLoadMoreButton();
+        showError(error?.message || 'حدث خطأ أثناء تحميل المجموعة');
       }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-      loadCollection();
-      updateCartDisplay();
-
-      document.getElementById('toastClose').addEventListener('click', hideCartToast);
-      document.getElementById('toastContinue').addEventListener('click', (e) => {
+      init();
+      document.getElementById('toastClose')?.addEventListener('click', hideCartToast);
+      document.getElementById('toastContinue')?.addEventListener('click', (e) => {
         e.preventDefault();
         hideCartToast();
       });
