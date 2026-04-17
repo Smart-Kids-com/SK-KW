@@ -783,6 +783,8 @@ router.get('/', async (req, res) => {
     const {
       status,
       search,
+      // NEW: searchMode=fast|full (default fast)
+      searchMode,
       limit = DEFAULT_LIMIT,
       offset = 0,
       sort = 'created_at',
@@ -832,26 +834,42 @@ router.get('/', async (req, res) => {
       if (s.length > 0) {
         const clipped = s.slice(0, MAX_SEARCH_LEN);
         searchValue = `%${clipped}%`;
-        where.push(`(
-          product_name LIKE ?
-          OR sku LIKE ?
-          OR slug LIKE ?
-          OR description LIKE ?
-          OR product_type LIKE ?
-          OR vendor LIKE ?
-          OR category LIKE ?
-          OR tags LIKE ?
-        )`);
-        params.push(
-          searchValue,
-          searchValue,
-          searchValue,
-          searchValue,
-          searchValue,
-          searchValue,
-          searchValue,
-          searchValue
-        );
+
+        const mode = String(searchMode || 'fast').trim().toLowerCase();
+        const isFull = mode === 'full';
+
+        if (isFull) {
+          where.push(`(
+            product_name LIKE ?
+            OR sku LIKE ?
+            OR slug LIKE ?
+            OR description LIKE ?
+            OR product_type LIKE ?
+            OR vendor LIKE ?
+            OR category LIKE ?
+            OR tags LIKE ?
+          )`);
+          params.push(
+            searchValue,
+            searchValue,
+            searchValue,
+            searchValue,
+            searchValue,
+            searchValue,
+            searchValue,
+            searchValue
+          );
+        } else {
+          // fast mode (default): avoid scanning big columns مثل description
+          where.push(`(
+            product_name LIKE ?
+            OR sku LIKE ?
+            OR slug LIKE ?
+            OR category LIKE ?
+            OR tags LIKE ?
+          )`);
+          params.push(searchValue, searchValue, searchValue, searchValue, searchValue);
+        }
       }
     }
 
@@ -910,12 +928,6 @@ router.get('/', async (req, res) => {
     const products = await withTimeout(db.all(sql, params), DB_OP_TIMEOUT_MS, 'listProducts');
     const enriched = await enrichProductsMaybe(products, includeImagesFlag);
 
-    // IMPORTANT:
-    // - COUNT(*) can be expensive under load, and is not required for UI to function.
-    // - We'll compute it only when:
-    //   - not using cursor
-    //   - limit is moderate
-    //   - search is empty or short
     const shouldCount =
       !useCursor &&
       parsedLimit <= 200 &&
@@ -934,10 +946,14 @@ router.get('/', async (req, res) => {
           if (normalizedStatus) countParams.push(normalizedStatus);
 
           if (searchValue) {
-            countParams.push(
-              searchValue, searchValue, searchValue, searchValue,
-              searchValue, searchValue, searchValue, searchValue
-            );
+            if (String(searchMode || 'fast').toLowerCase() === 'full') {
+              countParams.push(
+                searchValue, searchValue, searchValue, searchValue,
+                searchValue, searchValue, searchValue, searchValue
+              );
+            } else {
+              countParams.push(searchValue, searchValue, searchValue, searchValue, searchValue);
+            }
           }
         }
 
