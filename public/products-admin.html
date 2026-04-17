@@ -379,8 +379,8 @@
             </div>
             <div class="field">
               <select id="sortFilter">
-                <option value="created_at-DESC">Newest first</option>
-                <option value="created_at-ASC">Oldest first</option>
+                <option value="id-DESC">Newest first</option>
+                <option value="id-ASC">Oldest first</option>
                 <option value="product_name-ASC">Product A-Z</option>
                 <option value="product_name-DESC">Product Z-A</option>
                 <option value="stock-DESC">Inventory high-low</option>
@@ -435,8 +435,8 @@
     let currentSortIndex = 0;
 
     const sortOptions = [
-      'created_at-DESC',
-      'created_at-ASC',
+      'id-DESC',
+      'id-ASC',
       'product_name-ASC',
       'product_name-DESC',
       'stock-DESC',
@@ -735,7 +735,7 @@
 
         const search = (searchInput?.value || '').trim();
         const status = (statusFilter?.value || currentStatus || '').trim();
-        const sortValue = (sortFilter?.value || 'created_at-DESC').trim();
+        const sortValue = (sortFilter?.value || 'id-DESC').trim();
         const [sort, order] = sortValue.split('-');
 
         syncSearchInputs();
@@ -743,12 +743,10 @@
         const params = new URLSearchParams();
         if (search) params.append('search', search);
         if (status) params.append('status', status);
-        params.append('sort', sort || 'created_at');
+        params.append('sort', sort || 'id');
         params.append('order', order || 'DESC');
         params.append('limit', '50');
         params.append('offset', '0');
-
-        // IMPORTANT: keep list fast, do NOT load images in list
         params.append('includeImages', '0');
 
         const { response, result } = await fetchJsonWithTimeout(`${API_BASE}?${params.toString()}`);
@@ -878,7 +876,7 @@
           tags: Array.isArray(product.tags_list) ? product.tags_list : [],
           seoTitle: product.seo_title || '',
           seoDescription: product.seo_description || '',
-          images: [] // list calls don't include images; keep duplication simple
+          images: []
         };
 
         const { response, result } = await fetchJsonWithTimeout(API_BASE, {
@@ -1161,7 +1159,6 @@
     async function fetchImportLookup() {
       showAlert('جاري تجهيز بيانات المطابقة...', 'warning');
 
-      // IMPORTANT: do not request images during import lookup
       const { response, result } = await fetchJsonWithTimeout(
         `${API_BASE}?limit=500&offset=0&includeImages=0`,
         {},
@@ -1361,8 +1358,6 @@
 
         showAlert(message, result.failed ? 'warning' : 'success');
 
-        // IMPORTANT: do NOT do a heavy refresh immediately after many writes.
-        // We do a light refresh of the list only, and let summary refresh on next manual refresh.
         try {
           await loadProducts();
         } catch (_) {}
@@ -1430,7 +1425,7 @@
 
       currentStatus = '';
       document.getElementById('statusFilter').value = '';
-      document.getElementById('sortFilter').value = 'created_at-DESC';
+      document.getElementById('sortFilter').value = 'id-DESC';
 
       await loadProducts();
       await Promise.allSettled([loadOrdersCount(), loadSummary()]);
