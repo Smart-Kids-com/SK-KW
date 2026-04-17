@@ -783,11 +783,10 @@ router.get('/', async (req, res) => {
     const {
       status,
       search,
-      // NEW: searchMode=fast|full (default fast)
       searchMode,
       limit = DEFAULT_LIMIT,
       offset = 0,
-      sort = 'created_at',
+      sort = 'id',
       order = 'DESC',
       cursorCreatedAt,
       cursorId,
@@ -797,6 +796,7 @@ router.get('/', async (req, res) => {
     const includeImagesFlag = parseBooleanFlag(includeImages, false);
 
     const validSortColumns = [
+      'id',
       'created_at',
       'updated_at',
       'product_name',
@@ -809,7 +809,7 @@ router.get('/', async (req, res) => {
       'category'
     ];
 
-    const sortColumn = validSortColumns.includes(sort) ? sort : 'created_at';
+    const sortColumn = validSortColumns.includes(sort) ? sort : 'id';
     const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
     const parsedLimit = Math.min(MAX_LIMIT, Math.max(1, toInteger(limit, DEFAULT_LIMIT)));
@@ -822,7 +822,10 @@ router.get('/', async (req, res) => {
     if (status) {
       normalizedStatus = parseProductStatusFilter(status);
       if (!normalizedStatus) {
-        return res.status(400).json({ success: false, error: 'قيمة status غير صحيحة. القيم المسموحة: active, draft, archived' });
+        return res.status(400).json({
+          success: false,
+          error: 'قيمة status غير صحيحة. القيم المسموحة: active, draft, archived'
+        });
       }
       where.push(`status = ?`);
       params.push(normalizedStatus);
@@ -860,7 +863,6 @@ router.get('/', async (req, res) => {
             searchValue
           );
         } else {
-          // fast mode (default): avoid scanning big columns مثل description
           where.push(`(
             product_name LIKE ?
             OR sku LIKE ?
@@ -868,7 +870,13 @@ router.get('/', async (req, res) => {
             OR category LIKE ?
             OR tags LIKE ?
           )`);
-          params.push(searchValue, searchValue, searchValue, searchValue, searchValue);
+          params.push(
+            searchValue,
+            searchValue,
+            searchValue,
+            searchValue,
+            searchValue
+          );
         }
       }
     }
@@ -904,7 +912,6 @@ router.get('/', async (req, res) => {
     let sql =
       `SELECT
         id, product_name, slug, sku,
-        description,
         price, sale_price, image_url, stock, status,
         product_type, vendor, category, tags,
         seo_title, seo_description,
@@ -952,12 +959,18 @@ router.get('/', async (req, res) => {
                 searchValue, searchValue, searchValue, searchValue
               );
             } else {
-              countParams.push(searchValue, searchValue, searchValue, searchValue, searchValue);
+              countParams.push(
+                searchValue, searchValue, searchValue, searchValue, searchValue
+              );
             }
           }
         }
 
-        const countResult = await withTimeout(db.get(countSql, countParams), DB_OP_TIMEOUT_MS, 'countProducts');
+        const countResult = await withTimeout(
+          db.get(countSql, countParams),
+          DB_OP_TIMEOUT_MS,
+          'countProducts'
+        );
         total = Number(countResult?.total || 0);
       } catch (_) {
         total = null;
@@ -973,7 +986,10 @@ router.get('/', async (req, res) => {
         total,
         totalPages: total != null ? Math.ceil(total / parsedLimit) : null,
         cursor: enriched.length
-          ? { created_at: enriched[enriched.length - 1].created_at, id: enriched[enriched.length - 1].id }
+          ? {
+              created_at: enriched[enriched.length - 1].created_at,
+              id: enriched[enriched.length - 1].id
+            }
           : null
       }
     });
@@ -987,7 +1003,10 @@ router.get('/', async (req, res) => {
       });
     }
 
-    return res.status(500).json({ success: false, error: 'فشل في جلب المنتجات' });
+    return res.status(500).json({
+      success: false,
+      error: 'فشل في جلب المنتجات'
+    });
   }
 });
 
