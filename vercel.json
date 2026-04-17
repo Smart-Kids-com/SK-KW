@@ -6,12 +6,6 @@
       "use": "@vercel/node"
     }
   ],
-  "functions": {
-    "server.js": {
-      "regions": ["dub1"],
-      "maxDuration": 60
-    }
-  },
   "routes": [
     {
       "src": "/(.*)",
