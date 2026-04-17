@@ -767,7 +767,7 @@ router.get('/:id', async (req, res) => {
 
 /**
  * GET /api/products
- * نسخة خفيفة جدًا حتى لا تعلق في Turso
+ * workaround فعلي لتجاوز timeout في db.all على Vercel/Turso
  */
 router.get('/', async (req, res) => {
   try {
@@ -777,35 +777,20 @@ router.get('/', async (req, res) => {
       searchMode,
       limit = DEFAULT_LIMIT,
       offset = 0,
-      sort = 'id',
       order = 'DESC',
       includeImages
     } = req.query;
 
     const includeImagesFlag = parseBooleanFlag(includeImages, false);
-
-    const validSortColumns = [
-      'id',
-      'created_at',
-      'updated_at',
-      'product_name',
-      'price',
-      'sale_price',
-      'stock',
-      'status',
-      'product_type',
-      'vendor',
-      'category'
-    ];
-
-    const sortColumn = validSortColumns.includes(String(sort)) ? String(sort) : 'id';
     const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
-    const parsedLimit = Math.min(MAX_LIMIT, Math.max(1, toInteger(limit, DEFAULT_LIMIT)));
+    // مؤقتًا نجبر الفرز على id فقط لأن ده اللي شغال ومستقر الآن
+    const parsedLimit = Math.min(100, Math.max(1, toInteger(limit, DEFAULT_LIMIT)));
     const parsedOffset = Math.max(0, toInteger(offset, 0));
+    const targetCount = parsedLimit + parsedOffset;
 
     const where = [];
-    const params = [];
+    const baseParams = [];
 
     if (status) {
       const normalizedStatus = parseProductStatusFilter(status);
@@ -816,7 +801,7 @@ router.get('/', async (req, res) => {
         });
       }
       where.push(`status = ?`);
-      params.push(normalizedStatus);
+      baseParams.push(normalizedStatus);
     }
 
     if (search) {
@@ -837,7 +822,7 @@ router.get('/', async (req, res) => {
             OR category LIKE ?
             OR tags LIKE ?
           )`);
-          params.push(clipped, clipped, clipped, clipped, clipped, clipped, clipped, clipped);
+          baseParams.push(clipped, clipped, clipped, clipped, clipped, clipped, clipped, clipped);
         } else {
           where.push(`(
             product_name LIKE ?
@@ -846,46 +831,67 @@ router.get('/', async (req, res) => {
             OR category LIKE ?
             OR tags LIKE ?
           )`);
-          params.push(clipped, clipped, clipped, clipped, clipped);
+          baseParams.push(clipped, clipped, clipped, clipped, clipped);
         }
       }
     }
 
-    let sql =
-      `SELECT
-        id,
-        product_name,
-        slug,
-        sku,
-        price,
-        sale_price,
-        image_url,
-        stock,
-        status,
-        product_type,
-        vendor,
-        category,
-        tags,
-        seo_title,
-        seo_description,
-        created_at,
-        updated_at
-       FROM products`;
+    const rows = [];
+    let lastId = sortOrder === 'DESC' ? Number.MAX_SAFE_INTEGER : 0;
 
-    if (where.length) {
-      sql += ` WHERE ${where.join(' AND ')}`;
+    while (rows.length < targetCount) {
+      const params = [...baseParams];
+      const clauses = [...where];
+
+      if (sortOrder === 'DESC') {
+        clauses.push(`id < ?`);
+        params.push(lastId);
+      } else {
+        clauses.push(`id > ?`);
+        params.push(lastId);
+      }
+
+      let sql =
+        `SELECT
+          id,
+          product_name,
+          slug,
+          sku,
+          price,
+          sale_price,
+          image_url,
+          stock,
+          status,
+          product_type,
+          vendor,
+          category,
+          tags,
+          seo_title,
+          seo_description,
+          created_at,
+          updated_at
+         FROM products`;
+
+      if (clauses.length) {
+        sql += ` WHERE ${clauses.join(' AND ')}`;
+      }
+
+      sql += ` ORDER BY id ${sortOrder} LIMIT 1`;
+
+      const row = await withTimeout(
+        db.get(sql, params),
+        DB_OP_TIMEOUT_MS,
+        'listProducts(get-loop)'
+      );
+
+      if (!row) break;
+
+      rows.push(row);
+      lastId = Number(row.id);
     }
 
-    sql += ` ORDER BY ${sortColumn} ${sortOrder}, id ${sortOrder}`;
-    sql += ` LIMIT ${parsedLimit} OFFSET ${parsedOffset}`;
-
-    const products = await withTimeout(
-      db.all(sql, params),
-      DB_OP_TIMEOUT_MS,
-      'listProducts'
-    );
-
-    const enriched = await enrichProductsMaybe(Array.isArray(products) ? products : [], includeImagesFlag);
+    const pageRows = rows.slice(parsedOffset, parsedOffset + parsedLimit);
+    const enriched = await enrichProductsMaybe(pageRows, includeImagesFlag);
 
     return res.json({
       success: true,
@@ -895,7 +901,9 @@ router.get('/', async (req, res) => {
         offset: parsedOffset,
         total: null,
         totalPages: null,
-        cursor: null
+        cursor: enriched.length
+          ? { id: enriched[enriched.length - 1].id }
+          : null
       }
     });
   } catch (error) {
