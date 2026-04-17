@@ -959,7 +959,7 @@
 
     // pagination for products inside collection (editor)
     let collectionProductsOffset = 0;
-    const collectionProductsLimit = 200;
+    const collectionProductsLimit = 20;
     let collectionProductsTotal = 0;
 
     let browseProducts = [];
@@ -1474,9 +1474,11 @@
         collectionProductsTotal = Number(result.pagination?.total || collectionProducts.length);
 
         renderCollectionProducts();
+        return true;
       } catch (error) {
         console.error(error);
         showAlert(error.message || 'Failed to refresh collection products', 'error');
+        return false;
       }
     }
 
@@ -1679,8 +1681,12 @@
 
         closeBrowseModal();
         selectedBrowseProductIds.clear();
-        await refreshCollectionProducts(true);
-        showAlert('Products added to collection successfully', 'success');
+
+        const refreshed = await refreshCollectionProducts(true);
+
+        if (refreshed) {
+          showAlert('Products added to collection successfully', 'success');
+        }
       } catch (error) {
         console.error(error);
         showAlert(error.message || 'Failed to add products', 'error');
