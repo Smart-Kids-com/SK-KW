@@ -683,14 +683,9 @@ router.post('/:id/products/add', async (req, res) => {
 
     await addProductsToCollection(id, productIds, position === 'top' ? 'top' : 'bottom');
 
-    // رجّع أول صفحة فقط بدل ما ترجع كل المنتجات (مهم للأداء)
-    const { rows, pagination } = await getCollectionProductsPaged(id, 'manual', DEFAULT_LIMIT, 0);
-
     return res.json({
       success: true,
-      message: 'تمت إضافة المنتجات إلى المجموعة',
-      data: rows,
-      pagination
+      message: 'تمت إضافة المنتجات إلى المجموعة'
     });
   } catch (error) {
     console.error('❌ خطأ في إضافة منتجات للمجموعة:', error);
