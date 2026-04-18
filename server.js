@@ -89,6 +89,25 @@ function requireAdminAuth(req, res, next) {
   return res.redirect(`/admin?next=${nextUrl}`);
 }
 
+/**
+ * API write protection:
+ * - Allows public GET/HEAD/OPTIONS (site uses API for reads)
+ * - Requires admin cookie for POST/PUT/PATCH/DELETE
+ */
+function requireAdminApiWriteAuth(req, res, next) {
+  const method = String(req.method || '').toUpperCase();
+  const isRead = method === 'GET' || method === 'HEAD' || method === 'OPTIONS';
+
+  if (isRead) return next();
+
+  if (isAdminAuthenticated(req)) return next();
+
+  return res.status(401).json({
+    success: false,
+    error: 'غير مصرح. هذه العملية تتطلب دخول الإدارة.'
+  });
+}
+
 function escapeHtml(value) {
   return String(value || '')
     .replace(/&/g, '&amp;')
@@ -247,7 +266,31 @@ async function ensureDbReady() {
    Middleware عامة
 ========================================= */
 
-app.use(cors());
+/**
+ * Tighten CORS:
+ * - If your site is served from the same domain, you typically don't need CORS.
+ * - We'll allow only your own origins (and allow no-origin for curl/server-to-server).
+ */
+const allowedOrigins = new Set(
+  [
+    process.env.PUBLIC_ORIGIN, // optional
+    'https://smartkidskw.com',
+    'https://www.smartkidskw.com',
+    'http://localhost:3000'
+  ].filter(Boolean)
+);
+
+app.use(cors({
+  origin: (origin, cb) => {
+    // allow same-origin requests (no Origin header) e.g. curl, server-to-server
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.has(origin)) return cb(null, true);
+    return cb(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE']
+}));
+
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
@@ -275,6 +318,7 @@ app.use(
     '/customers-admin',
     '/customers-admin.html',
     '/customer-view.html',
+    '/customers-view.html',
     '/theme-admin',
     '/theme-admin.html'
   ],
@@ -293,6 +337,11 @@ app.use('/api', async (req, res, next) => {
     next(error);
   }
 });
+
+/**
+ * Protect API writes (admin only) without breaking public GET.
+ */
+app.use('/api', requireAdminApiWriteAuth);
 
 /* =========================================
    Routes للـ API
@@ -406,7 +455,11 @@ app.get('/customers-admin.html', (req, res) => {
 });
 
 app.get('/customer-view.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'customer-view.html'));
+  res.sendFile(path.join(__dirname, 'public', 'customers-view.html'));
+});
+
+app.get('/customers-view.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'customers-view.html'));
 });
 
 app.get('/theme-admin', (req, res) => {
@@ -432,6 +485,11 @@ app.use((err, req, res, next) => {
 
   if (res.headersSent) {
     return next(err);
+  }
+
+  // CORS errors are thrown as Error
+  if (String(err?.message || '').includes('CORS')) {
+    return res.status(403).json({ success: false, error: 'Forbidden' });
   }
 
   res.status(500).json({
@@ -478,54 +536,7 @@ async function startServer() {
       console.log(`║ 🎨 محرر الثيم: http://${HOST}:${PORT}/theme-admin`);
       console.log(`║ ✏️ تعديل/إضافة منتج: http://${HOST}:${PORT}/product-edit.html`);
       console.log(`║ 🧩 تعديل/إضافة مجموعة: http://${HOST}:${PORT}/collection-edit.html`);
-      console.log(`║ 👤 عرض العميل: http://${HOST}:${PORT}/customer-view.html?id=1`);
-      console.log('║');
-      console.log('║ API Endpoints:');
-      console.log(`║ GET    http://${HOST}:${PORT}/api/orders`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/orders/:id`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/orders/track/:orderNumber`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/orders`);
-      console.log(`║ PUT    http://${HOST}:${PORT}/api/orders/:id`);
-      console.log(`║ DELETE http://${HOST}:${PORT}/api/orders/:id`);
-      console.log('║');
-      console.log(`║ GET    http://${HOST}:${PORT}/api/products`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/products/:id`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/products/slug/:slug`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/products/stats/summary`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/products`);
-      console.log(`║ PUT    http://${HOST}:${PORT}/api/products/:id`);
-      console.log(`║ DELETE http://${HOST}:${PORT}/api/products/:id`);
-      console.log('║');
-      console.log(`║ GET    http://${HOST}:${PORT}/api/collections`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/collections/:id`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/collections/slug/:slug`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/collections/stats/summary`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/collections`);
-      console.log(`║ PUT    http://${HOST}:${PORT}/api/collections/:id`);
-      console.log(`║ DELETE http://${HOST}:${PORT}/api/collections/:id`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/collections/:id/duplicate`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/collections/:id/products`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/collections/:id/products/add`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/collections/:id/products/remove`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/collections/:id/products/reorder`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/collections/:id/products/move`);
-      console.log('║');
-      console.log(`║ GET    http://${HOST}:${PORT}/api/customers`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/customers/:id`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/customers/stats/summary`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/customers`);
-      console.log(`║ PUT    http://${HOST}:${PORT}/api/customers/:id`);
-      console.log(`║ DELETE http://${HOST}:${PORT}/api/customers/:id`);
-      console.log('║');
-      console.log(`║ GET    http://${HOST}:${PORT}/api/theme/pages/home`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/theme/pages/home/sections`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/theme/pages/home/sections`);
-      console.log(`║ PUT    http://${HOST}:${PORT}/api/theme/sections/:id`);
-      console.log(`║ DELETE http://${HOST}:${PORT}/api/theme/sections/:id`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/theme/sections/:id/duplicate`);
-      console.log(`║ POST   http://${HOST}:${PORT}/api/theme/pages/home/reorder`);
-      console.log(`║ GET    http://${HOST}:${PORT}/api/theme/settings`);
-      console.log(`║ PUT    http://${HOST}:${PORT}/api/theme/settings`);
+      console.log(`║ 👤 عرض العميل: http://${HOST}:${PORT}/customers-view.html?id=1`);
       console.log('╚════════════════════════════════════════════════════════╝\n');
     });
 
