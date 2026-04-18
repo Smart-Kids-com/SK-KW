@@ -103,6 +103,9 @@ function requireAdminAuth(req, res, next) {
  * - Allows public GET/HEAD/OPTIONS (site uses API for reads)
  * - Allows public checkout: POST /api/orders
  * - Requires admin cookie for any other POST/PUT/PATCH/DELETE
+ *
+ * SECURITY ADDITION:
+ * - Protect orders reads (GET /api/orders and GET /api/orders/:id) because they include PII.
  */
 function requireAdminApiWriteAuth(req, res, next) {
   const method = String(req.method || '').toUpperCase();
@@ -110,6 +113,20 @@ function requireAdminApiWriteAuth(req, res, next) {
 
   // reads
   if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') {
+    // Protect orders reads (PII) - admin only
+    // NOTE: this middleware is mounted at /api, so:
+    // - GET /api/orders     -> req.path "/orders"
+    // - GET /api/orders/123 -> req.path "/orders/123"
+    if (pathname === '/orders' || pathname.startsWith('/orders/')) {
+      if (isAdminAuthenticated(req)) return next();
+
+      return res.status(401).json({
+        success: false,
+        error: 'غير مصرح. قراءة الطلبات تتطلب دخول الإدارة.'
+      });
+    }
+
+    // Other reads remain public
     return next();
   }
 
@@ -248,7 +265,7 @@ function renderAdminLoginPage({ next = '/admin-enhanced', error = '' } = {}) {
     <form method="POST" action="/admin-login">
       <input type="hidden" name="next" value="${safeNext}" />
       <div class="field">
-        <label for="password">كلمة المرور</label>
+        <label for="password">كلمة المر��ر</label>
         <input id="password" name="password" type="password" placeholder="أدخل كلمة مرور الإدارة" required />
       </div>
       <button type="submit">دخول</button>
