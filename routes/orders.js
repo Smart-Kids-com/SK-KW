@@ -12,6 +12,13 @@ const ORDER_ITEMS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS;
 const META_START = '\n<!--OAI_ORDER_META:';
 const META_END = ':OAI_ORDER_META-->';
 
+/**
+ * Customer sync config
+ * - Shopify-like identity: email OR phone
+ */
+const CUSTOMERS_TABLE = 'customers';
+const CUSTOMER_SYNC_BATCH_LIMIT = 5000; // backfill safety limit per request
+
 function toNumber(value, fallback = 0) {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
@@ -25,6 +32,15 @@ function toInt(value, fallback = 0) {
 function safeText(value, fallback = '') {
   const text = String(value ?? '').trim();
   return text || fallback;
+}
+
+function normalizeEmail(email = '') {
+  return safeText(email).toLowerCase();
+}
+
+function normalizePhone(phone = '') {
+  // digits-only to reduce format mismatches
+  return safeText(phone).replace(/[^\d]/g, '');
 }
 
 function isValidOrderStatus(status) {
@@ -268,6 +284,228 @@ async function ensureOrderExists(id) {
   return order || null;
 }
 
+/**
+ * ----------------------------
+ * Customers sync helpers
+ * ----------------------------
+ */
+
+async function ensureCustomersTableExists() {
+  // Mirrors your customers table schema (from customers routes)
+  await db.run(`
+    CREATE TABLE IF NOT EXISTS ${CUSTOMERS_TABLE} (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      full_name TEXT NOT NULL,
+      email TEXT,
+      phone TEXT,
+      city TEXT,
+      area TEXT,
+      status TEXT DEFAULT 'new',
+      total_orders INTEGER DEFAULT 0,
+      total_spent REAL DEFAULT 0,
+      accepts_marketing INTEGER DEFAULT 0,
+      marketing_opt_in INTEGER DEFAULT 0,
+      last_order_at TEXT,
+      is_blocked INTEGER DEFAULT 0,
+      notes TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+}
+
+async function findCustomerByEmailOrPhone(email, phone) {
+  const e = normalizeEmail(email);
+  const p = normalizePhone(phone);
+
+  if (!e && !p) return null;
+
+  // Match email case-insensitively, phone by stripping separators.
+  const where = [];
+  const params = [];
+
+  if (e) {
+    where.push(`LOWER(TRIM(email)) = ?`);
+    params.push(e);
+  }
+
+  if (p) {
+    where.push(
+      `REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(TRIM(phone), ' ', ''), '-', ''), '(', ''), ')', ''), '+', '') = ?`
+    );
+    params.push(p);
+  }
+
+  const row = await db.get(
+    `SELECT *
+     FROM ${CUSTOMERS_TABLE}
+     WHERE (${where.join(' OR ')})
+     ORDER BY id ASC
+     LIMIT 1`,
+    params
+  );
+
+  return row || null;
+}
+
+async function recomputeCustomerStatsByIdentity(email, phone) {
+  const e = normalizeEmail(email);
+  const p = normalizePhone(phone);
+
+  if (!e && !p) {
+    return { total_orders: 0, total_spent: 0, last_order_at: null };
+  }
+
+  const whereParts = [];
+  const params = [];
+
+  if (e) {
+    whereParts.push(`LOWER(TRIM(customer_email)) = ?`);
+    params.push(e);
+  }
+
+  if (p) {
+    whereParts.push(
+      `REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(TRIM(customer_phone), ' ', ''), '-', ''), '(', ''), ')', ''), '+', '') = ?`
+    );
+    params.push(p);
+  }
+
+  const whereSql = `(${whereParts.join(' OR ')})`;
+
+  const row = await db.get(
+    `
+    SELECT
+      COUNT(*) as total_orders,
+      COALESCE(SUM(COALESCE(total, 0)), 0) as total_spent,
+      MAX(created_at) as last_order_at
+    FROM ${ORDERS_TABLE}
+    WHERE ${whereSql}
+    `,
+    params
+  );
+
+  return {
+    total_orders: Number(row?.total_orders || 0),
+    total_spent: Number(row?.total_spent || 0),
+    last_order_at: row?.last_order_at || null
+  };
+}
+
+async function upsertCustomerFromOrderSnapshot(orderSnapshot) {
+  const fullName = safeText(orderSnapshot.customer_name || orderSnapshot.customerName);
+  const email = safeText(orderSnapshot.customer_email || orderSnapshot.customerEmail);
+  const phone = safeText(orderSnapshot.customer_phone || orderSnapshot.customerPhone);
+
+  const city = safeText(orderSnapshot.customer_city || orderSnapshot.customerCity, '');
+  const area = safeText(orderSnapshot.customer_district || orderSnapshot.customerDistrict, '');
+
+  if (!fullName || !email || !phone) return { created: false, updated: false, customer: null };
+
+  await ensureCustomersTableExists();
+
+  const existing = await findCustomerByEmailOrPhone(email, phone);
+  const stats = await recomputeCustomerStatsByIdentity(email, phone);
+
+  if (!existing) {
+    await db.run(
+      `INSERT INTO ${CUSTOMERS_TABLE}
+        (full_name, email, phone, city, area, status, total_orders, total_spent, last_order_at, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+      [
+        fullName,
+        email,
+        phone,
+        city,
+        area,
+        'active',
+        stats.total_orders,
+        stats.total_spent,
+        stats.last_order_at
+      ]
+    );
+
+    const created = await findCustomerByEmailOrPhone(email, phone);
+    return { created: true, updated: false, customer: created };
+  }
+
+  // Update some fields (don't overwrite notes/is_blocked/marketing flags)
+  const nextFullName = fullName || existing.full_name;
+  const nextEmail = email || existing.email;
+  const nextPhone = phone || existing.phone;
+  const nextCity = city || existing.city;
+  const nextArea = area || existing.area;
+
+  await db.run(
+    `UPDATE ${CUSTOMERS_TABLE}
+     SET full_name = ?,
+         email = ?,
+         phone = ?,
+         city = ?,
+         area = ?,
+         total_orders = ?,
+         total_spent = ?,
+         last_order_at = ?,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE id = ?`,
+    [
+      nextFullName,
+      nextEmail,
+      nextPhone,
+      nextCity,
+      nextArea,
+      stats.total_orders,
+      stats.total_spent,
+      stats.last_order_at,
+      existing.id
+    ]
+  );
+
+  const updated = await db.get(`SELECT * FROM ${CUSTOMERS_TABLE} WHERE id = ?`, [existing.id]);
+  return { created: false, updated: true, customer: updated || existing };
+}
+
+async function backfillCustomersFromOrders({ limit = CUSTOMER_SYNC_BATCH_LIMIT, offset = 0 } = {}) {
+  await ensureCustomersTableExists();
+
+  const parsedLimit = Math.max(1, Math.min(CUSTOMER_SYNC_BATCH_LIMIT, toInt(limit, CUSTOMER_SYNC_BATCH_LIMIT)));
+  const parsedOffset = Math.max(0, toInt(offset, 0));
+
+  const orders = await db.all(
+    `
+    SELECT
+      customer_name,
+      customer_email,
+      customer_phone,
+      customer_city,
+      customer_district
+    FROM ${ORDERS_TABLE}
+    ORDER BY id ASC
+    LIMIT ? OFFSET ?
+    `,
+    [parsedLimit, parsedOffset]
+  );
+
+  let created = 0;
+  let updated = 0;
+  let skipped = 0;
+
+  for (const o of orders) {
+    const result = await upsertCustomerFromOrderSnapshot(o);
+    if (result.created) created += 1;
+    else if (result.updated) updated += 1;
+    else skipped += 1;
+  }
+
+  return { processedOrders: orders.length, created, updated, skipped, limit: parsedLimit, offset: parsedOffset };
+}
+
+/**
+ * ----------------------------
+ * Existing functions
+ * ----------------------------
+ */
+
 async function duplicateOrderById(id) {
   const source = await getOrderWithItems(id);
   if (!source) return null;
@@ -368,7 +606,72 @@ function applySearchFilterLocally(rows, search) {
 }
 
 /**
+ * GET /api/orders/customers-sync/preview
+ * Preview without writing. Helpful before running the sync.
+ */
+router.get('/customers-sync/preview', async (req, res) => {
+  try {
+    const limit = Math.max(1, Math.min(200, toInt(req.query.limit, 25)));
+    const offset = Math.max(0, toInt(req.query.offset, 0));
+
+    const rows = await db.all(
+      `
+      SELECT
+        customer_name,
+        customer_email,
+        customer_phone,
+        customer_city,
+        customer_district
+      FROM ${ORDERS_TABLE}
+      ORDER BY id ASC
+      LIMIT ? OFFSET ?
+      `,
+      [limit, offset]
+    );
+
+    const preview = rows.map(r => ({
+      full_name: safeText(r.customer_name),
+      email: safeText(r.customer_email),
+      phone: safeText(r.customer_phone),
+      city: safeText(r.customer_city),
+      area: safeText(r.customer_district)
+    }));
+
+    return res.json({ success: true, data: preview, pagination: { limit, offset, count: preview.length } });
+  } catch (error) {
+    console.error('❌ customers-sync preview error:', error);
+    return res.status(500).json({ success: false, error: 'فشل في معاينة مزامنة العملاء' });
+  }
+});
+
+/**
+ * POST /api/orders/sync-customers
+ * Run once (or multiple times) to backfill customers from historical orders.
+ * Body/query:
+ * - limit (max 5000)
+ * - offset
+ */
+router.post('/sync-customers', async (req, res) => {
+  try {
+    const limit = req.body?.limit ?? req.query?.limit;
+    const offset = req.body?.offset ?? req.query?.offset;
+
+    const result = await backfillCustomersFromOrders({ limit, offset });
+
+    return res.json({
+      success: true,
+      message: 'تمت مزامنة العملاء من الطلبات',
+      data: result
+    });
+  } catch (error) {
+    console.error('❌ sync-customers error:', error);
+    return res.status(500).json({ success: false, error: 'فشل في مزامنة العملاء من الطلبات' });
+  }
+});
+
+/**
  * POST /api/orders - إنشاء طلب جديد
+ * + Sync customer record (Shopify-like)
  */
 router.post('/', async (req, res) => {
   try {
@@ -486,6 +789,15 @@ router.post('/', async (req, res) => {
     );
 
     await replaceOrderItems(savedOrder.id, normalizedItems);
+
+    // Sync customer record after the order is created (so stats include it)
+    await upsertCustomerFromOrderSnapshot({
+      customer_name: customerName,
+      customer_email: customerEmail,
+      customer_phone: customerPhone,
+      customer_city: customerCity || 'الكويت',
+      customer_district: customerDistrict || ''
+    });
 
     const createdOrder = await getOrderWithItems(savedOrder.id);
 
@@ -1318,7 +1630,7 @@ router.put('/:id/tags', async (req, res) => {
     console.error('❌ خطأ في تحديث الوسوم:', error);
     return res.status(500).json({
       success: false,
-      error: 'فشل في تحديث الوسوم'
+      error: 'فشل في تحديث الوسوم بنجاح'
     });
   }
 });
