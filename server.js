@@ -7,7 +7,7 @@ const path = require('path');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-const { authenticator } = require('otplib');
+const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
 
 const db = require('./db/turso-manager');
@@ -38,9 +38,25 @@ if (ADMIN_PASSWORDS.length === 0) {
  * OTP secret (Base32).
  * Make it REQUIRED for security so nobody runs admin with password-only by mistake.
  */
-const ADMIN_OTP_SECRET = String(process.env.ADMIN_OTP_SECRET || '').trim();
+function normalizeBase32Secret(value) {
+  // remove spaces, make uppercase (common format for TOTP base32 secrets)
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, '')
+    .toUpperCase();
+}
+
+const ADMIN_OTP_SECRET = normalizeBase32Secret(process.env.ADMIN_OTP_SECRET);
+
 if (!ADMIN_OTP_SECRET) {
   throw new Error('Missing ADMIN_OTP_SECRET env var. Refusing to start for security.');
+}
+
+// Optional sanity check: base32 is typically A-Z2-7 and may include '=' padding
+// We don't block startup hard (to avoid breaking existing secrets), but it can help spot typos.
+const BASE32_LIKE = /^[A-Z2-7]+=*$/;
+if (!BASE32_LIKE.test(ADMIN_OTP_SECRET)) {
+  console.warn('⚠️ ADMIN_OTP_SECRET does not look like Base32 (A-Z2-7). Check for typos/spaces.');
 }
 
 const ADMIN_COOKIE_NAME = 'smartkids_admin_auth';
@@ -723,7 +739,14 @@ app.get('/admin-otp', async (req, res, next) => {
     // Generate otpauth URI + QR
     const issuer = 'Smart Kids Kuwait';
     const label = 'SmartKids Admin';
-    const otpUri = authenticator.keyuri(label, issuer, ADMIN_OTP_SECRET);
+
+    const otpUri = speakeasy.otpauthURL({
+      secret: ADMIN_OTP_SECRET,
+      label,
+      issuer,
+      encoding: 'base32'
+    });
+
     const qrDataUrl = await qrcode.toDataURL(otpUri);
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -764,7 +787,12 @@ app.post('/admin-otp', (req, res) => {
     return res.redirect(`/admin?next=${safeNext}&error=${err}`);
   }
 
-  const isValid = authenticator.check(otp, ADMIN_OTP_SECRET);
+  const isValid = speakeasy.totp.verify({
+    secret: ADMIN_OTP_SECRET,
+    encoding: 'base32',
+    token: otp,
+    window: 1
+  });
 
   if (!isValid) {
     const newTries = tries + 1;
