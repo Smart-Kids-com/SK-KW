@@ -6,7 +6,7 @@ const db = require('../db/turso-manager');
  * Guardrails (prevent Vercel timeouts + huge payloads)
  */
 const MAX_LIMIT = 50;
-const DEFAULT_LIMIT = 50;
+const DEFAULT_LIMIT = 10;
 const MAX_COLLECTIONS_LIST_LIMIT = 200;
 const MAX_SEARCH_LEN = 80;
 const DB_OP_TIMEOUT_MS = 12_000;
