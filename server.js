@@ -17,10 +17,19 @@ const themeRoutes = require('./routes/theme');
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
 
+/**
+ * IMPORTANT SECURITY:
+ * - Do NOT keep fallback/default admin passwords in code (repo may be public).
+ * - Admin passwords must come ONLY from environment variables.
+ */
 const ADMIN_PASSWORDS = [
-  process.env.ADMIN_PASSWORD_1 || 'admin123',
-  process.env.ADMIN_PASSWORD_2 || 'smartkids2024'
+  process.env.ADMIN_PASSWORD_1,
+  process.env.ADMIN_PASSWORD_2
 ].filter(Boolean);
+
+if (ADMIN_PASSWORDS.length === 0) {
+  throw new Error('Missing ADMIN_PASSWORD_1/2 env vars. Refusing to start for security.');
+}
 
 const ADMIN_COOKIE_NAME = 'smartkids_admin_auth';
 
@@ -542,7 +551,7 @@ async function startServer() {
       console.log('║ ✅ جميع الوحدات محملة');
       console.log('╠════════════════════════════════════════════════════════╣');
       console.log('║ الروابط المتاحة:');
-      console.log(`║ 📍 الصفحة الرئ��سية: http://${HOST}:${PORT}/`);
+      console.log(`║ 📍 الصفحة الرئيسية: http://${HOST}:${PORT}/`);
       console.log(`║ 📊 دخول الإدارة: http://${HOST}:${PORT}/admin`);
       console.log(`║ 📈 لوحة متقدمة: http://${HOST}:${PORT}/admin-enhanced`);
       console.log(`║ 🏷️ إدارة المنتجات: http://${HOST}:${PORT}/products-admin`);
