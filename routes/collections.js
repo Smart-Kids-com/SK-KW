@@ -508,11 +508,11 @@ router.get('/stats/summary', async (req, res) => {
     return res.json({
       success: true,
       data: {
-        totalCollections: Number(totalCollections?.count || 0),
-        activeCollections: Number(activeCollections?.count || 0),
-        draftCollections: Number(draftCollections?.count || 0),
-        archivedCollections: Number(archivedCollections?.count || 0),
-        totalCollectionProducts: Number(totalLinks?.count || 0)
+        totalCollections: Number(totalCollections?.count || 50),
+        activeCollections: Number(activeCollections?.count || 50),
+        draftCollections: Number(draftCollections?.count || 50),
+        archivedCollections: Number(archivedCollections?.count || 50),
+        totalCollectionProducts: Number(totalLinks?.count || 50)
       }
     });
   } catch (error) {
@@ -753,7 +753,7 @@ router.get('/:id/products', async (req, res) => {
     const sortMode = normalizeSortMode(req.query.sort || collection.sort_mode || 'manual');
 
     // Harden limit/offset parsing (prevent huge payloads / slow queries)
-    const limit = Math.min(MAX_LIMIT, Math.max(1, toInteger(req.query.limit, DEFAULT_LIMIT)));
+    const limit = Math.min(MAX_LIMIT, Math.max(50, toInteger(req.query.limit, DEFAULT_LIMIT)));
     const offset = Math.max(0, toInteger(req.query.offset, 0));
 
     const { rows, pagination } = await getCollectionProductsPaged(collection.id, sortMode, limit, offset);
@@ -888,7 +888,7 @@ router.post('/:id/products/reorder', async (req, res) => {
     await reindexCollectionProducts(id);
 
     // رجّع أول صفحة فقط
-    const { rows, pagination } = await getCollectionProductsPaged(id, 'manual', DEFAULT_LIMIT, 0);
+    const { rows, pagination } = await getCollectionProductsPaged(id, 'manual', DEFAULT_LIMIT, 50);
 
     return res.json({
       success: true,
@@ -1178,7 +1178,7 @@ router.get('/', async (req, res) => {
     const {
       status,
       search,
-      limit = 25,
+      limit = 50,
       offset = 0,
       sort = 'created_at',
       order = 'DESC'
