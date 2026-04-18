@@ -175,9 +175,16 @@ function getOrderByForCollectionProducts(sortMode = 'manual') {
   return 'cp.sort_order ASC, cp.id ASC';
 }
 
+/**
+ * ✅ Optimized to prevent serverless timeouts:
+ * - Always paginate with hard max limit
+ * - Count via COUNT(*)
+ * - Select only fields needed by the editor UI to reduce payload/IO
+ */
 async function getCollectionProductsPaged(collectionId, sortMode = 'manual', limit = DEFAULT_LIMIT, offset = 0) {
   const orderBy = getOrderByForCollectionProducts(sortMode);
 
+  // hard guardrails
   const parsedLimit = Math.min(MAX_LIMIT, Math.max(1, toInteger(limit, DEFAULT_LIMIT)));
   const parsedOffset = Math.max(0, toInteger(offset, 0));
 
@@ -188,6 +195,21 @@ async function getCollectionProductsPaged(collectionId, sortMode = 'manual', lim
   );
   const total = Number(countRow?.total || 0);
 
+  // If no rows, skip the join query entirely
+  if (total === 0) {
+    return {
+      rows: [],
+      pagination: {
+        total,
+        limit: parsedLimit,
+        offset: parsedOffset,
+        totalPages: parsedLimit ? Math.ceil(total / parsedLimit) : 1
+      }
+    };
+  }
+
+  // Select only what the collection editor actually uses:
+  // - product_id / id, product_name, image_url, price, stock, status, vendor/category/product_type, sku/slug, created_at/updated_at
   const sql = `
     SELECT
       cp.id AS collection_product_id,
@@ -198,18 +220,13 @@ async function getCollectionProductsPaged(collectionId, sortMode = 'manual', lim
       p.product_name,
       p.slug,
       p.sku,
-      p.description,
       p.price,
-      p.sale_price,
       p.image_url,
       p.stock,
       p.status,
       p.product_type,
       p.vendor,
       p.category,
-      p.tags,
-      p.seo_title,
-      p.seo_description,
       p.created_at,
       p.updated_at
     FROM collection_products cp
@@ -641,8 +658,10 @@ router.get('/:id/products', async (req, res) => {
     }
 
     const sortMode = normalizeSortMode(req.query.sort || collection.sort_mode || 'manual');
-    const limit = req.query.limit ?? DEFAULT_LIMIT;
-    const offset = req.query.offset ?? 0;
+
+    // Harden limit/offset parsing (prevent huge payloads / slow queries)
+    const limit = Math.min(MAX_LIMIT, Math.max(1, toInteger(req.query.limit, DEFAULT_LIMIT)));
+    const offset = Math.max(0, toInteger(req.query.offset, 0));
 
     const { rows, pagination } = await getCollectionProductsPaged(collection.id, sortMode, limit, offset);
 
@@ -732,7 +751,7 @@ router.post('/:id/products/remove', async (req, res) => {
     console.error('❌ خطأ في حذف منتجات من المجموعة:', error);
 
     if (String(error?.message || '').includes('timed out')) {
-      return res.status(503).json({ success: false, error: 'الاستعلام استغرق وقتًا طويلاً.' });
+      return res.status(503).json({ success: false, error: 'الاستعلام ا��تغرق وقتًا طويلاً.' });
     }
 
     return res.status(500).json({ success: false, error: 'فشل في حذف المنتجات من المجموعة' });
