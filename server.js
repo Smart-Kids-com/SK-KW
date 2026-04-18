@@ -7,6 +7,9 @@ const path = require('path');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
+const { authenticator } = require('otplib');
+const qrcode = require('qrcode');
+
 const db = require('./db/turso-manager');
 const ordersRoutes = require('./routes/orders');
 const productsRoutes = require('./routes/products');
@@ -31,7 +34,23 @@ if (ADMIN_PASSWORDS.length === 0) {
   throw new Error('Missing ADMIN_PASSWORD_1/2 env vars. Refusing to start for security.');
 }
 
+/**
+ * OTP secret (Base32).
+ * Make it REQUIRED for security so nobody runs admin with password-only by mistake.
+ */
+const ADMIN_OTP_SECRET = String(process.env.ADMIN_OTP_SECRET || '').trim();
+if (!ADMIN_OTP_SECRET) {
+  throw new Error('Missing ADMIN_OTP_SECRET env var. Refusing to start for security.');
+}
+
 const ADMIN_COOKIE_NAME = 'smartkids_admin_auth';
+const ADMIN_OTP_COOKIE_NAME = 'smartkids_admin_otp';
+const ADMIN_OTP_TRIES_COOKIE_NAME = 'smartkids_admin_otp_tries';
+
+/** Session times */
+const ADMIN_SESSION_SECONDS = 60 * 60 * 12; // 12 hours
+const OTP_SESSION_SECONDS = 60 * 60 * 12;   // 12 hours
+const OTP_TRIES_MAX = 2;
 
 // إنشاء تطبيق Express
 const app = express();
@@ -57,14 +76,9 @@ function parseCookies(req) {
   }, {});
 }
 
-function isAdminAuthenticated(req) {
-  const cookies = parseCookies(req);
-  return cookies[ADMIN_COOKIE_NAME] === '1';
-}
-
-function buildCookie(value, maxAgeSeconds) {
+function buildCookieGeneric(name, value, maxAgeSeconds) {
   const parts = [
-    `${ADMIN_COOKIE_NAME}=${encodeURIComponent(value)}`,
+    `${name}=${encodeURIComponent(value)}`,
     'Path=/',
     'HttpOnly',
     'SameSite=Lax'
@@ -79,6 +93,43 @@ function buildCookie(value, maxAgeSeconds) {
   }
 
   return parts.join('; ');
+}
+
+function buildAdminCookie(value, maxAgeSeconds) {
+  return buildCookieGeneric(ADMIN_COOKIE_NAME, value, maxAgeSeconds);
+}
+
+function buildOtpCookie(value, maxAgeSeconds) {
+  return buildCookieGeneric(ADMIN_OTP_COOKIE_NAME, value, maxAgeSeconds);
+}
+
+function buildOtpTriesCookie(value, maxAgeSeconds) {
+  return buildCookieGeneric(ADMIN_OTP_TRIES_COOKIE_NAME, value, maxAgeSeconds);
+}
+
+/**
+ * Admin is fully authenticated ONLY if:
+ * - password session cookie exists AND
+ * - OTP session cookie exists
+ */
+function isAdminAuthenticated(req) {
+  const cookies = parseCookies(req);
+  return cookies[ADMIN_COOKIE_NAME] === '1' && cookies[ADMIN_OTP_COOKIE_NAME] === '1';
+}
+
+/**
+ * Only checks that password was correct (before OTP).
+ */
+function hasAdminPasswordSession(req) {
+  const cookies = parseCookies(req);
+  return cookies[ADMIN_COOKIE_NAME] === '1';
+}
+
+function getOtpTries(req) {
+  const cookies = parseCookies(req);
+  const raw = cookies[ADMIN_OTP_TRIES_COOKIE_NAME];
+  const n = Number.parseInt(raw, 10);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
 }
 
 function sanitizeNextUrl(value) {
@@ -265,7 +316,7 @@ function renderAdminLoginPage({ next = '/admin-enhanced', error = '' } = {}) {
     <form method="POST" action="/admin-login">
       <input type="hidden" name="next" value="${safeNext}" />
       <div class="field">
-        <label for="password">كلمة المر��ر</label>
+        <label for="password">كلمة المرور</label>
         <input id="password" name="password" type="password" placeholder="أدخل كلمة مرور الإدارة" required />
       </div>
       <button type="submit">دخول</button>
@@ -273,6 +324,194 @@ function renderAdminLoginPage({ next = '/admin-enhanced', error = '' } = {}) {
 
     <div class="hint">الصفحة محمية</div>
   </div>
+</body>
+</html>`;
+}
+
+function renderAdminOtpPage({ next = '/admin-enhanced', error = '', otpUri = '', qrDataUrl = '', secret = '' } = {}) {
+  const safeNext = escapeHtml(next);
+  const safeError = escapeHtml(error);
+  const safeOtpUri = escapeHtml(otpUri);
+  const safeSecret = escapeHtml(secret);
+
+  return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>رمز التحقق - Smart Kids Kuwait</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:Segoe UI,Tahoma,Arial,sans-serif;
+      background:linear-gradient(135deg,#f5f1fb 0%,#ebe3f7 100%);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      color:#2d2340;
+    }
+    .card{
+      width:100%;
+      max-width:520px;
+      background:#fff;
+      border:1px solid #e7ddf4;
+      border-radius:20px;
+      box-shadow:0 18px 48px rgba(106,76,147,.12);
+      padding:28px;
+    }
+    .brand{
+      text-align:center;
+      margin-bottom:16px;
+    }
+    .brand h1{
+      font-size:24px;
+      color:#6a4c93;
+      margin-bottom:6px;
+    }
+    .brand p{
+      color:#6e6680;
+      font-size:14px;
+    }
+    .error{
+      background:#ffe9ea;
+      color:#a9353f;
+      border:1px solid #f3c8cc;
+      padding:12px 14px;
+      border-radius:12px;
+      margin-bottom:16px;
+      font-size:14px;
+    }
+    .field{
+      margin-bottom:14px;
+    }
+    label{
+      display:block;
+      margin-bottom:8px;
+      font-weight:700;
+      color:#4e3a70;
+      font-size:14px;
+    }
+    input{
+      width:100%;
+      padding:14px 16px;
+      border:1px solid #d8c9ef;
+      border-radius:14px;
+      font-size:18px;
+      outline:none;
+      letter-spacing:3px;
+      text-align:center;
+    }
+    input:focus{
+      border-color:#8c63c9;
+      box-shadow:0 0 0 4px rgba(140,99,201,.12);
+    }
+    button{
+      width:100%;
+      border:none;
+      border-radius:14px;
+      background:#6a4c93;
+      color:#fff;
+      padding:14px 16px;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+    }
+    button:hover{
+      background:#5e4485;
+    }
+    .setup{
+      margin-top:18px;
+      padding-top:18px;
+      border-top:1px solid #eee;
+    }
+    .qr{
+      display:flex;
+      justify-content:center;
+      margin:14px 0;
+    }
+    .qr img{
+      width:220px;
+      height:220px;
+      border:1px solid #e7ddf4;
+      border-radius:12px;
+      padding:10px;
+      background:#fff;
+    }
+    .secretBox{
+      background:#faf7ff;
+      border:1px solid #e7ddf4;
+      border-radius:12px;
+      padding:12px;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:13px;
+      word-break:break-all;
+      margin-top:10px;
+    }
+    .copyBtn{
+      margin-top:10px;
+      background:#4e3a70;
+    }
+    .small{
+      font-size:12px;
+      color:#857a99;
+      margin-top:8px;
+      line-height:1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <h1>رمز التحقق (Google Authenticator)</h1>
+      <p>أدخل كود 6 أرقام</p>
+    </div>
+
+    ${safeError ? `<div class="error">${safeError}</div>` : ''}
+
+    <form method="POST" action="/admin-otp">
+      <input type="hidden" name="next" value="${safeNext}" />
+      <div class="field">
+        <label for="otp">رمز التحقق</label>
+        <input id="otp" name="otp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000" required />
+      </div>
+      <button type="submit">تأكيد</button>
+    </form>
+
+    <div class="setup">
+      <div class="small">
+        لو أول مرة: افتح Google Authenticator → اضغط (+) → Scan QR أو أدخل الـ Secret يدويًا.
+      </div>
+
+      ${qrDataUrl ? `<div class="qr"><img alt="QR" src="${qrDataUrl}" /></div>` : ''}
+
+      <div class="small">OTP URI (لو محتاجه):</div>
+      <div class="secretBox">${safeOtpUri}</div>
+
+      <div class="small">Secret (للنسخ اليدوي):</div>
+      <div class="secretBox" id="secret">${safeSecret}</div>
+
+      <button class="copyBtn" type="button" onclick="copySecret()">Copy Secret</button>
+
+      <div class="small">
+        ملاحظة: الكود بيتغير كل ~30 ثانية.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function copySecret(){
+      var el = document.getElementById('secret');
+      var text = (el && el.textContent) ? el.textContent : '';
+      if(!text) return;
+      navigator.clipboard.writeText(text).then(function(){
+        alert('تم نسخ الـ Secret');
+      }).catch(function(){
+        prompt('انسخ الـ Secret يدويًا:', text);
+      });
+    }
+  </script>
 </body>
 </html>`;
 }
@@ -419,8 +658,15 @@ app.get('/admin', (req, res) => {
   const nextUrl = sanitizeNextUrl(req.query.next || '/admin-enhanced');
   const error = String(req.query.error || '').trim();
 
+  // If fully authed, go to next
   if (isAdminAuthenticated(req)) {
     return res.redirect(nextUrl);
+  }
+
+  // If password session exists but OTP missing -> go to OTP step
+  if (hasAdminPasswordSession(req)) {
+    const safeNext = encodeURIComponent(nextUrl);
+    return res.redirect(`/admin-otp?next=${safeNext}`);
   }
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -431,6 +677,9 @@ app.get('/admin.html', (req, res) => {
   return res.redirect('/admin');
 });
 
+/**
+ * Step 1: Password
+ */
 app.post('/admin-login', (req, res) => {
   const password = String(req.body.password || '').trim();
   const nextUrl = sanitizeNextUrl(req.body.next || '/admin-enhanced');
@@ -441,12 +690,124 @@ app.post('/admin-login', (req, res) => {
     return res.redirect(`/admin?next=${safeNext}&error=${error}`);
   }
 
-  res.setHeader('Set-Cookie', buildCookie('1', 60 * 60 * 12));
+  // Set password session cookie, clear OTP session & tries
+  res.setHeader('Set-Cookie', [
+    buildAdminCookie('1', ADMIN_SESSION_SECONDS),
+    buildOtpCookie('', 0),
+    buildOtpTriesCookie('0', 60 * 10) // tries window 10 minutes
+  ]);
+
+  const safeNext = encodeURIComponent(nextUrl);
+  return res.redirect(`/admin-otp?next=${safeNext}`);
+});
+
+/**
+ * Step 2: OTP page
+ */
+app.get('/admin-otp', async (req, res, next) => {
+  try {
+    const nextUrl = sanitizeNextUrl(req.query.next || '/admin-enhanced');
+    const error = String(req.query.error || '').trim();
+
+    if (isAdminAuthenticated(req)) {
+      return res.redirect(nextUrl);
+    }
+
+    // Must have passed password first
+    if (!hasAdminPasswordSession(req)) {
+      const safeNext = encodeURIComponent(nextUrl);
+      const err = encodeURIComponent('الرجاء إدخال كلمة المرور أولاً');
+      return res.redirect(`/admin?next=${safeNext}&error=${err}`);
+    }
+
+    // Generate otpauth URI + QR
+    const issuer = 'Smart Kids Kuwait';
+    const label = 'SmartKids Admin';
+    const otpUri = authenticator.keyuri(label, issuer, ADMIN_OTP_SECRET);
+    const qrDataUrl = await qrcode.toDataURL(otpUri);
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.status(200).send(renderAdminOtpPage({
+      next: nextUrl,
+      error,
+      otpUri,
+      qrDataUrl,
+      secret: ADMIN_OTP_SECRET
+    }));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post('/admin-otp', (req, res) => {
+  const otp = String(req.body.otp || '').trim();
+  const nextUrl = sanitizeNextUrl(req.body.next || '/admin-enhanced');
+
+  // Must have passed password first
+  if (!hasAdminPasswordSession(req)) {
+    const safeNext = encodeURIComponent(nextUrl);
+    const err = encodeURIComponent('الرجاء إدخال كلمة المرور أولاً');
+    return res.redirect(`/admin?next=${safeNext}&error=${err}`);
+  }
+
+  const tries = getOtpTries(req);
+  if (tries >= OTP_TRIES_MAX) {
+    // force password again
+    res.setHeader('Set-Cookie', [
+      buildAdminCookie('', 0),
+      buildOtpCookie('', 0),
+      buildOtpTriesCookie('0', 60 * 10)
+    ]);
+
+    const safeNext = encodeURIComponent(nextUrl);
+    const err = encodeURIComponent('تم تجاوز عدد محاولات OTP. الرجاء إدخال كلمة المرور مرة أخرى.');
+    return res.redirect(`/admin?next=${safeNext}&error=${err}`);
+  }
+
+  const isValid = authenticator.check(otp, ADMIN_OTP_SECRET);
+
+  if (!isValid) {
+    const newTries = tries + 1;
+
+    // If reached limit -> clear password session too (require password again)
+    if (newTries >= OTP_TRIES_MAX) {
+      res.setHeader('Set-Cookie', [
+        buildAdminCookie('', 0),
+        buildOtpCookie('', 0),
+        buildOtpTriesCookie('0', 60 * 10)
+      ]);
+
+      const safeNext = encodeURIComponent(nextUrl);
+      const err = encodeURIComponent('OTP غير صحيح. تم تجاوز محاولتين. الرجاء إدخال كلمة المرور مرة أخرى.');
+      return res.redirect(`/admin?next=${safeNext}&error=${err}`);
+    }
+
+    // Otherwise increment tries and stay on OTP page
+    res.setHeader('Set-Cookie', [
+      buildOtpCookie('', 0),
+      buildOtpTriesCookie(String(newTries), 60 * 10)
+    ]);
+
+    const safeNext = encodeURIComponent(nextUrl);
+    const err = encodeURIComponent(`OTP غير صحيح. متبقي ${OTP_TRIES_MAX - newTries} محاولة.`);
+    return res.redirect(`/admin-otp?next=${safeNext}&error=${err}`);
+  }
+
+  // OTP OK: set OTP session and clear tries
+  res.setHeader('Set-Cookie', [
+    buildOtpCookie('1', OTP_SESSION_SECONDS),
+    buildOtpTriesCookie('0', 60 * 10)
+  ]);
+
   return res.redirect(nextUrl);
 });
 
 app.post('/admin-logout', (req, res) => {
-  res.setHeader('Set-Cookie', buildCookie('', 0));
+  res.setHeader('Set-Cookie', [
+    buildAdminCookie('', 0),
+    buildOtpCookie('', 0),
+    buildOtpTriesCookie('0', 60 * 10)
+  ]);
   return res.redirect('/admin');
 });
 
@@ -570,6 +931,7 @@ async function startServer() {
       console.log('║ الروابط المتاحة:');
       console.log(`║ 📍 الصفحة الرئيسية: http://${HOST}:${PORT}/`);
       console.log(`║ 📊 دخول الإدارة: http://${HOST}:${PORT}/admin`);
+      console.log(`║ 🔐 OTP: http://${HOST}:${PORT}/admin-otp`);
       console.log(`║ 📈 لوحة متقدمة: http://${HOST}:${PORT}/admin-enhanced`);
       console.log(`║ 🏷️ إدارة المنتجات: http://${HOST}:${PORT}/products-admin`);
       console.log(`║ 🗂️ إدارة المجموعات: http://${HOST}:${PORT}/collections-admin`);
