@@ -176,11 +176,18 @@ function getOrderByForCollectionProducts(sortMode = 'manual') {
 }
 
 /**
- * Stronger paging strategy to avoid timeouts:
- * - For manual: page from collection_products first, then fetch products by IN(...)
- *   and reorder in-memory by the manual order.
- * - For other sort modes: keep join (ordering depends on product fields),
- *   but select minimal columns and keep guardrails.
+ * Stronger paging strategy to avoid timeouts + "empty data with non-zero total":
+ *
+ * - For manual:
+ *   1) COUNT(*) from collection_products (cheap)
+ *   2) Page from collection_products ONLY (product_id + sort_order)
+ *   3) Fetch products by IN (...)
+ *   4) Reorder in-memory to match collection_products order
+ *   5) If some product IDs are missing in products table, return placeholder rows
+ *      so the UI doesn't show an empty list while total>0.
+ *
+ * - For other sort modes:
+ *   Ordering depends on product fields, so we keep a join, but keep selected columns minimal.
  */
 async function getCollectionProductsPaged(collectionId, sortMode = 'manual', limit = DEFAULT_LIMIT, offset = 0) {
   const normalizedSort = normalizeSortMode(sortMode);
@@ -196,21 +203,25 @@ async function getCollectionProductsPaged(collectionId, sortMode = 'manual', lim
   );
   const total = Number(countRow?.total || 0);
 
+  const pagination = {
+    total,
+    limit: parsedLimit,
+    offset: parsedOffset,
+    totalPages: parsedLimit ? Math.ceil(total / parsedLimit) : 1
+  };
+
   if (total === 0) {
-    return {
-      rows: [],
-      pagination: {
-        total,
-        limit: parsedLimit,
-        offset: parsedOffset,
-        totalPages: parsedLimit ? Math.ceil(total / parsedLimit) : 1
-      }
-    };
+    return { rows: [], pagination };
   }
 
-  // ✅ Manual mode: NO JOIN in the paging query.
+  // If offset is beyond total, return empty page (prevents "stuck" pages)
+  if (parsedOffset >= total) {
+    return { rows: [], pagination };
+  }
+
+  // ✅ Manual mode: NO JOIN in paging query.
   if (normalizedSort === 'manual') {
-    // 1) Fetch just the page of product ids from collection_products
+    // 1) Page links
     const linkRows = await withTimeout(
       db.all(
         `
@@ -230,18 +241,10 @@ async function getCollectionProductsPaged(collectionId, sortMode = 'manual', lim
     const pageProductIds = pageLinks.map(r => Number(r.product_id)).filter(Boolean);
 
     if (!pageProductIds.length) {
-      return {
-        rows: [],
-        pagination: {
-          total,
-          limit: parsedLimit,
-          offset: parsedOffset,
-          totalPages: parsedLimit ? Math.ceil(total / parsedLimit) : 1
-        }
-      };
+      return { rows: [], pagination };
     }
 
-    // 2) Fetch products in one query (IN ...)
+    // 2) Fetch products by ids
     const placeholders = pageProductIds.map(() => '?').join(', ');
     const productRows = await withTimeout(
       db.all(
@@ -273,31 +276,46 @@ async function getCollectionProductsPaged(collectionId, sortMode = 'manual', lim
     const products = Array.isArray(productRows) ? productRows : [];
     const byId = new Map(products.map(p => [Number(p.id), p]));
 
-    // 3) Reorder according to manual order (collection_products page order)
+    // 3) Reorder + placeholders for missing products
     const ordered = [];
     for (const link of pageLinks) {
       const pid = Number(link.product_id);
+      const sortOrder = toInteger(link.sort_order, 0);
       const product = byId.get(pid);
-      if (!product) continue;
 
-      // Keep some cp fields for compatibility with UI if needed
+      if (product) {
+        ordered.push({
+          collection_id: Number(collectionId),
+          product_id: pid,
+          sort_order: sortOrder,
+          ...product
+        });
+        continue;
+      }
+
+      // Placeholder row (keeps UI from showing empty list while total>0)
       ordered.push({
         collection_id: Number(collectionId),
         product_id: pid,
-        sort_order: toInteger(link.sort_order, 0),
-        ...product
+        sort_order: sortOrder,
+        id: pid,
+        product_name: '[Missing product]',
+        slug: '',
+        sku: '',
+        price: 0,
+        sale_price: null,
+        image_url: '',
+        stock: 0,
+        status: 'archived',
+        product_type: '',
+        vendor: '',
+        category: '',
+        created_at: null,
+        updated_at: null
       });
     }
 
-    return {
-      rows: ordered,
-      pagination: {
-        total,
-        limit: parsedLimit,
-        offset: parsedOffset,
-        totalPages: parsedLimit ? Math.ceil(total / parsedLimit) : 1
-      }
-    };
+    return { rows: ordered, pagination };
   }
 
   // Other sort modes: ordering depends on product fields; keep join but minimal columns
@@ -337,12 +355,7 @@ async function getCollectionProductsPaged(collectionId, sortMode = 'manual', lim
 
   return {
     rows: Array.isArray(rows) ? rows : [],
-    pagination: {
-      total,
-      limit: parsedLimit,
-      offset: parsedOffset,
-      totalPages: parsedLimit ? Math.ceil(total / parsedLimit) : 1
-    }
+    pagination
   };
 }
 
@@ -753,7 +766,8 @@ router.get('/:id/products', async (req, res) => {
     const sortMode = normalizeSortMode(req.query.sort || collection.sort_mode || 'manual');
 
     // Harden limit/offset parsing (prevent huge payloads / slow queries)
-    const limit = Math.min(MAX_LIMIT, Math.max(50, toInteger(req.query.limit, DEFAULT_LIMIT)));
+    // IMPORTANT: do NOT force a minimum of 50; that defeats pagination and can cause timeouts.
+    const limit = Math.min(MAX_LIMIT, Math.max(1, toInteger(req.query.limit, DEFAULT_LIMIT)));
     const offset = Math.max(0, toInteger(req.query.offset, 0));
 
     const { rows, pagination } = await getCollectionProductsPaged(collection.id, sortMode, limit, offset);
@@ -776,7 +790,7 @@ router.get('/:id/products', async (req, res) => {
       });
     }
 
-    return res.status(500).json({ success: false, error: 'فشل في جلب منتجات المجموعة' });
+    return res.status(500).json({ success: false, error: 'فشل في ��لب منتجات المجموعة' });
   }
 });
 
@@ -865,7 +879,7 @@ router.post('/:id/products/reorder', async (req, res) => {
     }
 
     if (!Array.isArray(items) || !items.length) {
-      return res.status(400).json({ success: false, error: 'بيانات الترتيب غير صحيحة' });
+      return res.status(400).json({ success: false, error: 'بيانات الت��تيب غير صحيحة' });
     }
 
     for (const item of items) {
@@ -888,7 +902,7 @@ router.post('/:id/products/reorder', async (req, res) => {
     await reindexCollectionProducts(id);
 
     // رجّع أول صفحة فقط
-    const { rows, pagination } = await getCollectionProductsPaged(id, 'manual', DEFAULT_LIMIT, 50);
+    const { rows, pagination } = await getCollectionProductsPaged(id, 'manual', DEFAULT_LIMIT, 0);
 
     return res.json({
       success: true,
