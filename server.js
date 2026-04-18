@@ -92,15 +92,28 @@ function requireAdminAuth(req, res, next) {
 /**
  * API write protection:
  * - Allows public GET/HEAD/OPTIONS (site uses API for reads)
- * - Requires admin cookie for POST/PUT/PATCH/DELETE
+ * - Allows public checkout: POST /api/orders
+ * - Requires admin cookie for any other POST/PUT/PATCH/DELETE
  */
 function requireAdminApiWriteAuth(req, res, next) {
   const method = String(req.method || '').toUpperCase();
-  const isRead = method === 'GET' || method === 'HEAD' || method === 'OPTIONS';
+  const pathname = String(req.path || '');
 
-  if (isRead) return next();
+  // reads
+  if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') {
+    return next();
+  }
 
-  if (isAdminAuthenticated(req)) return next();
+  // public checkout: create order
+  // NOTE: this middleware is mounted at /api, so req.path for POST /api/orders is "/orders"
+  if (method === 'POST' && pathname === '/orders') {
+    return next();
+  }
+
+  // admin-only writes
+  if (isAdminAuthenticated(req)) {
+    return next();
+  }
 
   return res.status(401).json({
     success: false,
@@ -268,7 +281,7 @@ async function ensureDbReady() {
 
 /**
  * Tighten CORS:
- * - If your site is served from the same domain, you typically don't need CORS.
+ * - Site uses same-origin API calls, but CORS can still be hit by external sites.
  * - We'll allow only your own origins (and allow no-origin for curl/server-to-server).
  */
 const allowedOrigins = new Set(
@@ -339,7 +352,8 @@ app.use('/api', async (req, res, next) => {
 });
 
 /**
- * Protect API writes (admin only) without breaking public GET.
+ * Protect API writes (admin only) without breaking public GET
+ * and without breaking public checkout (POST /api/orders).
  */
 app.use('/api', requireAdminApiWriteAuth);
 
@@ -455,6 +469,7 @@ app.get('/customers-admin.html', (req, res) => {
 });
 
 app.get('/customer-view.html', (req, res) => {
+  // keep backward compat but serve the correct file
   res.sendFile(path.join(__dirname, 'public', 'customers-view.html'));
 });
 
@@ -527,7 +542,7 @@ async function startServer() {
       console.log('║ ✅ جميع الوحدات محملة');
       console.log('╠════════════════════════════════════════════════════════╣');
       console.log('║ الروابط المتاحة:');
-      console.log(`║ 📍 الصفحة الرئيسية: http://${HOST}:${PORT}/`);
+      console.log(`║ 📍 الصفحة الرئ��سية: http://${HOST}:${PORT}/`);
       console.log(`║ 📊 دخول الإدارة: http://${HOST}:${PORT}/admin`);
       console.log(`║ 📈 لوحة متقدمة: http://${HOST}:${PORT}/admin-enhanced`);
       console.log(`║ 🏷️ إدارة المنتجات: http://${HOST}:${PORT}/products-admin`);
