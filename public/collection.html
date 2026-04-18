@@ -578,10 +578,10 @@
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
     let toastTimer = null;
 
-    // pagination (smaller to reduce DB load/timeouts)
+    // خفض limit ليتوافق مع collection-edit.html ويقلل timeout
     let productsLoading = true;
     let productsOffset = 0;
-    const productsLimit = 20;
+    const productsLimit = 10;
     let productsTotal = null;
     let productsHasMore = false;
 
@@ -902,9 +902,10 @@
         productsLoading = false;
         productsHasMore = false;
         updateLoadMoreButton();
-        showError(error?.name === 'AbortError'
-          ? 'انتهى وقت تحميل المنتجات (Timeout). حاول مرة أخرى.'
-          : (error?.message || 'حدث خطأ أثناء تحميل المنتجات')
+        showError(
+          error?.name === 'AbortError'
+            ? 'انتهى وقت تحميل المنتجات (Timeout). حاول مرة أخرى.'
+            : (error?.message || 'حدث خطأ أثناء تحميل المنتجات')
         );
       }
     }
@@ -993,7 +994,6 @@
         allCollectionProducts = [];
         filteredProducts = [];
 
-        // first page
         productsHasMore = true;
         productsLoading = false;
         updateCollectionInfo();
