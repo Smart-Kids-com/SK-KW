@@ -578,7 +578,7 @@
 
         currentCustomers = Array.isArray(result.data) ? result.data : [];
         renderCustomers(currentCustomers);
-        updatePagination(currentCustomers);
+        updatePagination(result.pagination, currentCustomers);
       } catch (error) {
         console.error(error);
         tbody.innerHTML = `
@@ -607,9 +607,15 @@
       if (showMessage) showAlert('تم تحديث البيانات', 'success');
     }
 
-    function updatePagination(customers) {
-      const total = customers.length;
-      document.getElementById('paginationText').textContent = total ? `1-${total}` : '0-0';
+    function updatePagination(pagination, customers) {
+      const total = Number(pagination?.total || customers.length || 0);
+      const limit = Number(pagination?.limit || customers.length || 0);
+      const offset = Number(pagination?.offset || 0);
+
+      const start = total === 0 ? 0 : offset + 1;
+      const end = Math.min(offset + limit, total);
+
+      document.getElementById('paginationText').textContent = total ? `${start}-${end} of ${total}` : '0-0';
     }
 
     function renderCustomers(customers) {
@@ -661,7 +667,7 @@
         showAlert('رقم العميل غير صحيح', 'warning');
         return;
       }
-      window.location.href = `/customer-view.html?id=${id}`;
+      window.location.href = `/customers-view.html?id=${id}`;
     }
 
     function exportCustomersCsv() {

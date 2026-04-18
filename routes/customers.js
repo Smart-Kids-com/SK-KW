@@ -7,7 +7,16 @@ const db = require('../db/turso-manager');
  */
 const CUSTOMER_STATUSES = ['active', 'new', 'inactive', 'blocked'];
 const DB_OP_TIMEOUT_MS = 25_000;
+
 const MAX_SEARCH_LEN = 80;
+const MAX_LIMIT = 200;
+const DEFAULT_LIMIT = 50;
+
+/**
+ * Orders lookup guardrails (customer -> orders)
+ */
+const MAX_ORDERS_LIMIT = 50;
+const DEFAULT_ORDERS_LIMIT = 20;
 
 function withTimeout(promise, ms, label = 'operation') {
   let timer;
@@ -70,6 +79,49 @@ function deriveCustomerStatus(customer) {
   return 'inactive';
 }
 
+/**
+ * Normalize email/phone for matching orders like Shopify-style identity matching.
+ */
+function normalizeEmail(email = '') {
+  return normalizeText(email).toLowerCase();
+}
+
+function normalizePhone(phone = '') {
+  // Keep digits only. Works for Kuwait and most common formats.
+  // Example: "+965 6663 5393" => "96566635393"
+  return normalizeText(phone).replace(/[^\d]/g, '');
+}
+
+function buildOrderMatchWhere(customer) {
+  const email = normalizeEmail(customer?.email);
+  const phone = normalizePhone(customer?.phone);
+
+  // orders table uses customer_email/customer_phone fields
+  // We'll match case-insensitively for email, and digits-only for phone using REPLACE chain.
+  const whereParts = [];
+  const params = [];
+
+  if (email) {
+    whereParts.push(`LOWER(TRIM(customer_email)) = ?`);
+    params.push(email);
+  }
+
+  if (phone) {
+    // Normalize orders.customer_phone in SQL by stripping common separators.
+    // SQLite doesn't have regexp_replace by default; use nested REPLACE calls.
+    whereParts.push(
+      `REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(TRIM(customer_phone), ' ', ''), '-', ''), '(', ''), ')', ''), '+', '') = ?`
+    );
+    params.push(phone);
+  }
+
+  if (!whereParts.length) {
+    return { whereSql: '1=0', params: [] };
+  }
+
+  return { whereSql: `(${whereParts.join(' OR ')})`, params };
+}
+
 async function getCustomerById(id) {
   return await withTimeout(
     db.get(`SELECT * FROM customers WHERE id = ?`, [id]),
@@ -107,31 +159,63 @@ async function ensureCustomersTable() {
 
 /**
  * GET /api/customers/stats/summary
+ * Optimized: compute counts via SQL (no SELECT * scan).
  */
 router.get('/stats/summary', async (req, res) => {
   try {
     await ensureCustomersTable();
 
-    const rows = await withTimeout(
-      db.all(`SELECT * FROM customers`),
+    // Total customers
+    const totalRow = await withTimeout(
+      db.get(`SELECT COUNT(*) as count FROM customers`),
       DB_OP_TIMEOUT_MS,
-      'listCustomersForStats'
+      'customersStats(total)'
     );
-    const customers = Array.isArray(rows) ? rows : [];
+    const totalCustomers = Number(totalRow?.count || 0);
 
-    let totalCustomers = customers.length;
-    let activeCustomers = 0;
-    let newCustomers = 0;
-    let marketingCustomers = 0;
+    // Blocked customers (explicit flag)
+    const blockedRow = await withTimeout(
+      db.get(`SELECT COUNT(*) as count FROM customers WHERE COALESCE(is_blocked, 0) = 1`),
+      DB_OP_TIMEOUT_MS,
+      'customersStats(blocked)'
+    );
+    const blockedCustomers = Number(blockedRow?.count || 0);
 
-    for (const customer of customers) {
-      const status = deriveCustomerStatus(customer);
-      if (status === 'active') activeCustomers += 1;
-      if (status === 'new') newCustomers += 1;
+    // "Active" customers: total_orders > 0 (fast proxy)
+    const activeRow = await withTimeout(
+      db.get(
+        `SELECT COUNT(*) as count FROM customers WHERE COALESCE(total_orders, 0) > 0 AND COALESCE(is_blocked, 0) = 0`
+      ),
+      DB_OP_TIMEOUT_MS,
+      'customersStats(active)'
+    );
+    const activeCustomers = Number(activeRow?.count || 0);
 
-      const marketing = Number(customer.accepts_marketing || customer.marketing_opt_in || 0);
-      if (marketing) marketingCustomers += 1;
-    }
+    // "New" customers: created within 14 days and total_orders = 0 and not blocked
+    const newRow = await withTimeout(
+      db.get(`
+        SELECT COUNT(*) as count
+        FROM customers
+        WHERE COALESCE(total_orders, 0) = 0
+          AND COALESCE(is_blocked, 0) = 0
+          AND datetime(COALESCE(created_at, CURRENT_TIMESTAMP)) >= datetime('now', '-14 days')
+      `),
+      DB_OP_TIMEOUT_MS,
+      'customersStats(new)'
+    );
+    const newCustomers = Number(newRow?.count || 0);
+
+    // Marketing customers: accepts_marketing or marketing_opt_in set
+    const marketingRow = await withTimeout(
+      db.get(`
+        SELECT COUNT(*) as count
+        FROM customers
+        WHERE COALESCE(accepts_marketing, 0) = 1 OR COALESCE(marketing_opt_in, 0) = 1
+      `),
+      DB_OP_TIMEOUT_MS,
+      'customersStats(marketing)'
+    );
+    const marketingCustomers = Number(marketingRow?.count || 0);
 
     return res.json({
       success: true,
@@ -139,14 +223,128 @@ router.get('/stats/summary', async (req, res) => {
         totalCustomers,
         activeCustomers,
         newCustomers,
-        marketingCustomers
+        marketingCustomers,
+        blockedCustomers
       }
     });
   } catch (error) {
     console.error('❌ خطأ في جلب إحصائيات العملاء:', error);
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res
+        .status(503)
+        .json({ success: false, error: 'الاستعلام استغرق وقتاً طويلاً. حاول مرة أخرى لاحقاً.' });
+    }
+
     return res.status(500).json({
       success: false,
       error: 'فشل في جلب إحصائيات العملاء'
+    });
+  }
+});
+
+/**
+ * GET /api/customers/:id/orders
+ * Shopify-like: match orders by email OR phone (normalized), with pagination.
+ * Query:
+ *  - limit (default 20, max 50)
+ *  - offset (default 0)
+ *  - sort: created_at|updated_at|total|status|order_number|completed_at|shipped_at (default created_at)
+ *  - order: ASC|DESC (default DESC)
+ */
+router.get('/:id/orders', async (req, res) => {
+  try {
+    await ensureCustomersTable();
+
+    const customer = await getCustomerById(req.params.id);
+    if (!customer) {
+      return res.status(404).json({ success: false, error: 'العميل غير موجود' });
+    }
+
+    const limit = Math.min(MAX_ORDERS_LIMIT, Math.max(1, toInteger(req.query.limit, DEFAULT_ORDERS_LIMIT)));
+    const offset = Math.max(0, toInteger(req.query.offset, 0));
+
+    const validSort = ['created_at', 'updated_at', 'total', 'status', 'order_number', 'completed_at', 'shipped_at'];
+    const sort = validSort.includes(String(req.query.sort || 'created_at')) ? String(req.query.sort) : 'created_at';
+    const order = String(req.query.order || 'DESC').toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    const { whereSql, params } = buildOrderMatchWhere(customer);
+
+    // total count
+    const countRow = await withTimeout(
+      db.get(`SELECT COUNT(*) as total FROM orders WHERE ${whereSql}`, params),
+      DB_OP_TIMEOUT_MS,
+      'customerOrders(count)'
+    );
+    const total = Number(countRow?.total || 0);
+
+    // if offset beyond total, return empty page
+    if (total === 0 || offset >= total) {
+      return res.json({
+        success: true,
+        data: [],
+        pagination: {
+          total,
+          limit,
+          offset,
+          totalPages: Math.ceil(total / Math.max(1, limit))
+        }
+      });
+    }
+
+    const sql = `
+      SELECT
+        id,
+        order_number,
+        customer_name,
+        customer_email,
+        customer_phone,
+        customer_address,
+        customer_city,
+        customer_district,
+        subtotal,
+        shipping_cost,
+        total,
+        status,
+        notes,
+        created_at,
+        updated_at,
+        completed_at,
+        shipped_at
+      FROM orders
+      WHERE ${whereSql}
+      ORDER BY ${sort} ${order}, id ${order}
+      LIMIT ? OFFSET ?
+    `;
+
+    const rows = await withTimeout(
+      db.all(sql, [...params, limit, offset]),
+      DB_OP_TIMEOUT_MS,
+      'customerOrders(list)'
+    );
+
+    return res.json({
+      success: true,
+      data: Array.isArray(rows) ? rows : [],
+      pagination: {
+        total,
+        limit,
+        offset,
+        totalPages: Math.ceil(total / Math.max(1, limit))
+      }
+    });
+  } catch (error) {
+    console.error('❌ خطأ في جلب طلبات العميل:', error);
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res
+        .status(503)
+        .json({ success: false, error: 'الاستعلام استغرق وقتاً طويلاً. حاول مرة أخرى لاحقاً.' });
+    }
+
+    return res.status(500).json({
+      success: false,
+      error: 'فشل في جلب طلبات العميل'
     });
   }
 });
@@ -176,6 +374,13 @@ router.get('/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ خطأ في جلب العميل:', error);
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res
+        .status(503)
+        .json({ success: false, error: 'الاستعلام استغرق وقتاً طويلاً. حاول مرة أخرى لاحقاً.' });
+    }
+
     return res.status(500).json({
       success: false,
       error: 'فشل في جلب العميل'
@@ -268,6 +473,13 @@ router.post('/', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ خطأ في إنشاء العميل:', error);
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res
+        .status(503)
+        .json({ success: false, error: 'الاستعلام استغرق وقتاً طويلاً. حاول مرة أخرى لاحقاً.' });
+    }
+
     return res.status(500).json({
       success: false,
       error: 'فشل في إنشاء العميل'
@@ -401,6 +613,13 @@ router.put('/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ خطأ في تحديث العميل:', error);
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res
+        .status(503)
+        .json({ success: false, error: 'الاستعلام استغرق وقتاً طويلاً. حاول مرة أخرى لاحقاً.' });
+    }
+
     return res.status(500).json({
       success: false,
       error: 'فشل في تحديث العميل'
@@ -424,11 +643,7 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
-    await withTimeout(
-      db.run(`DELETE FROM customers WHERE id = ?`, [req.params.id]),
-      DB_OP_TIMEOUT_MS,
-      'deleteCustomer'
-    );
+    await withTimeout(db.run(`DELETE FROM customers WHERE id = ?`, [req.params.id]), DB_OP_TIMEOUT_MS, 'deleteCustomer');
 
     return res.json({
       success: true,
@@ -440,6 +655,13 @@ router.delete('/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('❌ خطأ في حذف العميل:', error);
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res
+        .status(503)
+        .json({ success: false, error: 'الاستعلام استغرق وقتاً طويلاً. حاول مرة أخرى لاحقاً.' });
+    }
+
     return res.status(500).json({
       success: false,
       error: 'فشل في حذف العميل'
@@ -449,22 +671,15 @@ router.delete('/:id', async (req, res) => {
 
 /**
  * GET /api/customers
+ * Optimized: SQL filtering + pagination (no SELECT * full scan).
  */
 router.get('/', async (req, res) => {
   try {
     await ensureCustomersTable();
 
-    const {
-      status,
-      search,
-      limit = 50,
-      offset = 0,
-      sort = 'created_at',
-      order = 'DESC'
-    } = req.query;
+    const { status, search, limit = DEFAULT_LIMIT, offset = 0, sort = 'created_at', order = 'DESC' } = req.query;
 
     let normalizedStatusFilter = null;
-
     if (status) {
       normalizedStatusFilter = parseCustomerStatusFilter(status);
       if (!normalizedStatusFilter) {
@@ -475,79 +690,87 @@ router.get('/', async (req, res) => {
       }
     }
 
-    const rows = await withTimeout(
-      db.all(`SELECT * FROM customers`),
-      DB_OP_TIMEOUT_MS,
-      'listCustomers'
-    );
-    let customers = Array.isArray(rows) ? rows : [];
+    const parsedLimit = Math.min(MAX_LIMIT, Math.max(1, toInteger(limit, DEFAULT_LIMIT)));
+    const parsedOffset = Math.max(0, toInteger(offset, 0));
 
+    const where = [];
+    const params = [];
+
+    // status filter (explicit only; derived statuses still computed on response)
+    if (normalizedStatusFilter) {
+      if (normalizedStatusFilter === 'blocked') {
+        where.push(`COALESCE(is_blocked, 0) = 1`);
+      } else {
+        where.push(`COALESCE(is_blocked, 0) = 0`);
+        where.push(`LOWER(COALESCE(status, '')) = ?`);
+        params.push(normalizedStatusFilter);
+      }
+    }
+
+    // search
+    if (search) {
+      const clipped = String(search).trim().slice(0, MAX_SEARCH_LEN).toLowerCase();
+      if (clipped) {
+        const like = `%${clipped}%`;
+        where.push(`(
+          LOWER(COALESCE(full_name, '')) LIKE ?
+          OR LOWER(COALESCE(email, '')) LIKE ?
+          OR LOWER(COALESCE(phone, '')) LIKE ?
+          OR LOWER(COALESCE(city, '')) LIKE ?
+          OR LOWER(COALESCE(area, '')) LIKE ?
+        )`);
+        params.push(like, like, like, like, like);
+      }
+    }
+
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+    // count
+    const countRow = await withTimeout(
+      db.get(`SELECT COUNT(*) as total FROM customers ${whereSql}`, params),
+      DB_OP_TIMEOUT_MS,
+      'customersList(count)'
+    );
+    const total = Number(countRow?.total || 0);
+
+    // ordering (safe whitelist)
+    const sortKey = String(sort || 'created_at');
+    const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    const sortMap = {
+      created_at: 'created_at',
+      updated_at: 'updated_at',
+      full_name: 'full_name',
+      total_orders: 'total_orders',
+      total_spent: 'total_spent',
+      last_order_at: 'last_order_at'
+    };
+
+    const sortColumn = sortMap[sortKey] || 'created_at';
+
+    // page
+    const rows = await withTimeout(
+      db.all(
+        `SELECT *
+         FROM customers
+         ${whereSql}
+         ORDER BY ${sortColumn} ${sortOrder}, id ${sortOrder}
+         LIMIT ? OFFSET ?`,
+        [...params, parsedLimit, parsedOffset]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'customersList(page)'
+    );
+
+    let customers = Array.isArray(rows) ? rows : [];
     customers = customers.map(customer => ({
       ...customer,
       status: deriveCustomerStatus(customer)
     }));
 
-    if (normalizedStatusFilter) {
-      customers = customers.filter(customer => customer.status === normalizedStatusFilter);
-    }
-
-    if (search) {
-      const clipped = String(search).trim().slice(0, MAX_SEARCH_LEN).toLowerCase();
-      if (clipped) {
-        customers = customers.filter(customer => {
-          const haystack = [
-            customer.full_name,
-            customer.email,
-            customer.phone,
-            customer.city,
-            customer.area
-          ].map(v => String(v || '').toLowerCase()).join(' ');
-          return haystack.includes(clipped);
-        });
-      }
-    }
-
-    const sortKey = String(sort || 'created_at');
-    const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-
-    customers.sort((a, b) => {
-      let av;
-      let bv;
-
-      switch (sortKey) {
-        case 'full_name':
-          av = String(a.full_name || '').toLowerCase();
-          bv = String(b.full_name || '').toLowerCase();
-          break;
-        case 'total_orders':
-          av = Number(a.total_orders || 0);
-          bv = Number(b.total_orders || 0);
-          break;
-        case 'total_spent':
-          av = Number(a.total_spent || 0);
-          bv = Number(b.total_spent || 0);
-          break;
-        case 'created_at':
-        default:
-          av = new Date(a.created_at || 0).getTime();
-          bv = new Date(b.created_at || 0).getTime();
-          break;
-      }
-
-      if (av < bv) return sortOrder === 'ASC' ? -1 : 1;
-      if (av > bv) return sortOrder === 'ASC' ? 1 : -1;
-      return 0;
-    });
-
-    const parsedLimit = Math.max(1, toInteger(limit, 50));
-    const parsedOffset = Math.max(0, toInteger(offset, 0));
-    const total = customers.length;
-
-    const paginated = customers.slice(parsedOffset, parsedOffset + parsedLimit);
-
     return res.json({
       success: true,
-      data: paginated,
+      data: customers,
       pagination: {
         total,
         limit: parsedLimit,
