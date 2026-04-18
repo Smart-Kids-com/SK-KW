@@ -176,18 +176,19 @@ function getOrderByForCollectionProducts(sortMode = 'manual') {
 }
 
 /**
- * ✅ Optimized to prevent serverless timeouts:
- * - Always paginate with hard max limit
- * - Count via COUNT(*)
- * - Select only fields needed by the editor UI to reduce payload/IO
+ * Stronger paging strategy to avoid timeouts:
+ * - For manual: page from collection_products first, then fetch products by IN(...)
+ *   and reorder in-memory by the manual order.
+ * - For other sort modes: keep join (ordering depends on product fields),
+ *   but select minimal columns and keep guardrails.
  */
 async function getCollectionProductsPaged(collectionId, sortMode = 'manual', limit = DEFAULT_LIMIT, offset = 0) {
-  const orderBy = getOrderByForCollectionProducts(sortMode);
+  const normalizedSort = normalizeSortMode(sortMode);
 
-  // hard guardrails
   const parsedLimit = Math.min(MAX_LIMIT, Math.max(1, toInteger(limit, DEFAULT_LIMIT)));
   const parsedOffset = Math.max(0, toInteger(offset, 0));
 
+  // Always compute total from the link table (cheap + stable)
   const countRow = await withTimeout(
     db.get(`SELECT COUNT(*) as total FROM collection_products WHERE collection_id = ?`, [collectionId]),
     DB_OP_TIMEOUT_MS,
@@ -195,7 +196,6 @@ async function getCollectionProductsPaged(collectionId, sortMode = 'manual', lim
   );
   const total = Number(countRow?.total || 0);
 
-  // If no rows, skip the join query entirely
   if (total === 0) {
     return {
       rows: [],
@@ -208,11 +208,103 @@ async function getCollectionProductsPaged(collectionId, sortMode = 'manual', lim
     };
   }
 
-  // Select only what the collection editor actually uses:
-  // - product_id / id, product_name, image_url, price, stock, status, vendor/category/product_type, sku/slug, created_at/updated_at
+  // ✅ Manual mode: NO JOIN in the paging query.
+  if (normalizedSort === 'manual') {
+    // 1) Fetch just the page of product ids from collection_products
+    const linkRows = await withTimeout(
+      db.all(
+        `
+          SELECT product_id, sort_order
+          FROM collection_products
+          WHERE collection_id = ?
+          ORDER BY sort_order ASC, id ASC
+          LIMIT ? OFFSET ?
+        `,
+        [collectionId, parsedLimit, parsedOffset]
+      ),
+      DB_OP_TIMEOUT_MS,
+      'getCollectionProductsPaged(manual.linksPage)'
+    );
+
+    const pageLinks = Array.isArray(linkRows) ? linkRows : [];
+    const pageProductIds = pageLinks.map(r => Number(r.product_id)).filter(Boolean);
+
+    if (!pageProductIds.length) {
+      return {
+        rows: [],
+        pagination: {
+          total,
+          limit: parsedLimit,
+          offset: parsedOffset,
+          totalPages: parsedLimit ? Math.ceil(total / parsedLimit) : 1
+        }
+      };
+    }
+
+    // 2) Fetch products in one query (IN ...)
+    const placeholders = pageProductIds.map(() => '?').join(', ');
+    const productRows = await withTimeout(
+      db.all(
+        `
+          SELECT
+            id,
+            product_name,
+            slug,
+            sku,
+            price,
+            sale_price,
+            image_url,
+            stock,
+            status,
+            product_type,
+            vendor,
+            category,
+            created_at,
+            updated_at
+          FROM products
+          WHERE id IN (${placeholders})
+        `,
+        pageProductIds
+      ),
+      DB_OP_TIMEOUT_MS,
+      'getCollectionProductsPaged(manual.productsByIds)'
+    );
+
+    const products = Array.isArray(productRows) ? productRows : [];
+    const byId = new Map(products.map(p => [Number(p.id), p]));
+
+    // 3) Reorder according to manual order (collection_products page order)
+    const ordered = [];
+    for (const link of pageLinks) {
+      const pid = Number(link.product_id);
+      const product = byId.get(pid);
+      if (!product) continue;
+
+      // Keep some cp fields for compatibility with UI if needed
+      ordered.push({
+        collection_id: Number(collectionId),
+        product_id: pid,
+        sort_order: toInteger(link.sort_order, 0),
+        ...product
+      });
+    }
+
+    return {
+      rows: ordered,
+      pagination: {
+        total,
+        limit: parsedLimit,
+        offset: parsedOffset,
+        totalPages: parsedLimit ? Math.ceil(total / parsedLimit) : 1
+      }
+    };
+  }
+
+  // Other sort modes: ordering depends on product fields; keep join but minimal columns
+  const orderBy = getOrderByForCollectionProducts(normalizedSort);
+
   const sql = `
     SELECT
-      cp.id AS collection_product_id,
       cp.collection_id,
       cp.product_id,
       cp.sort_order,
@@ -221,6 +313,7 @@ async function getCollectionProductsPaged(collectionId, sortMode = 'manual', lim
       p.slug,
       p.sku,
       p.price,
+      p.sale_price,
       p.image_url,
       p.stock,
       p.status,
@@ -239,7 +332,7 @@ async function getCollectionProductsPaged(collectionId, sortMode = 'manual', lim
   const rows = await withTimeout(
     db.all(sql, [collectionId, parsedLimit, parsedOffset]),
     DB_OP_TIMEOUT_MS,
-    'getCollectionProductsPaged'
+    'getCollectionProductsPaged(join)'
   );
 
   return {
