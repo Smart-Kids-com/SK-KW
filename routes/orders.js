@@ -5,6 +5,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/turso-manager');
 const { SYSTEM_CONFIG, HELPERS } = require('../config/system');
+const { sendOrderEmails } = require('../utils/email');
 
 const ORDERS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS;
 const ORDER_ITEMS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS;
@@ -800,6 +801,12 @@ router.post('/', async (req, res) => {
     });
 
     const createdOrder = await getOrderWithItems(savedOrder.id);
+
+    try {
+      await sendOrderEmails({ order: createdOrder });
+    } catch (emailError) {
+      console.error('❌ خطأ في إرسال إيميلات الطلب:', emailError);
+    }
 
     return res.status(201).json({
       success: true,
