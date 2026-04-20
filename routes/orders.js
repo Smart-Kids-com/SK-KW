@@ -677,15 +677,18 @@ router.post('/sync-customers', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const {
-      customerName,
-      customerEmail,
-      customerPhone,
-      customerAddress,
-      customerCity,
-      customerDistrict,
-      items,
-      notes
-    } = req.body;
+  customerName,
+  customerEmail,
+  customerPhone,
+  customerAddress,
+  customerCity,
+  customerDistrict,
+  items,
+  notes,
+  shippingCost,
+  discountAmount,
+  discountCode
+} = req.body;req.body;
 
     if (!customerName || !customerEmail || !customerPhone || !customerAddress || !items || items.length === 0) {
       return res.status(400).json({
@@ -709,59 +712,76 @@ router.post('/', async (req, res) => {
     }
 
     const normalizedItems = normalizeOrderItems(items);
-    if (!normalizedItems.length) {
-      return res.status(400).json({
-        success: false,
-        error: 'الطلب يجب أن يحتوي على منتج واحد على الأقل'
-      });
-    }
+if (!normalizedItems.length) {
+  return res.status(400).json({
+    success: false,
+    error: 'الطلب يجب أن يحتوي على منتج واحد على الأقل'
+  });
+}
 
-    const subtotal = calculateSubtotal(normalizedItems);
-    const shippingCost = HELPERS.calculateShipping(subtotal);
-    const total = subtotal + shippingCost;
-    const tempOrderNumber = `TEMP-${Date.now()}`;
+const subtotal = calculateSubtotal(normalizedItems);
+
+// الشحن منطق السيرفر يحدد قيمته النهائية
+const finalShippingCost = Math.max(0, toNumber(shippingCost, HELPERS.calculateShipping(subtotal)));
+
+// الخصم لا يزيد عن subtotal
+const finalDiscountAmount = Math.max(0, Math.min(toNumber(discountAmount, 0), subtotal));
+const finalDiscountCode = safeText(discountCode).toUpperCase();
+
+// الإجمالي النهائي بعد الخصم
+const total = Math.max(0, subtotal - finalDiscountAmount + finalShippingCost);
+
+const tempOrderNumber = `TEMP-${Date.now()}`;
 
     await db.run(
-      `INSERT INTO ${ORDERS_TABLE}
-      (
-        order_number,
-        customer_name,
-        customer_email,
-        customer_phone,
-        customer_address,
-        customer_city,
-        customer_district,
-        subtotal,
-        shipping_cost,
-        total,
-        status,
-        notes
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        tempOrderNumber,
-        customerName,
-        customerEmail,
-        customerPhone,
-        customerAddress,
-        customerCity || 'الكويت',
-        customerDistrict || '',
-        subtotal,
-        shippingCost,
-        total,
-        SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING,
-        buildNotesWithMeta(notes || '', {
-          tags: [],
-          archived: false,
-          archived_prev_status: null,
-          fulfillment_requested: false,
-          fulfillment_location: '',
-          restocked: false,
-          returned: false,
-          invoice_sent_at: null
-        })
-      ]
-    );
+  `INSERT INTO ${ORDERS_TABLE}
+  (
+    order_number,
+    customer_name,
+    customer_email,
+    customer_phone,
+    customer_address,
+    customer_city,
+    customer_district,
+    subtotal,
+    discount_code,
+    discount_type,
+    discount_value,
+    discount_amount,
+    shipping_cost,
+    total,
+    status,
+    notes
+  )
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  [
+    tempOrderNumber,
+    customerName,
+    customerEmail,
+    customerPhone,
+    customerAddress,
+    customerCity || 'الكويت',
+    customerDistrict || '',
+    subtotal,
+    finalDiscountCode,
+    finalDiscountAmount > 0 ? 'fixed' : '',
+    finalDiscountAmount,
+    finalDiscountAmount,
+    finalShippingCost,
+    total,
+    SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING,
+    buildNotesWithMeta(notes || '', {
+      tags: [],
+      archived: false,
+      archived_prev_status: null,
+      fulfillment_requested: false,
+      fulfillment_location: '',
+      restocked: false,
+      returned: false,
+      invoice_sent_at: null
+    })
+  ]
+);
 
     const savedOrder = await db.get(
       `SELECT id

@@ -645,11 +645,11 @@
       </a>
 
       <div class="side-menu__icons">
-        <button class="site-icon-btn" type="button" aria-label="بحث" onclick="openSearch()">🔍</button>
-        <a href="./cart.html" class="site-icon-btn" aria-label="السلة">
+        <button class="site-icon-btn" id="sideMenuSearchBtn" type="button" aria-label="بحث">🔍</button>
+        <button class="site-icon-btn" id="menuCartBtn" type="button" aria-label="السلة">
           🛍️
           <span class="cart-badge" id="menuCartBadge">0</span>
-        </a>
+        </button>
       </div>
     </div>
 
@@ -690,8 +690,8 @@
       <a href="./products-full.html" class="continue-link">متابعة الشراء</a>
 
       <div class="welcome-note">
-        <p style="font-size:1.2rem; margin-bottom:1rem;">سعداء بكم</p>
-        <p><a href="./products-full.html">تسوق</a> - المتجر</p>
+        <p style="font-size:1.2rem; margin-bottom:1rem;">العروض</p>
+        <p><a href="./collection.html?slug=boom-kids-offers-collection">تسوق</a> - من هنا</p>
       </div>
     </section>
 
@@ -993,9 +993,11 @@
       const menuClose = document.getElementById('menuClose');
       const menuBackdrop = document.getElementById('menuBackdrop');
       const searchBtn = document.getElementById('searchBtn');
+      const sideMenuSearchBtn = document.getElementById('sideMenuSearchBtn');
       const searchOverlay = document.getElementById('searchOverlay');
       const searchInput = document.getElementById('searchInput');
       const cartBtn = document.getElementById('cartBtn');
+      const menuCartBtn = document.getElementById('menuCartBtn');
       const checkoutBtn = document.getElementById('checkoutBtn');
       const cartNote = document.getElementById('cartNote');
 
@@ -1004,6 +1006,7 @@
       if (menuBackdrop) menuBackdrop.addEventListener('click', closeMenu);
 
       if (searchBtn) searchBtn.addEventListener('click', openSearch);
+      if (sideMenuSearchBtn) sideMenuSearchBtn.addEventListener('click', openSearch);
       if (searchOverlay) searchOverlay.addEventListener('click', closeSearch);
       if (searchInput) {
         searchInput.addEventListener('input', debounce((e) => handleSearch(e.target.value), 250));
@@ -1011,6 +1014,11 @@
 
       if (cartBtn) {
         cartBtn.addEventListener('click', function() {
+          window.location.href = './cart.html';
+        });
+      }
+      if (menuCartBtn) {
+        menuCartBtn.addEventListener('click', function() {
           window.location.href = './cart.html';
         });
       }
