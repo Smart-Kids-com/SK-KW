@@ -16,18 +16,22 @@
       --dark:#1f2937;
       --border:#e5e7eb;
       --card:#ffffff;
+      --whatsapp:#25d366;
     }
+
     body{
       font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
       background:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%);
       min-height:100vh;
       color:var(--dark);
     }
+
     .container{
       max-width:900px;
       margin:0 auto;
       padding:1.25rem;
     }
+
     .hero{
       background:rgba(255,255,255,.96);
       border-radius:18px;
@@ -36,6 +40,7 @@
       text-align:center;
       margin:1.5rem 0;
     }
+
     .hero-icon{
       width:84px;
       height:84px;
@@ -49,16 +54,19 @@
       font-size:2.2rem;
       font-weight:800;
     }
+
     .hero h1{
       color:var(--success);
       font-size:2rem;
       margin-bottom:.5rem;
     }
+
     .hero p{
       color:#666;
       line-height:1.8;
       font-size:1rem;
     }
+
     .card{
       background:var(--card);
       border-radius:16px;
@@ -66,11 +74,13 @@
       margin-bottom:1.25rem;
       box-shadow:0 10px 28px rgba(0,0,0,.14);
     }
+
     .card h2{
       color:var(--primary);
       margin-bottom:1rem;
       font-size:1.2rem;
     }
+
     .alert{
       display:none;
       padding:1rem;
@@ -78,24 +88,30 @@
       margin-bottom:1rem;
       line-height:1.8;
     }
+
     .alert.active{display:block}
+
     .alert.error{
       background:#fee2e2;
       color:#991b1b;
       border:1px solid #fca5a5;
     }
+
     .alert.info{
       background:#dbeafe;
       color:#1e40af;
       border:1px solid #93c5fd;
     }
+
     .loading{
       display:none;
       text-align:center;
       color:var(--primary);
       padding:2rem 0;
     }
+
     .loading.active{display:block}
+
     .spinner{
       width:42px;
       height:42px;
@@ -105,29 +121,37 @@
       animation:spin 1s linear infinite;
       margin:0 auto 1rem;
     }
-    @keyframes spin{to{transform:rotate(360deg)}}
+
+    @keyframes spin{
+      to{transform:rotate(360deg)}
+    }
+
     .order-grid{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:1rem;
     }
+
     .info-box{
       background:#fafafa;
       border:1px solid var(--border);
       border-radius:12px;
       padding:1rem;
     }
+
     .info-label{
       font-size:.9rem;
       color:#666;
       margin-bottom:.35rem;
     }
+
     .info-value{
       font-weight:700;
       color:var(--dark);
       word-break:break-word;
       line-height:1.7;
     }
+
     .status-badge{
       display:inline-block;
       padding:.5rem .9rem;
@@ -135,21 +159,25 @@
       font-size:.9rem;
       font-weight:700;
     }
+
     .status-badge.pending{background:#fef3c7;color:#92400e}
     .status-badge.processing{background:#dbeafe;color:#1e40af}
     .status-badge.shipped{background:#e9d5ff;color:#6b21a8}
     .status-badge.completed{background:#dcfce7;color:#166534}
     .status-badge.cancelled{background:#fee2e2;color:#991b1b}
+
     .items-list{
       display:grid;
       gap:.85rem;
     }
+
     .item{
       border:1px solid var(--border);
       border-radius:12px;
       padding:1rem;
       background:#fff;
     }
+
     .item-top{
       display:flex;
       justify-content:space-between;
@@ -158,21 +186,25 @@
       margin-bottom:.5rem;
       flex-wrap:wrap;
     }
+
     .item-name{
       font-weight:700;
       color:var(--dark);
     }
+
     .item-meta{
       color:#666;
       font-size:.92rem;
       line-height:1.7;
     }
+
     .summary{
       background:linear-gradient(135deg,var(--primary),var(--secondary));
       color:#fff;
       border-radius:14px;
       padding:1.2rem;
     }
+
     .summary-row{
       display:flex;
       justify-content:space-between;
@@ -180,6 +212,7 @@
       margin-bottom:.7rem;
       line-height:1.7;
     }
+
     .summary-row.total{
       border-top:1px solid rgba(255,255,255,.25);
       padding-top:.8rem;
@@ -187,12 +220,14 @@
       font-size:1.15rem;
       font-weight:800;
     }
+
     .actions{
       display:flex;
       gap:.8rem;
       flex-wrap:wrap;
       margin-top:1rem;
     }
+
     .btn{
       display:inline-flex;
       align-items:center;
@@ -207,28 +242,44 @@
       text-decoration:none;
       transition:.2s ease;
     }
+
     .btn.primary{
       background:var(--primary);
       color:#fff;
     }
+
     .btn.primary:hover{
       background:var(--secondary);
     }
-    .btn.light{
-      background:#fff;
-      color:var(--primary);
-      border:1px solid var(--border);
+
+    .btn.whatsapp{
+      background:var(--whatsapp);
+      color:#fff;
     }
-    .btn.light:hover{
-      background:#f8fafc;
+
+    .btn.whatsapp:hover{
+      filter:brightness(.95);
     }
+
     .hide{display:none!important}
+
+    .note{
+      margin-top:1rem;
+      color:#6b7280;
+      line-height:1.8;
+      text-align:center;
+      font-size:.95rem;
+    }
+
     @media (max-width:700px){
       .order-grid{grid-template-columns:1fr}
       .hero h1{font-size:1.6rem}
       .actions .btn{width:100%}
     }
   </style>
+
+  <!-- Meta Pixel base loader -->
+  <script src="/js/meta-pixel.js"></script>
 </head>
 <body>
   <div class="container">
@@ -238,7 +289,7 @@
       <div class="hero-icon">✓</div>
       <h1>شكراً لطلبك</h1>
       <p>
-        تم استلام طلبك بنجاح. يمكنك مراجعة التفاصيل أدناه ومتابعة حالة الطلب في أي وقت.
+        تم استلام طلبك بنجاح. ستجد تفاصيل الطلب كاملة هنا في نفس الصفحة.
       </p>
     </section>
 
@@ -258,7 +309,9 @@
 
           <div class="info-box">
             <div class="info-label">الحالة</div>
-            <div class="info-value"><span id="orderStatus" class="status-badge pending">--</span></div>
+            <div class="info-value">
+              <span id="orderStatus" class="status-badge pending">--</span>
+            </div>
           </div>
 
           <div class="info-box">
@@ -267,8 +320,8 @@
           </div>
 
           <div class="info-box">
-            <div class="info-label">طريقة المتابعة</div>
-            <div class="info-value">استخدم رقم الطلب في صفحة التتبع</div>
+            <div class="info-label">ملاحظة</div>
+            <div class="info-value">احتفظ برقم الطلب للرجوع إليه عند الحاجة</div>
           </div>
         </div>
       </div>
@@ -321,8 +374,12 @@
         </div>
 
         <div class="actions">
-          <a id="indexBtn" class="btn primary" href="./index.html">تتبع الطلب</a>
-          <a class="btn light" href="./index.html">العودة للمتجر</a>
+          <a class="btn primary" href="./index.html">العودة للمتجر</a>
+          <a id="whatsappBtn" class="btn whatsapp" href="#" target="_blank" rel="noopener">واتساب</a>
+        </div>
+
+        <div class="note">
+          في حال احتجت أي مساعدة، يمكنك التواصل معنا عبر واتساب مع إرسال رقم الطلب.
         </div>
       </div>
     </section>
@@ -337,7 +394,7 @@
       formatDateTime(value) {
         if (!value) return '-';
         const d = new Date(value);
-        if (isNaN(d)) return value;
+        if (isNaN(d.getTime())) return String(value);
         return d.toLocaleString('ar-KW');
       },
       getStatusLabel(status) {
@@ -353,6 +410,7 @@
     };
 
     const H = (typeof HELPERS !== 'undefined' && HELPERS) ? HELPERS : HELPERS_FALLBACK;
+    const WHATSAPP_NUMBER = '96566635393';
 
     function showAlert(message, type = 'info') {
       const alert = document.getElementById('alert');
@@ -360,62 +418,14 @@
       alert.className = `alert active ${type}`;
     }
 
-    function showLoading(show) {
-      document.getElementById('loading').classList.toggle('active', show);
-    }
-
-    function renderItems(items) {
-      const itemsList = document.getElementById('itemsList');
-
-      if (!items || !items.length) {
-        itemsList.innerHTML = `<div class="item"><div class="item-name">لا توجد منتجات مرتبطة بهذا الطلب</div></div>`;
-        return;
-      }
-
-      itemsList.innerHTML = items.map(item => {
-        const unitPrice = Number(item.product_price ?? item.price ?? 0);
-        const qty = Number(item.quantity ?? 0);
-        const itemSubtotal = Number(item.subtotal ?? (unitPrice * qty));
-
-        return `
-          <div class="item">
-            <div class="item-top">
-              <div class="item-name">${item.product_name || item.name || 'منتج'}</div>
-              <div class="item-name">${H.formatCurrency(itemSubtotal)}</div>
-            </div>
-            <div class="item-meta">
-              الكمية: ${qty} × ${H.formatCurrency(unitPrice)}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderOrder(order) {
-      document.getElementById('orderNumber').textContent = order.order_number || '-';
-      document.getElementById('orderDate').textContent = order.created_at ? H.formatDateTime(order.created_at) : '-';
-      document.getElementById('customerName').textContent = order.customer_name || '-';
-      document.getElementById('customerEmail').textContent = order.customer_email || '-';
-      document.getElementById('customerPhone').textContent = order.customer_phone || '-';
-      document.getElementById('customerAddress').textContent = order.customer_address || '-';
-
-      const statusEl = document.getElementById('orderStatus');
-      statusEl.className = `status-badge ${order.status || 'pending'}`;
-      statusEl.textContent = H.getStatusLabel(order.status);
-
-      document.getElementById('subtotal').textContent = H.formatCurrency(order.subtotal || 0);
-      document.getElementById('shipping').textContent = H.formatCurrency(order.shipping_cost || 0);
-      document.getElementById('total').textContent = H.formatCurrency(order.total || 0);
-
-      renderItems(order.items || []);
-
-      document.getElementById('orderSection').classList.remove('hide');
-    }
-
     function hideAlert() {
       const alert = document.getElementById('alert');
       alert.className = 'alert';
       alert.textContent = '';
+    }
+
+    function showLoading(show) {
+      document.getElementById('loading').classList.toggle('active', show);
     }
 
     function getQueryParam(name) {
@@ -435,44 +445,155 @@
       }
     }
 
-    function setTrackLink(order) {
-      const btn = document.getElementById('indexBtn');
+    function normalizeItems(order) {
+      if (Array.isArray(order?.items) && order.items.length) {
+        return order.items;
+      }
+
+      if (Array.isArray(order?.products) && order.products.length) {
+        return order.products;
+      }
+
+      return [];
+    }
+
+    function renderItems(items) {
+      const itemsList = document.getElementById('itemsList');
+
+      if (!items || !items.length) {
+        itemsList.innerHTML = `
+          <div class="item">
+            <div class="item-name">لا توجد منتجات مرتبطة بهذا الطلب</div>
+          </div>
+        `;
+        return;
+      }
+
+      itemsList.innerHTML = items.map(item => {
+        const unitPrice = Number(item.product_price ?? item.price ?? item.unit_price ?? 0);
+        const qty = Number(item.quantity ?? item.qty ?? 0);
+        const itemSubtotal = Number(item.subtotal ?? (unitPrice * qty));
+        const itemName = item.product_name || item.name || 'منتج';
+
+        return `
+          <div class="item">
+            <div class="item-top">
+              <div class="item-name">${itemName}</div>
+              <div class="item-name">${H.formatCurrency(itemSubtotal)}</div>
+            </div>
+            <div class="item-meta">
+              الكمية: ${qty} × ${H.formatCurrency(unitPrice)}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function setWhatsAppLink(order) {
+      const btn = document.getElementById('whatsappBtn');
       if (!btn) return;
+
       const orderNumber = String(order?.order_number || '').trim();
-      if (orderNumber) {
-        btn.href = `./order-details.html?order=${encodeURIComponent(orderNumber)}`;
-        btn.textContent = 'عرض تفاصيل الطلب';
-      } else {
-        btn.href = './index.html';
-        btn.textContent = 'العودة للمتجر';
+      const customerName = String(order?.customer_name || '').trim();
+
+      const message = [
+        'مرحباً،',
+        'أحتاج مساعدة بخصوص طلبي.',
+        orderNumber ? `رقم الطلب: ${orderNumber}` : '',
+        customerName ? `الاسم: ${customerName}` : ''
+      ].filter(Boolean).join('\n');
+
+      btn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    }
+
+    function getPurchaseEventKey(order) {
+      const orderNumber = String(order?.order_number || '').trim();
+      if (!orderNumber) return '';
+      return `pixel_purchase_sent_${orderNumber}`;
+    }
+
+    function hasPurchaseBeenTracked(order) {
+      try {
+        const key = getPurchaseEventKey(order);
+        if (!key) return false;
+        return sessionStorage.getItem(key) === '1';
+      } catch (e) {
+        return false;
       }
     }
 
-    async function fetchOrderByNumber(orderNumber) {
-      const response = await fetch('/api/orders?limit=300&offset=0&sort=created_at&order=DESC', {
-        cache: 'no-store'
-      });
-      const result = await response.json().catch(() => null);
-
-      if (!response.ok || !result || result.success !== true) {
-        throw new Error(result?.error || 'تعذر تحميل الطلب من السيرفر');
-      }
-
-      const orders = Array.isArray(result.data) ? result.data : [];
-      return orders.find(order => String(order.order_number || '') === String(orderNumber)) || null;
+    function markPurchaseTracked(order) {
+      try {
+        const key = getPurchaseEventKey(order);
+        if (!key) return;
+        sessionStorage.setItem(key, '1');
+      } catch (e) {}
     }
 
-    async function fetchOrderById(orderId) {
-      const response = await fetch(`/api/orders/${encodeURIComponent(orderId)}`, {
-        cache: 'no-store'
-      });
-      const result = await response.json().catch(() => null);
+    function trackPurchaseEvent(order) {
+      try {
+        if (typeof SmartKidsPixel === 'undefined' || !SmartKidsPixel || typeof SmartKidsPixel.trackPurchase !== 'function') {
+          return;
+        }
 
-      if (!response.ok || !result || result.success !== true) {
-        throw new Error(result?.error || 'تعذر تحميل الطلب من السيرفر');
+        if (hasPurchaseBeenTracked(order)) {
+          return;
+        }
+
+        const items = normalizeItems(order);
+        const ids = items
+          .map(item => item.product_id ?? item.id ?? item.productId ?? '')
+          .map(String)
+          .filter(Boolean);
+
+        const quantity = items.reduce((sum, item) => {
+          return sum + Number(item.quantity ?? item.qty ?? 0);
+        }, 0);
+
+        SmartKidsPixel.trackPurchase({
+          value: Number(order.total || 0),
+          quantity,
+          ids,
+          currency: 'KWD'
+        });
+
+        markPurchaseTracked(order);
+      } catch (error) {
+        console.error('Purchase pixel error:', error);
       }
+    }
 
-      return result.data || null;
+    function renderOrder(order) {
+      const items = normalizeItems(order);
+
+      document.getElementById('orderNumber').textContent = order.order_number || '-';
+      document.getElementById('orderDate').textContent = order.created_at ? H.formatDateTime(order.created_at) : '-';
+      document.getElementById('customerName').textContent = order.customer_name || '-';
+      document.getElementById('customerEmail').textContent = order.customer_email || '-';
+      document.getElementById('customerPhone').textContent = order.customer_phone || '-';
+      document.getElementById('customerAddress').textContent = order.customer_address || '-';
+
+      const statusEl = document.getElementById('orderStatus');
+      const status = String(order.status || 'pending').trim().toLowerCase();
+
+      statusEl.className = `status-badge ${status}`;
+      statusEl.textContent = H.getStatusLabel(status);
+
+      document.getElementById('subtotal').textContent = H.formatCurrency(order.subtotal || 0);
+      document.getElementById('shipping').textContent = H.formatCurrency(order.shipping_cost || 0);
+      document.getElementById('total').textContent = H.formatCurrency(order.total || 0);
+
+      renderItems(items);
+      setWhatsAppLink(order);
+
+      document.getElementById('orderSection').classList.remove('hide');
+
+      trackPurchaseEvent(order);
+    }
+
+    function isMatchingOrder(queryOrder, storedOrder) {
+      if (!queryOrder) return true;
+      return String(storedOrder?.order_number || '').trim() === String(queryOrder).trim();
     }
 
     async function loadOrderDetails() {
@@ -481,41 +602,17 @@
 
       try {
         const orderNumberFromUrl = getQueryParam('order');
-        const orderIdFromUrl = getQueryParam('id');
         const lastOrder = getLastOrder();
 
-        let order = null;
-
-        if (orderIdFromUrl) {
-          order = await fetchOrderById(orderIdFromUrl);
+        if (!lastOrder) {
+          throw new Error('لم يتم العثور على بيانات الطلب. افتح الصفحة مباشرة بعد إتمام الشراء.');
         }
 
-        if (!order && orderNumberFromUrl) {
-          order = await fetchOrderByNumber(orderNumberFromUrl);
+        if (!isMatchingOrder(orderNumberFromUrl, lastOrder)) {
+          throw new Error('بيانات الطلب الحالية غير متطابقة مع رقم الطلب الموجود في الرابط.');
         }
 
-        if (!order && lastOrder?.id) {
-          try {
-            order = await fetchOrderById(lastOrder.id);
-          } catch (e) {}
-        }
-
-        if (!order && lastOrder?.order_number) {
-          try {
-            order = await fetchOrderByNumber(lastOrder.order_number);
-          } catch (e) {}
-        }
-
-        if (!order && lastOrder) {
-          order = lastOrder;
-        }
-
-        if (!order) {
-          throw new Error('لم يتم العثور على بيانات الطلب. افتح الصفحة بعد إتمام الطلب مباشرة.');
-        }
-
-        renderOrder(order);
-        setTrackLink(order);
+        renderOrder(lastOrder);
       } catch (error) {
         console.error('Thank you load error:', error);
         showAlert(error.message || 'تعذر تحميل تفاصيل الطلب', 'error');
@@ -523,7 +620,6 @@
         showLoading(false);
       }
     }
-
 
     document.addEventListener('DOMContentLoaded', loadOrderDetails);
   </script>
