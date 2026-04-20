@@ -766,6 +766,9 @@
   <script>
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
     let discountAmount = 0;
+    const ABANDONED_CHECKOUTS_API = '/api/abandoned-checkouts';
+    const ABANDONED_CHECKOUT_TOKEN_KEY = 'abandoned_checkout_token';
+    let abandonedCheckoutSaveTimer = null;
 
     function formatKWD(value) {
       return `KWD ${Number(value || 0).toFixed(3)}`;
@@ -810,6 +813,140 @@
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
+    }
+
+    function generateCheckoutToken() {
+      return `chk_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    }
+
+    function getCheckoutToken() {
+      let token = safeText(localStorage.getItem(ABANDONED_CHECKOUT_TOKEN_KEY));
+      if (!token) {
+        token = generateCheckoutToken();
+        localStorage.setItem(ABANDONED_CHECKOUT_TOKEN_KEY, token);
+      }
+      return token;
+    }
+
+    function getContactType(value) {
+      const text = safeText(value);
+      if (!text) return '';
+      return text.includes('@') ? 'email' : 'phone';
+    }
+
+    function getContactEmailValue() {
+      const contactValue = safeText(document.getElementById('contactField')?.value);
+      return contactValue.includes('@') ? contactValue : '';
+    }
+
+    function getContactPhoneValue() {
+      const contactValue = safeText(document.getElementById('contactField')?.value);
+      const phoneValue = safeText(document.getElementById('phone')?.value);
+      if (contactValue && !contactValue.includes('@')) return contactValue;
+      return phoneValue;
+    }
+
+    function buildAbandonedCheckoutPayload() {
+      const contactValue = safeText(document.getElementById('contactField')?.value);
+      const firstName = safeText(document.getElementById('firstName')?.value);
+      const lastName = safeText(document.getElementById('lastName')?.value);
+      const phone = safeText(document.getElementById('phone')?.value);
+      const shipping = getShipping();
+
+      return {
+        checkoutToken: getCheckoutToken(),
+        contactValue,
+        contactType: getContactType(contactValue),
+        customerEmail: getContactEmailValue(),
+        customerPhone: getContactPhoneValue() || phone,
+        firstName,
+        lastName,
+        customerName: `${firstName} ${lastName}`.trim(),
+        address1: safeText(document.getElementById('address1')?.value),
+        address2: safeText(document.getElementById('address2')?.value),
+        city: safeText(document.getElementById('city')?.value),
+        governorate: safeText(document.getElementById('governorate')?.value),
+        country: safeText(document.getElementById('country')?.value, 'Kuwait'),
+        postalCode: safeText(document.getElementById('postalCode')?.value),
+        notes: safeText(document.getElementById('orderNotes')?.value),
+        discountCode: safeText(document.getElementById('discountField')?.value).toUpperCase(),
+        discountAmount: discountAmount,
+        subtotal: getSubtotal(),
+        shippingCost: shipping === null ? 0 : shipping,
+        total: getGrandTotal(),
+        currency: 'KWD',
+        cartItems: cart.map(item => ({
+          id: item.id || '',
+          slug: item.slug || '',
+          name: item.name || 'منتج',
+          image: safeText(item.image),
+          price: safeNumber(item.price, 0),
+          quantity: safeNumber(item.quantity, 1)
+        })),
+        cartQuantity: cart.reduce((sum, item) => sum + safeNumber(item.quantity, 0), 0),
+        itemCount: cart.length
+      };
+    }
+
+    function shouldSaveAbandonedCheckout(payload) {
+      return Boolean(
+        payload.contactValue ||
+        payload.firstName ||
+        payload.lastName ||
+        payload.address1 ||
+        payload.city ||
+        payload.governorate ||
+        payload.notes ||
+        payload.cartQuantity > 0
+      );
+    }
+
+    async function saveAbandonedCheckout(force = false) {
+      if (!cart.length) return;
+      const payload = buildAbandonedCheckoutPayload();
+      if (!force && !shouldSaveAbandonedCheckout(payload)) return;
+
+      try {
+        await fetch(`${ABANDONED_CHECKOUTS_API}/save`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+      } catch (error) {
+        console.error('Abandoned checkout save error:', error);
+      }
+    }
+
+    function queueAbandonedCheckoutSave(delay = 700) {
+      clearTimeout(abandonedCheckoutSaveTimer);
+      abandonedCheckoutSaveTimer = setTimeout(() => {
+        saveAbandonedCheckout(false);
+      }, delay);
+    }
+
+    async function markAbandonedCheckoutRecovered(orderData = {}) {
+      const token = safeText(localStorage.getItem(ABANDONED_CHECKOUT_TOKEN_KEY));
+      if (!token) return;
+
+      try {
+        await fetch(`${ABANDONED_CHECKOUTS_API}/recover`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            checkoutToken: token,
+            orderId: orderData?.id || '',
+            orderNumber: orderData?.order_number || ''
+          })
+        });
+      } catch (error) {
+        console.error('Abandoned checkout recover error:', error);
+      }
     }
 
     function renderShippingBox() {
@@ -942,6 +1079,7 @@
       if (!code) {
         discountAmount = 0;
         renderSummary();
+        queueAbandonedCheckoutSave(200);
         return;
       }
 
@@ -952,11 +1090,13 @@
       } else {
         discountAmount = 0;
         renderSummary();
+        queueAbandonedCheckoutSave(200);
         showError('كود الخصم غير صحيح');
         return;
       }
 
       renderSummary();
+      queueAbandonedCheckoutSave(200);
       showSuccess(`تم تطبيق كود الخصم: ${code}`);
     }
 
@@ -1064,6 +1204,7 @@
         notes: buildOrderNotes(paymentMethod, billingMode),
         shippingCost: getShipping() === null ? 0 : getShipping(),
         discountAmount: discountAmount,
+        discountCode: safeText(document.getElementById('discountField').value).toUpperCase(),
         subtotal: getSubtotal(),
         total: getGrandTotal(),
         items: cart.map(item => ({
@@ -1095,6 +1236,10 @@
 
           const orderNumber = savedOrder?.order_number || '';
           const orderId = savedOrder?.id || '';
+
+          await markAbandonedCheckoutRecovered(savedOrder);
+          localStorage.removeItem(ABANDONED_CHECKOUT_TOKEN_KEY);
+
           showSuccess(`تم إرسال الطلب بنجاح ✅ رقم الطلب: ${orderNumber || orderId || ''}`);
 
           setTimeout(() => {
@@ -1134,12 +1279,18 @@
     function bindDynamicRecalc() {
       [
         'address1','address2','city','governorate','country','phone',
-        'firstName','lastName','contactField','postalCode'
+        'firstName','lastName','contactField','postalCode','orderNotes'
       ].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-          el.addEventListener('input', renderSummary);
-          el.addEventListener('change', renderSummary);
+          el.addEventListener('input', () => {
+            renderSummary();
+            queueAbandonedCheckoutSave();
+          });
+          el.addEventListener('change', () => {
+            renderSummary();
+            queueAbandonedCheckoutSave();
+          });
         }
       });
     }
@@ -1166,6 +1317,8 @@
 
       bindDynamicRecalc();
       renderSummary();
+      getCheckoutToken();
+      setTimeout(() => saveAbandonedCheckout(false), 400);
     });
   </script>
 </body>
