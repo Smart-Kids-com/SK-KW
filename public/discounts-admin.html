@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إدارة الخصومات - Smart Kids Kuwait</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    :root{
+      --bg:#f6f3fb;
+      --panel:#ffffff;
+      --panel-2:#faf7ff;
+      --text:#231933;
+      --muted:#7b7287;
+      --line:#e6ddf0;
+      --primary:#6a4c93;
+      --primary-dark:#54387a;
+      --success:#0f9d58;
+      --danger:#d93025;
+      --warning:#d97706;
+      --shadow:0 12px 30px rgba(106,76,147,.10);
+      --radius:18px;
+    }
+
+    body{
+      margin:0;
+      font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+      background:linear-gradient(180deg,#f8f5fc 0%, #f2ecf8 100%);
+      color:var(--text);
+    }
+
+    .page{
+      max-width:1400px;
+      margin:0 auto;
+      padding:24px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:20px;
+    }
+
+    .title-wrap h1{
+      margin:0 0 8px;
+      font-size:30px;
+      color:var(--primary);
+    }
+
+    .title-wrap p{
+      margin:0;
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:12px 16px;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.2s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+
+    .btn.primary{
+      background:var(--primary);
+      color:#fff;
+    }
+
+    .btn.primary:hover{
+      background:var(--primary-dark);
+    }
+
+    .btn.light{
+      background:#fff;
+      color:var(--primary);
+      border:1px solid var(--line);
+    }
+
+    .btn.light:hover{
+      background:#f7f2ff;
+    }
+
+    .btn.success{
+      background:var(--success);
+      color:#fff;
+    }
+
+    .btn.warning{
+      background:var(--warning);
+      color:#fff;
+    }
+
+    .btn.danger{
+      background:var(--danger);
+      color:#fff;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:360px 1fr;
+      gap:20px;
+      align-items:start;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .card-header{
+      padding:18px 18px 14px;
+      border-bottom:1px solid var(--line);
+      background:var(--panel-2);
+    }
+
+    .card-header h2{
+      margin:0 0 6px;
+      font-size:19px;
+      color:var(--primary);
+    }
+
+    .card-header p{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .card-body{
+      padding:18px;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .stat{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:16px;
+      min-height:110px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:8px;
+    }
+
+    .stat .label{
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .stat .value{
+      font-size:30px;
+      font-weight:800;
+      color:var(--primary);
+      line-height:1;
+    }
+
+    .field{
+      margin-bottom:14px;
+    }
+
+    .field label{
+      display:block;
+      margin-bottom:8px;
+      font-size:13px;
+      font-weight:700;
+      color:#4e3a70;
+    }
+
+    .field input,
+    .field select,
+    .field textarea{
+      width:100%;
+      border:1px solid #d9cdea;
+      border-radius:14px;
+      background:#fff;
+      padding:13px 14px;
+      font-size:14px;
+      outline:none;
+      color:var(--text);
+    }
+
+    .field textarea{
+      min-height:90px;
+      resize:vertical;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus{
+      border-color:#8c63c9;
+      box-shadow:0 0 0 4px rgba(140,99,201,.12);
+    }
+
+    .row-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .row-3{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:12px;
+    }
+
+    .checkbox{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding-top:8px;
+      color:var(--text);
+      font-size:14px;
+    }
+
+    .checkbox input{
+      width:18px;
+      height:18px;
+      accent-color:var(--primary);
+    }
+
+    .form-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+
+    .toolbar{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .toolbar .field{
+      margin:0;
+      flex:1 1 220px;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:1100px;
+    }
+
+    th, td{
+      padding:14px 12px;
+      border-bottom:1px solid #eee6f6;
+      text-align:right;
+      vertical-align:middle;
+      font-size:14px;
+    }
+
+    th{
+      background:#fbf8ff;
+      color:#553c79;
+      position:sticky;
+      top:0;
+      z-index:1;
+      white-space:nowrap;
+    }
+
+    td small{
+      color:var(--muted);
+      display:block;
+      margin-top:4px;
+      line-height:1.5;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:88px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .badge.active{
+      background:#dcfce7;
+      color:#166534;
+    }
+
+    .badge.inactive{
+      background:#fee2e2;
+      color:#991b1b;
+    }
+
+    .badge.fixed{
+      background:#e0ecff;
+      color:#1d4ed8;
+    }
+
+    .badge.percentage{
+      background:#f3e8ff;
+      color:#7e22ce;
+    }
+
+    .table-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .table-actions .btn{
+      padding:9px 12px;
+      font-size:12px;
+      border-radius:12px;
+    }
+
+    .muted{
+      color:var(--muted);
+    }
+
+    .empty{
+      padding:34px 18px;
+      text-align:center;
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    .message{
+      display:none;
+      margin-bottom:16px;
+      border-radius:14px;
+      padding:14px 16px;
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .message.show{ display:block; }
+
+    .message.success{
+      background:#dff6e7;
+      color:#166534;
+      border:1px solid #b8e3c8;
+    }
+
+    .message.error{
+      background:#fde7e7;
+      color:#991b1b;
+      border:1px solid #f3c2c2;
+    }
+
+    .message.info{
+      background:#e8f1ff;
+      color:#1d4ed8;
+      border:1px solid #cdddff;
+    }
+
+    .loading{
+      opacity:.65;
+      pointer-events:none;
+    }
+
+    @media (max-width: 1100px){
+      .grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 700px){
+      .page{ padding:14px; }
+      .stats{ grid-template-columns:1fr; }
+      .row-2, .row-3{ grid-template-columns:1fr; }
+      .topbar{
+        flex-direction:column;
+        align-items:stretch;
+      }
+      .top-actions{
+        width:100%;
+      }
+      .top-actions .btn{
+        flex:1 1 180px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="title-wrap">
+        <h1>إدارة الخصومات</h1>
+        <p>أنشئ الأكواد وفعّلها أو أوقفها وتحكم في النوع والقيمة والحد الأدنى وتواريخ الصلاحية.</p>
+      </div>
+
+      <div class="top-actions">
+        <a class="btn light" href="/admin-enhanced">العودة للوحة الإدارة</a>
+        <button class="btn primary" type="button" id="refreshBtn">تحديث البيانات</button>
+      </div>
+    </div>
+
+    <div id="messageBox" class="message"></div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="label">إجمالي الأكواد</div>
+        <div class="value" id="statTotal">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">الأكواد المفعلة</div>
+        <div class="value" id="statActive">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">الأكواد غير المفعلة</div>
+        <div class="value" id="statInactive">0</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="card" id="formCard">
+        <div class="card-header">
+          <h2 id="formTitle">إضافة كود خصم جديد</h2>
+          <p>أنشئ كودًا جديدًا أو عدّل الكود المحدد.</p>
+        </div>
+
+        <div class="card-body">
+          <form id="discountForm">
+            <input type="hidden" id="discountId" />
+
+            <div class="row-2">
+              <div class="field">
+                <label for="code">كود الخصم</label>
+                <input type="text" id="code" placeholder="مثال: SMART10" required />
+              </div>
+
+              <div class="field">
+                <label for="type">نوع الخصم</label>
+                <select id="type" required>
+                  <option value="fixed">مبلغ ثابت</option>
+                  <option value="percentage">نسبة مئوية</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="value">قيمة الخصم</label>
+                <input type="number" step="0.001" min="0" id="value" placeholder="مثال: 1 أو 10" required />
+              </div>
+
+              <div class="field">
+                <label for="minimumOrderAmount">الحد الأدنى للطلب</label>
+                <input type="number" step="0.001" min="0" id="minimumOrderAmount" placeholder="0.000" />
+              </div>
+            </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="usageLimit">عدد مرات الاستخدام المسموح</label>
+                <input type="number" min="0" step="1" id="usageLimit" placeholder="فارغ = غير محدود" />
+              </div>
+
+              <div class="field">
+                <label for="usedCount">عدد مرات الاستخدام الحالي</label>
+                <input type="number" min="0" step="1" id="usedCount" placeholder="0" />
+              </div>
+            </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="startsAt">تاريخ البداية</label>
+                <input type="datetime-local" id="startsAt" />
+              </div>
+
+              <div class="field">
+                <label for="expiresAt">تاريخ النهاية</label>
+                <input type="datetime-local" id="expiresAt" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="notes">ملاحظات</label>
+              <textarea id="notes" placeholder="أي ملاحظات داخلية عن هذا الكود"></textarea>
+            </div>
+
+            <label class="checkbox">
+              <input type="checkbox" id="isActive" checked />
+              <span>الكود مفعل</span>
+            </label>
+
+            <div class="form-actions">
+              <button class="btn primary" type="submit" id="saveBtn">حفظ الكود</button>
+              <button class="btn light" type="button" id="resetBtn">تفريغ النموذج</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="card" id="listCard">
+        <div class="card-header">
+          <h2>قائمة أكواد الخصم</h2>
+          <p>ابحث وصفِّ النتائج ثم عدّل أو فعّل أو احذف أي كود.</p>
+        </div>
+
+        <div class="card-body">
+          <div class="toolbar">
+            <div class="field">
+              <label for="searchInput">بحث</label>
+              <input type="text" id="searchInput" placeholder="ابحث بالكود أو الملاحظات" />
+            </div>
+
+            <div class="field">
+              <label for="statusFilter">الحالة</label>
+              <select id="statusFilter">
+                <option value="">الكل</option>
+                <option value="1">مفعل</option>
+                <option value="0">غير مفعل</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="sortField">الترتيب حسب</label>
+              <select id="sortField">
+                <option value="created_at">تاريخ الإنشاء</option>
+                <option value="updated_at">آخر تحديث</option>
+                <option value="code">الكود</option>
+                <option value="value">القيمة</option>
+                <option value="used_count">عدد الاستخدام</option>
+                <option value="is_active">الحالة</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="sortOrder">اتجاه الترتيب</label>
+              <select id="sortOrder">
+                <option value="DESC">تنازلي</option>
+                <option value="ASC">تصاعدي</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>الكود</th>
+                  <th>النوع</th>
+                  <th>القيمة</th>
+                  <th>الحد الأدنى</th>
+                  <th>الحالة</th>
+                  <th>الاستخدام</th>
+                  <th>التواريخ</th>
+                  <th>ملاحظات</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="discountsTableBody">
+                <tr>
+                  <td colspan="9" class="empty">جاري التحميل...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '/api/discounts';
+
+    let discounts = [];
+    let currentEditingId = '';
+    let currentPagination = {
+      total: 0,
+      limit: 50,
+      offset: 0,
+      totalPages: 0
+    };
+
+    const els = {
+      messageBox: document.getElementById('messageBox'),
+      statTotal: document.getElementById('statTotal'),
+      statActive: document.getElementById('statActive'),
+      statInactive: document.getElementById('statInactive'),
+      formTitle: document.getElementById('formTitle'),
+      form: document.getElementById('discountForm'),
+      discountId: document.getElementById('discountId'),
+      code: document.getElementById('code'),
+      type: document.getElementById('type'),
+      value: document.getElementById('value'),
+      minimumOrderAmount: document.getElementById('minimumOrderAmount'),
+      usageLimit: document.getElementById('usageLimit'),
+      usedCount: document.getElementById('usedCount'),
+      startsAt: document.getElementById('startsAt'),
+      expiresAt: document.getElementById('expiresAt'),
+      notes: document.getElementById('notes'),
+      isActive: document.getElementById('isActive'),
+      saveBtn: document.getElementById('saveBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      refreshBtn: document.getElementById('refreshBtn'),
+      searchInput: document.getElementById('searchInput'),
+      statusFilter: document.getElementById('statusFilter'),
+      sortField: document.getElementById('sortField'),
+      sortOrder: document.getElementById('sortOrder'),
+      tableBody: document.getElementById('discountsTableBody'),
+      formCard: document.getElementById('formCard'),
+      listCard: document.getElementById('listCard')
+    };
+
+    function safeText(value, fallback = '') {
+      const text = String(value ?? '').trim();
+      return text || fallback;
+    }
+
+    function toNumber(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function formatNumber(value, digits = 3) {
+      return toNumber(value, 0).toFixed(digits);
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function showMessage(message, type = 'info') {
+      els.messageBox.textContent = message;
+      els.messageBox.className = `message show ${type}`;
+    }
+
+    function clearMessage() {
+      els.messageBox.className = 'message';
+      els.messageBox.textContent = '';
+    }
+
+    function setLoading(isLoading) {
+      document.body.classList.toggle('loading', isLoading);
+      els.saveBtn.disabled = isLoading;
+      els.refreshBtn.disabled = isLoading;
+    }
+
+    function formatDateTime(value) {
+      const text = safeText(value);
+      if (!text) return '—';
+
+      const d = new Date(text);
+      if (Number.isNaN(d.getTime())) return text;
+
+      return d.toLocaleString('ar-KW');
+    }
+
+    function toDateTimeLocalValue(value) {
+      const text = safeText(value);
+      if (!text) return '';
+
+      const d = new Date(text);
+      if (Number.isNaN(d.getTime())) return '';
+
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+    function buildQuery() {
+      const params = new URLSearchParams();
+
+      const search = safeText(els.searchInput.value);
+      const isActive = safeText(els.statusFilter.value);
+      const sort = safeText(els.sortField.value, 'created_at');
+      const order = safeText(els.sortOrder.value, 'DESC');
+
+      if (search) params.set('search', search);
+      if (isActive !== '') params.set('is_active', isActive);
+
+      params.set('limit', '50');
+      params.set('offset', '0');
+      params.set('sort', sort);
+      params.set('order', order);
+
+      return params.toString();
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          ...(options.headers || {})
+        },
+        ...options
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error || `Request failed (${response.status})`);
+      }
+
+      return result;
+    }
+
+    async function loadStats() {
+      const result = await fetchJson(`${API_BASE}/stats/summary`);
+      const data = result.data || {};
+
+      els.statTotal.textContent = String(toNumber(data.totalDiscounts, 0));
+      els.statActive.textContent = String(toNumber(data.activeDiscounts, 0));
+      els.statInactive.textContent = String(toNumber(data.inactiveDiscounts, 0));
+    }
+
+    async function loadDiscounts() {
+      const query = buildQuery();
+      const result = await fetchJson(`${API_BASE}?${query}`);
+      discounts = Array.isArray(result.data) ? result.data : [];
+      currentPagination = result.pagination || currentPagination;
+      renderTable();
+    }
+
+    function renderTable() {
+      if (!discounts.length) {
+        els.tableBody.innerHTML = `
+          <tr>
+            <td colspan="9" class="empty">لا توجد أكواد خصم مطابقة للبحث الحالي.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      els.tableBody.innerHTML = discounts.map(discount => {
+        const id = Number(discount.id || 0);
+        const code = escapeHtml(discount.code || '');
+        const type = safeText(discount.type);
+        const typeClass = type === 'percentage' ? 'percentage' : 'fixed';
+        const typeLabel = type === 'percentage' ? 'نسبة مئوية' : 'مبلغ ثابت';
+        const isActive = Number(discount.is_active || 0) === 1;
+        const statusLabel = isActive ? 'مفعل' : 'غير مفعل';
+        const statusClass = isActive ? 'active' : 'inactive';
+        const usageLimit = discount.usage_limit === null || discount.usage_limit === undefined || discount.usage_limit === ''
+          ? 'غير محدود'
+          : escapeHtml(String(discount.usage_limit));
+        const notes = escapeHtml(discount.notes || '');
+        const startsAt = formatDateTime(discount.starts_at);
+        const expiresAt = formatDateTime(discount.expires_at);
+
+        return `
+          <tr>
+            <td>
+              <strong>${code}</strong>
+              <small>ID: ${id}</small>
+            </td>
+
+            <td>
+              <span class="badge ${typeClass}">${typeLabel}</span>
+            </td>
+
+            <td>
+              <strong>${escapeHtml(formatNumber(discount.value))}</strong>
+            </td>
+
+            <td>
+              <strong>${escapeHtml(formatNumber(discount.minimum_order_amount || 0))}</strong>
+            </td>
+
+            <td>
+              <span class="badge ${statusClass}">${statusLabel}</span>
+            </td>
+
+            <td>
+              <strong>${escapeHtml(String(discount.used_count || 0))}</strong>
+              <small>الحد: ${usageLimit}</small>
+            </td>
+
+            <td>
+              <small>من: ${escapeHtml(startsAt)}</small>
+              <small>إلى: ${escapeHtml(expiresAt)}</small>
+            </td>
+
+            <td>
+              <small>${notes || '—'}</small>
+            </td>
+
+            <td>
+              <div class="table-actions">
+                <button class="btn light" type="button" onclick="editDiscount(${id})">تعديل</button>
+                <button class="btn warning" type="button" onclick="toggleDiscount(${id})">${isActive ? 'إيقاف' : 'تفعيل'}</button>
+                <button class="btn danger" type="button" onclick="deleteDiscount(${id}, '${code.replaceAll("'", "\\'")}')">حذف</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function resetForm() {
+      currentEditingId = '';
+      els.discountId.value = '';
+      els.code.value = '';
+      els.type.value = 'fixed';
+      els.value.value = '';
+      els.minimumOrderAmount.value = '';
+      els.usageLimit.value = '';
+      els.usedCount.value = '';
+      els.startsAt.value = '';
+      els.expiresAt.value = '';
+      els.notes.value = '';
+      els.isActive.checked = true;
+      els.formTitle.textContent = 'إضافة كود خصم جديد';
+      els.saveBtn.textContent = 'حفظ الكود';
+    }
+
+    function fillForm(discount) {
+      currentEditingId = String(discount.id || '');
+      els.discountId.value = currentEditingId;
+      els.code.value = safeText(discount.code);
+      els.type.value = safeText(discount.type, 'fixed');
+      els.value.value = safeText(discount.value);
+      els.minimumOrderAmount.value = safeText(discount.minimum_order_amount);
+      els.usageLimit.value = discount.usage_limit === null || discount.usage_limit === undefined ? '' : safeText(discount.usage_limit);
+      els.usedCount.value = safeText(discount.used_count, '0');
+      els.startsAt.value = toDateTimeLocalValue(discount.starts_at);
+      els.expiresAt.value = toDateTimeLocalValue(discount.expires_at);
+      els.notes.value = safeText(discount.notes);
+      els.isActive.checked = Number(discount.is_active || 0) === 1;
+      els.formTitle.textContent = `تعديل الكود: ${safeText(discount.code)}`;
+      els.saveBtn.textContent = 'حفظ التعديلات';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function saveDiscount(event) {
+      event.preventDefault();
+      clearMessage();
+
+      const payload = {
+        code: safeText(els.code.value).toUpperCase(),
+        type: safeText(els.type.value),
+        value: toNumber(els.value.value, 0),
+        minimum_order_amount: toNumber(els.minimumOrderAmount.value || 0, 0),
+        usage_limit: safeText(els.usageLimit.value) === '' ? null : parseInt(els.usageLimit.value, 10),
+        used_count: safeText(els.usedCount.value) === '' ? 0 : parseInt(els.usedCount.value, 10),
+        starts_at: safeText(els.startsAt.value) || null,
+        expires_at: safeText(els.expiresAt.value) || null,
+        notes: safeText(els.notes.value),
+        is_active: els.isActive.checked ? 1 : 0
+      };
+
+      try {
+        setLoading(true);
+
+        if (currentEditingId) {
+          await fetchJson(`${API_BASE}/${currentEditingId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          showMessage('تم تحديث كود الخصم بنجاح', 'success');
+        } else {
+          await fetchJson(`${API_BASE}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          showMessage('تم إنشاء كود الخصم بنجاح', 'success');
+        }
+
+        resetForm();
+        await Promise.all([loadStats(), loadDiscounts()]);
+      } catch (error) {
+        console.error(error);
+        showMessage(error.message || 'فشل في حفظ كود الخصم', 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function handleRefresh() {
+      clearMessage();
+
+      try {
+        setLoading(true);
+        await Promise.all([loadStats(), loadDiscounts()]);
+        showMessage('تم تحديث البيانات', 'info');
+      } catch (error) {
+        console.error(error);
+        showMessage(error.message || 'فشل في تحديث البيانات', 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function handleSearchChange() {
+      try {
+        setLoading(true);
+        await loadDiscounts();
+      } catch (error) {
+        console.error(error);
+        showMessage(error.message || 'فشل في جلب الأكواد', 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    window.editDiscount = async function editDiscount(id) {
+      clearMessage();
+
+      try {
+        setLoading(true);
+        const result = await fetchJson(`${API_BASE}/${id}`);
+        fillForm(result.data || {});
+      } catch (error) {
+        console.error(error);
+        showMessage(error.message || 'فشل في جلب بيانات الكود', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    window.toggleDiscount = async function toggleDiscount(id) {
+      clearMessage();
+
+      try {
+        setLoading(true);
+        await fetchJson(`${API_BASE}/${id}/toggle`, {
+          method: 'POST'
+        });
+
+        showMessage('تم تحديث حالة كود الخصم', 'success');
+        await Promise.all([loadStats(), loadDiscounts()]);
+
+        if (String(currentEditingId) === String(id)) {
+          const result = await fetchJson(`${API_BASE}/${id}`);
+          fillForm(result.data || {});
+        }
+      } catch (error) {
+        console.error(error);
+        showMessage(error.message || 'فشل في تحديث الحالة', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    window.deleteDiscount = async function deleteDiscount(id, code) {
+      const confirmed = window.confirm(`هل أنت متأكد من حذف كود الخصم ${code} ؟`);
+      if (!confirmed) return;
+
+      clearMessage();
+
+      try {
+        setLoading(true);
+        await fetchJson(`${API_BASE}/${id}`, {
+          method: 'DELETE'
+        });
+
+        showMessage('تم حذف كود الخصم بنجاح', 'success');
+
+        if (String(currentEditingId) === String(id)) {
+          resetForm();
+        }
+
+        await Promise.all([loadStats(), loadDiscounts()]);
+      } catch (error) {
+        console.error(error);
+        showMessage(error.message || 'فشل في حذف الكود', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    function bindEvents() {
+      els.form.addEventListener('submit', saveDiscount);
+      els.resetBtn.addEventListener('click', () => {
+        resetForm();
+        clearMessage();
+      });
+      els.refreshBtn.addEventListener('click', handleRefresh);
+
+      let searchDebounce = null;
+      els.searchInput.addEventListener('input', () => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(handleSearchChange, 350);
+      });
+
+      els.statusFilter.addEventListener('change', handleSearchChange);
+      els.sortField.addEventListener('change', handleSearchChange);
+      els.sortOrder.addEventListener('change', handleSearchChange);
+    }
+
+    async function init() {
+      bindEvents();
+      resetForm();
+
+      try {
+        setLoading(true);
+        await Promise.all([loadStats(), loadDiscounts()]);
+      } catch (error) {
+        console.error(error);
+        showMessage(error.message || 'فشل في تحميل صفحة الخصومات', 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

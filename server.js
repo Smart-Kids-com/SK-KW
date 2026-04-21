@@ -18,6 +18,7 @@ const customersRoutes = require('./routes/customers');
 const themeRoutes = require('./routes/theme');
 const abandonedCheckoutsRoutes = require('./routes/abandoned-checkouts');
 const discountsRoutes = require('./routes/discounts');
+
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
 
@@ -615,7 +616,9 @@ app.use(
     '/customer-view.html',
     '/customers-view.html',
     '/theme-admin',
-    '/theme-admin.html'
+    '/theme-admin.html',
+    '/discounts-admin',
+    '/discounts-admin.html'
   ],
   requireAdminAuth
 );
@@ -650,6 +653,7 @@ app.use('/api/customers', customersRoutes);
 app.use('/api/theme', themeRoutes);
 app.use('/api/abandoned-checkouts', abandonedCheckoutsRoutes);
 app.use('/api/discounts', discountsRoutes);
+
 // Route للـ Health Check
 app.get('/api/health', async (req, res, next) => {
   try {
@@ -904,6 +908,14 @@ app.get('/theme-admin.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'theme-admin.html'));
 });
 
+app.get('/discounts-admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'discounts-admin.html'));
+});
+
+app.get('/discounts-admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'discounts-admin.html'));
+});
+
 /* =========================================
    خدمة الملفات الثابتة
 ========================================= */
@@ -969,6 +981,7 @@ async function startServer() {
       console.log(`║ 🗂️ إدارة المجموعات: http://${HOST}:${PORT}/collections-admin`);
       console.log(`║ 👥 إدارة العملاء: http://${HOST}:${PORT}/customers-admin`);
       console.log(`║ 🎨 محرر الثيم: http://${HOST}:${PORT}/theme-admin`);
+      console.log(`║ 🎟️ إدارة الخصومات: http://${HOST}:${PORT}/discounts-admin`);
       console.log(`║ ✏️ تعديل/إضافة منتج: http://${HOST}:${PORT}/product-edit.html`);
       console.log(`║ 🧩 تعديل/إضافة مجموعة: http://${HOST}:${PORT}/collection-edit.html`);
       console.log(`║ 👤 عرض العميل: http://${HOST}:${PORT}/customers-view.html?id=1`);
