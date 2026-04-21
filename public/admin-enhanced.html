@@ -303,21 +303,13 @@
 <body>
   <div class="app">
     <header class="topbar">
-      <a class="top-icon" href="/admin-enhanced" aria-label="Home brand icon">
-        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/favicon.webp?v=1776716711" alt="favicon">
-      </a>
-
       <div class="top-search" aria-label="Search">
         <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/search-bar.webp?v=1776716710" alt="search bar">
         <input type="search" placeholder="Search">
       </div>
 
-      <div class="top-sk" aria-hidden="true">
-        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/favicon.webp?v=1776716711" alt="sk">
-      </div>
-
-      <div class="top-name" aria-label="Arabic name">
-        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/arabic-name.webp?v=1776716710" alt="الأطفال المبتكرون الكويت">
+      <div class="top-name" aria-label="sk logo with Arabic name">
+        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/sk-Logo-with-name.webp?v=1776752430" alt="الأطفال المبتكرون الكويت">
       </div>
     </header>
 
@@ -327,22 +319,47 @@
           <a class="nav-item" href="/admin-enhanced"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/smartify.webp?v=1776716711" alt="Smartify"></a>
           <a class="nav-item" href="/admin-enhanced"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/home.webp?v=1776716710" alt="Home"></a>
           <a class="nav-item" href="/orders-admin.html"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/orders.webp?v=1776716710" alt="Orders"><span class="nav-badge" id="ordersCountBadge">—</span></a>
-          <a class="nav-item" href="/abandoned-checkouts-admin.html"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Abandoned-checkouts.webp?v=1776722382" alt="Abandoned checkouts"></a>
           <a class="nav-item" href="/products-admin"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/products.webp?v=1776716710" alt="Products"></a>
           <a class="nav-item" href="/collections-admin"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/collections.webp?v=1776716710" alt="Collections"></a>
           <a class="nav-item" href="/customers-admin"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/customers.webp?v=1776716710" alt="Customers"></a>
           <a class="nav-item" href="/theme-admin"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/theme.webp?v=1776716710" alt="Theme"></a>
+          <a class="nav-item" href="/discounts-admin"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Discounts.webp?v=1776717424" alt="Discounts"></a>
+          <a class="nav-item" href="/abandoned-checkouts-admin.html"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/abandoned-checkout.webp?v=1776754656" alt="Abandoned checkouts"></a>
         </nav>
       </div>
     </aside>
 
-    <main class="main">
-      <div class="page">
-        <div class="toolbar">
-          <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/buttoons-background.webp?v=1776716710" alt="All Date Options">
-          <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/buttoons-background.webp?v=1776716710" alt="All Channels">
-          <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/buttoons-background.webp?v=1776716710" alt="3 Live Visitor">
-        </div>
+     <!-- Date range -->
+            <section class="card">
+              <div class="card-head">
+                <span>📅 الفترة الزمنية</span>
+                <span class="chip blue" id="activeRangeLabel">كل الوقت</span>
+              </div>
+              <div class="card-body">
+                <div class="date-presets">
+                  <button class="btn chip active-filter" type="button" data-range="all"       onclick="applyPresetRange('all',this)">كل الوقت</button>
+                  <button class="btn chip"               type="button" data-range="today"     onclick="applyPresetRange('today',this)">اليوم</button>
+                  <button class="btn chip"               type="button" data-range="yesterday" onclick="applyPresetRange('yesterday',this)">أمس</button>
+                  <button class="btn chip"               type="button" data-range="last7"     onclick="applyPresetRange('last7',this)">آخر 7 أيام</button>
+                  <button class="btn chip"               type="button" data-range="last30"    onclick="applyPresetRange('last30',this)">آخر 30 يومًا</button>
+                </div>
+
+                <div class="field-grid">
+                  <div class="field">
+                    <label for="dateFromInput">من</label>
+                    <input id="dateFromInput" type="date">
+                  </div>
+                  <div class="field">
+                    <label for="dateToInput">إلى</label>
+                    <input id="dateToInput" type="date">
+                  </div>
+                  <button class="btn primary" type="button" style="height:40px" onclick="applyCustomRange()">تطبيق</button>
+                </div>
+
+                <div class="helper">اختَر فترة جاهزة أو نطاقًا مخصصًا — ستتحدث جميع المؤشرات فورًا.</div>
+              </div>
+            </section>
+
 
         <section class="stats-strip" aria-label="Stats strip">
           <div class="stat">
