@@ -8,20 +8,28 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg1: #dfe6f3;
-      --bg2: #f8f9fc;
-      --text: #0c1222;
-      --muted: #667085;
-      --card: rgba(255,255,255,.72);
-      --line: rgba(255,255,255,.9);
-      --shadow: 0 14px 40px rgba(19, 29, 52, .12);
-      --shadow-soft: 0 10px 26px rgba(19, 29, 52, .08);
-      --radius: 24px;
-      --sidebar-width: 338px;
-      --topbar-height: 92px;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
+      --bg-top: #dfe6f3;
+      --bg-bottom: #f8f9fc;
+      --text: #111827;
+      --muted: #6b7280;
+      --card: rgba(255, 255, 255, 0.72);
+      --card-strong: rgba(255, 255, 255, 0.9);
+      --line: rgba(255, 255, 255, 0.88);
+      --shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+      --shadow-soft: 0 10px 28px rgba(15, 23, 42, 0.08);
+      --radius-xl: 26px;
+      --radius-lg: 20px;
+      --radius-md: 16px;
+      --sidebar-width: 336px;
+      --header-height: 88px;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --warning: #b45309;
+      --warning-bg: #fef3c7;
+      --danger: #b91c1c;
+      --danger-bg: #fee2e2;
+      --blue: #1d4ed8;
+      --blue-bg: #dbeafe;
       --dark: #202327;
     }
 
@@ -30,33 +38,32 @@
       min-height: 100vh;
       color: var(--text);
       background:
-        radial-gradient(circle at 18% 16%, rgba(255,255,255,.98), rgba(255,255,255,.32) 30%, transparent 54%),
-        radial-gradient(circle at 84% 12%, rgba(210,223,255,.86), transparent 34%),
-        linear-gradient(180deg, var(--bg1) 0%, #eef2f8 34%, var(--bg2) 100%);
+        radial-gradient(circle at 14% 14%, rgba(255,255,255,.96), rgba(255,255,255,.38) 28%, transparent 56%),
+        radial-gradient(circle at 84% 10%, rgba(217,228,255,.78), transparent 32%),
+        linear-gradient(180deg, var(--bg-top) 0%, #edf2fb 34%, var(--bg-bottom) 100%);
     }
 
     a { text-decoration: none; color: inherit; }
     button, input { font-family: inherit; }
 
     .app {
+      min-height: 100vh;
       display: grid;
       grid-template-columns: var(--sidebar-width) 1fr;
-      grid-template-rows: var(--topbar-height) 1fr;
+      grid-template-rows: var(--header-height) 1fr;
       grid-template-areas:
         "top top"
         "side main";
       gap: 16px;
-      min-height: 100vh;
       padding: 14px;
     }
 
     .topbar {
       grid-area: top;
       display: grid;
-      grid-template-columns: minmax(360px, 680px) minmax(360px, 700px);
-      align-items: center;
-      justify-content: space-between;
+      grid-template-columns: minmax(380px, 760px) minmax(420px, 760px);
       gap: 18px;
+      align-items: center;
     }
 
     .top-search-bar,
@@ -66,6 +73,7 @@
       overflow: hidden;
       min-height: 78px;
       box-shadow: var(--shadow);
+      background: transparent;
     }
 
     .top-search-bar img,
@@ -73,7 +81,8 @@
       display: block;
       width: 100%;
       height: 78px;
-      object-fit: fill;
+      object-fit: cover;
+      object-position: center;
     }
 
     .top-search-bar input {
@@ -85,12 +94,13 @@
       outline: none;
       background: transparent;
       color: #fff;
-      font-size: 22px;
-      padding: 0 104px 0 28px;
+      font-size: 20px;
+      padding: 0 96px 0 26px;
+      z-index: 2;
     }
 
     .top-search-bar input::placeholder {
-      color: rgba(255,255,255,.96);
+      color: transparent;
     }
 
     .search-results {
@@ -99,9 +109,9 @@
       left: 0;
       width: 100%;
       background: rgba(255,255,255,.98);
-      border: 1px solid rgba(204,210,222,.9);
+      border: 1px solid rgba(209,213,219,.92);
       border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(18, 26, 44, .16);
+      box-shadow: 0 22px 44px rgba(15,23,42,.16);
       overflow: hidden;
       display: none;
       z-index: 120;
@@ -113,7 +123,7 @@
     }
 
     .search-results-inner {
-      max-height: 460px;
+      max-height: 440px;
       overflow: auto;
       padding: 10px;
     }
@@ -121,22 +131,22 @@
     .search-empty,
     .search-loading {
       padding: 18px;
-      font-size: 14px;
-      color: #6b7280;
       text-align: center;
+      color: var(--muted);
+      font-size: 14px;
     }
 
     .search-group {
-      padding: 6px 0 10px;
+      padding: 6px 0 8px;
     }
 
     .search-group-title {
+      padding: 8px 12px;
       font-size: 12px;
       font-weight: 900;
-      color: #6b7280;
-      letter-spacing: .4px;
-      padding: 8px 12px;
+      color: var(--muted);
       text-transform: uppercase;
+      letter-spacing: .4px;
     }
 
     .search-item {
@@ -149,10 +159,10 @@
     }
 
     .search-item:hover {
-      background: #f3f5f9;
+      background: #f4f6fa;
     }
 
-    .search-bullet {
+    .search-icon {
       width: 34px;
       height: 34px;
       border-radius: 12px;
@@ -160,8 +170,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
       font-size: 16px;
+      flex-shrink: 0;
     }
 
     .search-main {
@@ -172,14 +182,13 @@
     .search-title {
       font-size: 14px;
       font-weight: 800;
-      color: #111827;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
       word-break: break-word;
     }
 
     .search-sub {
       font-size: 12px;
-      color: #6b7280;
+      color: var(--muted);
       line-height: 1.5;
       word-break: break-word;
     }
@@ -189,37 +198,37 @@
     }
 
     .sidebar-shell {
-      background: linear-gradient(180deg, rgba(12,18,48,.92), rgba(8,16,44,.97));
+      background: linear-gradient(180deg, rgba(16,23,56,.92), rgba(10,17,45,.97));
       border-radius: 28px;
       padding: 14px 12px;
       box-shadow: var(--shadow);
-      min-height: calc(100vh - var(--topbar-height) - 36px);
+      min-height: calc(100vh - var(--header-height) - 36px);
     }
 
     .nav-stack {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .nav-item {
       position: relative;
       display: block;
-      overflow: hidden;
       border-radius: 18px;
+      overflow: hidden;
       line-height: 0;
       transition: transform .14s ease, filter .14s ease;
     }
 
     .nav-item:hover {
-      transform: translateX(3px);
+      transform: translateX(2px);
       filter: brightness(1.04);
     }
 
     .nav-item img {
-      display: block;
       width: 100%;
       height: auto;
+      display: block;
     }
 
     .nav-badge {
@@ -231,13 +240,13 @@
       height: 24px;
       padding: 0 8px;
       border-radius: 999px;
+      background: rgba(255,255,255,.86);
+      color: #202223;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255,255,255,.82);
-      color: #202223;
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 900;
       box-shadow: 0 4px 12px rgba(0,0,0,.18);
     }
 
@@ -247,7 +256,7 @@
     }
 
     .page {
-      max-width: 1240px;
+      max-width: 1260px;
       margin: 0 auto;
     }
 
@@ -275,18 +284,18 @@
     }
 
     .toolbar-pill {
-      border: 1px solid rgba(24, 32, 56, .12);
-      background: rgba(255,255,255,.9);
-      color: #0c1222;
-      height: 44px;
-      border-radius: 14px;
+      height: 46px;
+      border-radius: 15px;
+      border: 1px solid rgba(17,24,39,.1);
+      background: rgba(255,255,255,.92);
+      color: #111827;
       padding: 0 14px;
       display: inline-flex;
       align-items: center;
       gap: 10px;
       font-size: 15px;
-      font-weight: 800;
-      box-shadow: 0 5px 18px rgba(20, 28, 44, .06);
+      font-weight: 900;
+      box-shadow: 0 6px 16px rgba(15,23,42,.06);
     }
 
     .toolbar-pill.date-trigger {
@@ -298,7 +307,7 @@
       height: 10px;
       border-radius: 999px;
       background: #22c55e;
-      box-shadow: 0 0 0 4px rgba(34,197,94,.14);
+      box-shadow: 0 0 0 4px rgba(34,197,94,.15);
       flex-shrink: 0;
     }
 
@@ -309,7 +318,7 @@
       box-shadow: var(--shadow-soft);
       backdrop-filter: blur(10px);
       padding: 22px 18px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .stats-grid {
@@ -323,63 +332,112 @@
     }
 
     .stat-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 900;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .stat-value {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 900;
       line-height: 1.25;
     }
 
     .stat-sub {
       font-size: 12px;
-      color: #6b7280;
+      color: var(--muted);
       margin-top: 6px;
+      line-height: 1.5;
     }
 
-    .summary-row {
+    .compact-tiles {
       display: flex;
-      align-items: stretch;
-      gap: 14px;
       flex-wrap: wrap;
+      gap: 14px;
       margin-bottom: 18px;
+      align-items: flex-start;
     }
 
-    .summary-tile {
+    .compact-tile {
       position: relative;
       display: inline-block;
       border-radius: 18px;
       overflow: hidden;
-      box-shadow: 0 12px 28px rgba(22, 30, 48, .08);
       line-height: 0;
+      box-shadow: var(--shadow-soft);
+      transition: transform .12s ease, filter .12s ease;
     }
 
-    .summary-tile img {
-      display: block;
+    .compact-tile:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.02);
+    }
+
+    .compact-tile.fulfill {
+      width: 348px;
       max-width: 100%;
-      height: auto;
     }
 
-    .summary-tile-badge {
+    .compact-tile.capture {
+      width: 352px;
+      max-width: 100%;
+    }
+
+    .compact-tile img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .compact-badge {
       position: absolute;
       top: 12px;
       left: 12px;
-      background: rgba(15, 23, 42, .82);
-      color: #fff;
+      min-width: 34px;
+      height: 34px;
+      padding: 0 10px;
       border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 13px;
+      background: rgba(31,41,55,.88);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
       font-weight: 900;
-      line-height: 1;
       box-shadow: 0 8px 16px rgba(0,0,0,.18);
+      line-height: 1;
+      z-index: 2;
+    }
+
+    .compact-tile.fulfill::after,
+    .compact-tile.capture::after {
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.82);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1;
+      white-space: nowrap;
+      box-shadow: 0 8px 16px rgba(0,0,0,.18);
+      z-index: 2;
+    }
+
+    .compact-tile.fulfill::after {
+      content: "Orders to fulfill";
+    }
+
+    .compact-tile.capture::after {
+      content: "Payments to capture";
     }
 
     .dashboard-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+      grid-template-columns: minmax(0, 1.15fr) minmax(330px, .85fr);
       gap: 16px;
       align-items: start;
     }
@@ -400,7 +458,7 @@
       gap: 12px;
       flex-wrap: wrap;
       padding: 16px 18px;
-      border-bottom: 1px solid rgba(255,255,255,.72);
+      border-bottom: 1px solid rgba(255,255,255,.78);
       font-size: 16px;
       font-weight: 900;
     }
@@ -416,61 +474,60 @@
     }
 
     .btn {
-      height: 36px;
+      height: 38px;
       border-radius: 12px;
-      border: 1px solid rgba(17,24,39,.12);
-      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(17,24,39,.1);
+      background: rgba(255,255,255,.95);
       color: #111827;
       padding: 0 14px;
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 900;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(16,24,40,.06);
+      box-shadow: 0 4px 12px rgba(15,23,42,.06);
     }
 
     .btn.dark {
-      background: #202327;
+      background: var(--dark);
       color: #fff;
-      border-color: #202327;
+      border-color: var(--dark);
     }
 
     .order-list,
-    .activity-list {
+    .notes-list {
       display: grid;
       gap: 10px;
     }
 
     .order-item,
-    .activity-item {
+    .note-item {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
       padding: 14px;
       border-radius: 18px;
-      background: rgba(255,255,255,.72);
-      border: 1px solid rgba(255,255,255,.74);
+      background: rgba(255,255,255,.8);
+      border: 1px solid rgba(255,255,255,.82);
     }
 
     .order-main,
-    .activity-main {
+    .note-main {
       min-width: 0;
       flex: 1;
     }
 
     .order-title,
-    .activity-title {
+    .note-title {
       font-size: 14px;
-      font-weight: 800;
-      color: #111827;
+      font-weight: 900;
       margin-bottom: 4px;
       word-break: break-word;
     }
 
     .order-sub,
-    .activity-sub {
+    .note-sub {
       font-size: 12px;
-      color: #6b7280;
+      color: var(--muted);
       line-height: 1.5;
       word-break: break-word;
     }
@@ -479,18 +536,18 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 28px;
-      padding: 0 10px;
+      min-height: 30px;
+      padding: 0 12px;
       border-radius: 999px;
       font-size: 12px;
       font-weight: 900;
       white-space: nowrap;
     }
 
-    .pill.green { background: #dcfce7; color: #166534; }
-    .pill.yellow { background: #fef3c7; color: #92400e; }
-    .pill.blue { background: #dbeafe; color: #1d4ed8; }
-    .pill.red { background: #fee2e2; color: #991b1b; }
+    .pill.green { background: var(--success-bg); color: var(--success); }
+    .pill.yellow { background: var(--warning-bg); color: var(--warning); }
+    .pill.red { background: var(--danger-bg); color: var(--danger); }
+    .pill.blue { background: var(--blue-bg); color: var(--blue); }
     .pill.grey { background: #f3f4f6; color: #4b5563; }
 
     .mini-grid {
@@ -502,14 +559,14 @@
     .mini-box {
       padding: 16px;
       border-radius: 18px;
-      background: rgba(255,255,255,.76);
-      border: 1px solid rgba(255,255,255,.8);
+      background: rgba(255,255,255,.8);
+      border: 1px solid rgba(255,255,255,.82);
     }
 
     .mini-label {
       font-size: 12px;
-      color: #6b7280;
-      font-weight: 800;
+      color: var(--muted);
+      font-weight: 900;
       margin-bottom: 8px;
     }
 
@@ -521,7 +578,7 @@
 
     .mini-sub {
       font-size: 12px;
-      color: #6b7280;
+      color: var(--muted);
       margin-top: 6px;
       line-height: 1.5;
     }
@@ -533,7 +590,7 @@
       align-items: flex-start;
       justify-content: center;
       padding-top: 78px;
-      background: rgba(11, 18, 34, .12);
+      background: rgba(11,18,34,.12);
       z-index: 100;
     }
 
@@ -550,7 +607,7 @@
       overflow: hidden;
       display: grid;
       grid-template-columns: 214px 1fr;
-      box-shadow: 0 20px 50px rgba(15, 23, 42, .18);
+      box-shadow: 0 20px 50px rgba(15,23,42,.18);
     }
 
     .picker-sidebar {
@@ -768,9 +825,11 @@
       .topbar {
         grid-template-columns: 1fr 420px;
       }
+
       .stats-grid {
         grid-template-columns: 1fr 1fr;
       }
+
       .dashboard-grid {
         grid-template-columns: 1fr;
       }
@@ -806,10 +865,6 @@
       .picker-top {
         grid-template-columns: 1fr;
       }
-
-      .summary-row {
-        flex-direction: column;
-      }
     }
 
     @media (max-width: 640px) {
@@ -822,6 +877,12 @@
         font-size: 18px;
         padding-right: 72px;
       }
+
+      .compact-tile.fulfill::after,
+      .compact-tile.capture::after {
+        font-size: 12px;
+        padding: 6px 10px;
+      }
     }
   </style>
 </head>
@@ -830,7 +891,7 @@
     <header class="topbar">
       <div class="top-search-bar" aria-label="Search Bar">
         <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/search-bar.webp?v=1776716710" alt="search bar">
-        <input id="globalSearchInput" type="search" placeholder="Search">
+        <input id="globalSearchInput" type="search" placeholder="">
         <div class="search-results" id="searchResults">
           <div class="search-results-inner" id="searchResultsInner">
             <div class="search-empty">Start typing to search...</div>
@@ -874,7 +935,7 @@
             <span>All Channels</span>
           </button>
 
-          <button class="toolbar-pill live" type="button">
+          <button class="toolbar-pill" type="button">
             <span class="green-dot"></span>
             <span id="liveVisitorsLabel">— Live Visitor</span>
           </button>
@@ -885,40 +946,43 @@
             <div class="stat-box">
               <div class="stat-title">Sessions</div>
               <div class="stat-value" id="sessionsValue">—</div>
-              <div class="stat-sub">Uses analytics endpoint if available</div>
+              <div class="stat-sub">Based on orders and abandoned activity in the selected range</div>
             </div>
+
             <div class="stat-box">
               <div class="stat-title">Total Sales</div>
               <div class="stat-value" id="salesValue">KWD 0.000</div>
               <div class="stat-sub">Calculated from filtered orders</div>
             </div>
+
             <div class="stat-box">
               <div class="stat-title">Orders</div>
               <div class="stat-value" id="ordersValue">0</div>
-              <div class="stat-sub">Within selected date range</div>
+              <div class="stat-sub">Inside selected date range</div>
             </div>
+
             <div class="stat-box">
               <div class="stat-title">Conversion rate</div>
               <div class="stat-value" id="conversionValue">—</div>
-              <div class="stat-sub">Analytics endpoint or recovery fallback</div>
+              <div class="stat-sub">Orders divided by estimated sessions</div>
             </div>
           </div>
         </section>
 
-        <section class="summary-row">
-          <span class="summary-tile">
+        <section class="compact-tiles">
+          <a class="compact-tile fulfill" href="/orders-admin.html?status=processing">
             <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/orders-to-fullfill.webp?v=1776716710" alt="Orders to fulfill">
-            <span class="summary-tile-badge" id="fulfillBadge">0</span>
-          </span>
+            <span class="compact-badge" id="fulfillBadge">0</span>
+          </a>
 
-          <span class="summary-tile">
+          <a class="compact-tile capture" href="/orders-admin.html?status=awaiting_payment">
             <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/payment-to-capure.webp?v=1776716710" alt="Payments to capture">
-            <span class="summary-tile-badge" id="paymentsBadge">0</span>
-          </span>
+            <span class="compact-badge" id="paymentsBadge">0</span>
+          </a>
         </section>
 
         <section class="dashboard-grid">
-          <div class="card">
+          <section class="card">
             <div class="card-head">
               <span>Recent Orders</span>
               <div class="card-actions">
@@ -926,6 +990,7 @@
                 <a class="btn" href="/orders-admin.html">Open Orders</a>
               </div>
             </div>
+
             <div class="card-body">
               <div class="order-list" id="recentOrdersList">
                 <div class="order-item">
@@ -936,19 +1001,20 @@
                 </div>
               </div>
             </div>
-          </div>
+          </section>
 
           <div style="display:grid; gap:16px;">
             <section class="card">
               <div class="card-head">
                 <span>Quick Snapshot</span>
               </div>
+
               <div class="card-body">
                 <div class="mini-grid">
                   <div class="mini-box">
                     <div class="mini-label">Loaded Orders</div>
                     <div class="mini-value" id="loadedOrdersValue">0</div>
-                    <div class="mini-sub">All fetched orders from backend</div>
+                    <div class="mini-sub">All orders fetched from backend</div>
                   </div>
 
                   <div class="mini-box">
@@ -960,7 +1026,7 @@
                   <div class="mini-box">
                     <div class="mini-label">Open Abandoned</div>
                     <div class="mini-value" id="openAbandonedValue">0</div>
-                    <div class="mini-sub">From abandoned checkout stats</div>
+                    <div class="mini-sub">Open abandoned checkouts</div>
                   </div>
 
                   <div class="mini-box">
@@ -976,18 +1042,20 @@
               <div class="card-head">
                 <span>System Notes</span>
               </div>
+
               <div class="card-body">
-                <div class="activity-list" id="systemNotesList">
-                  <div class="activity-item">
-                    <div class="activity-main">
-                      <div class="activity-title">Analytics fallback mode</div>
-                      <div class="activity-sub">If no analytics endpoint exists, sales and orders stay real from orders API, while sessions/live visitors/conversion use optional endpoints or graceful fallback.</div>
+                <div class="notes-list">
+                  <div class="note-item">
+                    <div class="note-main">
+                      <div class="note-title">Compact summary tiles</div>
+                      <div class="note-sub">Orders to fulfill and payments to capture keep their dynamic counters, with visible labels added for clarity.</div>
                     </div>
                   </div>
-                  <div class="activity-item">
-                    <div class="activity-main">
-                      <div class="activity-title">Global search</div>
-                      <div class="activity-sub">Search tries orders, abandoned checkouts, products, collections, and customers. Missing endpoints are skipped without breaking the page.</div>
+
+                  <div class="note-item">
+                    <div class="note-main">
+                      <div class="note-title">Search</div>
+                      <div class="note-sub">Global search looks through orders, abandoned checkouts, products, collections, and customers where endpoints exist.</div>
                     </div>
                   </div>
                 </div>
@@ -1077,55 +1145,55 @@
   </div>
 
   <script>
-    const ORDERS_API = '/api/orders';
-    const ABANDONED_STATS_API = '/api/abandoned-checkouts/stats/summary';
-    const SEARCH_ENDPOINTS = [
-      { key: 'orders', label: 'Orders', icon: '📦', url: (q) => `/api/orders?limit=8&offset=0&sort=created_at&order=DESC&search=${encodeURIComponent(q)}` },
-      { key: 'abandoned', label: 'Abandoned', icon: '🛒', url: (q) => `/api/abandoned-checkouts?limit=6&offset=0&search=${encodeURIComponent(q)}` },
-      { key: 'products', label: 'Products', icon: '🏷️', url: (q) => `/api/products?limit=6&offset=0&search=${encodeURIComponent(q)}` },
-      { key: 'collections', label: 'Collections', icon: '🗂️', url: (q) => `/api/collections?limit=6&offset=0&search=${encodeURIComponent(q)}` },
-      { key: 'customers', label: 'Customers', icon: '👥', url: (q) => `/api/customers?limit=6&offset=0&search=${encodeURIComponent(q)}` }
-    ];
-
-    const OPTIONAL_ANALYTICS_ENDPOINTS = [
-      '/api/analytics/summary',
-      '/api/dashboard/summary',
-      '/api/admin/summary'
-    ];
-
-    const OPTIONAL_LIVE_ENDPOINTS = [
-      '/api/live-visitors',
-      '/api/analytics/live-visitors'
-    ];
-
-    const STATUS_COLORS = {
-      pending: 'yellow',
-      processing: 'blue',
-      shipped: 'blue',
-      delivered: 'green',
-      completed: 'green',
-      cancelled: 'red',
-      awaiting_payment: 'yellow'
-    };
-
     const state = {
       allOrders: [],
-      filteredOrders: [],
-      abandonedSummary: { total: 0, open: 0, recovered: 0, closed: 0 },
-      analytics: null,
-      liveVisitors: null,
-      loading: false,
-      searchTimer: null,
+      abandonedList: [],
+      products: [],
+      collections: [],
+      customers: [],
+      liveVisitors: 0,
       dateLabel: 'Today',
-      rangeMode: 'today',
       selectedStart: null,
       selectedEnd: null,
       tempStart: null,
       tempEnd: null,
-      currentBaseMonth: null
+      currentBaseMonth: null,
+      searchTimer: null,
+      loading: false
     };
 
-    function qs(id) { return document.getElementById(id); }
+    const STATUS_COLORS = {
+      pending: 'yellow',
+      processing: 'blue',
+      awaiting_payment: 'yellow',
+      shipped: 'blue',
+      delivered: 'green',
+      completed: 'green',
+      cancelled: 'red'
+    };
+
+    function qs(id) {
+      return document.getElementById(id);
+    }
+
+    function safeText(value, fallback = '') {
+      const text = String(value ?? '').trim();
+      return text || fallback;
+    }
+
+    function safeNumber(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+    }
 
     function showAlert(message, type = 'success') {
       const box = qs('alertBox');
@@ -1135,34 +1203,11 @@
       window.__alertTimer = setTimeout(() => {
         box.className = 'alert';
         box.textContent = '';
-      }, 3500);
-    }
-
-    function safeNumber(value, fallback = 0) {
-      const n = Number(value);
-      return Number.isFinite(n) ? n : fallback;
-    }
-
-    function safeText(value, fallback = '') {
-      const text = String(value ?? '').trim();
-      return text || fallback;
-    }
-
-    function escapeHtml(v) {
-      return String(v ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#x27;');
+      }, 3200);
     }
 
     function formatMoney(value) {
       return `KWD ${safeNumber(value, 0).toFixed(3)}`;
-    }
-
-    function formatPercent(value) {
-      return `${safeNumber(value, 0).toFixed(2)}%`;
     }
 
     function normalizeDate(value) {
@@ -1172,11 +1217,17 @@
     }
 
     function getOrderDate(order) {
-      return normalizeDate(order.created_at || order.createdAt || order.order_date || order.date || order.updated_at);
+      return normalizeDate(
+        order.created_at ||
+        order.createdAt ||
+        order.order_date ||
+        order.date ||
+        order.updated_at
+      );
     }
 
     function getOrderTotal(order) {
-      return safeNumber(order.total ?? order.final_total ?? order.order_total ?? order.total_amount, 0);
+      return safeNumber(order.total ?? order.final_total ?? order.total_amount ?? order.order_total, 0);
     }
 
     function getOrderStatus(order) {
@@ -1240,9 +1291,10 @@
       });
     }
 
-    async function fetchJsonWithTimeout(url, timeoutMs = 15000) {
+    async function fetchJson(url, timeoutMs = 12000) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
+
       try {
         const response = await fetch(url, {
           signal: controller.signal,
@@ -1252,13 +1304,8 @@
 
         const text = await response.text();
         let result = null;
-
         if (text) {
-          try {
-            result = JSON.parse(text);
-          } catch (_) {
-            throw new Error(`Non-JSON response from ${url}`);
-          }
+          result = JSON.parse(text);
         }
 
         return { response, result };
@@ -1267,97 +1314,62 @@
       }
     }
 
-    async function fetchAllOrders() {
-      const results = [];
-      let offset = 0;
-      const limit = 50;
-      const maxTotal = 500;
-
-      while (true) {
-        const { response, result } = await fetchJsonWithTimeout(`${ORDERS_API}?limit=${limit}&offset=${offset}&sort=created_at&order=DESC`);
-        if (!response.ok || !result?.success) {
-          throw new Error(result?.error || 'Failed to load orders');
-        }
-
-        const chunk = Array.isArray(result.data) ? result.data : [];
-        results.push(...chunk);
-        offset += chunk.length;
-
-        const total = safeNumber(result?.pagination?.total, results.length);
-        if (!chunk.length || results.length >= total || results.length >= maxTotal) break;
-      }
-
-      return results;
-    }
-
-    async function fetchAbandonedSummary() {
+    async function tryLoadList(url) {
       try {
-        const { response, result } = await fetchJsonWithTimeout(ABANDONED_STATS_API, 10000);
-        if (!response.ok || !result?.success) return { total: 0, open: 0, recovered: 0, closed: 0 };
-        return {
-          total: safeNumber(result.data?.total, 0),
-          open: safeNumber(result.data?.open, 0),
-          recovered: safeNumber(result.data?.recovered, 0),
-          closed: safeNumber(result.data?.closed, 0)
-        };
+        const { response, result } = await fetchJson(url);
+        if (!response.ok || !result?.success) return [];
+        return Array.isArray(result.data) ? result.data : [];
       } catch (_) {
-        return { total: 0, open: 0, recovered: 0, closed: 0 };
+        return [];
       }
     }
 
-    async function fetchOptionalAnalyticsSummary(from, to) {
-      for (const baseUrl of OPTIONAL_ANALYTICS_ENDPOINTS) {
-        try {
-          const url = `${baseUrl}?from=${encodeURIComponent(from.toISOString())}&to=${encodeURIComponent(to.toISOString())}`;
-          const { response, result } = await fetchJsonWithTimeout(url, 10000);
-          if (!response.ok || !result) continue;
+    async function loadData() {
+      const [orders, abandoned, products, collections, customers] = await Promise.all([
+        tryLoadList('/api/orders?limit=120&offset=0&sort=created_at&order=DESC'),
+        tryLoadList('/api/abandoned-checkouts?limit=80&offset=0&sort=last_activity_at&order=DESC'),
+        tryLoadList('/api/products?limit=60&offset=0'),
+        tryLoadList('/api/collections?limit=60&offset=0'),
+        tryLoadList('/api/customers?limit=60&offset=0')
+      ]);
 
-          const data = result.data || result;
-          return {
-            sessions: safeNumber(data.sessions, null),
-            totalSales: safeNumber(data.totalSales ?? data.sales, null),
-            orders: safeNumber(data.orders, null),
-            conversionRate: safeNumber(data.conversionRate ?? data.conversion_rate, null)
-          };
-        } catch (_) {}
-      }
-      return null;
+      state.allOrders = orders;
+      state.abandonedList = abandoned;
+      state.products = products;
+      state.collections = collections;
+      state.customers = customers;
     }
 
-    async function fetchOptionalLiveVisitors() {
-      for (const baseUrl of OPTIONAL_LIVE_ENDPOINTS) {
-        try {
-          const { response, result } = await fetchJsonWithTimeout(baseUrl, 8000);
-          if (!response.ok || !result) continue;
-          const data = result.data || result;
-          const count = safeNumber(data.liveVisitors ?? data.live_visitors ?? data.count, null);
-          if (count !== null) return count;
-        } catch (_) {}
-      }
-      return null;
-    }
-
-    function getSelectedRange() {
+    function getSelectedDateRange() {
       return {
         from: cloneDate(state.selectedStart),
         to: cloneDate(state.selectedEnd)
       };
     }
 
-    function filterOrdersByCurrentRange() {
-      const { from, to } = getSelectedRange();
+    function getFilteredOrders() {
+      const range = getSelectedDateRange();
       return state.allOrders.filter(order => {
         const d = getOrderDate(order);
-        return d && d >= from && d <= to;
+        return d && d >= range.from && d <= range.to;
       });
     }
 
-    function deriveConversionRate(ordersCount, abandonedSummary) {
-      const recovered = safeNumber(abandonedSummary?.recovered, 0);
-      const open = safeNumber(abandonedSummary?.open, 0);
-      const base = ordersCount + open;
-      if (!base) return null;
-      return (ordersCount / base) * 100;
+    function getFilteredAbandoned() {
+      const range = getSelectedDateRange();
+      return state.abandonedList.filter(item => {
+        const d = normalizeDate(item.last_activity_at || item.updated_at || item.created_at);
+        return d && d >= range.from && d <= range.to;
+      });
+    }
+
+    function deriveSessions(orders, abandoned) {
+      return orders.length + abandoned.length;
+    }
+
+    function deriveConversionRate(orders, sessions) {
+      if (!sessions) return 0;
+      return (orders.length / sessions) * 100;
     }
 
     function countOrdersToFulfill(orders) {
@@ -1368,44 +1380,35 @@
       return orders.filter(order => ['awaiting_payment', 'pending'].includes(getOrderStatus(order))).length;
     }
 
-    function renderStats() {
-      state.filteredOrders = filterOrdersByCurrentRange();
+    function renderDashboard() {
+      const filteredOrders = getFilteredOrders();
+      const filteredAbandoned = getFilteredAbandoned();
 
-      const totalOrders = state.filteredOrders.length;
-      const totalSales = state.filteredOrders.reduce((sum, order) => sum + getOrderTotal(order), 0);
+      const totalSales = filteredOrders.reduce((sum, order) => sum + getOrderTotal(order), 0);
+      const sessions = deriveSessions(filteredOrders, filteredAbandoned);
+      const conversion = deriveConversionRate(filteredOrders, sessions);
 
-      const sessionsValue = state.analytics?.sessions;
-      const ordersValue = state.analytics?.orders ?? totalOrders;
-      const salesValue = state.analytics?.totalSales ?? totalSales;
-
-      let conversion = state.analytics?.conversionRate;
-      if (conversion === null || conversion === undefined || Number.isNaN(conversion)) {
-        conversion = deriveConversionRate(totalOrders, state.abandonedSummary);
-      }
-
-      qs('sessionsValue').textContent = sessionsValue === null || sessionsValue === undefined ? '—' : String(Math.round(sessionsValue));
-      qs('salesValue').textContent = formatMoney(salesValue);
-      qs('ordersValue').textContent = String(Math.round(ordersValue));
-      qs('conversionValue').textContent = conversion === null || conversion === undefined ? '—' : formatPercent(conversion);
+      qs('sessionsValue').textContent = String(sessions);
+      qs('salesValue').textContent = formatMoney(totalSales);
+      qs('ordersValue').textContent = String(filteredOrders.length);
+      qs('conversionValue').textContent = `${conversion.toFixed(2)}%`;
 
       qs('ordersCountBadge').textContent = String(state.allOrders.length);
       qs('loadedOrdersValue').textContent = String(state.allOrders.length);
-      qs('filteredOrdersValue').textContent = String(totalOrders);
-      qs('openAbandonedValue').textContent = String(state.abandonedSummary.open);
-      qs('recoveredAbandonedValue').textContent = String(state.abandonedSummary.recovered);
+      qs('filteredOrdersValue').textContent = String(filteredOrders.length);
+      qs('openAbandonedValue').textContent = String(filteredAbandoned.filter(item => safeText(item.status).toLowerCase() === 'open').length);
+      qs('recoveredAbandonedValue').textContent = String(filteredAbandoned.filter(item => safeText(item.status).toLowerCase() === 'recovered').length);
 
-      qs('fulfillBadge').textContent = String(countOrdersToFulfill(state.filteredOrders));
-      qs('paymentsBadge').textContent = String(countPaymentsToCapture(state.filteredOrders));
+      qs('fulfillBadge').textContent = String(countOrdersToFulfill(filteredOrders));
+      qs('paymentsBadge').textContent = String(countPaymentsToCapture(filteredOrders));
+      qs('liveVisitorsLabel').textContent = `${state.liveVisitors} Live Visitor`;
 
-      const live = state.liveVisitors;
-      qs('liveVisitorsLabel').textContent = live === null || live === undefined ? '— Live Visitor' : `${live} Live Visitor`;
-
-      renderRecentOrders();
+      renderRecentOrders(filteredOrders);
     }
 
-    function renderRecentOrders() {
+    function renderRecentOrders(orders) {
       const list = qs('recentOrdersList');
-      const rows = [...state.filteredOrders]
+      const rows = [...orders]
         .sort((a, b) => (getOrderDate(b)?.getTime() || 0) - (getOrderDate(a)?.getTime() || 0))
         .slice(0, 6);
 
@@ -1414,7 +1417,7 @@
           <div class="order-item">
             <div class="order-main">
               <div class="order-title">No orders found</div>
-              <div class="order-sub">No orders in the selected date range</div>
+              <div class="order-sub">No orders inside the selected date range</div>
             </div>
           </div>
         `;
@@ -1442,95 +1445,130 @@
       }).join('');
     }
 
-    async function reloadDashboard(showMessage = false) {
-      if (state.loading) return;
-      state.loading = true;
-      qs('reloadBtn').disabled = true;
-      qs('reloadBtn').textContent = 'Refreshing...';
+    function buildSearchResults(query) {
+      const q = safeText(query).toLowerCase();
+      if (!q) return [];
 
-      try {
-        state.allOrders = await fetchAllOrders();
-        state.abandonedSummary = await fetchAbandonedSummary();
-
-        const range = getSelectedRange();
-        state.analytics = await fetchOptionalAnalyticsSummary(range.from, range.to);
-        state.liveVisitors = await fetchOptionalLiveVisitors();
-
-        renderStats();
-        if (showMessage) showAlert('Dashboard updated successfully', 'success');
-      } catch (error) {
-        console.error(error);
-        showAlert(error.message || 'Failed to load dashboard', 'error');
-      } finally {
-        state.loading = false;
-        qs('reloadBtn').disabled = false;
-        qs('reloadBtn').textContent = 'Refresh';
-      }
-    }
-
-    function buildSearchItem(endpointKey, item) {
-      if (endpointKey === 'orders') {
-        const id = item.id || '';
-        return {
-          title: item.order_number || `Order #${id}`,
+      const orders = state.allOrders
+        .filter(item => {
+          return [
+            item.order_number,
+            item.customer_name,
+            item.customer_email,
+            item.customer_phone
+          ].some(v => safeText(v).toLowerCase().includes(q));
+        })
+        .slice(0, 6)
+        .map(item => ({
+          group: 'Orders',
+          icon: '📦',
+          title: item.order_number || `Order #${item.id}`,
           sub: `${safeText(item.customer_name, 'Unknown customer')} | ${formatMoney(getOrderTotal(item))}`,
-          href: `/order-details.html?id=${encodeURIComponent(id)}`
-        };
-      }
+          href: `/order-details.html?id=${encodeURIComponent(item.id || '')}`
+        }));
 
-      if (endpointKey === 'abandoned') {
-        return {
+      const abandoned = state.abandonedList
+        .filter(item => {
+          return [
+            item.checkout_token,
+            item.customer_name,
+            item.customer_email,
+            item.customer_phone,
+            item.contact_value
+          ].some(v => safeText(v).toLowerCase().includes(q));
+        })
+        .slice(0, 6)
+        .map(item => ({
+          group: 'Abandoned',
+          icon: '🛒',
           title: item.customer_name || item.checkout_token || 'Abandoned checkout',
           sub: `${safeText(item.customer_email || item.customer_phone || item.contact_value, 'No contact')} | ${formatMoney(item.total)}`,
-          href: `/abandoned-checkouts-admin.html`
-        };
-      }
+          href: '/abandoned-checkouts-admin.html'
+        }));
 
-      if (endpointKey === 'products') {
-        return {
-          title: item.name || item.title || 'Product',
+      const products = state.products
+        .filter(item => {
+          return [
+            item.name,
+            item.slug,
+            item.sku
+          ].some(v => safeText(v).toLowerCase().includes(q));
+        })
+        .slice(0, 6)
+        .map(item => ({
+          group: 'Products',
+          icon: '🏷️',
+          title: item.name || 'Product',
           sub: safeText(item.slug || item.sku || item.id, 'Product record'),
-          href: `/products-admin`
-        };
-      }
+          href: '/products-admin'
+        }));
 
-      if (endpointKey === 'collections') {
-        return {
-          title: item.name || item.title || 'Collection',
-          sub: safeText(item.slug || item.handle || item.id, 'Collection record'),
-          href: `/collections-admin`
-        };
-      }
+      const collections = state.collections
+        .filter(item => {
+          return [
+            item.name,
+            item.slug
+          ].some(v => safeText(v).toLowerCase().includes(q));
+        })
+        .slice(0, 6)
+        .map(item => ({
+          group: 'Collections',
+          icon: '🗂️',
+          title: item.name || 'Collection',
+          sub: safeText(item.slug || item.id, 'Collection record'),
+          href: '/collections-admin'
+        }));
 
-      if (endpointKey === 'customers') {
-        return {
+      const customers = state.customers
+        .filter(item => {
+          return [
+            item.name,
+            item.customer_name,
+            item.email,
+            item.phone
+          ].some(v => safeText(v).toLowerCase().includes(q));
+        })
+        .slice(0, 6)
+        .map(item => ({
+          group: 'Customers',
+          icon: '👥',
           title: item.name || item.customer_name || item.email || 'Customer',
           sub: safeText(item.email || item.phone || item.id, 'Customer record'),
-          href: `/customers-admin`
-        };
-      }
+          href: '/customers-admin'
+        }));
 
-      return null;
+      return [...orders, ...abandoned, ...products, ...collections, ...customers];
     }
 
-    function renderSearchResults(groups) {
+    function renderSearch(query) {
       const box = qs('searchResults');
       const inner = qs('searchResultsInner');
+      const results = buildSearchResults(query);
 
-      const validGroups = groups.filter(group => group.items.length);
+      if (!safeText(query)) {
+        inner.innerHTML = `<div class="search-empty">Start typing to search...</div>`;
+        box.classList.remove('open');
+        return;
+      }
 
-      if (!validGroups.length) {
+      if (!results.length) {
         inner.innerHTML = `<div class="search-empty">No results found</div>`;
         box.classList.add('open');
         return;
       }
 
-      inner.innerHTML = validGroups.map(group => `
+      const grouped = {};
+      results.forEach(item => {
+        if (!grouped[item.group]) grouped[item.group] = [];
+        grouped[item.group].push(item);
+      });
+
+      inner.innerHTML = Object.entries(grouped).map(([group, items]) => `
         <div class="search-group">
-          <div class="search-group-title">${escapeHtml(group.label)}</div>
-          ${group.items.map(item => `
+          <div class="search-group-title">${escapeHtml(group)}</div>
+          ${items.map(item => `
             <a class="search-item" href="${escapeHtml(item.href)}">
-              <div class="search-bullet">${escapeHtml(group.icon)}</div>
+              <div class="search-icon">${escapeHtml(item.icon)}</div>
               <div class="search-main">
                 <div class="search-title">${escapeHtml(item.title)}</div>
                 <div class="search-sub">${escapeHtml(item.sub)}</div>
@@ -1543,58 +1581,21 @@
       box.classList.add('open');
     }
 
-    async function runGlobalSearch(query) {
-      const box = qs('searchResults');
-      const inner = qs('searchResultsInner');
-
-      if (!query) {
-        inner.innerHTML = `<div class="search-empty">Start typing to search...</div>`;
-        box.classList.remove('open');
-        return;
-      }
-
-      inner.innerHTML = `<div class="search-loading">Searching...</div>`;
-      box.classList.add('open');
-
-      const groups = [];
-
-      await Promise.all(SEARCH_ENDPOINTS.map(async endpoint => {
-        try {
-          const { response, result } = await fetchJsonWithTimeout(endpoint.url(query), 10000);
-          if (!response.ok || !result?.success) return;
-
-          const raw = Array.isArray(result.data) ? result.data : [];
-          const mapped = raw
-            .map(item => buildSearchItem(endpoint.key, item))
-            .filter(Boolean)
-            .slice(0, 6);
-
-          groups.push({
-            key: endpoint.key,
-            label: endpoint.label,
-            icon: endpoint.icon,
-            items: mapped
-          });
-        } catch (_) {}
-      }));
-
-      renderSearchResults(groups);
-    }
-
     function bindSearch() {
       const input = qs('globalSearchInput');
       const box = qs('searchResults');
 
       input.addEventListener('input', () => {
-        const value = safeText(input.value);
         clearTimeout(state.searchTimer);
         state.searchTimer = setTimeout(() => {
-          runGlobalSearch(value);
-        }, 260);
+          renderSearch(input.value);
+        }, 180);
       });
 
       input.addEventListener('focus', () => {
-        if (safeText(input.value)) box.classList.add('open');
+        if (safeText(input.value)) {
+          box.classList.add('open');
+        }
       });
 
       document.addEventListener('click', (e) => {
@@ -1661,8 +1662,10 @@
     function renderCalendars() {
       const left = new Date(state.currentBaseMonth.getFullYear(), state.currentBaseMonth.getMonth(), 1);
       const right = new Date(state.currentBaseMonth.getFullYear(), state.currentBaseMonth.getMonth() + 1, 1);
+
       renderMonth(qs('monthLeft'), left);
       renderMonth(qs('monthRight'), right);
+
       qs('startDateInput').value = formatInputDate(state.tempStart);
       qs('endDateInput').value = formatInputDate(state.tempEnd);
     }
@@ -1798,22 +1801,25 @@
     }
 
     function handleDateClick(clicked) {
-      if (!state.tempStart || (state.tempStart && state.tempEnd && state.tempStart.getTime() !== state.tempEnd.getTime())) {
-        state.tempStart = startOfDay(clicked);
-        state.tempEnd = endOfDay(clicked);
-      } else {
-        if (clicked.getTime() < state.tempStart.getTime()) {
-          state.tempEnd = endOfDay(state.tempStart);
-          state.tempStart = startOfDay(clicked);
-        } else {
-          state.tempEnd = endOfDay(clicked);
-        }
-      }
+  const clickedStart = startOfDay(clicked);
+  const clickedEnd = endOfDay(clicked);
 
-      state.dateLabel = 'Custom range';
-      activateCustomPicker();
-      renderCalendars();
+  if (!state.tempStart || !state.tempEnd || state.tempStart.getTime() !== state.tempEnd.getTime()) {
+    state.tempStart = clickedStart;
+    state.tempEnd = clickedEnd;
+  } else {
+    if (clickedStart.getTime() < state.tempStart.getTime()) {
+      state.tempEnd = endOfDay(state.tempStart);
+      state.tempStart = clickedStart;
+    } else {
+      state.tempEnd = clickedEnd;
     }
+  }
+
+  state.dateLabel = 'Custom range';
+  activateCustomPicker();
+  renderCalendars();
+}
 
     function bindDatePicker() {
       qs('openDatePickerBtn').addEventListener('click', () => {
@@ -1834,12 +1840,12 @@
         qs('pickerBackdrop').classList.remove('open');
       });
 
-      qs('applyPickerBtn').addEventListener('click', async () => {
+      qs('applyPickerBtn').addEventListener('click', () => {
         state.selectedStart = cloneDate(state.tempStart);
         state.selectedEnd = cloneDate(state.tempEnd);
         qs('dateTriggerLabel').textContent = state.dateLabel;
         qs('pickerBackdrop').classList.remove('open');
-        await reloadDashboard(false);
+        renderDashboard();
       });
 
       qs('toggleTimeBtn').addEventListener('click', () => {
@@ -1903,7 +1909,7 @@
       });
     }
 
-    function initState() {
+    function initDateState() {
       const [s, e] = getTodayRange();
       state.selectedStart = cloneDate(s);
       state.selectedEnd = cloneDate(e);
@@ -1915,14 +1921,36 @@
       renderCalendars();
     }
 
+    async function reloadPageData(showMessage = false) {
+      if (state.loading) return;
+      state.loading = true;
+      qs('reloadBtn').disabled = true;
+      qs('reloadBtn').textContent = 'Refreshing...';
+
+      try {
+        await loadData();
+        renderDashboard();
+        if (showMessage) showAlert('Dashboard updated successfully', 'success');
+      } catch (error) {
+        console.error(error);
+        showAlert('Failed to load dashboard data', 'error');
+      } finally {
+        state.loading = false;
+        qs('reloadBtn').disabled = false;
+        qs('reloadBtn').textContent = 'Refresh';
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       bindSearch();
       bindDatePicker();
-      initState();
+      initDateState();
 
-      qs('reloadBtn').addEventListener('click', () => reloadDashboard(true));
+      qs('reloadBtn').addEventListener('click', () => {
+        reloadPageData(true);
+      });
 
-      await reloadDashboard(false);
+      await reloadPageData(false);
     });
   </script>
 </body>
