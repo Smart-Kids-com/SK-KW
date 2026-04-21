@@ -1,301 +1,826 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Enhanced</title>
+  <title>Smart Kids Kuwait - Admin Enhanced</title>
   <style>
-    :root{
-      --bg:#d7e9f7;
-      --panel:#f3f3f6;
-      --text:#111317;
-      --muted:#6d7175;
-      --line:#e5e7eb;
-      --shadow:0 6px 16px rgba(0,0,0,.06);
-      --radius:18px;
-      --side-w:476px;
-      --top-h:176px;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg1: #dfe6f3;
+      --bg2: #f8f9fc;
+      --text: #0c1222;
+      --muted: #667085;
+      --card: rgba(255,255,255,.72);
+      --line: rgba(255,255,255,.9);
+      --shadow: 0 14px 40px rgba(19, 29, 52, .12);
+      --shadow-soft: 0 10px 26px rgba(19, 29, 52, .08);
+      --radius: 24px;
+      --sidebar-width: 338px;
+      --topbar-height: 92px;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --dark: #202327;
     }
 
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{min-height:100%}
-    body{
-      font-family:Arial, Helvetica, sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      overflow-x:hidden;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial, sans-serif;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 16%, rgba(255,255,255,.98), rgba(255,255,255,.32) 30%, transparent 54%),
+        radial-gradient(circle at 84% 12%, rgba(210,223,255,.86), transparent 34%),
+        linear-gradient(180deg, var(--bg1) 0%, #eef2f8 34%, var(--bg2) 100%);
     }
 
-    a{text-decoration:none;color:inherit}
-    button,input{font-family:inherit}
+    a { text-decoration: none; color: inherit; }
+    button, input { font-family: inherit; }
 
-    .app{
-      min-height:100vh;
-      display:grid;
-      grid-template-columns:var(--side-w) 1fr;
-      grid-template-rows:var(--top-h) 1fr;
+    .app {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr;
+      grid-template-rows: var(--topbar-height) 1fr;
       grid-template-areas:
         "top top"
         "side main";
+      gap: 16px;
+      min-height: 100vh;
+      padding: 14px;
     }
 
-    /* top */
-    .topbar{
-      grid-area:top;
-      background:var(--bg);
-      border-bottom:4px solid rgba(17,19,23,.85);
-      display:grid;
-      grid-template-columns:120px 1fr 108px 1fr;
-      align-items:center;
-      gap:18px;
-      padding:16px 24px 18px;
+    .topbar {
+      grid-area: top;
+      display: grid;
+      grid-template-columns: minmax(360px, 680px) minmax(360px, 700px);
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
     }
 
-    .top-icon,
-    .top-sk{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      line-height:0;
+    .top-search-bar,
+    .top-name {
+      position: relative;
+      border-radius: 22px;
+      overflow: hidden;
+      min-height: 78px;
+      box-shadow: var(--shadow);
     }
 
-    .top-icon img{width:92px;height:auto;display:block}
-    .top-sk img{width:82px;height:auto;display:block}
-
-    .top-search,
-    .top-name{
-      position:relative;
-      line-height:0;
-      min-width:0;
+    .top-search-bar img,
+    .top-name img {
+      display: block;
+      width: 100%;
+      height: 78px;
+      object-fit: fill;
     }
 
-    .top-search img,
-    .top-name img{
-      width:100%;
-      height:auto;
-      display:block;
+    .top-search-bar input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: #fff;
+      font-size: 22px;
+      padding: 0 104px 0 28px;
     }
 
-    .top-search input{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      border:0;
-      background:transparent;
-      outline:none;
-      color:#fff;
-      font-size:24px;
-      padding:0 120px 0 34px;
+    .top-search-bar input::placeholder {
+      color: rgba(255,255,255,.96);
     }
 
-    .top-search input::placeholder{color:#fff;opacity:1}
-
-    /* sidebar */
-    .sidebar{
-      grid-area:side;
-      padding:0 0 0 2px;
+    .search-results {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 0;
+      width: 100%;
+      background: rgba(255,255,255,.98);
+      border: 1px solid rgba(204,210,222,.9);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(18, 26, 44, .16);
+      overflow: hidden;
+      display: none;
+      z-index: 120;
+      backdrop-filter: blur(10px);
     }
 
-    .sidebar-shell{
-      margin-top:2px;
-      min-height:calc(100vh - var(--top-h));
-      background:linear-gradient(180deg,#06144d 0%, #07123f 100%);
-      border-radius:0 0 22px 0;
-      padding:58px 14px 16px;
-      position:relative;
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+    .search-results.open {
+      display: block;
     }
 
-    .sidebar-shell::after{
-      content:"";
-      position:absolute;
-      left:0;
-      bottom:0;
-      width:86px;
-      height:86px;
-      background:linear-gradient(135deg, transparent 0 60%, rgba(255,255,255,.14) 60% 100%);
-      opacity:.55;
-      pointer-events:none;
+    .search-results-inner {
+      max-height: 460px;
+      overflow: auto;
+      padding: 10px;
     }
 
-    .nav-stack{display:flex;flex-direction:column;gap:10px}
-
-    .nav-item{
-      position:relative;
-      display:block;
-      line-height:0;
-      border-radius:18px;
-      overflow:hidden;
+    .search-empty,
+    .search-loading {
+      padding: 18px;
+      font-size: 14px;
+      color: #6b7280;
+      text-align: center;
     }
 
-    .nav-item img{display:block;width:100%;height:auto}
-
-    .nav-badge{
-      position:absolute;
-      left:18px;
-      top:50%;
-      transform:translateY(-50%);
-      min-width:30px;
-      height:22px;
-      border-radius:999px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:0 7px;
-      background:rgba(255,255,255,.92);
-      font-size:12px;
-      font-weight:800;
-      color:#444;
+    .search-group {
+      padding: 6px 0 10px;
     }
 
-    /* main */
-    .main{
-      grid-area:main;
-      background:#fff;
-      padding:18px 20px 28px;
+    .search-group-title {
+      font-size: 12px;
+      font-weight: 900;
+      color: #6b7280;
+      letter-spacing: .4px;
+      padding: 8px 12px;
+      text-transform: uppercase;
     }
 
-    .page{
-      max-width:1320px;
-      margin:0 auto;
+    .search-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      transition: background .12s ease;
     }
 
-    .toolbar{
-      display:flex;
-      align-items:center;
-      gap:18px;
-      flex-wrap:wrap;
-      margin:0 0 14px;
+    .search-item:hover {
+      background: #f3f5f9;
     }
 
-    .toolbar img{
-      display:block;
-      height:48px;
-      width:auto;
+    .search-bullet {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: #eef2f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 16px;
     }
 
-    .stats-strip{
-      background:var(--panel);
-      border-radius:24px;
-      padding:20px 24px 18px;
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:32px;
-      margin-bottom:28px;
+    .search-main {
+      min-width: 0;
+      flex: 1;
     }
 
-    .stat h3{
-      font-size:28px;
-      line-height:1.05;
-      font-weight:900;
-      margin-bottom:10px;
-      color:#000;
+    .search-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 3px;
+      word-break: break-word;
     }
 
-    .stat p{
-      font-size:24px;
-      font-weight:800;
-      color:#000;
+    .search-sub {
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.5;
+      word-break: break-word;
     }
 
-    .action-row{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:18px;
+    .sidebar {
+      grid-area: side;
     }
 
-    .action-row img{display:block;height:78px;width:auto}
-
-    .empty-stage{
-      min-height:420px;
-      background:transparent;
+    .sidebar-shell {
+      background: linear-gradient(180deg, rgba(12,18,48,.92), rgba(8,16,44,.97));
+      border-radius: 28px;
+      padding: 14px 12px;
+      box-shadow: var(--shadow);
+      min-height: calc(100vh - var(--topbar-height) - 36px);
     }
 
-    /* existing dashboard logic blocks kept hidden on desktop reference build */
-    .legacy-hidden{display:none !important}
+    .nav-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
 
-    /* mobile keeps old practical layout */
-    .mobile-top,
-    .mobile-content{display:none}
+    .nav-item {
+      position: relative;
+      display: block;
+      overflow: hidden;
+      border-radius: 18px;
+      line-height: 0;
+      transition: transform .14s ease, filter .14s ease;
+    }
 
-    @media (max-width: 1100px){
-      .app{display:none}
+    .nav-item:hover {
+      transform: translateX(3px);
+      filter: brightness(1.04);
+    }
 
-      .mobile-top{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:12px;
-        position:sticky;
-        top:0;
-        z-index:40;
-        background:#111;
-        color:#fff;
-        padding:12px 14px;
+    .nav-item img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: 50%;
+      left: 14px;
+      transform: translateY(-50%);
+      min-width: 34px;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,.82);
+      color: #202223;
+      font-size: 12px;
+      font-weight: 800;
+      box-shadow: 0 4px 12px rgba(0,0,0,.18);
+    }
+
+    .main {
+      grid-area: main;
+      min-width: 0;
+    }
+
+    .page {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    .alert {
+      display: none;
+      margin-bottom: 12px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .alert.open { display: block; }
+    .alert.success { background: #dcfce7; color: #166534; }
+    .alert.error { background: #fee2e2; color: #991b1b; }
+    .alert.warning { background: #fef3c7; color: #92400e; }
+
+    .toolbar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 4px 0 14px;
+    }
+
+    .toolbar-pill {
+      border: 1px solid rgba(24, 32, 56, .12);
+      background: rgba(255,255,255,.9);
+      color: #0c1222;
+      height: 44px;
+      border-radius: 14px;
+      padding: 0 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 800;
+      box-shadow: 0 5px 18px rgba(20, 28, 44, .06);
+    }
+
+    .toolbar-pill.date-trigger {
+      cursor: pointer;
+    }
+
+    .green-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34,197,94,.14);
+      flex-shrink: 0;
+    }
+
+    .stats-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(10px);
+      padding: 22px 18px;
+      margin-bottom: 18px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .stat-box {
+      min-width: 0;
+    }
+
+    .stat-title {
+      font-size: 18px;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: stretch;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .summary-tile {
+      position: relative;
+      display: inline-block;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 12px 28px rgba(22, 30, 48, .08);
+      line-height: 0;
+    }
+
+    .summary-tile img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .summary-tile-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(15, 23, 42, .82);
+      color: #fff;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1;
+      box-shadow: 0 8px 16px rgba(0,0,0,.18);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.72);
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      height: 36px;
+      border-radius: 12px;
+      border: 1px solid rgba(17,24,39,.12);
+      background: rgba(255,255,255,.92);
+      color: #111827;
+      padding: 0 14px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(16,24,40,.06);
+    }
+
+    .btn.dark {
+      background: #202327;
+      color: #fff;
+      border-color: #202327;
+    }
+
+    .order-list,
+    .activity-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .order-item,
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(255,255,255,.74);
+    }
+
+    .order-main,
+    .activity-main {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .order-title,
+    .activity-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+
+    .order-sub,
+    .activity-sub {
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .pill.green { background: #dcfce7; color: #166534; }
+    .pill.yellow { background: #fef3c7; color: #92400e; }
+    .pill.blue { background: #dbeafe; color: #1d4ed8; }
+    .pill.red { background: #fee2e2; color: #991b1b; }
+    .pill.grey { background: #f3f4f6; color: #4b5563; }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .mini-box {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.76);
+      border: 1px solid rgba(255,255,255,.8);
+    }
+
+    .mini-label {
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .mini-value {
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1.15;
+    }
+
+    .mini-sub {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 78px;
+      background: rgba(11, 18, 34, .12);
+      z-index: 100;
+    }
+
+    .backdrop.open {
+      display: flex;
+    }
+
+    .picker {
+      width: 960px;
+      max-width: calc(100vw - 20px);
+      background: #fff;
+      border: 1px solid #d5d8e1;
+      border-radius: 18px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 214px 1fr;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, .18);
+    }
+
+    .picker-sidebar {
+      background: #f8f8f9;
+      border-right: 1px solid #e6e7ea;
+      padding: 10px 0;
+    }
+
+    .picker-item,
+    .picker-subitem {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      color: #111827;
+    }
+
+    .picker-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 18px;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .picker-item.active {
+      background: #e7e7e8;
+      border-radius: 10px;
+      margin: 0 8px;
+      width: calc(100% - 16px);
+      font-weight: 800;
+    }
+
+    .picker-divider {
+      height: 1px;
+      background: #e6e7ea;
+      margin: 10px 0;
+    }
+
+    .picker-submenu {
+      display: none;
+      padding: 4px 0 8px;
+    }
+
+    .picker-submenu.open {
+      display: block;
+    }
+
+    .picker-subitem {
+      padding: 8px 18px 8px 32px;
+      font-size: 14px;
+      color: #384152;
+    }
+
+    .picker-content {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .picker-top {
+      display: grid;
+      grid-template-columns: 1fr 34px 1fr 44px;
+      gap: 12px;
+      padding: 18px 22px 12px;
+      align-items: center;
+    }
+
+    .picker-date,
+    .picker-time,
+    .picker-icon-btn {
+      height: 44px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      background: #fff;
+      font-size: 15px;
+    }
+
+    .picker-date,
+    .picker-time {
+      width: 100%;
+      padding: 0 14px;
+      outline: none;
+    }
+
+    .picker-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .picker-time-row {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 0 22px 10px;
+    }
+
+    .picker-time-row.open {
+      display: grid;
+    }
+
+    .picker-calendar-wrap {
+      padding: 0 22px 0;
+    }
+
+    .picker-nav {
+      display: grid;
+      grid-template-columns: 28px 1fr 1fr 28px;
+      gap: 12px;
+      align-items: center;
+      padding: 6px 0 10px;
+    }
+
+    .picker-nav-btn {
+      border: 0;
+      background: transparent;
+      font-size: 24px;
+      color: #6b7280;
+      cursor: pointer;
+    }
+
+    .picker-months {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 36px;
+      min-height: 332px;
+    }
+
+    .month-title {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .weekdays,
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .weekdays div {
+      text-align: center;
+      font-size: 14px;
+      color: #6b7280;
+      padding-bottom: 6px;
+    }
+
+    .day {
+      height: 38px;
+      border: 0;
+      background: transparent;
+      border-radius: 12px;
+      font-size: 15px;
+      cursor: pointer;
+      color: #111827;
+    }
+
+    .day.muted {
+      color: #c8ccd4;
+      cursor: default;
+    }
+
+    .day.in-range {
+      background: #f2f4f7;
+      border-radius: 0;
+    }
+
+    .day.range-start,
+    .day.range-end,
+    .day.single {
+      background: #2f3136;
+      color: #fff;
+      font-weight: 800;
+      border-radius: 12px;
+    }
+
+    .picker-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 16px 22px 18px;
+      border-top: 1px solid #eceef2;
+      margin-top: 8px;
+    }
+
+    .picker-footer button {
+      height: 40px;
+      border-radius: 12px;
+      padding: 0 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-light {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: #111827;
+    }
+
+    .btn-dark {
+      border: 1px solid #2f3136;
+      background: #2f3136;
+      color: #fff;
+    }
+
+    @media (max-width: 1200px) {
+      .topbar {
+        grid-template-columns: 1fr 420px;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr;
+        grid-template-areas:
+          "top"
+          "side"
+          "main";
       }
 
-      .mobile-top .title{
-        font-size:20px;
-        font-weight:900;
+      .topbar {
+        grid-template-columns: 1fr;
       }
 
-      .mobile-top button{
-        border:0;
-        background:#0d0d0f;
-        color:#fff;
-        border-radius:14px;
-        padding:14px 18px;
-        font-size:16px;
-        font-weight:800;
+      .sidebar-shell {
+        min-height: auto;
       }
 
-      .mobile-content{
-        display:block;
-        padding:14px;
+      .picker {
+        grid-template-columns: 1fr;
       }
 
-      .card{
-        background:#fff;
-        border:1px solid var(--line);
-        border-radius:18px;
-        box-shadow:var(--shadow);
-        overflow:hidden;
-        margin-bottom:14px;
+      .picker-months {
+        grid-template-columns: 1fr;
+        gap: 24px;
       }
 
-      .card-head{
-        padding:14px 16px;
-        border-bottom:1px solid var(--line);
-        font-size:15px;
-        font-weight:800;
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:10px;
-        flex-wrap:wrap;
+      .picker-top {
+        grid-template-columns: 1fr;
       }
 
-      .card-body{padding:16px}
+      .summary-row {
+        flex-direction: column;
+      }
+    }
 
-      .date-presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-      .btn-chip{
-        border:0;
-        background:#f1f2f3;
-        border-radius:999px;
-        padding:12px 18px;
-        font-size:16px;
-        font-weight:800;
+    @media (max-width: 640px) {
+      .stats-grid,
+      .mini-grid {
+        grid-template-columns: 1fr;
       }
 
-      .btn-chip.active{background:#111827;color:#fff}
-
-      .field{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-      .field label{font-size:14px;font-weight:800;color:#4b5563}
-      .field input{
-        width:100%;height:54px;border-radius:16px;border:1px solid #d1d5db;padding:0 14px;font-size:16px;
+      .top-search-bar input {
+        font-size: 18px;
+        padding-right: 72px;
       }
     }
   </style>
@@ -303,9 +828,14 @@
 <body>
   <div class="app">
     <header class="topbar">
-      <div class="top-search" aria-label="Search">
+      <div class="top-search-bar" aria-label="Search Bar">
         <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/search-bar.webp?v=1776716710" alt="search bar">
-        <input type="search" placeholder="Search">
+        <input id="globalSearchInput" type="search" placeholder="Search">
+        <div class="search-results" id="searchResults">
+          <div class="search-results-inner" id="searchResultsInner">
+            <div class="search-empty">Start typing to search...</div>
+          </div>
+        </div>
       </div>
 
       <div class="top-name" aria-label="sk logo with Arabic name">
@@ -329,344 +859,1070 @@
       </div>
     </aside>
 
-     <!-- Date range -->
-            <section class="card">
-              <div class="card-head">
-                <span>📅 الفترة الزمنية</span>
-                <span class="chip blue" id="activeRangeLabel">كل الوقت</span>
-              </div>
-              <div class="card-body">
-                <div class="date-presets">
-                  <button class="btn chip active-filter" type="button" data-range="all"       onclick="applyPresetRange('all',this)">كل الوقت</button>
-                  <button class="btn chip"               type="button" data-range="today"     onclick="applyPresetRange('today',this)">اليوم</button>
-                  <button class="btn chip"               type="button" data-range="yesterday" onclick="applyPresetRange('yesterday',this)">أمس</button>
-                  <button class="btn chip"               type="button" data-range="last7"     onclick="applyPresetRange('last7',this)">آخر 7 أيام</button>
-                  <button class="btn chip"               type="button" data-range="last30"    onclick="applyPresetRange('last30',this)">آخر 30 يومًا</button>
-                </div>
+    <main class="main">
+      <div class="page">
+        <div id="alertBox" class="alert"></div>
 
-                <div class="field-grid">
-                  <div class="field">
-                    <label for="dateFromInput">من</label>
-                    <input id="dateFromInput" type="date">
-                  </div>
-                  <div class="field">
-                    <label for="dateToInput">إلى</label>
-                    <input id="dateToInput" type="date">
-                  </div>
-                  <button class="btn primary" type="button" style="height:40px" onclick="applyCustomRange()">تطبيق</button>
-                </div>
+        <div class="toolbar-row">
+          <button class="toolbar-pill date-trigger" id="openDatePickerBtn" type="button">
+            <span style="font-size:18px">🗂</span>
+            <span id="dateTriggerLabel">All Date Options</span>
+          </button>
 
-                <div class="helper">اختَر فترة جاهزة أو نطاقًا مخصصًا — ستتحدث جميع المؤشرات فورًا.</div>
-              </div>
-            </section>
+          <button class="toolbar-pill" type="button">
+            <span style="font-size:18px">🔀</span>
+            <span>All Channels</span>
+          </button>
 
+          <button class="toolbar-pill live" type="button">
+            <span class="green-dot"></span>
+            <span id="liveVisitorsLabel">— Live Visitor</span>
+          </button>
+        </div>
 
-        <section class="stats-strip" aria-label="Stats strip">
-          <div class="stat">
-            <h3>Sessions</h3>
-            <p>50 —</p>
-          </div>
-          <div class="stat">
-            <h3>Total Sales</h3>
-            <p>KWD 0.000</p>
-          </div>
-          <div class="stat">
-            <h3>Orders</h3>
-            <p>4 —</p>
-          </div>
-          <div class="stat">
-            <h3>Conversion rate</h3>
-            <p>2.90% —</p>
+        <section class="stats-card">
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-title">Sessions</div>
+              <div class="stat-value" id="sessionsValue">—</div>
+              <div class="stat-sub">Uses analytics endpoint if available</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-title">Total Sales</div>
+              <div class="stat-value" id="salesValue">KWD 0.000</div>
+              <div class="stat-sub">Calculated from filtered orders</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-title">Orders</div>
+              <div class="stat-value" id="ordersValue">0</div>
+              <div class="stat-sub">Within selected date range</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-title">Conversion rate</div>
+              <div class="stat-value" id="conversionValue">—</div>
+              <div class="stat-sub">Analytics endpoint or recovery fallback</div>
+            </div>
           </div>
         </section>
 
-        <div class="action-row">
-          <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/orders-to-fullfill.webp?v=1776716710" alt="30+ Orders to fulfill">
-          <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/payment-to-capure.webp?v=1776716710" alt="5 Payments to capture">
-        </div>
+        <section class="summary-row">
+          <span class="summary-tile">
+            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/orders-to-fullfill.webp?v=1776716710" alt="Orders to fulfill">
+            <span class="summary-tile-badge" id="fulfillBadge">0</span>
+          </span>
 
-        <div class="empty-stage"></div>
+          <span class="summary-tile">
+            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/payment-to-capure.webp?v=1776716710" alt="Payments to capture">
+            <span class="summary-tile-badge" id="paymentsBadge">0</span>
+          </span>
+        </section>
 
-        <!-- original logic DOM retained but hidden -->
-        <div class="legacy-hidden">
-          <div id="alertBox"></div>
-          <div id="activeRangeLabel"></div>
-          <input id="dateFromInput" type="date">
-          <input id="dateToInput" type="date">
-          <div id="loadedOrdersChip"></div>
-          <div id="pendingChip"></div>
-          <div id="totalSalesValue"></div>
-          <div id="ordersCountValue"></div>
-          <div id="avgOrderValue"></div>
-          <div id="pendingOrdersValue"></div>
-          <div id="attentionPendingValue"></div>
-          <div id="attentionTodayValue"></div>
-          <div id="attentionCancelledValue"></div>
-          <div id="miniLoadedOrders"></div>
-          <div id="miniFilteredOrders"></div>
-          <div id="miniRangeLabel"></div>
-          <div id="recentOrdersList"></div>
-          <button id="refreshBtn" type="button"></button>
-          <button id="mobileRefreshBtn" type="button"></button>
-        </div>
+        <section class="dashboard-grid">
+          <div class="card">
+            <div class="card-head">
+              <span>Recent Orders</span>
+              <div class="card-actions">
+                <button class="btn dark" id="reloadBtn" type="button">Refresh</button>
+                <a class="btn" href="/orders-admin.html">Open Orders</a>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="order-list" id="recentOrdersList">
+                <div class="order-item">
+                  <div class="order-main">
+                    <div class="order-title">Loading orders...</div>
+                    <div class="order-sub">Please wait</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid; gap:16px;">
+            <section class="card">
+              <div class="card-head">
+                <span>Quick Snapshot</span>
+              </div>
+              <div class="card-body">
+                <div class="mini-grid">
+                  <div class="mini-box">
+                    <div class="mini-label">Loaded Orders</div>
+                    <div class="mini-value" id="loadedOrdersValue">0</div>
+                    <div class="mini-sub">All fetched orders from backend</div>
+                  </div>
+
+                  <div class="mini-box">
+                    <div class="mini-label">Filtered Orders</div>
+                    <div class="mini-value" id="filteredOrdersValue">0</div>
+                    <div class="mini-sub">Current date selection only</div>
+                  </div>
+
+                  <div class="mini-box">
+                    <div class="mini-label">Open Abandoned</div>
+                    <div class="mini-value" id="openAbandonedValue">0</div>
+                    <div class="mini-sub">From abandoned checkout stats</div>
+                  </div>
+
+                  <div class="mini-box">
+                    <div class="mini-label">Recovered</div>
+                    <div class="mini-value" id="recoveredAbandonedValue">0</div>
+                    <div class="mini-sub">Recovered abandoned checkouts</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-head">
+                <span>System Notes</span>
+              </div>
+              <div class="card-body">
+                <div class="activity-list" id="systemNotesList">
+                  <div class="activity-item">
+                    <div class="activity-main">
+                      <div class="activity-title">Analytics fallback mode</div>
+                      <div class="activity-sub">If no analytics endpoint exists, sales and orders stay real from orders API, while sessions/live visitors/conversion use optional endpoints or graceful fallback.</div>
+                    </div>
+                  </div>
+                  <div class="activity-item">
+                    <div class="activity-main">
+                      <div class="activity-title">Global search</div>
+                      <div class="activity-sub">Search tries orders, abandoned checkouts, products, collections, and customers. Missing endpoints are skipped without breaking the page.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
       </div>
     </main>
   </div>
 
-  <div class="mobile-top">
-    <div class="title">🏠 لوحة التحكم</div>
-    <button id="mobileRefreshBtnReal" onclick="reloadDashboard(true)">تحديث البيانات</button>
-  </div>
+  <div class="backdrop" id="pickerBackdrop">
+    <div class="picker" role="dialog" aria-modal="true" aria-label="Date range picker">
+      <aside class="picker-sidebar">
+        <button class="picker-item active" data-mode="today">Today</button>
+        <button class="picker-item" data-mode="yesterday">Yesterday</button>
 
-  <div class="mobile-content">
-    <section class="card">
-      <div class="card-head">
-        <span>📅 الفترة الزمنية</span>
-        <span id="activeRangeLabelMobile">كل الوقت</span>
-      </div>
-      <div class="card-body">
-        <div class="date-presets">
-          <button class="btn-chip active" type="button" data-range="all" onclick="applyPresetRange('all',this)">كل الوقت</button>
-          <button class="btn-chip" type="button" data-range="today" onclick="applyPresetRange('today',this)">اليوم</button>
-          <button class="btn-chip" type="button" data-range="yesterday" onclick="applyPresetRange('yesterday',this)">أمس</button>
-          <button class="btn-chip" type="button" data-range="last7" onclick="applyPresetRange('last7',this)">آخر 7 أيام</button>
-          <button class="btn-chip" type="button" data-range="last30" onclick="applyPresetRange('last30',this)">آخر 30 يومًا</button>
+        <div class="picker-divider"></div>
+
+        <button class="picker-item" id="lastToggle" type="button">
+          <span>Last</span>
+          <span>›</span>
+        </button>
+        <div class="picker-submenu" id="lastMenu">
+          <button class="picker-subitem" data-last="30m">Last 30 minutes</button>
+          <button class="picker-subitem" data-last="12h">Last 12 hours</button>
+          <button class="picker-subitem" data-last="7d">Last 7 days</button>
+          <button class="picker-subitem" data-last="30d">Last 30 days</button>
+          <button class="picker-subitem" data-last="90d">Last 90 days</button>
+          <button class="picker-subitem" data-last="365d">Last 365 days</button>
+          <button class="picker-subitem" data-last="week">Last week</button>
+          <button class="picker-subitem" data-last="month">Last month</button>
+          <button class="picker-subitem" data-last="quarter">Last quarter</button>
+          <button class="picker-subitem" data-last="12months">Last 12 months</button>
+          <button class="picker-subitem" data-last="year">Last year</button>
         </div>
-        <div class="field">
-          <label for="mobileDateFrom">من</label>
-          <input id="mobileDateFrom" type="date" onchange="syncMobileDate('from', this.value)">
+
+        <button class="picker-item" id="periodToggle" type="button">
+          <span>Period to date</span>
+          <span>›</span>
+        </button>
+        <div class="picker-submenu" id="periodMenu">
+          <button class="picker-subitem" data-period="wtd">Week to date</button>
+          <button class="picker-subitem" data-period="mtd">Month to date</button>
+          <button class="picker-subitem" data-period="qtd">Quarter to date</button>
+          <button class="picker-subitem" data-period="ytd">Year to date</button>
         </div>
-        <div class="field">
-          <label for="mobileDateTo">إلى</label>
-          <input id="mobileDateTo" type="date" onchange="syncMobileDate('to', this.value)">
+
+        <div class="picker-divider"></div>
+
+        <button class="picker-item" data-mode="custom">Custom range</button>
+      </aside>
+
+      <section class="picker-content">
+        <div class="picker-top">
+          <input class="picker-date" id="startDateInput" type="text" readonly>
+          <div style="text-align:center;font-size:24px;color:#6b7280">→</div>
+          <input class="picker-date" id="endDateInput" type="text" readonly>
+          <button class="picker-icon-btn" id="toggleTimeBtn" type="button" title="Time">🕘</button>
         </div>
-      </div>
-    </section>
+
+        <div class="picker-time-row" id="timeRow">
+          <input class="picker-time" id="startTimeInput" type="time" value="00:00">
+          <input class="picker-time" id="endTimeInput" type="time" value="23:59">
+        </div>
+
+        <div class="picker-calendar-wrap">
+          <div class="picker-nav">
+            <button class="picker-nav-btn" id="prevMonthBtn" type="button">←</button>
+            <div></div>
+            <div></div>
+            <button class="picker-nav-btn" id="nextMonthBtn" type="button">→</button>
+          </div>
+
+          <div class="picker-months">
+            <div id="monthLeft"></div>
+            <div id="monthRight"></div>
+          </div>
+        </div>
+
+        <div class="picker-footer">
+          <button class="btn-light" id="cancelPickerBtn" type="button">Cancel</button>
+          <button class="btn-dark" id="applyPickerBtn" type="button">Apply</button>
+        </div>
+      </section>
+    </div>
   </div>
 
   <script>
     const ORDERS_API = '/api/orders';
-    const FETCH_LIMIT = 50;
-    const FETCH_LIMIT_MAX = 200;
+    const ABANDONED_STATS_API = '/api/abandoned-checkouts/stats/summary';
+    const SEARCH_ENDPOINTS = [
+      { key: 'orders', label: 'Orders', icon: '📦', url: (q) => `/api/orders?limit=8&offset=0&sort=created_at&order=DESC&search=${encodeURIComponent(q)}` },
+      { key: 'abandoned', label: 'Abandoned', icon: '🛒', url: (q) => `/api/abandoned-checkouts?limit=6&offset=0&search=${encodeURIComponent(q)}` },
+      { key: 'products', label: 'Products', icon: '🏷️', url: (q) => `/api/products?limit=6&offset=0&search=${encodeURIComponent(q)}` },
+      { key: 'collections', label: 'Collections', icon: '🗂️', url: (q) => `/api/collections?limit=6&offset=0&search=${encodeURIComponent(q)}` },
+      { key: 'customers', label: 'Customers', icon: '👥', url: (q) => `/api/customers?limit=6&offset=0&search=${encodeURIComponent(q)}` }
+    ];
 
-    let allOrders = [];
-    let activeRange = 'all';
-    let isLoading = false;
+    const OPTIONAL_ANALYTICS_ENDPOINTS = [
+      '/api/analytics/summary',
+      '/api/dashboard/summary',
+      '/api/admin/summary'
+    ];
 
-    const RANGE_LABELS = {
-      all: 'كل الوقت',
-      today: 'اليوم',
-      yesterday: 'أمس',
-      last7: 'آخر 7 أيام',
-      last30: 'آخر 30 يومًا',
-      custom: 'نطاق مخصص'
+    const OPTIONAL_LIVE_ENDPOINTS = [
+      '/api/live-visitors',
+      '/api/analytics/live-visitors'
+    ];
+
+    const STATUS_COLORS = {
+      pending: 'yellow',
+      processing: 'blue',
+      shipped: 'blue',
+      delivered: 'green',
+      completed: 'green',
+      cancelled: 'red',
+      awaiting_payment: 'yellow'
     };
 
-    const STATUS_CHIP = {
-      pending:'yellow', processing:'blue', shipped:'purple', completed:'green', cancelled:'red', delivered:'green', awaiting_payment:'yellow'
+    const state = {
+      allOrders: [],
+      filteredOrders: [],
+      abandonedSummary: { total: 0, open: 0, recovered: 0, closed: 0 },
+      analytics: null,
+      liveVisitors: null,
+      loading: false,
+      searchTimer: null,
+      dateLabel: 'Today',
+      rangeMode: 'today',
+      selectedStart: null,
+      selectedEnd: null,
+      tempStart: null,
+      tempEnd: null,
+      currentBaseMonth: null
     };
 
-    function qs(id){ return document.getElementById(id) }
+    function qs(id) { return document.getElementById(id); }
 
-    function showAlert(message, type='success'){
+    function showAlert(message, type = 'success') {
       const box = qs('alertBox');
-      if (!box) return;
       box.textContent = message;
-      box.className = `active ${type}`;
+      box.className = `alert open ${type}`;
       clearTimeout(window.__alertTimer);
-      window.__alertTimer = setTimeout(()=>{
-        box.className = '';
+      window.__alertTimer = setTimeout(() => {
+        box.className = 'alert';
         box.textContent = '';
-      }, 4000);
+      }, 3500);
     }
 
-    function setText(id, value){ const el = qs(id); if (el) el.textContent = value; }
-
-    function setLoadingState(loading){
-      isLoading = loading;
-      const btns = [qs('refreshBtn'), qs('mobileRefreshBtnReal')].filter(Boolean);
-      btns.forEach(btn => {
-        btn.disabled = loading;
-        btn.textContent = loading ? 'جاري التحديث' : 'تحديث البيانات';
-      });
+    function safeNumber(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
     }
 
-    function formatCurrency(value){ const num = Number(value || 0); return `KWD ${num.toFixed(3)}`; }
-
-    function normalizeDate(value){
-      if (!value) return null;
-      const date = new Date(value);
-      return Number.isNaN(date.getTime()) ? null : date;
+    function safeText(value, fallback = '') {
+      const text = String(value ?? '').trim();
+      return text || fallback;
     }
 
-    function getOrderDate(order){ return normalizeDate(order.created_at || order.createdAt || order.date || order.order_date || order.updated_at || null); }
-    function getOrderTotal(order){ return Number(order.total ?? order.order_total ?? order.final_total ?? order.total_amount ?? 0) || 0; }
-    function isPendingOrder(order){ const s = String(order.status || '').trim().toLowerCase(); return ['pending','processing','awaiting_payment'].includes(s); }
-    function isCancelledOrder(order){ return String(order.status || '').trim().toLowerCase() === 'cancelled'; }
-    function startOfDay(date){ const d = new Date(date); d.setHours(0,0,0,0); return d; }
-    function endOfDay(date){ const d = new Date(date); d.setHours(23,59,59,999); return d; }
-
-    function getPresetRange(name){
-      const now = new Date();
-      if (name === 'today') return { from:startOfDay(now), to:endOfDay(now) };
-      if (name === 'yesterday') { const d = new Date(); d.setDate(d.getDate() - 1); return { from:startOfDay(d), to:endOfDay(d) }; }
-      if (name === 'last7') { const f = new Date(); f.setDate(now.getDate() - 6); return { from:startOfDay(f), to:endOfDay(now) }; }
-      if (name === 'last30') { const f = new Date(); f.setDate(now.getDate() - 29); return { from:startOfDay(f), to:endOfDay(now) }; }
-      return null;
-    }
-
-    function filterOrdersByRange(orders){
-      if (activeRange === 'all') return orders;
-      let range = null;
-      if (activeRange === 'custom') {
-        const fromVal = qs('dateFromInput').value;
-        const toVal = qs('dateToInput').value;
-        if (!fromVal || !toVal) return orders;
-        range = { from:startOfDay(new Date(fromVal)), to:endOfDay(new Date(toVal)) };
-      } else {
-        range = getPresetRange(activeRange);
-      }
-      if (!range) return orders;
-      return orders.filter(o => {
-        const d = getOrderDate(o);
-        return d && d >= range.from && d <= range.to;
-      });
-    }
-
-    function formatShortDate(date){ if (!date) return '—'; return date.toLocaleDateString('ar-KW',{day:'2-digit', month:'short'}); }
-
-    function escapeHtml(v){
+    function escapeHtml(v) {
       return String(v ?? '')
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;')
-        .replace(/'/g,'&#x27;');
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
     }
 
-    function renderRecentOrders(filtered){
-      const list = qs('recentOrdersList');
-      if (!list) return;
-      if (!filtered.length) { list.innerHTML = ''; return; }
-      const rows = [...filtered].sort((a,b)=>(getOrderDate(b)?.getTime()||0)-(getOrderDate(a)?.getTime()||0)).slice(0,5);
-      list.innerHTML = rows.map(order => {
-        const id = order.id || '';
-        const orderNumber = escapeHtml(order.order_number || `#${id}`);
-        const customer = escapeHtml(order.customer_name || 'عميل غير معروف');
-        const total = formatCurrency(getOrderTotal(order));
-        const status = String(order.status || 'pending').trim().toLowerCase();
-        const chipColor = STATUS_CHIP[status] || 'grey';
-        const dateLabel = formatShortDate(getOrderDate(order));
-        return `<a class="activity-item" href="/order-details.html?id=${encodeURIComponent(id)}"><div class="activity-left"><div class="activity-title">${orderNumber} — ${customer}</div><div class="activity-sub">${total}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0"><span class="chip ${chipColor}">${escapeHtml(status)}</span><span class="chip grey">${dateLabel}</span></div></a>`;
-      }).join('');
+    function formatMoney(value) {
+      return `KWD ${safeNumber(value, 0).toFixed(3)}`;
     }
 
-    function renderDashboard(){
-      const filtered = filterOrdersByRange(allOrders);
-      const totalOrders = filtered.length;
-      const totalSales = filtered.reduce((s,o)=>s+getOrderTotal(o),0);
-      const avgOrder = totalOrders ? totalSales / totalOrders : 0;
-      const pendingOrders = filtered.filter(isPendingOrder).length;
-      const cancelledOrders = filtered.filter(isCancelledOrder).length;
-      const today = new Date();
-      const todayOrders = filtered.filter(o => {
-        const d = getOrderDate(o);
-        return d && d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
-      }).length;
-
-      setText('ordersCountBadge', String(allOrders.length));
-      setText('ordersCountBadgeMobile', String(allOrders.length));
-      setText('totalSalesValue', formatCurrency(totalSales));
-      setText('ordersCountValue', String(totalOrders));
-      setText('avgOrderValue', formatCurrency(avgOrder));
-      setText('pendingOrdersValue', String(pendingOrders));
-      setText('loadedOrdersChip', `الطلبات: ${filtered.length}`);
-      setText('pendingChip', `معلقة: ${pendingOrders}`);
-      setText('attentionPendingValue', String(pendingOrders));
-      setText('attentionTodayValue', String(todayOrders));
-      setText('attentionCancelledValue', String(cancelledOrders));
-      setText('miniLoadedOrders', String(allOrders.length));
-      setText('miniFilteredOrders', String(filtered.length));
-      const rangeLabel = RANGE_LABELS[activeRange] || 'كل الوقت';
-      setText('activeRangeLabel', rangeLabel);
-      setText('activeRangeLabelMobile', rangeLabel);
-      setText('miniRangeLabel', rangeLabel);
-      renderRecentOrders(filtered);
+    function formatPercent(value) {
+      return `${safeNumber(value, 0).toFixed(2)}%`;
     }
 
-    async function fetchJsonWithTimeout(url, options={}, timeoutMs=15000){
+    function normalizeDate(value) {
+      if (!value) return null;
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    function getOrderDate(order) {
+      return normalizeDate(order.created_at || order.createdAt || order.order_date || order.date || order.updated_at);
+    }
+
+    function getOrderTotal(order) {
+      return safeNumber(order.total ?? order.final_total ?? order.order_total ?? order.total_amount, 0);
+    }
+
+    function getOrderStatus(order) {
+      return safeText(order.status, 'pending').toLowerCase();
+    }
+
+    function getOrderCustomer(order) {
+      return safeText(order.customer_name, 'Unknown customer');
+    }
+
+    function startOfDay(date) {
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    function endOfDay(date) {
+      const d = new Date(date);
+      d.setHours(23, 59, 59, 999);
+      return d;
+    }
+
+    function cloneDate(date) {
+      return new Date(date.getTime());
+    }
+
+    function formatInputDate(date) {
+      return date.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+
+    function formatShortDate(date) {
+      if (!date) return '—';
+      return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    function isSameDay(a, b) {
+      return a.getFullYear() === b.getFullYear() &&
+             a.getMonth() === b.getMonth() &&
+             a.getDate() === b.getDate();
+    }
+
+    function isBetween(date, start, end) {
+      const x = startOfDay(date).getTime();
+      const s = startOfDay(start).getTime();
+      const e = startOfDay(end).getTime();
+      return x > s && x < e;
+    }
+
+    function monthName(date) {
+      return date.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric'
+      });
+    }
+
+    async function fetchJsonWithTimeout(url, timeoutMs = 15000) {
       const controller = new AbortController();
-      const timer = setTimeout(()=>controller.abort(), timeoutMs);
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
       try {
-        const response = await fetch(url, { ...options, signal:controller.signal, cache:'no-store', headers:{ Accept:'application/json', ...(options.headers||{}) } });
+        const response = await fetch(url, {
+          signal: controller.signal,
+          cache: 'no-store',
+          headers: { Accept: 'application/json' }
+        });
+
         const text = await response.text();
-        if (!text) return { response, result:null };
-        try { return { response, result:JSON.parse(text) }; }
-        catch { throw new Error(`Non-JSON response from ${url}`); }
-      } catch (error) {
-        if (error.name === 'AbortError') throw new Error(`Request timeout: ${url}`);
-        throw error;
+        let result = null;
+
+        if (text) {
+          try {
+            result = JSON.parse(text);
+          } catch (_) {
+            throw new Error(`Non-JSON response from ${url}`);
+          }
+        }
+
+        return { response, result };
       } finally {
         clearTimeout(timer);
       }
     }
 
-    async function fetchAllOrders(){
-      let offset = 0;
-      let total = null;
+    async function fetchAllOrders() {
       const results = [];
+      let offset = 0;
+      const limit = 50;
+      const maxTotal = 500;
+
       while (true) {
-        const url = `${ORDERS_API}?limit=${FETCH_LIMIT}&offset=${offset}&sort=created_at&order=DESC`;
-        const { response, result } = await fetchJsonWithTimeout(url);
-        if (!response.ok || !result?.success) throw new Error(result?.error || 'فشل في تحميل الطلبات');
+        const { response, result } = await fetchJsonWithTimeout(`${ORDERS_API}?limit=${limit}&offset=${offset}&sort=created_at&order=DESC`);
+        if (!response.ok || !result?.success) {
+          throw new Error(result?.error || 'Failed to load orders');
+        }
+
         const chunk = Array.isArray(result.data) ? result.data : [];
         results.push(...chunk);
-        total = Number(result.pagination?.total ?? results.length);
         offset += chunk.length;
-        if (!chunk.length || results.length >= total || results.length >= FETCH_LIMIT_MAX) break;
+
+        const total = safeNumber(result?.pagination?.total, results.length);
+        if (!chunk.length || results.length >= total || results.length >= maxTotal) break;
       }
+
       return results;
     }
 
-    async function reloadDashboard(showMessage=false){
-      if (isLoading) return;
-      setLoadingState(true);
+    async function fetchAbandonedSummary() {
       try {
-        allOrders = await fetchAllOrders();
-        renderDashboard();
+        const { response, result } = await fetchJsonWithTimeout(ABANDONED_STATS_API, 10000);
+        if (!response.ok || !result?.success) return { total: 0, open: 0, recovered: 0, closed: 0 };
+        return {
+          total: safeNumber(result.data?.total, 0),
+          open: safeNumber(result.data?.open, 0),
+          recovered: safeNumber(result.data?.recovered, 0),
+          closed: safeNumber(result.data?.closed, 0)
+        };
+      } catch (_) {
+        return { total: 0, open: 0, recovered: 0, closed: 0 };
+      }
+    }
+
+    async function fetchOptionalAnalyticsSummary(from, to) {
+      for (const baseUrl of OPTIONAL_ANALYTICS_ENDPOINTS) {
+        try {
+          const url = `${baseUrl}?from=${encodeURIComponent(from.toISOString())}&to=${encodeURIComponent(to.toISOString())}`;
+          const { response, result } = await fetchJsonWithTimeout(url, 10000);
+          if (!response.ok || !result) continue;
+
+          const data = result.data || result;
+          return {
+            sessions: safeNumber(data.sessions, null),
+            totalSales: safeNumber(data.totalSales ?? data.sales, null),
+            orders: safeNumber(data.orders, null),
+            conversionRate: safeNumber(data.conversionRate ?? data.conversion_rate, null)
+          };
+        } catch (_) {}
+      }
+      return null;
+    }
+
+    async function fetchOptionalLiveVisitors() {
+      for (const baseUrl of OPTIONAL_LIVE_ENDPOINTS) {
+        try {
+          const { response, result } = await fetchJsonWithTimeout(baseUrl, 8000);
+          if (!response.ok || !result) continue;
+          const data = result.data || result;
+          const count = safeNumber(data.liveVisitors ?? data.live_visitors ?? data.count, null);
+          if (count !== null) return count;
+        } catch (_) {}
+      }
+      return null;
+    }
+
+    function getSelectedRange() {
+      return {
+        from: cloneDate(state.selectedStart),
+        to: cloneDate(state.selectedEnd)
+      };
+    }
+
+    function filterOrdersByCurrentRange() {
+      const { from, to } = getSelectedRange();
+      return state.allOrders.filter(order => {
+        const d = getOrderDate(order);
+        return d && d >= from && d <= to;
+      });
+    }
+
+    function deriveConversionRate(ordersCount, abandonedSummary) {
+      const recovered = safeNumber(abandonedSummary?.recovered, 0);
+      const open = safeNumber(abandonedSummary?.open, 0);
+      const base = ordersCount + open;
+      if (!base) return null;
+      return (ordersCount / base) * 100;
+    }
+
+    function countOrdersToFulfill(orders) {
+      return orders.filter(order => ['pending', 'processing'].includes(getOrderStatus(order))).length;
+    }
+
+    function countPaymentsToCapture(orders) {
+      return orders.filter(order => ['awaiting_payment', 'pending'].includes(getOrderStatus(order))).length;
+    }
+
+    function renderStats() {
+      state.filteredOrders = filterOrdersByCurrentRange();
+
+      const totalOrders = state.filteredOrders.length;
+      const totalSales = state.filteredOrders.reduce((sum, order) => sum + getOrderTotal(order), 0);
+
+      const sessionsValue = state.analytics?.sessions;
+      const ordersValue = state.analytics?.orders ?? totalOrders;
+      const salesValue = state.analytics?.totalSales ?? totalSales;
+
+      let conversion = state.analytics?.conversionRate;
+      if (conversion === null || conversion === undefined || Number.isNaN(conversion)) {
+        conversion = deriveConversionRate(totalOrders, state.abandonedSummary);
+      }
+
+      qs('sessionsValue').textContent = sessionsValue === null || sessionsValue === undefined ? '—' : String(Math.round(sessionsValue));
+      qs('salesValue').textContent = formatMoney(salesValue);
+      qs('ordersValue').textContent = String(Math.round(ordersValue));
+      qs('conversionValue').textContent = conversion === null || conversion === undefined ? '—' : formatPercent(conversion);
+
+      qs('ordersCountBadge').textContent = String(state.allOrders.length);
+      qs('loadedOrdersValue').textContent = String(state.allOrders.length);
+      qs('filteredOrdersValue').textContent = String(totalOrders);
+      qs('openAbandonedValue').textContent = String(state.abandonedSummary.open);
+      qs('recoveredAbandonedValue').textContent = String(state.abandonedSummary.recovered);
+
+      qs('fulfillBadge').textContent = String(countOrdersToFulfill(state.filteredOrders));
+      qs('paymentsBadge').textContent = String(countPaymentsToCapture(state.filteredOrders));
+
+      const live = state.liveVisitors;
+      qs('liveVisitorsLabel').textContent = live === null || live === undefined ? '— Live Visitor' : `${live} Live Visitor`;
+
+      renderRecentOrders();
+    }
+
+    function renderRecentOrders() {
+      const list = qs('recentOrdersList');
+      const rows = [...state.filteredOrders]
+        .sort((a, b) => (getOrderDate(b)?.getTime() || 0) - (getOrderDate(a)?.getTime() || 0))
+        .slice(0, 6);
+
+      if (!rows.length) {
+        list.innerHTML = `
+          <div class="order-item">
+            <div class="order-main">
+              <div class="order-title">No orders found</div>
+              <div class="order-sub">No orders in the selected date range</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = rows.map(order => {
+        const id = order.id || '';
+        const number = escapeHtml(order.order_number || `#${id}`);
+        const customer = escapeHtml(getOrderCustomer(order));
+        const total = formatMoney(getOrderTotal(order));
+        const status = getOrderStatus(order);
+        const pill = STATUS_COLORS[status] || 'grey';
+        const dateLabel = formatShortDate(getOrderDate(order));
+
+        return `
+          <a class="order-item" href="/order-details.html?id=${encodeURIComponent(id)}">
+            <div class="order-main">
+              <div class="order-title">${number} - ${customer}</div>
+              <div class="order-sub">${total} | ${dateLabel}</div>
+            </div>
+            <span class="pill ${pill}">${escapeHtml(status)}</span>
+          </a>
+        `;
+      }).join('');
+    }
+
+    async function reloadDashboard(showMessage = false) {
+      if (state.loading) return;
+      state.loading = true;
+      qs('reloadBtn').disabled = true;
+      qs('reloadBtn').textContent = 'Refreshing...';
+
+      try {
+        state.allOrders = await fetchAllOrders();
+        state.abandonedSummary = await fetchAbandonedSummary();
+
+        const range = getSelectedRange();
+        state.analytics = await fetchOptionalAnalyticsSummary(range.from, range.to);
+        state.liveVisitors = await fetchOptionalLiveVisitors();
+
+        renderStats();
+        if (showMessage) showAlert('Dashboard updated successfully', 'success');
       } catch (error) {
         console.error(error);
+        showAlert(error.message || 'Failed to load dashboard', 'error');
       } finally {
-        setLoadingState(false);
+        state.loading = false;
+        qs('reloadBtn').disabled = false;
+        qs('reloadBtn').textContent = 'Refresh';
       }
     }
 
-    function applyPresetRange(rangeName, btn){
-      if (isLoading) return;
-      activeRange = rangeName;
-      if (rangeName !== 'custom') {
-        qs('dateFromInput').value = '';
-        qs('dateToInput').value = '';
-        const mobileFrom = qs('mobileDateFrom');
-        const mobileTo = qs('mobileDateTo');
-        if (mobileFrom) mobileFrom.value = '';
-        if (mobileTo) mobileTo.value = '';
+    function buildSearchItem(endpointKey, item) {
+      if (endpointKey === 'orders') {
+        const id = item.id || '';
+        return {
+          title: item.order_number || `Order #${id}`,
+          sub: `${safeText(item.customer_name, 'Unknown customer')} | ${formatMoney(getOrderTotal(item))}`,
+          href: `/order-details.html?id=${encodeURIComponent(id)}`
+        };
       }
-      document.querySelectorAll('[data-range]').forEach(b => b.classList.toggle('active', b === btn));
-      renderDashboard();
+
+      if (endpointKey === 'abandoned') {
+        return {
+          title: item.customer_name || item.checkout_token || 'Abandoned checkout',
+          sub: `${safeText(item.customer_email || item.customer_phone || item.contact_value, 'No contact')} | ${formatMoney(item.total)}`,
+          href: `/abandoned-checkouts-admin.html`
+        };
+      }
+
+      if (endpointKey === 'products') {
+        return {
+          title: item.name || item.title || 'Product',
+          sub: safeText(item.slug || item.sku || item.id, 'Product record'),
+          href: `/products-admin`
+        };
+      }
+
+      if (endpointKey === 'collections') {
+        return {
+          title: item.name || item.title || 'Collection',
+          sub: safeText(item.slug || item.handle || item.id, 'Collection record'),
+          href: `/collections-admin`
+        };
+      }
+
+      if (endpointKey === 'customers') {
+        return {
+          title: item.name || item.customer_name || item.email || 'Customer',
+          sub: safeText(item.email || item.phone || item.id, 'Customer record'),
+          href: `/customers-admin`
+        };
+      }
+
+      return null;
     }
 
-    function syncMobileDate(which, value){
-      if (which === 'from') qs('dateFromInput').value = value;
-      if (which === 'to') qs('dateToInput').value = value;
-      if (qs('dateFromInput').value && qs('dateToInput').value) {
-        activeRange = 'custom';
-        renderDashboard();
+    function renderSearchResults(groups) {
+      const box = qs('searchResults');
+      const inner = qs('searchResultsInner');
+
+      const validGroups = groups.filter(group => group.items.length);
+
+      if (!validGroups.length) {
+        inner.innerHTML = `<div class="search-empty">No results found</div>`;
+        box.classList.add('open');
+        return;
       }
+
+      inner.innerHTML = validGroups.map(group => `
+        <div class="search-group">
+          <div class="search-group-title">${escapeHtml(group.label)}</div>
+          ${group.items.map(item => `
+            <a class="search-item" href="${escapeHtml(item.href)}">
+              <div class="search-bullet">${escapeHtml(group.icon)}</div>
+              <div class="search-main">
+                <div class="search-title">${escapeHtml(item.title)}</div>
+                <div class="search-sub">${escapeHtml(item.sub)}</div>
+              </div>
+            </a>
+          `).join('')}
+        </div>
+      `).join('');
+
+      box.classList.add('open');
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      reloadDashboard(false);
+    async function runGlobalSearch(query) {
+      const box = qs('searchResults');
+      const inner = qs('searchResultsInner');
+
+      if (!query) {
+        inner.innerHTML = `<div class="search-empty">Start typing to search...</div>`;
+        box.classList.remove('open');
+        return;
+      }
+
+      inner.innerHTML = `<div class="search-loading">Searching...</div>`;
+      box.classList.add('open');
+
+      const groups = [];
+
+      await Promise.all(SEARCH_ENDPOINTS.map(async endpoint => {
+        try {
+          const { response, result } = await fetchJsonWithTimeout(endpoint.url(query), 10000);
+          if (!response.ok || !result?.success) return;
+
+          const raw = Array.isArray(result.data) ? result.data : [];
+          const mapped = raw
+            .map(item => buildSearchItem(endpoint.key, item))
+            .filter(Boolean)
+            .slice(0, 6);
+
+          groups.push({
+            key: endpoint.key,
+            label: endpoint.label,
+            icon: endpoint.icon,
+            items: mapped
+          });
+        } catch (_) {}
+      }));
+
+      renderSearchResults(groups);
+    }
+
+    function bindSearch() {
+      const input = qs('globalSearchInput');
+      const box = qs('searchResults');
+
+      input.addEventListener('input', () => {
+        const value = safeText(input.value);
+        clearTimeout(state.searchTimer);
+        state.searchTimer = setTimeout(() => {
+          runGlobalSearch(value);
+        }, 260);
+      });
+
+      input.addEventListener('focus', () => {
+        if (safeText(input.value)) box.classList.add('open');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!box.contains(e.target) && e.target !== input) {
+          box.classList.remove('open');
+        }
+      });
+    }
+
+    function renderMonth(container, monthDate) {
+      const firstDay = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+      const lastDay = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
+      const startWeekday = firstDay.getDay();
+      const daysInMonth = lastDay.getDate();
+      const prevMonthLastDay = new Date(monthDate.getFullYear(), monthDate.getMonth(), 0).getDate();
+
+      let html = `
+        <div class="month-title">${monthName(monthDate)}</div>
+        <div class="weekdays">
+          <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        </div>
+        <div class="days-grid">
+      `;
+
+      for (let i = 0; i < startWeekday; i++) {
+        const dayNum = prevMonthLastDay - startWeekday + i + 1;
+        html += `<button class="day muted" type="button" disabled>${dayNum}</button>`;
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(monthDate.getFullYear(), monthDate.getMonth(), day);
+        const classes = ['day'];
+
+        const singleDay = isSameDay(state.tempStart, state.tempEnd) && isSameDay(date, state.tempStart);
+        if (singleDay) {
+          classes.push('single');
+        } else {
+          if (isSameDay(date, state.tempStart)) classes.push('range-start');
+          if (isSameDay(date, state.tempEnd)) classes.push('range-end');
+          if (isBetween(date, state.tempStart, state.tempEnd)) classes.push('in-range');
+        }
+
+        html += `<button class="${classes.join(' ')}" type="button" data-date="${date.toISOString()}">${day}</button>`;
+      }
+
+      const totalCells = startWeekday + daysInMonth;
+      const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+
+      for (let i = 1; i <= remaining; i++) {
+        html += `<button class="day muted" type="button" disabled>${i}</button>`;
+      }
+
+      html += `</div>`;
+      container.innerHTML = html;
+
+      container.querySelectorAll('[data-date]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const clicked = new Date(btn.dataset.date);
+          handleDateClick(clicked);
+        });
+      });
+    }
+
+    function renderCalendars() {
+      const left = new Date(state.currentBaseMonth.getFullYear(), state.currentBaseMonth.getMonth(), 1);
+      const right = new Date(state.currentBaseMonth.getFullYear(), state.currentBaseMonth.getMonth() + 1, 1);
+      renderMonth(qs('monthLeft'), left);
+      renderMonth(qs('monthRight'), right);
+      qs('startDateInput').value = formatInputDate(state.tempStart);
+      qs('endDateInput').value = formatInputDate(state.tempEnd);
+    }
+
+    function clearActivePickerItems() {
+      document.querySelectorAll('.picker-item').forEach(item => item.classList.remove('active'));
+    }
+
+    function activateCustomPicker() {
+      clearActivePickerItems();
+      const customBtn = document.querySelector('.picker-item[data-mode="custom"]');
+      if (customBtn) customBtn.classList.add('active');
+    }
+
+    function getTodayRange() {
+      const now = new Date();
+      return [startOfDay(now), endOfDay(now)];
+    }
+
+    function getYesterdayRange() {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return [startOfDay(d), endOfDay(d)];
+    }
+
+    function getLastRange(key) {
+      const now = new Date();
+
+      if (key === '30m') return [new Date(now.getTime() - 30 * 60 * 1000), now];
+      if (key === '12h') return [new Date(now.getTime() - 12 * 60 * 60 * 1000), now];
+
+      if (key === '7d') {
+        const d = new Date();
+        d.setDate(d.getDate() - 6);
+        return [startOfDay(d), endOfDay(now)];
+      }
+
+      if (key === '30d') {
+        const d = new Date();
+        d.setDate(d.getDate() - 29);
+        return [startOfDay(d), endOfDay(now)];
+      }
+
+      if (key === '90d') {
+        const d = new Date();
+        d.setDate(d.getDate() - 89);
+        return [startOfDay(d), endOfDay(now)];
+      }
+
+      if (key === '365d') {
+        const d = new Date();
+        d.setDate(d.getDate() - 364);
+        return [startOfDay(d), endOfDay(now)];
+      }
+
+      if (key === 'week') {
+        const current = new Date();
+        const day = current.getDay();
+        const endLastWeek = new Date(current);
+        endLastWeek.setDate(current.getDate() - day - 1);
+        const startLastWeek = new Date(endLastWeek);
+        startLastWeek.setDate(endLastWeek.getDate() - 6);
+        return [startOfDay(startLastWeek), endOfDay(endLastWeek)];
+      }
+
+      if (key === 'month') {
+        const current = new Date();
+        const start = new Date(current.getFullYear(), current.getMonth() - 1, 1);
+        const end = new Date(current.getFullYear(), current.getMonth(), 0);
+        return [startOfDay(start), endOfDay(end)];
+      }
+
+      if (key === 'quarter') {
+        const current = new Date();
+        const q = Math.floor(current.getMonth() / 3);
+        const start = new Date(current.getFullYear(), (q - 1) * 3, 1);
+        const end = new Date(current.getFullYear(), q * 3, 0);
+        return [startOfDay(start), endOfDay(end)];
+      }
+
+      if (key === '12months') {
+        const start = new Date();
+        start.setMonth(start.getMonth() - 11);
+        start.setDate(1);
+        return [startOfDay(start), endOfDay(now)];
+      }
+
+      if (key === 'year') {
+        const current = new Date();
+        const start = new Date(current.getFullYear() - 1, 0, 1);
+        const end = new Date(current.getFullYear() - 1, 11, 31);
+        return [startOfDay(start), endOfDay(end)];
+      }
+
+      return getTodayRange();
+    }
+
+    function getPeriodToDateRange(key) {
+      const now = new Date();
+
+      if (key === 'wtd') {
+        const start = new Date(now);
+        const day = start.getDay();
+        start.setDate(start.getDate() - day);
+        return [startOfDay(start), endOfDay(now)];
+      }
+
+      if (key === 'mtd') {
+        const start = new Date(now.getFullYear(), now.getMonth(), 1);
+        return [startOfDay(start), endOfDay(now)];
+      }
+
+      if (key === 'qtd') {
+        const quarter = Math.floor(now.getMonth() / 3);
+        const start = new Date(now.getFullYear(), quarter * 3, 1);
+        return [startOfDay(start), endOfDay(now)];
+      }
+
+      if (key === 'ytd') {
+        const start = new Date(now.getFullYear(), 0, 1);
+        return [startOfDay(start), endOfDay(now)];
+      }
+
+      return getTodayRange();
+    }
+
+    function applyTempRange(start, end, label) {
+      state.tempStart = startOfDay(start);
+      state.tempEnd = endOfDay(end);
+      state.dateLabel = label;
+      state.currentBaseMonth = new Date(state.tempStart.getFullYear(), state.tempStart.getMonth(), 1);
+      renderCalendars();
+    }
+
+    function handleDateClick(clicked) {
+      if (!state.tempStart || (state.tempStart && state.tempEnd && state.tempStart.getTime() !== state.tempEnd.getTime())) {
+        state.tempStart = startOfDay(clicked);
+        state.tempEnd = endOfDay(clicked);
+      } else {
+        if (clicked.getTime() < state.tempStart.getTime()) {
+          state.tempEnd = endOfDay(state.tempStart);
+          state.tempStart = startOfDay(clicked);
+        } else {
+          state.tempEnd = endOfDay(clicked);
+        }
+      }
+
+      state.dateLabel = 'Custom range';
+      activateCustomPicker();
+      renderCalendars();
+    }
+
+    function bindDatePicker() {
+      qs('openDatePickerBtn').addEventListener('click', () => {
+        qs('pickerBackdrop').classList.add('open');
+        state.currentBaseMonth = new Date(state.tempStart.getFullYear(), state.tempStart.getMonth(), 1);
+        renderCalendars();
+      });
+
+      qs('pickerBackdrop').addEventListener('click', (e) => {
+        if (e.target === qs('pickerBackdrop')) {
+          qs('pickerBackdrop').classList.remove('open');
+        }
+      });
+
+      qs('cancelPickerBtn').addEventListener('click', () => {
+        state.tempStart = cloneDate(state.selectedStart);
+        state.tempEnd = cloneDate(state.selectedEnd);
+        qs('pickerBackdrop').classList.remove('open');
+      });
+
+      qs('applyPickerBtn').addEventListener('click', async () => {
+        state.selectedStart = cloneDate(state.tempStart);
+        state.selectedEnd = cloneDate(state.tempEnd);
+        qs('dateTriggerLabel').textContent = state.dateLabel;
+        qs('pickerBackdrop').classList.remove('open');
+        await reloadDashboard(false);
+      });
+
+      qs('toggleTimeBtn').addEventListener('click', () => {
+        qs('timeRow').classList.toggle('open');
+      });
+
+      qs('prevMonthBtn').addEventListener('click', () => {
+        state.currentBaseMonth = new Date(state.currentBaseMonth.getFullYear(), state.currentBaseMonth.getMonth() - 1, 1);
+        renderCalendars();
+      });
+
+      qs('nextMonthBtn').addEventListener('click', () => {
+        state.currentBaseMonth = new Date(state.currentBaseMonth.getFullYear(), state.currentBaseMonth.getMonth() + 1, 1);
+        renderCalendars();
+      });
+
+      document.querySelectorAll('.picker-item[data-mode]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mode = btn.dataset.mode;
+          clearActivePickerItems();
+          btn.classList.add('active');
+
+          if (mode === 'today') {
+            const [s, e] = getTodayRange();
+            applyTempRange(s, e, 'Today');
+          } else if (mode === 'yesterday') {
+            const [s, e] = getYesterdayRange();
+            applyTempRange(s, e, 'Yesterday');
+          } else if (mode === 'custom') {
+            state.dateLabel = 'Custom range';
+          }
+        });
+      });
+
+      qs('lastToggle').addEventListener('click', () => {
+        qs('lastMenu').classList.toggle('open');
+        qs('periodMenu').classList.remove('open');
+      });
+
+      qs('periodToggle').addEventListener('click', () => {
+        qs('periodMenu').classList.toggle('open');
+        qs('lastMenu').classList.remove('open');
+      });
+
+      document.querySelectorAll('[data-last]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const [s, e] = getLastRange(btn.dataset.last);
+          clearActivePickerItems();
+          qs('lastToggle').classList.add('active');
+          applyTempRange(s, e, 'Last');
+        });
+      });
+
+      document.querySelectorAll('[data-period]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const [s, e] = getPeriodToDateRange(btn.dataset.period);
+          clearActivePickerItems();
+          qs('periodToggle').classList.add('active');
+          applyTempRange(s, e, 'Period to date');
+        });
+      });
+    }
+
+    function initState() {
+      const [s, e] = getTodayRange();
+      state.selectedStart = cloneDate(s);
+      state.selectedEnd = cloneDate(e);
+      state.tempStart = cloneDate(s);
+      state.tempEnd = cloneDate(e);
+      state.currentBaseMonth = new Date(s.getFullYear(), s.getMonth(), 1);
+      state.dateLabel = 'Today';
+      qs('dateTriggerLabel').textContent = 'All Date Options';
+      renderCalendars();
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      bindSearch();
+      bindDatePicker();
+      initState();
+
+      qs('reloadBtn').addEventListener('click', () => reloadDashboard(true));
+
+      await reloadDashboard(false);
     });
   </script>
 </body>
