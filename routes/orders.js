@@ -321,7 +321,6 @@ async function findCustomerByEmailOrPhone(email, phone) {
 
   if (!e && !p) return null;
 
-  // Match email case-insensitively, phone by stripping separators.
   const where = [];
   const params = [];
 
@@ -430,7 +429,6 @@ async function upsertCustomerFromOrderSnapshot(orderSnapshot) {
     return { created: true, updated: false, customer: created };
   }
 
-  // Update some fields (don't overwrite notes/is_blocked/marketing flags)
   const nextFullName = fullName || existing.full_name;
   const nextEmail = email || existing.email;
   const nextPhone = phone || existing.phone;
@@ -524,12 +522,16 @@ async function duplicateOrderById(id) {
       customer_city,
       customer_district,
       subtotal,
+      discount_code,
+      discount_type,
+      discount_value,
+      discount_amount,
       shipping_cost,
       total,
       status,
       notes
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       tempOrderNumber,
       safeText(source.customer_name),
@@ -539,6 +541,10 @@ async function duplicateOrderById(id) {
       safeText(source.customer_city),
       safeText(source.customer_district),
       toNumber(source.subtotal, 0),
+      safeText(source.discount_code),
+      safeText(source.discount_type),
+      toNumber(source.discount_value, 0),
+      toNumber(source.discount_amount, 0),
       toNumber(source.shipping_cost, 0),
       toNumber(source.total, 0),
       normalizeStatus(source.status, SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING),
@@ -677,18 +683,18 @@ router.post('/sync-customers', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const {
-  customerName,
-  customerEmail,
-  customerPhone,
-  customerAddress,
-  customerCity,
-  customerDistrict,
-  items,
-  notes,
-  shippingCost,
-  discountAmount,
-  discountCode
-} = req.body;req.body;
+      customerName,
+      customerEmail,
+      customerPhone,
+      customerAddress,
+      customerCity,
+      customerDistrict,
+      items,
+      notes,
+      shippingCost,
+      discountAmount,
+      discountCode
+    } = req.body;
 
     if (!customerName || !customerEmail || !customerPhone || !customerAddress || !items || items.length === 0) {
       return res.status(400).json({
@@ -712,76 +718,81 @@ router.post('/', async (req, res) => {
     }
 
     const normalizedItems = normalizeOrderItems(items);
-if (!normalizedItems.length) {
-  return res.status(400).json({
-    success: false,
-    error: 'الطلب يجب أن يحتوي على منتج واحد على الأقل'
-  });
-}
+    if (!normalizedItems.length) {
+      return res.status(400).json({
+        success: false,
+        error: 'الطلب يجب أن يحتوي على منتج واحد على الأقل'
+      });
+    }
 
-const subtotal = calculateSubtotal(normalizedItems);
+    const subtotal = calculateSubtotal(normalizedItems);
 
-// الشحن منطق السيرفر يحدد قيمته النهائية
-const finalShippingCost = Math.max(0, toNumber(shippingCost, HELPERS.calculateShipping(subtotal)));
+    const finalShippingCost = Math.max(
+      0,
+      toNumber(shippingCost, HELPERS.calculateShipping(subtotal))
+    );
 
-// الخصم لا يزيد عن subtotal
-const finalDiscountAmount = Math.max(0, Math.min(toNumber(discountAmount, 0), subtotal));
-const finalDiscountCode = safeText(discountCode).toUpperCase();
+    const finalDiscountAmount = Math.max(
+      0,
+      Math.min(toNumber(discountAmount, 0), subtotal)
+    );
 
-// الإجمالي النهائي بعد الخصم
-const total = Math.max(0, subtotal - finalDiscountAmount + finalShippingCost);
+    const finalDiscountCode = safeText(discountCode).toUpperCase();
+    const finalDiscountType = finalDiscountAmount > 0 ? 'fixed' : '';
+    const finalDiscountValue = finalDiscountAmount;
 
-const tempOrderNumber = `TEMP-${Date.now()}`;
+    const total = Math.max(0, subtotal - finalDiscountAmount + finalShippingCost);
+    const tempOrderNumber = `TEMP-${Date.now()}`;
 
     await db.run(
-  `INSERT INTO ${ORDERS_TABLE}
-  (
-    order_number,
-    customer_name,
-    customer_email,
-    customer_phone,
-    customer_address,
-    customer_city,
-    customer_district,
-    subtotal,
-    discount_code,
-    discount_type,
-    discount_value,
-    discount_amount,
-    shipping_cost,
-    total,
-    status,
-    notes
-  )
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  [
-    tempOrderNumber,
-    customerName,
-    customerEmail,
-    customerPhone,
-    customerAddress,
-    customerCity || 'الكويت',
-    customerDistrict || '',
-    subtotal,
-    finalDiscountCode,
-    finalDiscountAmount > 0 ? 'fixed' : '',
-    finalDiscountAmount,
-    finalDiscountAmount,
-    finalShippingCost,
-    total,
-    SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING,
-    buildNotesWithMeta(notes || '', {
-      tags: [],
-      archived: false,
-      archived_prev_status: null,
-      fulfillment_requested: false,
-      fulfillment_location: '',
-      restocked: false,
-      returned: false,
-      invoice_sent_at: null
-    })
-  ]
-);
+      `INSERT INTO ${ORDERS_TABLE}
+      (
+        order_number,
+        customer_name,
+        customer_email,
+        customer_phone,
+        customer_address,
+        customer_city,
+        customer_district,
+        subtotal,
+        discount_code,
+        discount_type,
+        discount_value,
+        discount_amount,
+        shipping_cost,
+        total,
+        status,
+        notes
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        tempOrderNumber,
+        customerName,
+        customerEmail,
+        customerPhone,
+        customerAddress,
+        customerCity || 'الكويت',
+        customerDistrict || '',
+        subtotal,
+        finalDiscountCode,
+        finalDiscountType,
+        finalDiscountValue,
+        finalDiscountAmount,
+        finalShippingCost,
+        total,
+        SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING,
+        buildNotesWithMeta(notes || '', {
+          tags: [],
+          archived: false,
+          archived_prev_status: null,
+          fulfillment_requested: false,
+          fulfillment_location: '',
+          restocked: false,
+          returned: false,
+          invoice_sent_at: null
+        })
+      ]
+    );
 
     const savedOrder = await db.get(
       `SELECT id
@@ -811,7 +822,6 @@ const tempOrderNumber = `TEMP-${Date.now()}`;
 
     await replaceOrderItems(savedOrder.id, normalizedItems);
 
-    // Sync customer record after the order is created (so stats include it)
     await upsertCustomerFromOrderSnapshot({
       customer_name: customerName,
       customer_email: customerEmail,
@@ -1091,7 +1101,8 @@ router.put('/:id/shipping', async (req, res) => {
     if (shippingCost !== undefined) {
       const finalShipping = Math.max(0, toNumber(shippingCost, 0));
       const subtotal = toNumber(order.subtotal, 0);
-      const newTotal = subtotal + finalShipping;
+      const discountAmount = toNumber(order.discount_amount, 0);
+      const newTotal = Math.max(0, subtotal - discountAmount + finalShipping);
 
       updateFields.push('shipping_cost = ?');
       updateValues.push(finalShipping);
@@ -2046,6 +2057,7 @@ router.put('/:id', async (req, res) => {
       : toNumber(order.shipping_cost, 0);
 
     let finalSubtotal = toNumber(order.subtotal, 0);
+    let finalDiscountAmount = toNumber(order.discount_amount, 0);
     let shouldReplaceItems = false;
     let normalizedItems = [];
 
@@ -2071,7 +2083,7 @@ router.put('/:id', async (req, res) => {
       updateValues.push(finalShipping);
 
       updateFields.push('total = ?');
-      updateValues.push(finalSubtotal + finalShipping);
+      updateValues.push(Math.max(0, finalSubtotal - finalDiscountAmount + finalShipping));
     }
 
     const nextMeta = {

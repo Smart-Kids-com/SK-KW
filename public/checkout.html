@@ -766,6 +766,10 @@
   <script>
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
     let discountAmount = 0;
+    let discountCode = '';
+    let discountType = '';
+    let discountValue = 0;
+
     const ABANDONED_CHECKOUTS_API = '/api/abandoned-checkouts';
     const ABANDONED_CHECKOUT_TOKEN_KEY = 'abandoned_checkout_token';
     let abandonedCheckoutSaveTimer = null;
@@ -782,6 +786,18 @@
     function safeNumber(value, fallback = 0) {
       const n = Number(value);
       return Number.isFinite(n) ? n : fallback;
+    }
+
+    function resetDiscountState(clearField = false) {
+      discountAmount = 0;
+      discountCode = '';
+      discountType = '';
+      discountValue = 0;
+
+      if (clearField) {
+        const field = document.getElementById('discountField');
+        if (field) field.value = '';
+      }
     }
 
     function getSubtotal() {
@@ -803,7 +819,7 @@
     function getGrandTotal() {
       const subtotal = getSubtotal();
       const shipping = getShipping();
-      return subtotal - discountAmount + (shipping === null ? 0 : shipping);
+      return Math.max(0, subtotal - discountAmount + (shipping === null ? 0 : shipping));
     }
 
     function escapeHtml(str) {
@@ -869,7 +885,7 @@
         country: safeText(document.getElementById('country')?.value, 'Kuwait'),
         postalCode: safeText(document.getElementById('postalCode')?.value),
         notes: safeText(document.getElementById('orderNotes')?.value),
-        discountCode: safeText(document.getElementById('discountField')?.value).toUpperCase(),
+        discountCode: discountCode,
         discountAmount: discountAmount,
         subtotal: getSubtotal(),
         shippingCost: shipping === null ? 0 : shipping,
@@ -1073,31 +1089,53 @@
       }
     }
 
-    function applyDiscountCode() {
+    async function applyDiscountCode() {
       const code = safeText(document.getElementById('discountField').value).toUpperCase();
+      const subtotal = getSubtotal();
 
       if (!code) {
-        discountAmount = 0;
+        resetDiscountState();
         renderSummary();
         queueAbandonedCheckoutSave(200);
         return;
       }
 
-      if (code === 'SMART10') {
-        discountAmount = 1;
-      } else if (code === 'KIDS5') {
-        discountAmount = 0.5;
-      } else {
-        discountAmount = 0;
+      try {
+        const response = await fetch('/api/discounts/validate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            code,
+            subtotal
+          })
+        });
+
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok || !result?.success) {
+          resetDiscountState();
+          renderSummary();
+          queueAbandonedCheckoutSave(200);
+          throw new Error(result?.error || 'فشل في التحقق من كود الخصم');
+        }
+
+        const discountData = result.data || {};
+
+        discountCode = safeText(discountData.code, code);
+        discountType = safeText(discountData.type);
+        discountValue = safeNumber(discountData.value, 0);
+        discountAmount = safeNumber(discountData.discount_amount, 0);
+
         renderSummary();
         queueAbandonedCheckoutSave(200);
-        showError('كود الخصم غير صحيح');
-        return;
+        showSuccess(`تم تطبيق كود الخصم: ${discountCode}`);
+      } catch (error) {
+        console.error('Discount validate error:', error);
+        showError(error.message || 'كود الخصم غير صحيح');
       }
-
-      renderSummary();
-      queueAbandonedCheckoutSave(200);
-      showSuccess(`تم تطبيق كود الخصم: ${code}`);
     }
 
     function validateCheckout() {
@@ -1204,7 +1242,7 @@
         notes: buildOrderNotes(paymentMethod, billingMode),
         shippingCost: getShipping() === null ? 0 : getShipping(),
         discountAmount: discountAmount,
-        discountCode: safeText(document.getElementById('discountField').value).toUpperCase(),
+        discountCode: discountCode || safeText(document.getElementById('discountField').value).toUpperCase(),
         subtotal: getSubtotal(),
         total: getGrandTotal(),
         items: cart.map(item => ({
@@ -1313,6 +1351,14 @@
       bindRadioCards('billingAddress', toggleBillingFields);
 
       document.getElementById('discountBtn').addEventListener('click', applyDiscountCode);
+
+      document.getElementById('discountField').addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          applyDiscountCode();
+        }
+      });
+
       document.getElementById('completeOrderBtn').addEventListener('click', completeOrder);
 
       bindDynamicRecalc();

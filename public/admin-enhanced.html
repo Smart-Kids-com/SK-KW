@@ -9,7 +9,8 @@
 
     :root{
       --bg:#dbe9f7;
-      --card:#fff;
+      --surface:#f3f4f7;
+      --card:#ffffff;
       --line:#e5e7eb;
       --text:#202223;
       --muted:#6d7175;
@@ -28,8 +29,26 @@
       --chip:#f1f2f3;
       --chip-active:#111827;
       --chip-active-text:#fff;
-      --radius:16px;
-      --sidebar-width:306px;
+      --radius:18px;
+      --sidebar-width:292px;
+      --topbar-height:126px;
+
+      --img-top-bg:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/top-background-header.webp?v=1776716710');
+      --img-search:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/search-bar.webp?v=1776716710');
+      --img-favicon:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/favicon.webp?v=1776716711');
+      --img-arabic-name:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/arabic-name.webp?v=1776716710');
+      --img-smartify:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/smartify.webp?v=1776716711');
+      --img-name:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/name.webp?v=1776716710');
+      --img-discounts:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Discounts.webp?v=1776717424');
+      --img-home:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/home.webp?v=1776716710');
+      --img-orders:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/orders.webp?v=1776716710');
+      --img-products:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/products.webp?v=1776716710');
+      --img-collections:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/collections.webp?v=1776716710');
+      --img-customers:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/customers.webp?v=1776716710');
+      --img-theme:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/theme.webp?v=1776716710');
+      --img-abandoned:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Abandoned-checkouts.webp?v=1776722382');
+      --img-orders-fulfill:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/orders-to-fullfill.webp?v=1776716710');
+      --img-payment-capture:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/payment-to-capure.webp?v=1776716710');
     }
 
     body{
@@ -43,32 +62,43 @@
     a{text-decoration:none;color:inherit}
     button,input,select{font-family:inherit}
 
-    .mobile-top,
-    .mobile-sidebar{display:none}
-
     .app{
       min-height:100vh;
       display:grid;
       grid-template-columns:var(--sidebar-width) 1fr;
-      grid-template-rows:auto 1fr;
+      grid-template-rows:var(--topbar-height) 1fr;
       grid-template-areas:"top top" "side main";
-      gap:16px;
-      padding:12px 14px 24px;
-      max-width:1600px;
-      margin:0 auto;
+      gap:18px;
+      padding:0 0 24px;
     }
 
     .topbar{
       grid-area:top;
       display:grid;
-      grid-template-columns:84px minmax(260px, 1fr) 84px 420px;
+      grid-template-columns:84px minmax(280px,700px) 84px minmax(260px,430px);
       align-items:center;
-      gap:16px;
-      padding:0;
+      gap:18px;
+      padding:22px 24px 0;
       position:sticky;
       top:0;
       z-index:80;
       background:transparent;
+    }
+
+    .top-tile{
+      position:relative;
+      min-height:88px;
+      border-radius:24px;
+      box-shadow:0 12px 24px rgba(0,0,0,.12);
+      overflow:hidden;
+      background:transparent;
+    }
+
+    .top-bg{
+      position:absolute;
+      inset:0;
+      background:var(--img-top-bg) center/100% 100% no-repeat;
+      pointer-events:none;
     }
 
     .top-logo,
@@ -76,16 +106,13 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      width:84px;
-      height:84px;
-      flex:0 0 84px;
-      line-height:0;
+      min-height:88px;
     }
 
     .top-logo img,
     .top-mini-logo img{
-      width:84px;
-      height:84px;
+      width:100%;
+      height:100%;
       object-fit:contain;
       display:block;
       filter:drop-shadow(0 8px 18px rgba(0,0,0,.16));
@@ -93,47 +120,29 @@
 
     .search-shell,
     .brand-shell{
-      position:relative;
-      height:84px;
-      min-width:0;
-      line-height:0;
+      min-height:88px;
     }
 
-    .search-shell::before,
-    .brand-shell::before{
-      content:"";
+    .search-bar-bg{
       position:absolute;
       inset:0;
-      background:url('https://cdn.shopify.com/s/files/1/0697/3318/7805/files/top-background-header.webp?v=1776716710') center/100% 100% no-repeat;
-      border-radius:22px;
-      box-shadow:0 10px 20px rgba(0,0,0,.12);
-      z-index:0;
-    }
-
-    .search-shell .search-bar-art{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit:fill;
-      display:block;
+      background:var(--img-search) center/100% 100% no-repeat;
       z-index:1;
       pointer-events:none;
-      border-radius:22px;
     }
 
     .search-input{
       position:relative;
       z-index:2;
       width:100%;
-      height:84px;
+      height:88px;
       border:0;
       outline:none;
       background:transparent;
-      color:#fff;
+      color:#ffffff;
       font-size:22px;
       font-weight:700;
-      padding:0 92px 0 26px;
+      padding:0 104px 0 28px;
       direction:ltr;
     }
 
@@ -144,54 +153,57 @@
       inset:0;
       width:100%;
       height:100%;
-      object-fit:contain;
-      padding:6px 18px;
+      object-fit:fill;
       display:block;
-      z-index:1;
+      z-index:2;
       filter:drop-shadow(0 8px 18px rgba(0,0,0,.14));
     }
 
     .sidebar{
       grid-area:side;
+      padding:0 0 0 10px;
       overflow-y:auto;
     }
 
     .sidebar-inner{
-      min-height:calc(100vh - 112px);
-      background:rgba(244,245,248,.74);
-      border-radius:26px;
+      min-height:calc(100vh - var(--topbar-height) - 26px);
+      background:rgba(244,245,248,.72);
+      border-radius:0 24px 24px 0;
       box-shadow:var(--shadow);
-      padding:16px 14px 18px 12px;
+      padding:20px 12px 22px;
     }
 
-    .nav-list{display:flex;flex-direction:column;gap:10px}
+    .nav-list{display:flex;flex-direction:column;gap:12px}
 
     .nav-item-image{
       display:block;
-      position:relative;
+      border-radius:18px;
+      overflow:hidden;
       line-height:0;
-      transition:transform .16s ease, filter .16s ease;
+      box-shadow:0 4px 10px rgba(0,0,0,.04);
+      transition:transform .16s ease,filter .16s ease;
+      position:relative;
     }
 
-    .nav-item-image:hover{transform:translateX(3px);filter:brightness(1.02)}
+    .nav-item-image:hover{transform:translateX(3px);filter:brightness(1.03)}
+    .nav-item-image.active{filter:brightness(1.02)}
 
     .nav-item-image img{
       width:100%;
-      height:auto;
       display:block;
-      border-radius:18px;
+      height:auto;
     }
 
     .nav-count{
       position:absolute;
       top:50%;
-      left:18px;
       transform:translateY(-50%);
+      left:14px;
       min-width:34px;
       height:24px;
       padding:0 8px;
       border-radius:999px;
-      background:rgba(255,255,255,.78);
+      background:rgba(255,255,255,.72);
       color:#303030;
       display:flex;
       align-items:center;
@@ -202,22 +214,8 @@
       backdrop-filter:blur(3px);
     }
 
-    .main{grid-area:main;padding:0 4px 0 0;overflow:auto}
+    .main{grid-area:main;padding:0 24px 0 0;overflow:auto}
     .page{max-width:1400px;margin:0 auto}
-
-    .hero-branding{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      padding:2px 0 8px;
-    }
-
-    .hero-mark{width:76px;height:auto;display:block}
-    .hero-logo{width:min(92%,620px);height:auto;display:block}
-    .hero-name{width:min(92%,470px);height:auto;display:block}
-    .hero-discounts{width:min(92%,620px);height:auto;display:block;margin-top:2px}
 
     .alert{
       display:none;
@@ -234,12 +232,26 @@
     .alert.error{background:#fee2e2;border-color:#fca5a5;color:#991b1b}
     .alert.warning{background:#fef3c7;border-color:#fcd34d;color:#92400e}
 
+    .hero-branding{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:18px 0 4px;
+    }
+
+    .hero-mark{width:86px;height:auto;display:block}
+    .hero-logo{width:min(92%,700px);height:auto;display:block}
+    .hero-name{width:min(92%,540px);height:auto;display:block}
+    .hero-discounts{width:min(92%,680px);height:auto;display:block;margin-top:4px}
+
     .page-head{
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
       gap:14px;
-      margin-bottom:18px;
+      margin:14px 0 18px;
       flex-wrap:wrap;
     }
     .page-title{font-size:26px;font-weight:900;line-height:1.1;color:#111827}
@@ -265,23 +277,9 @@
     .btn.chip{background:var(--chip);border-color:var(--chip);box-shadow:none;height:34px}
     .btn.chip.active-filter{background:var(--chip-active);color:var(--chip-active-text);border-color:var(--chip-active)}
 
-    .summary-strip{
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-      align-items:center;
-      margin:0 0 18px;
-    }
-
-    .summary-image img{
-      display:block;
-      max-width:100%;
-      height:auto;
-    }
-
     .card{
       background:var(--card);
-      border:1px solid var(--line);
+      border:1px solid rgba(229,231,235,.95);
       border-radius:var(--radius);
       box-shadow:var(--shadow-soft);
       overflow:hidden;
@@ -298,6 +296,25 @@
       flex-wrap:wrap;
     }
     .card-body{padding:16px}
+
+    .summary-strip{
+      display:flex;
+      flex-wrap:wrap;
+      gap:14px;
+      align-items:center;
+      margin:0 0 18px;
+    }
+
+    .summary-image{
+      display:block;
+      line-height:0;
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:var(--shadow-soft);
+      background:#fff;
+    }
+
+    .summary-image img{display:block;max-width:100%;height:auto}
 
     .layout{
       display:grid;
@@ -405,26 +422,26 @@
     }
     @keyframes spin{to{transform:rotate(360deg)}}
 
+    .mobile-top{display:none;background:#111;color:#fff;padding:12px 14px 10px;position:sticky;top:0;z-index:60}
+    .mobile-top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .mobile-title{font-size:20px;font-weight:900}
+    .mobile-sidebar{display:none;padding:0 14px 14px;background:var(--bg)}
+    .mobile-sidebar .nav-list{gap:10px}
+
     @media (max-width: 1280px){.layout{grid-template-columns:1fr}}
 
     @media (max-width: 1180px){
-      .topbar{grid-template-columns:72px minmax(220px,1fr) 72px 320px}
-      .top-logo,.top-mini-logo{width:72px;height:72px;flex-basis:72px}
-      .top-logo img,.top-mini-logo img{width:72px;height:72px}
-      .search-shell,.brand-shell,.search-input{height:74px}
+      .topbar{grid-template-columns:72px minmax(220px,1fr) 72px minmax(200px,340px)}
       .kpi-grid{grid-template-columns:1fr 1fr}
     }
 
     @media (max-width: 1100px){
       .app{grid-template-columns:1fr;grid-template-rows:auto 1fr;grid-template-areas:"main"}
       .topbar,.sidebar{display:none}
-      .mobile-top{display:block;background:#111;color:#fff;padding:12px 14px 10px;position:sticky;top:0;z-index:60}
-      .mobile-top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-      .mobile-title{font-size:20px;font-weight:900}
-      .mobile-sidebar{display:block;padding:0 14px 14px;background:var(--bg)}
-      .mobile-sidebar .nav-list{gap:10px}
+      .mobile-top,.mobile-sidebar{display:block}
       .main{padding:14px}
       .field-grid{grid-template-columns:1fr}
+      .hero-branding{padding-top:4px}
     }
 
     @media (max-width: 700px){
@@ -432,14 +449,15 @@
       .quick-actions{grid-template-columns:1fr}
       .summary-strip{flex-direction:column;align-items:stretch}
       .page-title{font-size:22px}
-      .hero-mark{width:64px}
+      .hero-mark{width:66px}
       .hero-logo{width:100%}
-      .hero-name{width:90%}
+      .hero-name{width:92%}
       .hero-discounts{width:100%}
     }
   </style>
 </head>
 <body>
+
   <div class="mobile-top">
     <div class="mobile-top-row">
       <div class="mobile-title">🏠 لوحة التحكم</div>
@@ -449,48 +467,88 @@
 
   <div class="mobile-sidebar">
     <nav class="nav-list" aria-label="Mobile navigation">
-      <a class="nav-item-image" href="/admin-enhanced"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/home.webp?v=1776716710" alt="Home"></a>
-      <a class="nav-item-image" href="/orders-admin.html"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/orders.webp?v=1776716710" alt="Orders"><span class="nav-count" id="ordersCountBadgeMobile">—</span></a>
-      <a class="nav-item-image" href="/abandoned-checkouts-admin.html"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Abandoned-checkouts.webp?v=1776722382" alt="Abandoned checkouts"></a>
-      <a class="nav-item-image" href="/products-admin"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/products.webp?v=1776716710" alt="Products"></a>
-      <a class="nav-item-image" href="/collections-admin"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/collections.webp?v=1776716710" alt="Collections"></a>
-      <a class="nav-item-image" href="/customers-admin"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/customers.webp?v=1776716710" alt="Customers"></a>
-      <a class="nav-item-image" href="/theme-admin"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/theme.webp?v=1776716710" alt="Theme"></a>
+      <a class="nav-item-image active" href="/admin-enhanced.html" aria-label="Home">
+        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/home.webp?v=1776716710" alt="Home" />
+      </a>
+      <a class="nav-item-image" href="/orders-admin.html" aria-label="Orders">
+        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/orders.webp?v=1776716710" alt="Orders" />
+        <span class="nav-count" id="ordersCountBadgeMobile">—</span>
+      </a>
+      <a class="nav-item-image" href="/abandoned-checkouts-admin.html" aria-label="Abandoned checkouts">
+        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Abandoned-checkouts.webp?v=1776722382" alt="Abandoned checkouts" />
+      </a>
+      <a class="nav-item-image" href="/products-admin" aria-label="Products">
+        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/products.webp?v=1776716710" alt="Products" />
+      </a>
+      <a class="nav-item-image" href="/collections-admin" aria-label="Collections">
+        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/collections.webp?v=1776716710" alt="Collections" />
+      </a>
+      <a class="nav-item-image" href="/customers-admin" aria-label="Customers">
+        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/customers.webp?v=1776716710" alt="Customers" />
+      </a>
+      <a class="nav-item-image" href="/theme-admin" aria-label="Theme">
+        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/theme.webp?v=1776716710" alt="Theme" />
+      </a>
     </nav>
   </div>
 
   <div class="app">
     <header class="topbar">
-      <a class="top-logo" href="/admin-enhanced"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/favicon.webp?v=1776716711" alt="Smart Kids icon"></a>
-      <div class="search-shell">
-        <img class="search-bar-art" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/search-bar.webp?v=1776716710" alt="">
-        <input class="search-input" type="search" placeholder="Search">
+      <a class="top-logo" href="/admin-enhanced.html" aria-label="Smart Kids icon">
+        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/favicon.webp?v=1776716711" alt="Smart Kids Kuwait icon" />
+      </a>
+
+      <div class="top-tile search-shell" aria-label="Search area">
+        <div class="search-bar-bg"></div>
+        <input class="search-input" id="dashboardSearchInput" type="search" placeholder="Search" />
       </div>
-      <div class="top-mini-logo"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/favicon.webp?v=1776716711" alt=""></div>
-      <div class="brand-shell"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/arabic-name.webp?v=1776716710" alt="الأطفال المبتكرون"></div>
+
+      <a class="top-mini-logo" href="/admin-enhanced.html" aria-hidden="true">
+        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/favicon.webp?v=1776716711" alt="" />
+      </a>
+
+      <div class="top-tile brand-shell" aria-label="Arabic store name">
+        <div class="top-bg"></div>
+        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/arabic-name.webp?v=1776716710" alt="الأطفال المبتكرون" />
+      </div>
     </header>
 
     <aside class="sidebar">
       <div class="sidebar-inner">
         <nav class="nav-list" aria-label="Main navigation">
-          <a class="nav-item-image" href="/admin-enhanced"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/home.webp?v=1776716710" alt="Home"></a>
-          <a class="nav-item-image" href="/orders-admin.html"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/orders.webp?v=1776716710" alt="Orders"><span class="nav-count" id="ordersCountBadge">—</span></a>
-          <a class="nav-item-image" href="/abandoned-checkouts-admin.html"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Abandoned-checkouts.webp?v=1776722382" alt="Abandoned checkouts"></a>
-          <a class="nav-item-image" href="/products-admin"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/products.webp?v=1776716710" alt="Products"></a>
-          <a class="nav-item-image" href="/collections-admin"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/collections.webp?v=1776716710" alt="Collections"></a>
-          <a class="nav-item-image" href="/customers-admin"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/customers.webp?v=1776716710" alt="Customers"></a>
-          <a class="nav-item-image" href="/theme-admin"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/theme.webp?v=1776716710" alt="Theme"></a>
+          <a class="nav-item-image active" href="/admin-enhanced.html" aria-label="Home">
+            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/home.webp?v=1776716710" alt="Home" />
+          </a>
+          <a class="nav-item-image" href="/orders-admin.html" aria-label="Orders">
+            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/orders.webp?v=1776716710" alt="Orders" />
+            <span class="nav-count" id="ordersCountBadge">—</span>
+          </a>
+          <a class="nav-item-image" href="/abandoned-checkouts-admin.html" aria-label="Abandoned checkouts">
+            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Abandoned-checkouts.webp?v=1776722382" alt="Abandoned checkouts" />
+          </a>
+          <a class="nav-item-image" href="/products-admin" aria-label="Products">
+            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/products.webp?v=1776716710" alt="Products" />
+          </a>
+          <a class="nav-item-image" href="/collections-admin" aria-label="Collections">
+            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/collections.webp?v=1776716710" alt="Collections" />
+          </a>
+          <a class="nav-item-image" href="/customers-admin" aria-label="Customers">
+            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/customers.webp?v=1776716710" alt="Customers" />
+          </a>
+          <a class="nav-item-image" href="/theme-admin" aria-label="Theme">
+            <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/theme.webp?v=1776716710" alt="Theme" />
+          </a>
         </nav>
       </div>
     </aside>
 
     <main class="main">
       <div class="page">
-        <div class="hero-branding">
-          <img class="hero-mark" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/favicon.webp?v=1776716711" alt="">
-          <img class="hero-logo" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/smartify.webp?v=1776716711" alt="Smartify">
-          <img class="hero-name" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/name.webp?v=1776716710" alt="Smart Kids Kuwait">
-          <img class="hero-discounts" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Discounts.webp?v=1776717424" alt="Discounts">
+        <div class="hero-branding" aria-label="Hero branding">
+          <img class="hero-mark" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/favicon.webp?v=1776716711" alt="" />
+          <img class="hero-logo" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/smartify.webp?v=1776716711" alt="Smartify" />
+          <img class="hero-name" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/name.webp?v=1776716710" alt="Smart Kids Kuwait" />
+          <img class="hero-discounts" src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Discounts.webp?v=1776717424" alt="Discounts" />
         </div>
 
         <div id="alertBox" class="alert"></div>
@@ -500,12 +558,14 @@
             <div class="page-title">لوحة التحكم</div>
             <div class="page-sub">نظرة شاملة على المبيعات والطلبات والأداء</div>
           </div>
-          <button class="btn primary" id="refreshBtn" type="button" onclick="reloadDashboard(true)">تحديث البيانات</button>
+          <button class="btn primary" id="refreshBtn" type="button" onclick="reloadDashboard(true)">
+            تحديث البيانات
+          </button>
         </div>
 
-        <div class="summary-strip">
-          <span class="summary-image"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/orders-to-fullfill.webp?v=1776716710" alt="Orders to fulfill"></span>
-          <span class="summary-image"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/payment-to-capure.webp?v=1776716710" alt="Payments to capture"></span>
+        <div class="summary-strip" aria-label="Summary chips">
+          <span class="summary-image"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/orders-to-fullfill.webp?v=1776716710" alt="Orders to fulfill" /></span>
+          <span class="summary-image"><img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/payment-to-capure.webp?v=1776716710" alt="Payment to capture" /></span>
         </div>
 
         <div class="layout">
@@ -550,10 +610,26 @@
               </div>
               <div class="card-body" id="kpiSection">
                 <div class="kpi-grid">
-                  <div class="kpi-box"><div class="kpi-label">إجمالي المبيعات</div><div class="kpi-value" id="totalSalesValue"><div class="skeleton sk-value"></div></div><div class="kpi-sub">إجمالي قيمة الطلبات في الفترة</div></div>
-                  <div class="kpi-box"><div class="kpi-label">عدد الطلبات</div><div class="kpi-value" id="ordersCountValue"><div class="skeleton sk-value"></div></div><div class="kpi-sub">عدد الطلبات في الفترة المحددة</div></div>
-                  <div class="kpi-box"><div class="kpi-label">متوسط قيمة الطلب</div><div class="kpi-value" id="avgOrderValue"><div class="skeleton sk-value"></div></div><div class="kpi-sub">متوسط قيمة الطلب الواحد</div></div>
-                  <div class="kpi-box"><div class="kpi-label">الطلبات المعلقة</div><div class="kpi-value" id="pendingOrdersValue"><div class="skeleton sk-value"></div></div><div class="kpi-sub">طلبات بحاجة إلى متابعة</div></div>
+                  <div class="kpi-box">
+                    <div class="kpi-label">إجمالي المبيعات</div>
+                    <div class="kpi-value" id="totalSalesValue"><div class="skeleton sk-value"></div></div>
+                    <div class="kpi-sub">إجمالي قيمة الطلبات في الفترة</div>
+                  </div>
+                  <div class="kpi-box">
+                    <div class="kpi-label">عدد الطلبات</div>
+                    <div class="kpi-value" id="ordersCountValue"><div class="skeleton sk-value"></div></div>
+                    <div class="kpi-sub">عدد الطلبات في الفترة المحددة</div>
+                  </div>
+                  <div class="kpi-box">
+                    <div class="kpi-label">متوسط قيمة الطلب</div>
+                    <div class="kpi-value" id="avgOrderValue"><div class="skeleton sk-value"></div></div>
+                    <div class="kpi-sub">متوسط قيمة الطلب الواحد</div>
+                  </div>
+                  <div class="kpi-box">
+                    <div class="kpi-label">الطلبات المعلقة</div>
+                    <div class="kpi-value" id="pendingOrdersValue"><div class="skeleton sk-value"></div></div>
+                    <div class="kpi-sub">طلبات بحاجة إلى متابعة</div>
+                  </div>
                 </div>
               </div>
             </section>
@@ -562,16 +638,46 @@
               <div class="card-head"><span>⚠️ يستحق الانتباه</span></div>
               <div class="card-body">
                 <div class="attention-list">
-                  <div class="attention-item"><div class="attention-left"><div class="attention-title">الطلبات المعلقة</div><div class="attention-sub">طلبات تحتاج متابعة سريعة أو تنفيذ</div></div><div class="attention-value" id="attentionPendingValue"><div class="skeleton sk-value" style="width:40px"></div></div></div>
-                  <div class="attention-item"><div class="attention-left"><div class="attention-title">طلبات اليوم</div><div class="attention-sub">الطلبات التي دخلت اليوم</div></div><div class="attention-value" id="attentionTodayValue"><div class="skeleton sk-value" style="width:40px"></div></div></div>
-                  <div class="attention-item"><div class="attention-left"><div class="attention-title">الطلبات الملغية</div><div class="attention-sub">طلبات ملغية في الفترة الحالية</div></div><div class="attention-value" id="attentionCancelledValue"><div class="skeleton sk-value" style="width:40px"></div></div></div>
+                  <div class="attention-item">
+                    <div class="attention-left">
+                      <div class="attention-title">الطلبات المعلقة</div>
+                      <div class="attention-sub">طلبات تحتاج متابعة سريعة أو تنفيذ</div>
+                    </div>
+                    <div class="attention-value" id="attentionPendingValue"><div class="skeleton sk-value" style="width:40px"></div></div>
+                  </div>
+                  <div class="attention-item">
+                    <div class="attention-left">
+                      <div class="attention-title">طلبات اليوم</div>
+                      <div class="attention-sub">الطلبات التي دخلت اليوم</div>
+                    </div>
+                    <div class="attention-value" id="attentionTodayValue"><div class="skeleton sk-value" style="width:40px"></div></div>
+                  </div>
+                  <div class="attention-item">
+                    <div class="attention-left">
+                      <div class="attention-title">الطلبات الملغية</div>
+                      <div class="attention-sub">طلبات ملغية في الفترة الحالية</div>
+                    </div>
+                    <div class="attention-value" id="attentionCancelledValue"><div class="skeleton sk-value" style="width:40px"></div></div>
+                  </div>
                 </div>
               </div>
             </section>
 
             <section class="card">
-              <div class="card-head"><span>🕒 آخر الطلبات</span><a class="btn" href="/orders-admin.html">عرض الكل</a></div>
-              <div class="card-body"><div class="activity-list" id="recentOrdersList"><div class="activity-item"><div class="activity-left"><div class="skeleton sk-line wide"></div><div class="skeleton sk-line narrow"></div></div></div></div></div>
+              <div class="card-head">
+                <span>🕒 آخر الطلبات</span>
+                <a class="btn" href="/orders-admin.html">عرض الكل</a>
+              </div>
+              <div class="card-body">
+                <div class="activity-list" id="recentOrdersList">
+                  <div class="activity-item">
+                    <div class="activity-left">
+                      <div class="skeleton sk-line wide"></div>
+                      <div class="skeleton sk-line narrow"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </section>
           </div>
 
@@ -580,12 +686,30 @@
               <div class="card-head"><span>⚡ الوصول السريع</span></div>
               <div class="card-body">
                 <div class="quick-actions">
-                  <a class="quick-link" href="/orders-admin.html"><div class="quick-link-icon">📦</div><div><div class="quick-link-title">الطلبات</div><div class="quick-link-sub">إدارة الطلبات والحالات</div></div></a>
-                  <a class="quick-link" href="/abandoned-checkouts-admin.html"><div class="quick-link-icon">🛒</div><div><div class="quick-link-title">Abandoned Checkouts</div><div class="quick-link-sub">متابعة السلات غير المكتملة</div></div></a>
-                  <a class="quick-link" href="/products-admin"><div class="quick-link-icon">🏷️</div><div><div class="quick-link-title">المنتجات</div><div class="quick-link-sub">تعديل المنتجات والأسعار</div></div></a>
-                  <a class="quick-link" href="/collections-admin"><div class="quick-link-icon">🗂️</div><div><div class="quick-link-title">المجموعات</div><div class="quick-link-sub">إدارة مجموعات المنتجات</div></div></a>
-                  <a class="quick-link" href="/customers-admin"><div class="quick-link-icon">👥</div><div><div class="quick-link-title">العملاء</div><div class="quick-link-sub">ملفات العملاء والطلبات</div></div></a>
-                  <a class="quick-link" href="/theme-admin"><div class="quick-link-icon">🎨</div><div><div class="quick-link-title">الثيم</div><div class="quick-link-sub">تحكم في الصفحة الرئيسية</div></div></a>
+                  <a class="quick-link" href="/orders-admin.html">
+                    <div class="quick-link-icon">📦</div>
+                    <div><div class="quick-link-title">الطلبات</div><div class="quick-link-sub">إدارة الطلبات والحالات</div></div>
+                  </a>
+                  <a class="quick-link" href="/abandoned-checkouts-admin.html">
+                    <div class="quick-link-icon">🛒</div>
+                    <div><div class="quick-link-title">Abandoned Checkouts</div><div class="quick-link-sub">متابعة السلات غير المكتملة</div></div>
+                  </a>
+                  <a class="quick-link" href="/products-admin">
+                    <div class="quick-link-icon">🏷️</div>
+                    <div><div class="quick-link-title">المنتجات</div><div class="quick-link-sub">تعديل المنتجات والأسعار</div></div>
+                  </a>
+                  <a class="quick-link" href="/collections-admin">
+                    <div class="quick-link-icon">🗂️</div>
+                    <div><div class="quick-link-title">المجموعات</div><div class="quick-link-sub">إدارة مجموعات المنتجات</div></div>
+                  </a>
+                  <a class="quick-link" href="/customers-admin">
+                    <div class="quick-link-icon">👥</div>
+                    <div><div class="quick-link-title">العملاء</div><div class="quick-link-sub">ملفات العملاء والطلبات</div></div>
+                  </a>
+                  <a class="quick-link" href="/theme-admin">
+                    <div class="quick-link-icon">🎨</div>
+                    <div><div class="quick-link-title">الثيم</div><div class="quick-link-sub">تحكم في الصفحة الرئيسية</div></div>
+                  </a>
                 </div>
               </div>
             </section>
@@ -594,9 +718,21 @@
               <div class="card-head"><span>📌 لقطة سريعة</span></div>
               <div class="card-body">
                 <div class="sidebar-metric">
-                  <div class="mini-metric"><div class="mini-label">إجمالي الطلبات المحملة</div><div class="mini-value" id="miniLoadedOrders">—</div><div class="mini-sub">من قاعدة البيانات</div></div>
-                  <div class="mini-metric"><div class="mini-label">الطلبات المطابقة للفترة</div><div class="mini-value" id="miniFilteredOrders">—</div><div class="mini-sub">حسب الفلتر الحالي</div></div>
-                  <div class="mini-metric"><div class="mini-label">الفترة النشطة</div><div class="mini-value" id="miniRangeLabel" style="font-size:15px">كل الوقت</div><div class="mini-sub">الفترة المحددة الآن</div></div>
+                  <div class="mini-metric">
+                    <div class="mini-label">إجمالي الطلبات المحملة</div>
+                    <div class="mini-value" id="miniLoadedOrders">—</div>
+                    <div class="mini-sub">من قاعدة البيانات</div>
+                  </div>
+                  <div class="mini-metric">
+                    <div class="mini-label">الطلبات المطابقة للفترة</div>
+                    <div class="mini-value" id="miniFilteredOrders">—</div>
+                    <div class="mini-sub">حسب الفلتر الحالي</div>
+                  </div>
+                  <div class="mini-metric">
+                    <div class="mini-label">الفترة النشطة</div>
+                    <div class="mini-value" id="miniRangeLabel" style="font-size:15px">كل الوقت</div>
+                    <div class="mini-sub">الفترة المحددة الآن</div>
+                  </div>
                 </div>
               </div>
             </section>
@@ -625,68 +761,117 @@
     };
 
     const STATUS_CHIP = {
-      pending:'yellow', processing:'blue', shipped:'purple', completed:'green', cancelled:'red', delivered:'green', awaiting_payment:'yellow'
+      pending: 'yellow',
+      processing: 'blue',
+      shipped: 'purple',
+      completed: 'green',
+      cancelled: 'red',
+      delivered: 'green',
+      awaiting_payment: 'yellow'
     };
 
-    function qs(id){ return document.getElementById(id) }
+    function qs(id) { return document.getElementById(id) }
 
-    function showAlert(message, type='success'){
+    function showAlert(message, type = 'success') {
       const box = qs('alertBox');
       box.textContent = message;
       box.className = `alert active ${type}`;
       clearTimeout(window.__alertTimer);
-      window.__alertTimer = setTimeout(()=>{
+      window.__alertTimer = setTimeout(() => {
         box.className = 'alert';
         box.textContent = '';
       }, 4000);
     }
 
-    function setText(id, value){ const el = qs(id); if (el) el.textContent = value; }
+    function setText(id, value) {
+      const el = qs(id);
+      if (el) el.textContent = value;
+    }
 
-    function setLoadingState(loading){
+    function setLoadingState(loading) {
       isLoading = loading;
       const btns = [qs('refreshBtn'), qs('mobileRefreshBtn')].filter(Boolean);
       btns.forEach(btn => {
         btn.disabled = loading;
-        btn.innerHTML = loading ? 'جاري التحديث<span class="spin"></span>' : 'تحديث البيانات';
+        btn.innerHTML = loading
+          ? 'جاري التحديث<span class="spin"></span>'
+          : 'تحديث البيانات';
       });
     }
 
-    function formatCurrency(value){ const num = Number(value || 0); return `KWD ${num.toFixed(3)}`; }
+    function formatCurrency(value) {
+      const num = Number(value || 0);
+      return `KWD ${num.toFixed(3)}`;
+    }
 
-    function normalizeDate(value){
+    function normalizeDate(value) {
       if (!value) return null;
       const date = new Date(value);
       return Number.isNaN(date.getTime()) ? null : date;
     }
 
-    function getOrderDate(order){ return normalizeDate(order.created_at || order.createdAt || order.date || order.order_date || order.updated_at || null); }
-    function getOrderTotal(order){ return Number(order.total ?? order.order_total ?? order.final_total ?? order.total_amount ?? 0) || 0; }
-    function isPendingOrder(order){ const s = String(order.status || '').trim().toLowerCase(); return ['pending','processing','awaiting_payment'].includes(s); }
-    function isCancelledOrder(order){ return String(order.status || '').trim().toLowerCase() === 'cancelled'; }
-    function startOfDay(date){ const d = new Date(date); d.setHours(0,0,0,0); return d; }
-    function endOfDay(date){ const d = new Date(date); d.setHours(23,59,59,999); return d; }
+    function getOrderDate(order) {
+      return normalizeDate(
+        order.created_at || order.createdAt || order.date ||
+        order.order_date || order.updated_at || null
+      );
+    }
 
-    function getPresetRange(name){
+    function getOrderTotal(order) {
+      return Number(order.total ?? order.order_total ?? order.final_total ?? order.total_amount ?? 0) || 0;
+    }
+
+    function isPendingOrder(order) {
+      const s = String(order.status || '').trim().toLowerCase();
+      return ['pending', 'processing', 'awaiting_payment'].includes(s);
+    }
+
+    function isCancelledOrder(order) {
+      return String(order.status || '').trim().toLowerCase() === 'cancelled';
+    }
+
+    function startOfDay(date) {
+      const d = new Date(date); d.setHours(0, 0, 0, 0); return d;
+    }
+
+    function endOfDay(date) {
+      const d = new Date(date); d.setHours(23, 59, 59, 999); return d;
+    }
+
+    function getPresetRange(name) {
       const now = new Date();
-      if (name === 'today') return { from:startOfDay(now), to:endOfDay(now) };
-      if (name === 'yesterday') { const d = new Date(); d.setDate(d.getDate() - 1); return { from:startOfDay(d), to:endOfDay(d) }; }
-      if (name === 'last7') { const f = new Date(); f.setDate(now.getDate() - 6); return { from:startOfDay(f), to:endOfDay(now) }; }
-      if (name === 'last30') { const f = new Date(); f.setDate(now.getDate() - 29); return { from:startOfDay(f), to:endOfDay(now) }; }
+      if (name === 'today') return { from: startOfDay(now), to: endOfDay(now) };
+      if (name === 'yesterday') {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        return { from: startOfDay(d), to: endOfDay(d) };
+      }
+      if (name === 'last7') {
+        const f = new Date();
+        f.setDate(now.getDate() - 6);
+        return { from: startOfDay(f), to: endOfDay(now) };
+      }
+      if (name === 'last30') {
+        const f = new Date();
+        f.setDate(now.getDate() - 29);
+        return { from: startOfDay(f), to: endOfDay(now) };
+      }
       return null;
     }
 
-    function filterOrdersByRange(orders){
+    function filterOrdersByRange(orders) {
       if (activeRange === 'all') return orders;
+
       let range = null;
       if (activeRange === 'custom') {
         const fromVal = qs('dateFromInput').value;
-        const toVal = qs('dateToInput').value;
+        const toVal   = qs('dateToInput').value;
         if (!fromVal || !toVal) return orders;
-        range = { from:startOfDay(new Date(fromVal)), to:endOfDay(new Date(toVal)) };
+        range = { from: startOfDay(new Date(fromVal)), to: endOfDay(new Date(toVal)) };
       } else {
         range = getPresetRange(activeRange);
       }
+
       if (!range) return orders;
       return orders.filter(o => {
         const d = getOrderDate(o);
@@ -694,24 +879,38 @@
       });
     }
 
-    function formatShortDate(date){ if (!date) return '—'; return date.toLocaleDateString('ar-KW',{day:'2-digit', month:'short'}); }
-
-    function escapeHtml(v){
-      return String(v ?? '')
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;')
-        .replace(/'/g,'&#x27;');
+    function formatShortDate(date) {
+      if (!date) return '—';
+      return date.toLocaleDateString('ar-KW', { day: '2-digit', month: 'short' });
     }
 
-    function renderRecentOrders(filtered){
+    function escapeHtml(v) {
+      return String(v ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+    }
+
+    function renderRecentOrders(filtered) {
       const list = qs('recentOrdersList');
+
       if (!filtered.length) {
-        list.innerHTML = '<div class="activity-item"><div class="activity-left"><div class="activity-title">لا توجد طلبات</div><div class="activity-sub">لا توجد طلبات في الفترة المحددة</div></div></div>';
+        list.innerHTML = `
+          <div class="activity-item">
+            <div class="activity-left">
+              <div class="activity-title">لا توجد طلبات</div>
+              <div class="activity-sub">لا توجد طلبات في الفترة المحددة</div>
+            </div>
+          </div>`;
         return;
       }
-      const rows = [...filtered].sort((a,b)=>(getOrderDate(b)?.getTime()||0)-(getOrderDate(a)?.getTime()||0)).slice(0,5);
+
+      const rows = [...filtered]
+        .sort((a, b) => (getOrderDate(b)?.getTime() || 0) - (getOrderDate(a)?.getTime() || 0))
+        .slice(0, 5);
+
       list.innerHTML = rows.map(order => {
         const id = order.id || '';
         const orderNumber = escapeHtml(order.order_number || `#${id}`);
@@ -720,51 +919,81 @@
         const status = String(order.status || 'pending').trim().toLowerCase();
         const chipColor = STATUS_CHIP[status] || 'grey';
         const dateLabel = formatShortDate(getOrderDate(order));
-        return `<a class="activity-item" href="/order-details.html?id=${encodeURIComponent(id)}"><div class="activity-left"><div class="activity-title">${orderNumber} — ${customer}</div><div class="activity-sub">${total}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0"><span class="chip ${chipColor}">${escapeHtml(status)}</span><span class="chip grey">${dateLabel}</span></div></a>`;
+
+        return `
+          <a class="activity-item" href="/order-details.html?id=${encodeURIComponent(id)}">
+            <div class="activity-left">
+              <div class="activity-title">${orderNumber} — ${customer}</div>
+              <div class="activity-sub">${total}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
+              <span class="chip ${chipColor}">${escapeHtml(status)}</span>
+              <span class="chip grey">${dateLabel}</span>
+            </div>
+          </a>`;
       }).join('');
     }
 
-    function renderDashboard(){
+    function renderDashboard() {
       const filtered = filterOrdersByRange(allOrders);
       const totalOrders = filtered.length;
-      const totalSales = filtered.reduce((s,o)=>s+getOrderTotal(o),0);
+      const totalSales = filtered.reduce((s, o) => s + getOrderTotal(o), 0);
       const avgOrder = totalOrders ? totalSales / totalOrders : 0;
       const pendingOrders = filtered.filter(isPendingOrder).length;
       const cancelledOrders = filtered.filter(isCancelledOrder).length;
+
       const today = new Date();
       const todayOrders = filtered.filter(o => {
         const d = getOrderDate(o);
-        return d && d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
+        return d && d.getFullYear() === today.getFullYear() &&
+               d.getMonth() === today.getMonth() &&
+               d.getDate() === today.getDate();
       }).length;
 
       setText('ordersCountValue', String(totalOrders));
       setText('totalSalesValue', formatCurrency(totalSales));
       setText('avgOrderValue', formatCurrency(avgOrder));
       setText('pendingOrdersValue', String(pendingOrders));
+
       setText('ordersCountBadge', String(allOrders.length));
       setText('ordersCountBadgeMobile', String(allOrders.length));
       setText('loadedOrdersChip', `الطلبات: ${filtered.length}`);
       setText('pendingChip', `معلقة: ${pendingOrders}`);
+
       setText('attentionPendingValue', String(pendingOrders));
       setText('attentionTodayValue', String(todayOrders));
       setText('attentionCancelledValue', String(cancelledOrders));
+
       setText('miniLoadedOrders', String(allOrders.length));
       setText('miniFilteredOrders', String(filtered.length));
+
       const rangeLabel = RANGE_LABELS[activeRange] || 'كل الوقت';
       setText('activeRangeLabel', rangeLabel);
       setText('miniRangeLabel', rangeLabel);
+
       renderRecentOrders(filtered);
     }
 
-    async function fetchJsonWithTimeout(url, options={}, timeoutMs=15000){
+    async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 15000) {
       const controller = new AbortController();
-      const timer = setTimeout(()=>controller.abort(), timeoutMs);
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
       try {
-        const response = await fetch(url, { ...options, signal:controller.signal, cache:'no-store', headers:{ Accept:'application/json', ...(options.headers||{}) } });
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+          cache: 'no-store',
+          headers: { Accept: 'application/json', ...(options.headers || {}) }
+        });
+
         const text = await response.text();
-        if (!text) return { response, result:null };
-        try { return { response, result:JSON.parse(text) }; }
-        catch { throw new Error(`Non-JSON response from ${url}`); }
+        if (!text) return { response, result: null };
+
+        try {
+          return { response, result: JSON.parse(text) };
+        } catch {
+          throw new Error(`Non-JSON response from ${url}`);
+        }
       } catch (error) {
         if (error.name === 'AbortError') throw new Error(`Request timeout: ${url}`);
         throw error;
@@ -773,61 +1002,107 @@
       }
     }
 
-    async function fetchAllOrders(){
+    async function fetchAllOrders() {
       let offset = 0;
       let total = null;
       const results = [];
+
       while (true) {
         const url = `${ORDERS_API}?limit=${FETCH_LIMIT}&offset=${offset}&sort=created_at&order=DESC`;
         const { response, result } = await fetchJsonWithTimeout(url);
-        if (!response.ok || !result?.success) throw new Error(result?.error || 'فشل في تحميل الطلبات');
+
+        if (!response.ok || !result?.success) {
+          throw new Error(result?.error || 'فشل في تحميل الطلبات');
+        }
+
         const chunk = Array.isArray(result.data) ? result.data : [];
         results.push(...chunk);
+
         total = Number(result.pagination?.total ?? results.length);
         offset += chunk.length;
+
         if (!chunk.length || results.length >= total || results.length >= FETCH_LIMIT_MAX) break;
       }
+
       return results;
     }
 
-    async function reloadDashboard(showMessage=false){
+    async function reloadDashboard(showMessage = false) {
       if (isLoading) return;
       setLoadingState(true);
+
       try {
         allOrders = await fetchAllOrders();
         renderDashboard();
-        if (showMessage) showAlert('تم تحديث البيانات بنجاح','success');
+        if (showMessage) showAlert('تم تحديث البيانات بنجاح', 'success');
       } catch (error) {
         console.error(error);
-        showAlert(error.message || 'فشل في تحميل البيانات','error');
+        showAlert(error.message || 'فشل في تحميل البيانات', 'error');
       } finally {
         setLoadingState(false);
       }
     }
 
-    function applyPresetRange(rangeName, btn){
+    function applyPresetRange(rangeName, btn) {
       if (isLoading) return;
       activeRange = rangeName;
+
       if (rangeName !== 'custom') {
         qs('dateFromInput').value = '';
         qs('dateToInput').value = '';
       }
-      document.querySelectorAll('[data-range]').forEach(b => b.classList.toggle('active-filter', b === btn));
+
+      document.querySelectorAll('[data-range]').forEach(b => {
+        b.classList.toggle('active-filter', b === btn);
+      });
+
       renderDashboard();
     }
 
-    function applyCustomRange(){
+    function applyCustomRange() {
       if (isLoading) return;
+
       const fromVal = qs('dateFromInput').value;
       const toVal = qs('dateToInput').value;
-      if (!fromVal || !toVal) return showAlert('اختر "من" و"إلى" أولًا','warning');
-      if (new Date(fromVal) > new Date(toVal)) return showAlert('تاريخ البداية يجب أن يكون قبل تاريخ النهاية','error');
+
+      if (!fromVal || !toVal) {
+        showAlert('اختر "من" و"إلى" أولًا', 'warning');
+        return;
+      }
+
+      if (new Date(fromVal) > new Date(toVal)) {
+        showAlert('تاريخ البداية يجب أن يكون قبل تاريخ النهاية', 'error');
+        return;
+      }
+
       activeRange = 'custom';
       document.querySelectorAll('[data-range]').forEach(b => b.classList.remove('active-filter'));
       renderDashboard();
     }
 
+    function bindDashboardSearch() {
+      const input = qs('dashboardSearchInput');
+      if (!input) return;
+
+      const goToOrdersSearch = () => {
+        const q = String(input.value || '').trim();
+        if (!q) {
+          window.location.href = '/orders-admin.html';
+          return;
+        }
+        window.location.href = `/orders-admin.html?search=${encodeURIComponent(q)}`;
+      };
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          goToOrdersSearch();
+        }
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+      bindDashboardSearch();
       reloadDashboard(false);
     });
   </script>

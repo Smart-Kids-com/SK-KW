@@ -17,7 +17,7 @@ const collectionsRoutes = require('./routes/collections');
 const customersRoutes = require('./routes/customers');
 const themeRoutes = require('./routes/theme');
 const abandonedCheckoutsRoutes = require('./routes/abandoned-checkouts');
-
+const discountsRoutes = require('./routes/discounts');
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
 
@@ -649,7 +649,7 @@ app.use('/api/collections', collectionsRoutes);
 app.use('/api/customers', customersRoutes);
 app.use('/api/theme', themeRoutes);
 app.use('/api/abandoned-checkouts', abandonedCheckoutsRoutes);
-
+app.use('/api/discounts', discountsRoutes);
 // Route للـ Health Check
 app.get('/api/health', async (req, res, next) => {
   try {
