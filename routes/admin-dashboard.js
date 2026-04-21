@@ -1,0 +1,384 @@
+const express = require('express');
+const router = express.Router();
+const db = require('../db/turso-manager');
+
+const ACTIVE_VISITOR_WINDOW_MS = 2 * 60 * 1000;
+
+function safeText(value, fallback = '') {
+  const text = String(value ?? '').trim();
+  return text || fallback;
+}
+
+function safeNumber(value, fallback = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function toDate(value) {
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function startOfDay(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function endOfDay(date) {
+  const d = new Date(date);
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+
+function getDateRange(query) {
+  const now = new Date();
+  const from = toDate(query.from) || startOfDay(now);
+  const to = toDate(query.to) || endOfDay(now);
+  return { from, to };
+}
+
+async function ensureHeartbeatTable() {
+  await db.run(`
+    CREATE TABLE IF NOT EXISTS visitor_heartbeats (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      visitor_id TEXT NOT NULL UNIQUE,
+      page TEXT DEFAULT '',
+      user_agent TEXT DEFAULT '',
+      ip_address TEXT DEFAULT '',
+      first_seen_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      last_seen_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await db.run(`
+    CREATE INDEX IF NOT EXISTS idx_visitor_heartbeats_last_seen
+    ON visitor_heartbeats(last_seen_at)
+  `);
+}
+
+async function tryGetOrdersInRange(fromIso, toIso) {
+  try {
+    const rows = await db.all(
+      `SELECT *
+       FROM orders
+       WHERE datetime(created_at) >= datetime(?)
+         AND datetime(created_at) <= datetime(?)
+       ORDER BY datetime(created_at) DESC`,
+      [fromIso, toIso]
+    );
+    return Array.isArray(rows) ? rows : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+async function tryGetAbandonedSummaryInRange(fromIso, toIso) {
+  try {
+    const total = await db.get(
+      `SELECT COUNT(*) as count
+       FROM abandoned_checkouts
+       WHERE datetime(created_at) >= datetime(?)
+         AND datetime(created_at) <= datetime(?)`,
+      [fromIso, toIso]
+    );
+
+    const open = await db.get(
+      `SELECT COUNT(*) as count
+       FROM abandoned_checkouts
+       WHERE status = 'open'
+         AND datetime(created_at) >= datetime(?)
+         AND datetime(created_at) <= datetime(?)`,
+      [fromIso, toIso]
+    );
+
+    const recovered = await db.get(
+      `SELECT COUNT(*) as count
+       FROM abandoned_checkouts
+       WHERE status = 'recovered'
+         AND datetime(created_at) >= datetime(?)
+         AND datetime(created_at) <= datetime(?)`,
+      [fromIso, toIso]
+    );
+
+    const closed = await db.get(
+      `SELECT COUNT(*) as count
+       FROM abandoned_checkouts
+       WHERE status = 'closed'
+         AND datetime(created_at) >= datetime(?)
+         AND datetime(created_at) <= datetime(?)`,
+      [fromIso, toIso]
+    );
+
+    return {
+      total: safeNumber(total?.count, 0),
+      open: safeNumber(open?.count, 0),
+      recovered: safeNumber(recovered?.count, 0),
+      closed: safeNumber(closed?.count, 0)
+    };
+  } catch (_) {
+    return { total: 0, open: 0, recovered: 0, closed: 0 };
+  }
+}
+
+async function trySearchOrders(q) {
+  try {
+    return await db.all(
+      `SELECT id, order_number, customer_name, customer_email, customer_phone, total, status, created_at
+       FROM orders
+       WHERE order_number LIKE ?
+          OR customer_name LIKE ?
+          OR customer_email LIKE ?
+          OR customer_phone LIKE ?
+       ORDER BY datetime(created_at) DESC
+       LIMIT 8`,
+      [q, q, q, q]
+    );
+  } catch (_) {
+    return [];
+  }
+}
+
+async function trySearchAbandoned(q) {
+  try {
+    return await db.all(
+      `SELECT id, checkout_token, customer_name, customer_email, customer_phone, contact_value, total, status, created_at
+       FROM abandoned_checkouts
+       WHERE checkout_token LIKE ?
+          OR customer_name LIKE ?
+          OR customer_email LIKE ?
+          OR customer_phone LIKE ?
+          OR contact_value LIKE ?
+       ORDER BY datetime(created_at) DESC
+       LIMIT 8`,
+      [q, q, q, q, q]
+    );
+  } catch (_) {
+    return [];
+  }
+}
+
+async function trySearchProducts(q) {
+  try {
+    return await db.all(
+      `SELECT id, name, slug, sku
+       FROM products
+       WHERE name LIKE ?
+          OR slug LIKE ?
+          OR sku LIKE ?
+       ORDER BY id DESC
+       LIMIT 8`,
+      [q, q, q]
+    );
+  } catch (_) {
+    return [];
+  }
+}
+
+async function trySearchCollections(q) {
+  try {
+    return await db.all(
+      `SELECT id, name, slug
+       FROM collections
+       WHERE name LIKE ?
+          OR slug LIKE ?
+       ORDER BY id DESC
+       LIMIT 8`,
+      [q, q]
+    );
+  } catch (_) {
+    return [];
+  }
+}
+
+async function trySearchCustomers(q) {
+  try {
+    return await db.all(
+      `SELECT id, name, email, phone
+       FROM customers
+       WHERE name LIKE ?
+          OR email LIKE ?
+          OR phone LIKE ?
+       ORDER BY id DESC
+       LIMIT 8`,
+      [q, q, q]
+    );
+  } catch (_) {
+    return [];
+  }
+}
+
+router.get('/summary', async (req, res) => {
+  try {
+    await ensureHeartbeatTable();
+
+    const { from, to } = getDateRange(req.query);
+    const fromIso = from.toISOString();
+    const toIso = to.toISOString();
+
+    const orders = await tryGetOrdersInRange(fromIso, toIso);
+    const abandoned = await tryGetAbandonedSummaryInRange(fromIso, toIso);
+
+    const totalSales = orders.reduce((sum, order) => {
+      return sum + safeNumber(order.total, 0);
+    }, 0);
+
+    const ordersCount = orders.length;
+
+    const pendingOrders = orders.filter(order => {
+      const status = safeText(order.status).toLowerCase();
+      return ['pending', 'processing'].includes(status);
+    }).length;
+
+    const paymentsToCapture = orders.filter(order => {
+      const status = safeText(order.status).toLowerCase();
+      return ['awaiting_payment', 'pending'].includes(status);
+    }).length;
+
+    const sessions = abandoned.total + ordersCount;
+    const conversionRate = sessions > 0 ? (ordersCount / sessions) * 100 : 0;
+
+    const activeSince = new Date(Date.now() - ACTIVE_VISITOR_WINDOW_MS).toISOString();
+    const liveVisitorsRow = await db.get(
+      `SELECT COUNT(*) as count
+       FROM visitor_heartbeats
+       WHERE datetime(last_seen_at) >= datetime(?)`,
+      [activeSince]
+    );
+
+    const liveVisitors = safeNumber(liveVisitorsRow?.count, 0);
+
+    return res.json({
+      success: true,
+      data: {
+        sessions,
+        liveVisitors,
+        totalSales,
+        orders: ordersCount,
+        conversionRate,
+        pendingOrders,
+        paymentsToCapture,
+        ordersToFulfill: pendingOrders,
+        abandoned
+      }
+    });
+  } catch (error) {
+    console.error('admin dashboard summary error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to load admin dashboard summary'
+    });
+  }
+});
+
+router.get('/search', async (req, res) => {
+  try {
+    const rawQ = safeText(req.query.q);
+    if (!rawQ) {
+      return res.json({
+        success: true,
+        data: {
+          orders: [],
+          abandoned: [],
+          products: [],
+          collections: [],
+          customers: []
+        }
+      });
+    }
+
+    const q = `%${rawQ}%`;
+
+    const [orders, abandoned, products, collections, customers] = await Promise.all([
+      trySearchOrders(q),
+      trySearchAbandoned(q),
+      trySearchProducts(q),
+      trySearchCollections(q),
+      trySearchCustomers(q)
+    ]);
+
+    return res.json({
+      success: true,
+      data: {
+        orders: Array.isArray(orders) ? orders : [],
+        abandoned: Array.isArray(abandoned) ? abandoned : [],
+        products: Array.isArray(products) ? products : [],
+        collections: Array.isArray(collections) ? collections : [],
+        customers: Array.isArray(customers) ? customers : []
+      }
+    });
+  } catch (error) {
+    console.error('admin dashboard search error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to run admin search'
+    });
+  }
+});
+
+router.post('/heartbeat', async (req, res) => {
+  try {
+    await ensureHeartbeatTable();
+
+    const visitorId = safeText(req.body?.visitorId);
+    if (!visitorId) {
+      return res.status(400).json({
+        success: false,
+        error: 'visitorId is required'
+      });
+    }
+
+    const page = safeText(req.body?.page);
+    const userAgent = safeText(req.headers['user-agent']);
+    const ipAddress =
+      safeText(req.headers['x-forwarded-for']) ||
+      safeText(req.socket?.remoteAddress);
+
+    const existing = await db.get(
+      `SELECT id FROM visitor_heartbeats WHERE visitor_id = ?`,
+      [visitorId]
+    );
+
+    if (existing?.id) {
+      await db.run(
+        `UPDATE visitor_heartbeats
+         SET page = ?,
+             user_agent = ?,
+             ip_address = ?,
+             last_seen_at = CURRENT_TIMESTAMP
+         WHERE visitor_id = ?`,
+        [page, userAgent, ipAddress, visitorId]
+      );
+    } else {
+      await db.run(
+        `INSERT INTO visitor_heartbeats
+         (visitor_id, page, user_agent, ip_address, first_seen_at, last_seen_at)
+         VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+        [visitorId, page, userAgent, ipAddress]
+      );
+    }
+
+    const activeSince = new Date(Date.now() - ACTIVE_VISITOR_WINDOW_MS).toISOString();
+    const liveVisitorsRow = await db.get(
+      `SELECT COUNT(*) as count
+       FROM visitor_heartbeats
+       WHERE datetime(last_seen_at) >= datetime(?)`,
+      [activeSince]
+    );
+
+    return res.json({
+      success: true,
+      data: {
+        liveVisitors: safeNumber(liveVisitorsRow?.count, 0)
+      }
+    });
+  } catch (error) {
+    console.error('admin dashboard heartbeat error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to record visitor heartbeat'
+    });
+  }
+});
+
+module.exports = router;
