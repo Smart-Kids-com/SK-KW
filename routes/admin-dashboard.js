@@ -46,6 +46,7 @@ async function ensureHeartbeatTable() {
       page TEXT DEFAULT '',
       user_agent TEXT DEFAULT '',
       ip_address TEXT DEFAULT '',
+      source TEXT DEFAULT 'storefront',
       first_seen_at TEXT DEFAULT CURRENT_TIMESTAMP,
       last_seen_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
@@ -54,6 +55,11 @@ async function ensureHeartbeatTable() {
   await db.run(`
     CREATE INDEX IF NOT EXISTS idx_visitor_heartbeats_last_seen
     ON visitor_heartbeats(last_seen_at)
+  `);
+
+  await db.run(`
+    CREATE INDEX IF NOT EXISTS idx_visitor_heartbeats_source
+    ON visitor_heartbeats(source)
   `);
 }
 
@@ -118,6 +124,41 @@ async function tryGetAbandonedSummaryInRange(fromIso, toIso) {
     };
   } catch (_) {
     return { total: 0, open: 0, recovered: 0, closed: 0 };
+  }
+}
+
+async function countSessionsInRange(fromIso, toIso) {
+  try {
+    const row = await db.get(
+      `SELECT COUNT(DISTINCT visitor_id) as count
+       FROM visitor_heartbeats
+       WHERE source = 'storefront'
+         AND datetime(last_seen_at) >= datetime(?)
+         AND datetime(last_seen_at) <= datetime(?)`,
+      [fromIso, toIso]
+    );
+
+    return safeNumber(row?.count, 0);
+  } catch (_) {
+    return 0;
+  }
+}
+
+async function countLiveVisitors() {
+  try {
+    const activeSince = new Date(Date.now() - ACTIVE_VISITOR_WINDOW_MS).toISOString();
+
+    const row = await db.get(
+      `SELECT COUNT(DISTINCT visitor_id) as count
+       FROM visitor_heartbeats
+       WHERE source = 'storefront'
+         AND datetime(last_seen_at) >= datetime(?)`,
+      [activeSince]
+    );
+
+    return safeNumber(row?.count, 0);
+  } catch (_) {
+    return 0;
   }
 }
 
@@ -235,18 +276,9 @@ router.get('/summary', async (req, res) => {
       return ['awaiting_payment', 'pending'].includes(status);
     }).length;
 
-    const sessions = abandoned.total + ordersCount;
+    const sessions = await countSessionsInRange(fromIso, toIso);
     const conversionRate = sessions > 0 ? (ordersCount / sessions) * 100 : 0;
-
-    const activeSince = new Date(Date.now() - ACTIVE_VISITOR_WINDOW_MS).toISOString();
-    const liveVisitorsRow = await db.get(
-      `SELECT COUNT(*) as count
-       FROM visitor_heartbeats
-       WHERE datetime(last_seen_at) >= datetime(?)`,
-      [activeSince]
-    );
-
-    const liveVisitors = safeNumber(liveVisitorsRow?.count, 0);
+    const liveVisitors = await countLiveVisitors();
 
     return res.json({
       success: true,
@@ -329,6 +361,7 @@ router.post('/heartbeat', async (req, res) => {
     }
 
     const page = safeText(req.body?.page);
+    const source = safeText(req.body?.source, 'storefront');
     const userAgent = safeText(req.headers['user-agent']);
     const ipAddress =
       safeText(req.headers['x-forwarded-for']) ||
@@ -345,31 +378,26 @@ router.post('/heartbeat', async (req, res) => {
          SET page = ?,
              user_agent = ?,
              ip_address = ?,
+             source = ?,
              last_seen_at = CURRENT_TIMESTAMP
          WHERE visitor_id = ?`,
-        [page, userAgent, ipAddress, visitorId]
+        [page, userAgent, ipAddress, source, visitorId]
       );
     } else {
       await db.run(
         `INSERT INTO visitor_heartbeats
-         (visitor_id, page, user_agent, ip_address, first_seen_at, last_seen_at)
-         VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
-        [visitorId, page, userAgent, ipAddress]
+         (visitor_id, page, user_agent, ip_address, source, first_seen_at, last_seen_at)
+         VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+        [visitorId, page, userAgent, ipAddress, source]
       );
     }
 
-    const activeSince = new Date(Date.now() - ACTIVE_VISITOR_WINDOW_MS).toISOString();
-    const liveVisitorsRow = await db.get(
-      `SELECT COUNT(*) as count
-       FROM visitor_heartbeats
-       WHERE datetime(last_seen_at) >= datetime(?)`,
-      [activeSince]
-    );
+    const liveVisitors = await countLiveVisitors();
 
     return res.json({
       success: true,
       data: {
-        liveVisitors: safeNumber(liveVisitorsRow?.count, 0)
+        liveVisitors
       }
     });
   } catch (error) {
