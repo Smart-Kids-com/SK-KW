@@ -13,13 +13,9 @@
       --text: #111827;
       --muted: #6b7280;
       --card: rgba(255, 255, 255, 0.72);
-      --card-strong: rgba(255, 255, 255, 0.9);
       --line: rgba(255, 255, 255, 0.88);
       --shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
       --shadow-soft: 0 10px 28px rgba(15, 23, 42, 0.08);
-      --radius-xl: 26px;
-      --radius-lg: 20px;
-      --radius-md: 16px;
       --sidebar-width: 336px;
       --header-height: 88px;
       --success: #16a34a;
@@ -95,6 +91,7 @@
       background: transparent;
       color: #fff;
       font-size: 20px;
+      font-weight: 700;
       padding: 0 96px 0 26px;
       z-index: 2;
     }
@@ -900,7 +897,7 @@
       </div>
 
       <div class="top-name" aria-label="sk logo with Arabic name">
-        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/sk-Logo-with-name.webp?v=1776752430" alt="الأطفال المبتكرون الكويت">
+        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/sk-Logo-with-name.webp?v=1776752430" alt="Smart Kids Kuwait">
       </div>
     </header>
 
@@ -946,13 +943,13 @@
             <div class="stat-box">
               <div class="stat-title">Sessions</div>
               <div class="stat-value" id="sessionsValue">—</div>
-              <div class="stat-sub">Based on orders and abandoned activity in the selected range</div>
+              <div class="stat-sub">From dashboard summary endpoint</div>
             </div>
 
             <div class="stat-box">
               <div class="stat-title">Total Sales</div>
               <div class="stat-value" id="salesValue">KWD 0.000</div>
-              <div class="stat-sub">Calculated from filtered orders</div>
+              <div class="stat-sub">From selected date range</div>
             </div>
 
             <div class="stat-box">
@@ -964,7 +961,7 @@
             <div class="stat-box">
               <div class="stat-title">Conversion rate</div>
               <div class="stat-value" id="conversionValue">—</div>
-              <div class="stat-sub">Orders divided by estimated sessions</div>
+              <div class="stat-sub">From dashboard summary endpoint</div>
             </div>
           </div>
         </section>
@@ -1014,7 +1011,7 @@
                   <div class="mini-box">
                     <div class="mini-label">Loaded Orders</div>
                     <div class="mini-value" id="loadedOrdersValue">0</div>
-                    <div class="mini-sub">All orders fetched from backend</div>
+                    <div class="mini-sub">All fetched orders from backend</div>
                   </div>
 
                   <div class="mini-box">
@@ -1047,15 +1044,15 @@
                 <div class="notes-list">
                   <div class="note-item">
                     <div class="note-main">
-                      <div class="note-title">Compact summary tiles</div>
-                      <div class="note-sub">Orders to fulfill and payments to capture keep their dynamic counters, with visible labels added for clarity.</div>
+                      <div class="note-title">Dashboard APIs</div>
+                      <div class="note-sub">This page now reads `summary`, `search`, and `heartbeat` from `/api/admin-dashboard/*`.</div>
                     </div>
                   </div>
 
                   <div class="note-item">
                     <div class="note-main">
-                      <div class="note-title">Search</div>
-                      <div class="note-sub">Global search looks through orders, abandoned checkouts, products, collections, and customers where endpoints exist.</div>
+                      <div class="note-title">Compact tiles</div>
+                      <div class="note-sub">Orders to fulfill and payments to capture remain compact clickable tiles instead of oversized image blocks.</div>
                     </div>
                   </div>
                 </div>
@@ -1145,13 +1142,27 @@
   </div>
 
   <script>
+    const ADMIN_DASHBOARD_API = '/api/admin-dashboard';
+    const ORDERS_API = '/api/orders';
+
     const state = {
       allOrders: [],
-      abandonedList: [],
-      products: [],
-      collections: [],
-      customers: [],
-      liveVisitors: 0,
+      summary: {
+        sessions: 0,
+        liveVisitors: 0,
+        totalSales: 0,
+        orders: 0,
+        conversionRate: 0,
+        pendingOrders: 0,
+        paymentsToCapture: 0,
+        ordersToFulfill: 0,
+        abandoned: {
+          total: 0,
+          open: 0,
+          recovered: 0,
+          closed: 0
+        }
+      },
       dateLabel: 'Today',
       selectedStart: null,
       selectedEnd: null,
@@ -1159,7 +1170,8 @@
       tempEnd: null,
       currentBaseMonth: null,
       searchTimer: null,
-      loading: false
+      loading: false,
+      liveHeartbeatTimer: null
     };
 
     const STATUS_COLORS = {
@@ -1291,15 +1303,19 @@
       });
     }
 
-    async function fetchJson(url, timeoutMs = 12000) {
+    async function fetchJson(url, options = {}, timeoutMs = 12000) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
 
       try {
         const response = await fetch(url, {
+          ...options,
           signal: controller.signal,
           cache: 'no-store',
-          headers: { Accept: 'application/json' }
+          headers: {
+            Accept: 'application/json',
+            ...(options.headers || {})
+          }
         });
 
         const text = await response.text();
@@ -1314,32 +1330,6 @@
       }
     }
 
-    async function tryLoadList(url) {
-      try {
-        const { response, result } = await fetchJson(url);
-        if (!response.ok || !result?.success) return [];
-        return Array.isArray(result.data) ? result.data : [];
-      } catch (_) {
-        return [];
-      }
-    }
-
-    async function loadData() {
-      const [orders, abandoned, products, collections, customers] = await Promise.all([
-        tryLoadList('/api/orders?limit=120&offset=0&sort=created_at&order=DESC'),
-        tryLoadList('/api/abandoned-checkouts?limit=80&offset=0&sort=last_activity_at&order=DESC'),
-        tryLoadList('/api/products?limit=60&offset=0'),
-        tryLoadList('/api/collections?limit=60&offset=0'),
-        tryLoadList('/api/customers?limit=60&offset=0')
-      ]);
-
-      state.allOrders = orders;
-      state.abandonedList = abandoned;
-      state.products = products;
-      state.collections = collections;
-      state.customers = customers;
-    }
-
     function getSelectedDateRange() {
       return {
         from: cloneDate(state.selectedStart),
@@ -1347,70 +1337,74 @@
       };
     }
 
-    function getFilteredOrders() {
+    async function loadOrders() {
+      const { response, result } = await fetchJson(`${ORDERS_API}?limit=120&offset=0&sort=created_at&order=DESC`);
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error || 'Failed to load orders');
+      }
+      state.allOrders = Array.isArray(result.data) ? result.data : [];
+    }
+
+    async function loadSummary() {
       const range = getSelectedDateRange();
-      return state.allOrders.filter(order => {
-        const d = getOrderDate(order);
-        return d && d >= range.from && d <= range.to;
-      });
-    }
+      const url = `${ADMIN_DASHBOARD_API}/summary?from=${encodeURIComponent(range.from.toISOString())}&to=${encodeURIComponent(range.to.toISOString())}`;
+      const { response, result } = await fetchJson(url);
 
-    function getFilteredAbandoned() {
-      const range = getSelectedDateRange();
-      return state.abandonedList.filter(item => {
-        const d = normalizeDate(item.last_activity_at || item.updated_at || item.created_at);
-        return d && d >= range.from && d <= range.to;
-      });
-    }
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error || 'Failed to load dashboard summary');
+      }
 
-    function deriveSessions(orders, abandoned) {
-      return orders.length + abandoned.length;
-    }
-
-    function deriveConversionRate(orders, sessions) {
-      if (!sessions) return 0;
-      return (orders.length / sessions) * 100;
-    }
-
-    function countOrdersToFulfill(orders) {
-      return orders.filter(order => ['pending', 'processing'].includes(getOrderStatus(order))).length;
-    }
-
-    function countPaymentsToCapture(orders) {
-      return orders.filter(order => ['awaiting_payment', 'pending'].includes(getOrderStatus(order))).length;
+      state.summary = {
+        sessions: safeNumber(result.data?.sessions, 0),
+        liveVisitors: safeNumber(result.data?.liveVisitors, 0),
+        totalSales: safeNumber(result.data?.totalSales, 0),
+        orders: safeNumber(result.data?.orders, 0),
+        conversionRate: safeNumber(result.data?.conversionRate, 0),
+        pendingOrders: safeNumber(result.data?.pendingOrders, 0),
+        paymentsToCapture: safeNumber(result.data?.paymentsToCapture, 0),
+        ordersToFulfill: safeNumber(result.data?.ordersToFulfill, 0),
+        abandoned: {
+          total: safeNumber(result.data?.abandoned?.total, 0),
+          open: safeNumber(result.data?.abandoned?.open, 0),
+          recovered: safeNumber(result.data?.abandoned?.recovered, 0),
+          closed: safeNumber(result.data?.abandoned?.closed, 0)
+        }
+      };
     }
 
     function renderDashboard() {
-      const filteredOrders = getFilteredOrders();
-      const filteredAbandoned = getFilteredAbandoned();
-
-      const totalSales = filteredOrders.reduce((sum, order) => sum + getOrderTotal(order), 0);
-      const sessions = deriveSessions(filteredOrders, filteredAbandoned);
-      const conversion = deriveConversionRate(filteredOrders, sessions);
-
-      qs('sessionsValue').textContent = String(sessions);
-      qs('salesValue').textContent = formatMoney(totalSales);
-      qs('ordersValue').textContent = String(filteredOrders.length);
-      qs('conversionValue').textContent = `${conversion.toFixed(2)}%`;
+      qs('sessionsValue').textContent = String(state.summary.sessions);
+      qs('salesValue').textContent = formatMoney(state.summary.totalSales);
+      qs('ordersValue').textContent = String(state.summary.orders);
+      qs('conversionValue').textContent = `${safeNumber(state.summary.conversionRate, 0).toFixed(2)}%`;
 
       qs('ordersCountBadge').textContent = String(state.allOrders.length);
       qs('loadedOrdersValue').textContent = String(state.allOrders.length);
-      qs('filteredOrdersValue').textContent = String(filteredOrders.length);
-      qs('openAbandonedValue').textContent = String(filteredAbandoned.filter(item => safeText(item.status).toLowerCase() === 'open').length);
-      qs('recoveredAbandonedValue').textContent = String(filteredAbandoned.filter(item => safeText(item.status).toLowerCase() === 'recovered').length);
+      qs('filteredOrdersValue').textContent = String(state.summary.orders);
+      qs('openAbandonedValue').textContent = String(state.summary.abandoned.open);
+      qs('recoveredAbandonedValue').textContent = String(state.summary.abandoned.recovered);
 
-      qs('fulfillBadge').textContent = String(countOrdersToFulfill(filteredOrders));
-      qs('paymentsBadge').textContent = String(countPaymentsToCapture(filteredOrders));
-      qs('liveVisitorsLabel').textContent = `${state.liveVisitors} Live Visitor`;
+      qs('fulfillBadge').textContent = String(state.summary.ordersToFulfill);
+      qs('paymentsBadge').textContent = String(state.summary.paymentsToCapture);
+      qs('liveVisitorsLabel').textContent = `${state.summary.liveVisitors} Live Visitor`;
 
-      renderRecentOrders(filteredOrders);
+      renderRecentOrders();
     }
 
-    function renderRecentOrders(orders) {
-      const list = qs('recentOrdersList');
-      const rows = [...orders]
+    function getRecentFilteredOrders() {
+      const range = getSelectedDateRange();
+      return state.allOrders
+        .filter(order => {
+          const d = getOrderDate(order);
+          return d && d >= range.from && d <= range.to;
+        })
         .sort((a, b) => (getOrderDate(b)?.getTime() || 0) - (getOrderDate(a)?.getTime() || 0))
         .slice(0, 6);
+    }
+
+    function renderRecentOrders() {
+      const list = qs('recentOrdersList');
+      const rows = getRecentFilteredOrders();
 
       if (!rows.length) {
         list.innerHTML = `
@@ -1445,105 +1439,9 @@
       }).join('');
     }
 
-    function buildSearchResults(query) {
-      const q = safeText(query).toLowerCase();
-      if (!q) return [];
-
-      const orders = state.allOrders
-        .filter(item => {
-          return [
-            item.order_number,
-            item.customer_name,
-            item.customer_email,
-            item.customer_phone
-          ].some(v => safeText(v).toLowerCase().includes(q));
-        })
-        .slice(0, 6)
-        .map(item => ({
-          group: 'Orders',
-          icon: '📦',
-          title: item.order_number || `Order #${item.id}`,
-          sub: `${safeText(item.customer_name, 'Unknown customer')} | ${formatMoney(getOrderTotal(item))}`,
-          href: `/order-details.html?id=${encodeURIComponent(item.id || '')}`
-        }));
-
-      const abandoned = state.abandonedList
-        .filter(item => {
-          return [
-            item.checkout_token,
-            item.customer_name,
-            item.customer_email,
-            item.customer_phone,
-            item.contact_value
-          ].some(v => safeText(v).toLowerCase().includes(q));
-        })
-        .slice(0, 6)
-        .map(item => ({
-          group: 'Abandoned',
-          icon: '🛒',
-          title: item.customer_name || item.checkout_token || 'Abandoned checkout',
-          sub: `${safeText(item.customer_email || item.customer_phone || item.contact_value, 'No contact')} | ${formatMoney(item.total)}`,
-          href: '/abandoned-checkouts-admin.html'
-        }));
-
-      const products = state.products
-        .filter(item => {
-          return [
-            item.name,
-            item.slug,
-            item.sku
-          ].some(v => safeText(v).toLowerCase().includes(q));
-        })
-        .slice(0, 6)
-        .map(item => ({
-          group: 'Products',
-          icon: '🏷️',
-          title: item.name || 'Product',
-          sub: safeText(item.slug || item.sku || item.id, 'Product record'),
-          href: '/products-admin'
-        }));
-
-      const collections = state.collections
-        .filter(item => {
-          return [
-            item.name,
-            item.slug
-          ].some(v => safeText(v).toLowerCase().includes(q));
-        })
-        .slice(0, 6)
-        .map(item => ({
-          group: 'Collections',
-          icon: '🗂️',
-          title: item.name || 'Collection',
-          sub: safeText(item.slug || item.id, 'Collection record'),
-          href: '/collections-admin'
-        }));
-
-      const customers = state.customers
-        .filter(item => {
-          return [
-            item.name,
-            item.customer_name,
-            item.email,
-            item.phone
-          ].some(v => safeText(v).toLowerCase().includes(q));
-        })
-        .slice(0, 6)
-        .map(item => ({
-          group: 'Customers',
-          icon: '👥',
-          title: item.name || item.customer_name || item.email || 'Customer',
-          sub: safeText(item.email || item.phone || item.id, 'Customer record'),
-          href: '/customers-admin'
-        }));
-
-      return [...orders, ...abandoned, ...products, ...collections, ...customers];
-    }
-
-    function renderSearch(query) {
+    async function searchDashboard(query) {
       const box = qs('searchResults');
       const inner = qs('searchResultsInner');
-      const results = buildSearchResults(query);
 
       if (!safeText(query)) {
         inner.innerHTML = `<div class="search-empty">Start typing to search...</div>`;
@@ -1551,34 +1449,106 @@
         return;
       }
 
-      if (!results.length) {
-        inner.innerHTML = `<div class="search-empty">No results found</div>`;
-        box.classList.add('open');
-        return;
-      }
-
-      const grouped = {};
-      results.forEach(item => {
-        if (!grouped[item.group]) grouped[item.group] = [];
-        grouped[item.group].push(item);
-      });
-
-      inner.innerHTML = Object.entries(grouped).map(([group, items]) => `
-        <div class="search-group">
-          <div class="search-group-title">${escapeHtml(group)}</div>
-          ${items.map(item => `
-            <a class="search-item" href="${escapeHtml(item.href)}">
-              <div class="search-icon">${escapeHtml(item.icon)}</div>
-              <div class="search-main">
-                <div class="search-title">${escapeHtml(item.title)}</div>
-                <div class="search-sub">${escapeHtml(item.sub)}</div>
-              </div>
-            </a>
-          `).join('')}
-        </div>
-      `).join('');
-
+      inner.innerHTML = `<div class="search-loading">Searching...</div>`;
       box.classList.add('open');
+
+      try {
+        const { response, result } = await fetchJson(`${ADMIN_DASHBOARD_API}/search?q=${encodeURIComponent(query)}`, {}, 10000);
+
+        if (!response.ok || !result?.success) {
+          throw new Error(result?.error || 'Search failed');
+        }
+
+        const groups = [];
+
+        const orders = Array.isArray(result.data?.orders) ? result.data.orders : [];
+        const abandoned = Array.isArray(result.data?.abandoned) ? result.data.abandoned : [];
+        const products = Array.isArray(result.data?.products) ? result.data.products : [];
+        const collections = Array.isArray(result.data?.collections) ? result.data.collections : [];
+        const customers = Array.isArray(result.data?.customers) ? result.data.customers : [];
+
+        if (orders.length) {
+          groups.push({
+            title: 'Orders',
+            icon: '📦',
+            items: orders.map(item => ({
+              title: item.order_number || `Order #${item.id}`,
+              sub: `${safeText(item.customer_name, 'Unknown customer')} | ${formatMoney(item.total)}`,
+              href: `/order-details.html?id=${encodeURIComponent(item.id || '')}`
+            }))
+          });
+        }
+
+        if (abandoned.length) {
+          groups.push({
+            title: 'Abandoned',
+            icon: '🛒',
+            items: abandoned.map(item => ({
+              title: item.customer_name || item.checkout_token || 'Abandoned checkout',
+              sub: `${safeText(item.customer_email || item.customer_phone || item.contact_value, 'No contact')} | ${formatMoney(item.total)}`,
+              href: '/abandoned-checkouts-admin.html'
+            }))
+          });
+        }
+
+        if (products.length) {
+          groups.push({
+            title: 'Products',
+            icon: '🏷️',
+            items: products.map(item => ({
+              title: item.name || 'Product',
+              sub: safeText(item.slug || item.sku || item.id, 'Product record'),
+              href: '/products-admin'
+            }))
+          });
+        }
+
+        if (collections.length) {
+          groups.push({
+            title: 'Collections',
+            icon: '🗂️',
+            items: collections.map(item => ({
+              title: item.name || 'Collection',
+              sub: safeText(item.slug || item.id, 'Collection record'),
+              href: '/collections-admin'
+            }))
+          });
+        }
+
+        if (customers.length) {
+          groups.push({
+            title: 'Customers',
+            icon: '👥',
+            items: customers.map(item => ({
+              title: item.name || item.email || item.phone || 'Customer',
+              sub: safeText(item.email || item.phone || item.id, 'Customer record'),
+              href: '/customers-admin'
+            }))
+          });
+        }
+
+        if (!groups.length) {
+          inner.innerHTML = `<div class="search-empty">No results found</div>`;
+          return;
+        }
+
+        inner.innerHTML = groups.map(group => `
+          <div class="search-group">
+            <div class="search-group-title">${escapeHtml(group.title)}</div>
+            ${group.items.map(item => `
+              <a class="search-item" href="${escapeHtml(item.href)}">
+                <div class="search-icon">${escapeHtml(group.icon)}</div>
+                <div class="search-main">
+                  <div class="search-title">${escapeHtml(item.title)}</div>
+                  <div class="search-sub">${escapeHtml(item.sub)}</div>
+                </div>
+              </a>
+            `).join('')}
+          </div>
+        `).join('');
+      } catch (_) {
+        inner.innerHTML = `<div class="search-empty">Search failed</div>`;
+      }
     }
 
     function bindSearch() {
@@ -1588,7 +1558,7 @@
       input.addEventListener('input', () => {
         clearTimeout(state.searchTimer);
         state.searchTimer = setTimeout(() => {
-          renderSearch(input.value);
+          searchDashboard(input.value);
         }, 180);
       });
 
@@ -1801,25 +1771,25 @@
     }
 
     function handleDateClick(clicked) {
-  const clickedStart = startOfDay(clicked);
-  const clickedEnd = endOfDay(clicked);
+      const clickedStart = startOfDay(clicked);
+      const clickedEnd = endOfDay(clicked);
 
-  if (!state.tempStart || !state.tempEnd || state.tempStart.getTime() !== state.tempEnd.getTime()) {
-    state.tempStart = clickedStart;
-    state.tempEnd = clickedEnd;
-  } else {
-    if (clickedStart.getTime() < state.tempStart.getTime()) {
-      state.tempEnd = endOfDay(state.tempStart);
-      state.tempStart = clickedStart;
-    } else {
-      state.tempEnd = clickedEnd;
+      if (!state.tempStart || !state.tempEnd || state.tempStart.getTime() !== state.tempEnd.getTime()) {
+        state.tempStart = clickedStart;
+        state.tempEnd = clickedEnd;
+      } else {
+        if (clickedStart.getTime() < state.tempStart.getTime()) {
+          state.tempEnd = endOfDay(state.tempStart);
+          state.tempStart = clickedStart;
+        } else {
+          state.tempEnd = clickedEnd;
+        }
+      }
+
+      state.dateLabel = 'Custom range';
+      activateCustomPicker();
+      renderCalendars();
     }
-  }
-
-  state.dateLabel = 'Custom range';
-  activateCustomPicker();
-  renderCalendars();
-}
 
     function bindDatePicker() {
       qs('openDatePickerBtn').addEventListener('click', () => {
@@ -1840,12 +1810,12 @@
         qs('pickerBackdrop').classList.remove('open');
       });
 
-      qs('applyPickerBtn').addEventListener('click', () => {
+      qs('applyPickerBtn').addEventListener('click', async () => {
         state.selectedStart = cloneDate(state.tempStart);
         state.selectedEnd = cloneDate(state.tempEnd);
         qs('dateTriggerLabel').textContent = state.dateLabel;
         qs('pickerBackdrop').classList.remove('open');
-        renderDashboard();
+        await reloadPageData(false);
       });
 
       qs('toggleTimeBtn').addEventListener('click', () => {
@@ -1921,6 +1891,38 @@
       renderCalendars();
     }
 
+    function getVisitorId() {
+      const key = 'admin_visitor_id';
+      let id = localStorage.getItem(key);
+      if (!id) {
+        id = `visitor_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+        localStorage.setItem(key, id);
+      }
+      return id;
+    }
+
+    async function sendHeartbeat() {
+      try {
+        const { response, result } = await fetchJson(
+          `${ADMIN_DASHBOARD_API}/heartbeat`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              visitorId: getVisitorId(),
+              page: location.pathname
+            })
+          },
+          10000
+        );
+
+        if (response.ok && result?.success) {
+          state.summary.liveVisitors = safeNumber(result.data?.liveVisitors, state.summary.liveVisitors);
+          qs('liveVisitorsLabel').textContent = `${state.summary.liveVisitors} Live Visitor`;
+        }
+      } catch (_) {}
+    }
+
     async function reloadPageData(showMessage = false) {
       if (state.loading) return;
       state.loading = true;
@@ -1928,7 +1930,7 @@
       qs('reloadBtn').textContent = 'Refreshing...';
 
       try {
-        await loadData();
+        await Promise.all([loadOrders(), loadSummary()]);
         renderDashboard();
         if (showMessage) showAlert('Dashboard updated successfully', 'success');
       } catch (error) {
@@ -1951,6 +1953,10 @@
       });
 
       await reloadPageData(false);
+      await sendHeartbeat();
+
+      clearInterval(state.liveHeartbeatTimer);
+      state.liveHeartbeatTimer = setInterval(sendHeartbeat, 30000);
     });
   </script>
 </body>
