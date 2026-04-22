@@ -18,7 +18,9 @@ const customersRoutes = require('./routes/customers');
 const themeRoutes = require('./routes/theme');
 const abandonedCheckoutsRoutes = require('./routes/abandoned-checkouts');
 const discountsRoutes = require('./routes/discounts');
+const storeDiscountsRoutes = require('./routes/store-discounts');
 const adminDashboardRoutes = require('./routes/admin-dashboard');
+
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
@@ -200,9 +202,16 @@ function requireAdminApiWriteAuth(req, res, next) {
     return next();
   }
 
-  // public checkout: create order
+   // public checkout: create order
   // NOTE: this middleware is mounted at /api, so req.path for POST /api/orders is "/orders"
   if (method === 'POST' && pathname === '/orders') {
+    return next();
+  }
+
+  // public storefront discount validation
+  // NOTE: this middleware is mounted at /api, so:
+  // POST /api/store/discounts/validate -> req.path "/store/discounts/validate"
+  if (method === 'POST' && pathname === '/store/discounts/validate') {
     return next();
   }
 
@@ -654,6 +663,7 @@ app.use('/api/customers', customersRoutes);
 app.use('/api/theme', themeRoutes);
 app.use('/api/abandoned-checkouts', abandonedCheckoutsRoutes);
 app.use('/api/discounts', discountsRoutes);
+app.use('/api/store/discounts', storeDiscountsRoutes);
 app.use('/api/admin-dashboard', adminDashboardRoutes);
 
 // Route للـ Health Check
