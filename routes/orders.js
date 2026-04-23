@@ -9,13 +9,12 @@ const { sendOrderEmails } = require('../utils/email');
 
 const ORDERS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS;
 const ORDER_ITEMS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS;
-
 const META_START = '\n<!--OAI_ORDER_META:';
 const META_END = ':OAI_ORDER_META-->';
-
+const { validateOrderItemsStock } = require('../services/inventory-service');
 /**
  * Customer sync config
- * - Shopify-like identity: email OR phone
+ * - Smartify-like identity: email OR phone
  */
 const CUSTOMERS_TABLE = 'customers';
 const CUSTOMER_SYNC_BATCH_LIMIT = 5000; // backfill safety limit per request
@@ -724,6 +723,16 @@ router.post('/', async (req, res) => {
         error: 'الطلب يجب أن يحتوي على منتج واحد على الأقل'
       });
     }
+
+    const stockValidation = await validateOrderItemsStock(normalizedItems);
+
+    if (!stockValidation.valid) {
+  return res.status(400).json({
+    success: false,
+    error: stockValidation.message,
+    details: stockValidation.errors
+  });
+   }
 
     const subtotal = calculateSubtotal(normalizedItems);
 

@@ -409,4 +409,35 @@ router.post('/heartbeat', async (req, res) => {
   }
 });
 
+router.post('/leave', async (req, res) => {
+  try {
+    await ensureHeartbeatTable();
+
+    const visitorId = safeText(req.body?.visitorId);
+    if (!visitorId) {
+      return res.status(400).json({
+        success: false,
+        error: 'visitorId is required'
+      });
+    }
+
+    await db.run(
+      `UPDATE visitor_heartbeats
+       SET last_seen_at = datetime('now', '-10 minutes')
+       WHERE visitor_id = ?`,
+      [visitorId]
+    );
+
+    return res.json({
+      success: true
+    });
+  } catch (error) {
+    console.error('admin dashboard leave error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to record visitor leave'
+    });
+  }
+});
+
 module.exports = router;

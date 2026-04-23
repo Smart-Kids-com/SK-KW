@@ -20,7 +20,7 @@ const abandonedCheckoutsRoutes = require('./routes/abandoned-checkouts');
 const discountsRoutes = require('./routes/discounts');
 const storeDiscountsRoutes = require('./routes/store-discounts');
 const adminDashboardRoutes = require('./routes/admin-dashboard');
-
+const inventoryRoutes = require('./routes/inventory');
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
@@ -203,17 +203,29 @@ function requireAdminApiWriteAuth(req, res, next) {
   }
 
    // public checkout: create order
-  // NOTE: this middleware is mounted at /api, so req.path for POST /api/orders is "/orders"
-  if (method === 'POST' && pathname === '/orders') {
-    return next();
-  }
+// NOTE: this middleware is mounted at /api, so req.path for POST /api/orders is "/orders"
+if (method === 'POST' && pathname === '/orders') {
+  return next();
+}
 
-  // public storefront discount validation
-  // NOTE: this middleware is mounted at /api, so:
-  // POST /api/store/discounts/validate -> req.path "/store/discounts/validate"
-  if (method === 'POST' && pathname === '/store/discounts/validate') {
-    return next();
-  }
+// public storefront discount validation
+// NOTE: this middleware is mounted at /api, so:
+// POST /api/store/discounts/validate -> req.path "/store/discounts/validate"
+if (method === 'POST' && pathname === '/store/discounts/validate') {
+  return next();
+}
+
+if (method === 'POST' && pathname === '/admin-dashboard/heartbeat') {
+  return next();
+}
+
+if (method === 'POST' && pathname === '/admin-dashboard/leave') {
+  return next();
+}
+
+if (method === 'POST' && pathname === '/abandoned-checkouts/save') {
+  return next();
+}
 
   // admin-only writes
   if (isAdminAuthenticated(req)) {
@@ -628,7 +640,9 @@ app.use(
     '/theme-admin',
     '/theme-admin.html',
     '/discounts-admin',
-    '/discounts-admin.html'
+    '/discounts-admin.html',
+    '/inventory-admin',
+    '/inventory-admin.html'
   ],
   requireAdminAuth
 );
@@ -663,6 +677,7 @@ app.use('/api/customers', customersRoutes);
 app.use('/api/theme', themeRoutes);
 app.use('/api/abandoned-checkouts', abandonedCheckoutsRoutes);
 app.use('/api/discounts', discountsRoutes);
+app.use('/api/inventory', inventoryRoutes);
 app.use('/api/store/discounts', storeDiscountsRoutes);
 app.use('/api/admin-dashboard', adminDashboardRoutes);
 
