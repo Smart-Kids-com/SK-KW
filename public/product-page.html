@@ -560,6 +560,15 @@
       transform:translateY(-2px);
     }
 
+    .main-btn:disabled,
+    .buy-now-btn:disabled,
+    .qty-btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+      transform:none;
+      box-shadow:none;
+    }
+
     .product-description-card{
       background:rgba(255,255,255,.08);
       border:1px solid rgba(255,255,255,.08);
@@ -1198,13 +1207,35 @@
       return safeNumber(price, 0);
     }
 
+    function getAvailableStock(product) {
+      return Math.max(
+        0,
+        safeNumber(
+          product?.stock ??
+          product?.inventory ??
+          product?.inventory_quantity,
+          0
+        )
+      );
+    }
+
+    function isOutOfStock(product) {
+      if (!product) return true;
+      if (product?.status && String(product.status).toLowerCase() !== "active") {
+        return true;
+      }
+      return getAvailableStock(product) <= 0;
+    }
+
     function getStockLabel(product) {
-      const stock = safeNumber(product?.stock, 0);
       if (product?.status && String(product.status).toLowerCase() !== "active") {
         return "غير متاح";
       }
-      if (stock > 0) return "متوفر";
-      return "متوفر للطلب";
+
+      const stock = getAvailableStock(product);
+      if (stock > 0) return `متوفر (${stock})`;
+
+      return "نفدت الكمية";
     }
 
     function getProductUrl(product) {
@@ -1445,6 +1476,12 @@
     function addCurrentProductToCart() {
       if (!currentProduct) return;
 
+      if (isOutOfStock(currentProduct)) {
+        alert("هذا المنتج نفدت كميته وغير متاح للشراء حالياً");
+        return;
+      }
+
+      const availableStock = getAvailableStock(currentProduct);
       const qty = Math.max(1, parseInt(document.getElementById("qtyValue")?.textContent || "1", 10) || 1);
       const id = safeText(currentProduct.id, getProductTitle(currentProduct));
       const name = getProductTitle(currentProduct);
@@ -1453,9 +1490,16 @@
       const slug = safeText(currentProduct.slug);
 
       const existing = cart.find(item => String(item.id) === String(id));
+      const currentCartQty = existing ? Number(existing.quantity || 0) : 0;
+      const nextQty = currentCartQty + qty;
+
+      if (nextQty > availableStock) {
+        alert(`الكمية المتاحة فقط هي ${availableStock}`);
+        return;
+      }
 
       if (existing) {
-        existing.quantity += qty;
+        existing.quantity = nextQty;
       } else {
         cart.push({
           id,
@@ -1473,17 +1517,30 @@
     }
 
     function buyNow() {
+      if (isOutOfStock(currentProduct)) {
+        alert("هذا المنتج نفدت كميته وغير متاح للشراء حالياً");
+        return;
+      }
+
       addCurrentProductToCart();
       window.location.href = "./checkout.html";
     }
 
     function changeQty(step) {
       const el = document.getElementById("qtyValue");
-      if (!el) return;
+      if (!el || !currentProduct) return;
+
+      const availableStock = getAvailableStock(currentProduct);
+      if (availableStock <= 0) {
+        el.textContent = "0";
+        return;
+      }
 
       let value = parseInt(el.textContent || "1", 10) || 1;
       value += step;
+
       if (value < 1) value = 1;
+      if (value > availableStock) value = availableStock;
 
       el.textContent = String(value);
     }
@@ -1543,6 +1600,31 @@
       document.getElementById("crumb").textContent = title;
       document.getElementById("pCategory").textContent = category;
       document.getElementById("pStock").textContent = stockLabel;
+
+      const outOfStock = isOutOfStock(product);
+
+      const addToCartBtn = document.getElementById("addToCartBtn");
+      const buyNowBtn = document.getElementById("buyNowBtn");
+      const qtyPlus = document.getElementById("qtyPlus");
+      const qtyMinus = document.getElementById("qtyMinus");
+      const qtyValue = document.getElementById("qtyValue");
+
+      if (qtyValue) {
+        qtyValue.textContent = outOfStock ? "0" : "1";
+      }
+
+      if (qtyPlus) qtyPlus.disabled = outOfStock;
+      if (qtyMinus) qtyMinus.disabled = outOfStock;
+
+      if (addToCartBtn) {
+        addToCartBtn.disabled = outOfStock;
+        addToCartBtn.textContent = outOfStock ? "نفدت الكمية" : "إضافة إلى السلة";
+      }
+
+      if (buyNowBtn) {
+        buyNowBtn.disabled = outOfStock;
+        buyNowBtn.textContent = outOfStock ? "غير متاح حالياً" : "اشترِ الآن";
+      }
 
       renderGallery(getProductImages(product), title);
 

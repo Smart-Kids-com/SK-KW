@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إدارة المخزون - Smart Kids Kuwait</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    :root{
+      --bg:#f6f3fb;
+      --panel:#ffffff;
+      --panel-2:#faf7ff;
+      --text:#231933;
+      --muted:#7b7287;
+      --line:#e6ddf0;
+      --primary:#6a4c93;
+      --primary-dark:#54387a;
+      --success:#0f9d58;
+      --danger:#d93025;
+      --warning:#d97706;
+      --info:#1d4ed8;
+      --shadow:0 12px 30px rgba(106,76,147,.10);
+      --radius:18px;
+    }
+
+    body{
+      margin:0;
+      font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+      background:linear-gradient(180deg,#f8f5fc 0%, #f2ecf8 100%);
+      color:var(--text);
+    }
+
+    .page{
+      max-width:1500px;
+      margin:0 auto;
+      padding:24px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:20px;
+      flex-wrap:wrap;
+    }
+
+    .title-wrap h1{
+      margin:0 0 8px;
+      font-size:30px;
+      color:var(--primary);
+    }
+
+    .title-wrap p{
+      margin:0;
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:12px 16px;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.2s ease;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+
+    .btn.primary{
+      background:var(--primary);
+      color:#fff;
+    }
+
+    .btn.primary:hover{ background:var(--primary-dark); }
+
+    .btn.light{
+      background:#fff;
+      color:var(--primary);
+      border:1px solid var(--line);
+    }
+
+    .btn.light:hover{ background:#f7f2ff; }
+
+    .btn.success{
+      background:var(--success);
+      color:#fff;
+    }
+
+    .btn.warning{
+      background:var(--warning);
+      color:#fff;
+    }
+
+    .btn.danger{
+      background:var(--danger);
+      color:#fff;
+    }
+
+    .btn.info{
+      background:var(--info);
+      color:#fff;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:420px 1fr;
+      gap:20px;
+      align-items:start;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .card-header{
+      padding:18px 18px 14px;
+      border-bottom:1px solid var(--line);
+      background:var(--panel-2);
+    }
+
+    .card-header h2{
+      margin:0 0 6px;
+      font-size:19px;
+      color:var(--primary);
+    }
+
+    .card-header p{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .card-body{
+      padding:18px;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .stat{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:16px;
+      min-height:110px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:8px;
+    }
+
+    .stat .label{
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .stat .value{
+      font-size:28px;
+      font-weight:800;
+      color:var(--primary);
+      line-height:1;
+    }
+
+    .field{
+      margin-bottom:14px;
+    }
+
+    .field label{
+      display:block;
+      margin-bottom:8px;
+      font-size:13px;
+      font-weight:700;
+      color:#4e3a70;
+    }
+
+    .field input,
+    .field select{
+      width:100%;
+      border:1px solid #d9cdea;
+      border-radius:14px;
+      background:#fff;
+      padding:13px 14px;
+      font-size:14px;
+      outline:none;
+      color:var(--text);
+    }
+
+    .field input:focus,
+    .field select:focus{
+      border-color:#8c63c9;
+      box-shadow:0 0 0 4px rgba(140,99,201,.12);
+    }
+
+    .row-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .checkbox{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding-top:8px;
+      color:var(--text);
+      font-size:14px;
+      user-select:none;
+    }
+
+    .checkbox input{
+      width:18px;
+      height:18px;
+      accent-color:var(--primary);
+    }
+
+    .form-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+
+    .toolbar{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .toolbar .field{
+      margin:0;
+      flex:1 1 180px;
+    }
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#fff;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:1350px;
+    }
+
+    th, td{
+      padding:14px 12px;
+      border-bottom:1px solid #eee6f6;
+      text-align:right;
+      vertical-align:middle;
+      font-size:14px;
+    }
+
+    th{
+      background:#fbf8ff;
+      color:#553c79;
+      position:sticky;
+      top:0;
+      z-index:1;
+      white-space:nowrap;
+    }
+
+    td small{
+      color:var(--muted);
+      display:block;
+      margin-top:4px;
+      line-height:1.5;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:90px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .badge.in-stock{
+      background:#dcfce7;
+      color:#166534;
+    }
+
+    .badge.out-of-stock{
+      background:#fee2e2;
+      color:#991b1b;
+    }
+
+    .badge.active{
+      background:#e0ecff;
+      color:#1d4ed8;
+    }
+
+    .badge.archived{
+      background:#f3e8ff;
+      color:#7e22ce;
+    }
+
+    .table-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .table-actions .btn{
+      padding:9px 12px;
+      font-size:12px;
+      border-radius:12px;
+    }
+
+    .message{
+      display:none;
+      margin-bottom:16px;
+      border-radius:14px;
+      padding:14px 16px;
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .message.show{ display:block; }
+
+    .message.success{
+      background:#dff6e7;
+      color:#166534;
+      border:1px solid #b8e3c8;
+    }
+
+    .message.error{
+      background:#fde7e7;
+      color:#991b1b;
+      border:1px solid #f3c2c2;
+    }
+
+    .message.info{
+      background:#e8f1ff;
+      color:#1d4ed8;
+      border:1px solid #cdddff;
+    }
+
+    .loading{
+      opacity:.65;
+      pointer-events:none;
+    }
+
+    .empty{
+      padding:34px 18px;
+      text-align:center;
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    .helper{
+      margin-top:8px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.7;
+    }
+
+    @media (max-width: 1180px){
+      .grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 900px){
+      .stats{
+        grid-template-columns:1fr 1fr;
+      }
+    }
+
+    @media (max-width: 700px){
+      .page{ padding:14px; }
+      .stats{ grid-template-columns:1fr; }
+      .row-2{ grid-template-columns:1fr; }
+      .topbar{ align-items:stretch; }
+      .top-actions{ width:100%; }
+      .top-actions .btn{ flex:1 1 180px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="title-wrap">
+        <h1>إدارة المخزون</h1>
+        <p>تحكم في حالة توفر المنتجات، الكمية المتاحة، الإغلاق والفتح، والمخزون الفعلي بنفس منطق Inventory.</p>
+      </div>
+
+      <div class="top-actions">
+        <a class="btn light" href="/admin-enhanced">العودة للوحة الإدارة</a>
+        <button class="btn primary" type="button" id="refreshBtn">تحديث البيانات</button>
+      </div>
+    </div>
+
+    <div id="messageBox" class="message"></div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="label">إجمالي المنتجات</div>
+        <div class="value" id="statTotal">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">متاح على الواجهة</div>
+        <div class="value" id="statInStock">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">نفدت الكمية / مغلق</div>
+        <div class="value" id="statOutOfStock">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">إجمالي Available</div>
+        <div class="value" id="statAvailable">0</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="card" id="formCard">
+        <div class="card-header">
+          <h2 id="formTitle">تعديل مخزون المنتج</h2>
+          <p>اختر منتجًا من الجدول وعدل الـ SKU والمخزون والحالة وفتح/إغلاق الواجهة.</p>
+        </div>
+
+        <div class="card-body">
+          <form id="inventoryForm">
+            <input type="hidden" id="productId" />
+
+            <div class="field">
+              <label for="productName">اسم المنتج</label>
+              <input type="text" id="productName" disabled />
+            </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="sku">SKU</label>
+                <input type="text" id="sku" placeholder="SKU" />
+              </div>
+
+              <div class="field">
+                <label for="status">حالة المنتج</label>
+                <select id="status">
+                  <option value="active">active</option>
+                  <option value="archived">archived</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="onHand">On hand</label>
+                <input type="number" id="onHand" min="0" step="1" value="0" />
+              </div>
+
+              <div class="field">
+                <label for="committed">Committed</label>
+                <input type="number" id="committed" min="0" step="1" value="0" />
+              </div>
+            </div>
+
+            <div class="row-2">
+              <div class="field">
+                <label for="unavailable">Unavailable</label>
+                <input type="number" id="unavailable" min="0" step="1" value="0" />
+              </div>
+
+              <div class="field">
+                <label for="availablePreview">Available</label>
+                <input type="number" id="availablePreview" disabled value="0" />
+              </div>
+            </div>
+
+            <label class="checkbox">
+              <input type="checkbox" id="inventoryEnabled" checked />
+              <span>Inventory tracking enabled</span>
+            </label>
+
+            <label class="checkbox">
+              <input type="checkbox" id="inventoryBlocked" />
+              <span>إغلاق المنتج على الواجهة مباشرة</span>
+            </label>
+
+            <div class="helper">
+              المعادلة: Available = On hand - Committed - Unavailable
+            </div>
+
+            <div class="form-actions">
+              <button class="btn primary" type="submit" id="saveBtn">حفظ التعديلات</button>
+              <button class="btn success" type="button" id="openBtn">فتح المنتج</button>
+              <button class="btn warning" type="button" id="closeBtn">إغلاق المنتج</button>
+              <button class="btn info" type="button" id="setAvailableBtn">ضبط Available</button>
+              <button class="btn light" type="button" id="resetBtn">تفريغ النموذج</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="card" id="listCard">
+        <div class="card-header">
+          <h2>قائمة المخزون</h2>
+          <p>ابحث وصفِّ ثم اختر أي منتج لتعديل بيانات Inventory.</p>
+        </div>
+
+        <div class="card-body">
+          <div class="toolbar">
+            <div class="field">
+              <label for="searchInput">بحث</label>
+              <input type="text" id="searchInput" placeholder="ابحث بالاسم أو SKU أو ID" />
+            </div>
+
+            <div class="field">
+              <label for="stockStatusFilter">حالة الواجهة</label>
+              <select id="stockStatusFilter">
+                <option value="">الكل</option>
+                <option value="in_stock">متاح</option>
+                <option value="out_of_stock">نفدت الكمية / مغلق</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="sortField">الترتيب حسب</label>
+              <select id="sortField">
+                <option value="product_name">اسم المنتج</option>
+                <option value="sku">SKU</option>
+                <option value="available">Available</option>
+                <option value="on_hand">On hand</option>
+                <option value="committed">Committed</option>
+                <option value="unavailable">Unavailable</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="sortOrder">اتجاه الترتيب</label>
+              <select id="sortOrder">
+                <option value="ASC">تصاعدي</option>
+                <option value="DESC">تنازلي</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>المنتج</th>
+                  <th>SKU</th>
+                  <th>Status</th>
+                  <th>واجهة المتجر</th>
+                  <th>Available</th>
+                  <th>Committed</th>
+                  <th>Unavailable</th>
+                  <th>On hand</th>
+                  <th>Inventory</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryTableBody">
+                <tr>
+                  <td colspan="10" class="empty">جاري التحميل...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '/api/inventory';
+
+    let inventoryItems = [];
+    let currentEditingId = '';
+
+    const els = {
+      messageBox: document.getElementById('messageBox'),
+      statTotal: document.getElementById('statTotal'),
+      statInStock: document.getElementById('statInStock'),
+      statOutOfStock: document.getElementById('statOutOfStock'),
+      statAvailable: document.getElementById('statAvailable'),
+      formTitle: document.getElementById('formTitle'),
+      form: document.getElementById('inventoryForm'),
+      productId: document.getElementById('productId'),
+      productName: document.getElementById('productName'),
+      sku: document.getElementById('sku'),
+      status: document.getElementById('status'),
+      onHand: document.getElementById('onHand'),
+      committed: document.getElementById('committed'),
+      unavailable: document.getElementById('unavailable'),
+      availablePreview: document.getElementById('availablePreview'),
+      inventoryEnabled: document.getElementById('inventoryEnabled'),
+      inventoryBlocked: document.getElementById('inventoryBlocked'),
+      saveBtn: document.getElementById('saveBtn'),
+      openBtn: document.getElementById('openBtn'),
+      closeBtn: document.getElementById('closeBtn'),
+      setAvailableBtn: document.getElementById('setAvailableBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      refreshBtn: document.getElementById('refreshBtn'),
+      searchInput: document.getElementById('searchInput'),
+      stockStatusFilter: document.getElementById('stockStatusFilter'),
+      sortField: document.getElementById('sortField'),
+      sortOrder: document.getElementById('sortOrder'),
+      tableBody: document.getElementById('inventoryTableBody')
+    };
+
+    function safeText(value, fallback = '') {
+      const text = String(value ?? '').trim();
+      return text || fallback;
+    }
+
+    function toNumber(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function toInt(value, fallback = 0) {
+      const n = parseInt(value, 10);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function showMessage(message, type = 'info') {
+      els.messageBox.textContent = message;
+      els.messageBox.className = `message show ${type}`;
+    }
+
+    function clearMessage() {
+      els.messageBox.className = 'message';
+      els.messageBox.textContent = '';
+    }
+
+    function setLoading(isLoading) {
+      document.body.classList.toggle('loading', isLoading);
+      els.saveBtn.disabled = isLoading;
+      els.refreshBtn.disabled = isLoading;
+      els.openBtn.disabled = isLoading;
+      els.closeBtn.disabled = isLoading;
+      els.setAvailableBtn.disabled = isLoading;
+    }
+
+    function calculateAvailablePreview() {
+      const onHand = Math.max(0, toInt(els.onHand.value, 0));
+      const committed = Math.max(0, toInt(els.committed.value, 0));
+      const unavailable = Math.max(0, toInt(els.unavailable.value, 0));
+      const available = Math.max(0, onHand - committed - unavailable);
+      els.availablePreview.value = String(available);
+      return available;
+    }
+
+    function buildQuery() {
+      const params = new URLSearchParams();
+
+      const search = safeText(els.searchInput.value);
+      const stockStatus = safeText(els.stockStatusFilter.value);
+      const sort = safeText(els.sortField.value, 'product_name');
+      const order = safeText(els.sortOrder.value, 'ASC');
+
+      if (search) params.set('search', search);
+      if (stockStatus) params.set('stock_status', stockStatus);
+      params.set('sort', sort);
+      params.set('order', order);
+      params.set('limit', '200');
+      params.set('offset', '0');
+
+      return params.toString();
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...(options.headers || {})
+        },
+        ...options
+      });
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error || `Request failed (${response.status})`);
+      }
+
+      return result;
+    }
+
+    function updateStats() {
+      const total = inventoryItems.length;
+      const inStock = inventoryItems.filter(item => item.storefront_status === 'in_stock').length;
+      const outOfStock = inventoryItems.filter(item => item.storefront_status === 'out_of_stock').length;
+      const availableSum = inventoryItems.reduce((sum, item) => sum + toInt(item.available, 0), 0);
+
+      els.statTotal.textContent = String(total);
+      els.statInStock.textContent = String(inStock);
+      els.statOutOfStock.textContent = String(outOfStock);
+      els.statAvailable.textContent = String(availableSum);
+    }
+
+    async function loadInventory() {
+      const query = buildQuery();
+      const result = await fetchJson(`${API_BASE}?${query}`);
+      inventoryItems = Array.isArray(result.data) ? result.data : [];
+      updateStats();
+      renderTable();
+    }
+
+    function renderTable() {
+      if (!inventoryItems.length) {
+        els.tableBody.innerHTML = `
+          <tr>
+            <td colspan="10" class="empty">لا توجد منتجات مطابقة للفلاتر الحالية.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      els.tableBody.innerHTML = inventoryItems.map(item => {
+        const id = Number(item.id || 0);
+        const name = escapeHtml(item.product_name || '');
+        const sku = escapeHtml(item.sku || '—');
+        const status = safeText(item.status, 'active');
+        const storefrontStatus = safeText(item.storefront_status, 'out_of_stock');
+        const stockLabel = storefrontStatus === 'in_stock' ? 'متاح' : 'نفدت الكمية';
+        const inventoryMode = Number(item.inventory_enabled || 0) ? 'ON' : 'OFF';
+        const blockedLabel = Number(item.inventory_blocked || 0) ? 'مغلق' : 'مفتوح';
+
+        return `
+          <tr>
+            <td>
+              <strong>${name}</strong>
+              <small>ID: ${id}</small>
+            </td>
+            <td>${sku}</td>
+            <td>
+              <span class="badge ${status === 'archived' ? 'archived' : 'active'}">${escapeHtml(status)}</span>
+            </td>
+            <td>
+              <span class="badge ${storefrontStatus === 'in_stock' ? 'in-stock' : 'out-of-stock'}">${stockLabel}</span>
+              <small>${blockedLabel}</small>
+            </td>
+            <td><strong>${escapeHtml(String(toInt(item.available, 0)))}</strong></td>
+            <td>${escapeHtml(String(toInt(item.committed, 0)))}</td>
+            <td>${escapeHtml(String(toInt(item.unavailable, 0)))}</td>
+            <td>${escapeHtml(String(toInt(item.on_hand, 0)))}</td>
+            <td>
+              <small>Tracking: ${inventoryMode}</small>
+              <small>Stock field: ${escapeHtml(String(toInt(item.stock, 0)))}</small>
+            </td>
+            <td>
+              <div class="table-actions">
+                <button class="btn light" type="button" onclick="editInventory(${id})">تعديل</button>
+                <button class="btn success" type="button" onclick="openInventory(${id})">فتح</button>
+                <button class="btn warning" type="button" onclick="closeInventory(${id})">إغلاق</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function resetForm() {
+      currentEditingId = '';
+      els.productId.value = '';
+      els.productName.value = '';
+      els.sku.value = '';
+      els.status.value = 'active';
+      els.onHand.value = '0';
+      els.committed.value = '0';
+      els.unavailable.value = '0';
+      els.availablePreview.value = '0';
+      els.inventoryEnabled.checked = true;
+      els.inventoryBlocked.checked = false;
+      els.formTitle.textContent = 'تعديل مخزون المنتج';
+    }
+
+    function fillForm(item) {
+      currentEditingId = String(item.id || '');
+      els.productId.value = currentEditingId;
+      els.productName.value = safeText(item.product_name);
+      els.sku.value = safeText(item.sku);
+      els.status.value = safeText(item.status, 'active');
+      els.onHand.value = String(toInt(item.on_hand, 0));
+      els.committed.value = String(toInt(item.committed, 0));
+      els.unavailable.value = String(toInt(item.unavailable, 0));
+      els.inventoryEnabled.checked = Number(item.inventory_enabled || 0) === 1;
+      els.inventoryBlocked.checked = Number(item.inventory_blocked || 0) === 1;
+      els.formTitle.textContent = `تعديل مخزون: ${safeText(item.product_name, 'المنتج')}`;
+      calculateAvailablePreview();
+    }
+
+    async function editInventory(id) {
+      try {
+        clearMessage();
+        const result = await fetchJson(`${API_BASE}/${id}`);
+        const item = result.data;
+        fillForm(item);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (error) {
+        showMessage(error.message, 'error');
+      }
+    }
+
+    async function openInventory(id) {
+      try {
+        clearMessage();
+        setLoading(true);
+        await fetchJson(`${API_BASE}/${id}/open`, { method: 'POST', body: JSON.stringify({}) });
+        showMessage('تم فتح المنتج', 'success');
+        await loadInventory();
+        if (String(currentEditingId) === String(id)) {
+          await editInventory(id);
+        }
+      } catch (error) {
+        showMessage(error.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function closeInventory(id) {
+      try {
+        clearMessage();
+        setLoading(true);
+        await fetchJson(`${API_BASE}/${id}/close`, { method: 'POST', body: JSON.stringify({}) });
+        showMessage('تم إغلاق المنتج على الواجهة', 'success');
+        await loadInventory();
+        if (String(currentEditingId) === String(id)) {
+          await editInventory(id);
+        }
+      } catch (error) {
+        showMessage(error.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function saveCurrentProduct(event) {
+      event.preventDefault();
+
+      const id = safeText(els.productId.value);
+      if (!id) {
+        showMessage('اختر منتجًا من الجدول أولًا', 'error');
+        return;
+      }
+
+      try {
+        clearMessage();
+        setLoading(true);
+
+        const payload = {
+          sku: safeText(els.sku.value),
+          status: safeText(els.status.value, 'active'),
+          on_hand: Math.max(0, toInt(els.onHand.value, 0)),
+          committed: Math.max(0, toInt(els.committed.value, 0)),
+          unavailable: Math.max(0, toInt(els.unavailable.value, 0)),
+          inventory_enabled: els.inventoryEnabled.checked ? 1 : 0,
+          inventory_blocked: els.inventoryBlocked.checked ? 1 : 0
+        };
+
+        const result = await fetchJson(`${API_BASE}/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+
+        fillForm(result.data);
+        showMessage('تم تحديث المخزون بنجاح', 'success');
+        await loadInventory();
+      } catch (error) {
+        showMessage(error.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function setAvailableDirectly() {
+      const id = safeText(els.productId.value);
+      if (!id) {
+        showMessage('اختر منتجًا من الجدول أولًا', 'error');
+        return;
+      }
+
+      const available = prompt('أدخل الكمية المتاحة Available', els.availablePreview.value || '0');
+      if (available === null) return;
+
+      try {
+        clearMessage();
+        setLoading(true);
+
+        const result = await fetchJson(`${API_BASE}/${id}/set-available`, {
+          method: 'POST',
+          body: JSON.stringify({
+            available: Math.max(0, toInt(available, 0))
+          })
+        });
+
+        fillForm(result.data);
+        showMessage('تم ضبط Available بنجاح', 'success');
+        await loadInventory();
+      } catch (error) {
+        showMessage(error.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    els.form.addEventListener('submit', saveCurrentProduct);
+    els.resetBtn.addEventListener('click', () => {
+      resetForm();
+      clearMessage();
+    });
+
+    els.refreshBtn.addEventListener('click', async () => {
+      try {
+        clearMessage();
+        setLoading(true);
+        await loadInventory();
+        showMessage('تم تحديث البيانات', 'success');
+      } catch (error) {
+        showMessage(error.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    els.openBtn.addEventListener('click', () => {
+      const id = safeText(els.productId.value);
+      if (!id) {
+        showMessage('اختر منتجًا من الجدول أولًا', 'error');
+        return;
+      }
+      openInventory(id);
+    });
+
+    els.closeBtn.addEventListener('click', () => {
+      const id = safeText(els.productId.value);
+      if (!id) {
+        showMessage('اختر منتجًا من الجدول أولًا', 'error');
+        return;
+      }
+      closeInventory(id);
+    });
+
+    els.setAvailableBtn.addEventListener('click', setAvailableDirectly);
+
+    [els.onHand, els.committed, els.unavailable].forEach(el => {
+      el.addEventListener('input', calculateAvailablePreview);
+    });
+
+    [els.searchInput, els.stockStatusFilter, els.sortField, els.sortOrder].forEach(el => {
+      el.addEventListener('input', loadInventory);
+      el.addEventListener('change', loadInventory);
+    });
+
+    async function boot() {
+      try {
+        setLoading(true);
+        resetForm();
+        await loadInventory();
+      } catch (error) {
+        showMessage(error.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    window.editInventory = editInventory;
+    window.openInventory = openInventory;
+    window.closeInventory = closeInventory;
+
+    boot();
+  </script>
+</body>
+</html>
