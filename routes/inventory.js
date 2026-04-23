@@ -10,19 +10,6 @@ const {
   listInventory
 } = require('../services/inventory-service');
 
-router.use(async (req, res, next) => {
-  try {
-    await ensureInventoryColumns();
-    next();
-  } catch (error) {
-    console.error('inventory schema ensure error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'فشل في تهيئة أعمدة المخزون'
-    });
-  }
-});
-
 router.get('/', async (req, res) => {
   try {
     const result = await listInventory({
