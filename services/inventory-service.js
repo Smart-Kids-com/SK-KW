@@ -275,7 +275,61 @@ async function listInventory({
   limit = 50,
   offset = 0
 } = {}) {
-  await ensureInventoryColumns();
+  const safeLimit = Math.max(1, Math.min(200, toInt(limit, 50)));
+  const safeOffset = Math.max(0, toInt(offset, 0));
+  const q = safeText(search).toLowerCase();
+  const stockStatusNormalized = safeText(stockStatus).toLowerCase();
+  const sortOrder = String(order).toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
+  const sortMap = {
+    product_name: 'product_name',
+    sku: 'sku',
+    unavailable: 'unavailable',
+    committed: 'committed',
+    available: 'stock',
+    on_hand: 'on_hand'
+  };
+
+  const sortColumn = sortMap[sort] || 'product_name';
+
+  const where = [];
+  const params = [];
+
+  if (q) {
+    where.push(`(
+      LOWER(COALESCE(product_name, '')) LIKE ?
+      OR LOWER(COALESCE(sku, '')) LIKE ?
+      OR CAST(id AS TEXT) LIKE ?
+    )`);
+    params.push(`%${q}%`, `%${q}%`, `%${q}%`);
+  }
+
+  if (stockStatusNormalized === 'in_stock') {
+    where.push(`
+      COALESCE(inventory_enabled, 1) = 1
+      AND COALESCE(inventory_blocked, 0) = 0
+      AND LOWER(COALESCE(status, 'active')) = 'active'
+      AND COALESCE(stock, 0) > 0
+    `);
+  } else if (stockStatusNormalized === 'out_of_stock') {
+    where.push(`(
+      COALESCE(inventory_enabled, 1) = 0
+      OR COALESCE(inventory_blocked, 0) = 1
+      OR LOWER(COALESCE(status, 'active')) <> 'active'
+      OR COALESCE(stock, 0) <= 0
+    )`);
+  }
+
+  const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+  const countRow = await db.get(
+    `
+    SELECT COUNT(*) as count
+    FROM ${PRODUCTS_TABLE}
+    ${whereSql}
+    `,
+    params
+  );
 
   const rows = await db.all(
     `
@@ -293,11 +347,14 @@ async function listInventory({
       created_at,
       updated_at
     FROM ${PRODUCTS_TABLE}
-    ORDER BY id DESC
-    `
+    ${whereSql}
+    ORDER BY ${sortColumn} ${sortOrder}
+    LIMIT ? OFFSET ?
+    `,
+    [...params, safeLimit, safeOffset]
   );
 
-  let items = rows.map(row => {
+  const items = rows.map(row => {
     const inventory = getInventoryState(row);
 
     return {
@@ -311,47 +368,15 @@ async function listInventory({
     };
   });
 
-  const q = safeText(search).toLowerCase();
-  if (q) {
-    items = items.filter(item => {
-      const haystack = [item.product_name, item.sku, item.id].join(' ').toLowerCase();
-      return haystack.includes(q);
-    });
-  }
-
-  const stockStatusNormalized = safeText(stockStatus).toLowerCase();
-  if (stockStatusNormalized === 'in_stock') {
-    items = items.filter(item => item.storefront_status === 'in_stock');
-  } else if (stockStatusNormalized === 'out_of_stock') {
-    items = items.filter(item => item.storefront_status === 'out_of_stock');
-  }
-
-  const sorters = {
-    product_name: (a, b) => a.product_name.localeCompare(b.product_name, 'ar'),
-    sku: (a, b) => a.sku.localeCompare(b.sku, 'en'),
-    unavailable: (a, b) => a.unavailable - b.unavailable,
-    committed: (a, b) => a.committed - b.committed,
-    available: (a, b) => a.available - b.available,
-    on_hand: (a, b) => a.on_hand - b.on_hand
-  };
-
-  const sorter = sorters[sort] || sorters.product_name;
-  items.sort(sorter);
-
-  if (String(order).toUpperCase() === 'DESC') {
-    items.reverse();
-  }
-
-  const safeLimit = Math.max(1, Math.min(200, toInt(limit, 50)));
-  const safeOffset = Math.max(0, toInt(offset, 0));
+  const total = Number(countRow?.count || 0);
 
   return {
-    data: items.slice(safeOffset, safeOffset + safeLimit),
+    data: items,
     pagination: {
-      total: items.length,
+      total,
       limit: safeLimit,
       offset: safeOffset,
-      totalPages: Math.ceil(items.length / safeLimit)
+      totalPages: Math.ceil(total / safeLimit)
     }
   };
 }
