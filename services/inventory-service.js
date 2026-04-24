@@ -281,16 +281,16 @@ async function listInventory({
   const stockStatusNormalized = safeText(stockStatus).toLowerCase();
   const sortOrder = String(order).toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
 
-  const sortMap = {
-    product_name: 'product_name',
-    sku: 'sku',
-    unavailable: 'unavailable',
-    committed: 'committed',
-    available: 'stock',
-    on_hand: 'on_hand'
-  };
+    const sortMap = {
+  product_name: 'id',
+  sku: 'id',
+  unavailable: 'unavailable',
+  committed: 'committed',
+  available: 'stock',
+  on_hand: 'on_hand'
+};
 
-  const sortColumn = sortMap[sort] || 'product_name';
+const sortColumn = sortMap[sort] || 'id';
 
   const where = [];
   const params = [];
