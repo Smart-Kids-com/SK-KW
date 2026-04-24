@@ -320,6 +320,79 @@
       margin-bottom:8px;
     }
 
+.search-item-price-wrap,
+    .hero-price-wrap,
+    .card-price-wrap{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .search-item-price-old,
+    .hero-price-old,
+    .card-price-old{
+      color:rgba(255,255,255,.6);
+      text-decoration:line-through;
+      font-size:.88rem;
+      direction:ltr;
+    }
+
+    .search-item-price-old{
+      color:#7a6a8f;
+    }
+
+    .search-item-stock,
+    .hero-stock-badge,
+    .card-stock-badge,
+    .offer-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:26px;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:.8rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .offer-badge{
+      background:rgba(255,213,74,.18);
+      color:var(--accent);
+      border:1px solid rgba(255,213,74,.24);
+      width:fit-content;
+    }
+
+    .search-item-stock{
+      background:#f3eef7;
+      color:#5b1970;
+      margin-bottom:8px;
+    }
+
+    .search-item-stock.out,
+    .hero-stock-badge.out,
+    .card-stock-badge.out{
+      background:rgba(217,48,37,.16);
+      color:#ffd8d4;
+      border:1px solid rgba(217,48,37,.22);
+    }
+
+    .hero-stock-badge,
+    .card-stock-badge{
+      background:rgba(255,255,255,.1);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.12);
+      margin-bottom:10px;
+      width:fit-content;
+    }
+
+    .hero-btn.is-disabled,
+    .card-btn.is-disabled,
+    .search-item button.is-disabled{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
     .search-item-actions{
       display:flex;
       gap:8px;
@@ -978,14 +1051,79 @@
       );
     }
 
-    function getPrice(product) {
-      const salePrice = parseFloat(product.sale_price);
-      const regularPrice = parseFloat(product.price);
+    function getRegularPrice(product) {
+      const value = Number(
+        product.compare_at_price ??
+        product.regular_price ??
+        product.price ??
+        0
+      );
+      return Number.isFinite(value) ? value : 0;
+    }
 
-      if (!isNaN(salePrice) && salePrice > 0) return salePrice;
-      if (!isNaN(regularPrice)) return regularPrice;
-      if (product.variants && product.variants[0] && product.variants[0].price) return parseFloat(product.variants[0].price);
+    function getSalePrice(product) {
+      const value = Number(
+        product.sale_price ??
+        product.discounted_price ??
+        0
+      );
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    function getPrice(product) {
+      const regularPrice = getRegularPrice(product);
+      const salePrice = getSalePrice(product);
+
+      if (salePrice > 0 && regularPrice > salePrice) return salePrice;
+      if (regularPrice > 0) return regularPrice;
+      if (product.variants && product.variants[0] && product.variants[0].price) {
+        return parseFloat(product.variants[0].price) || 0;
+      }
       return 0;
+    }
+
+    function hasSale(product) {
+      const regularPrice = getRegularPrice(product);
+      const salePrice = getSalePrice(product);
+      return salePrice > 0 && regularPrice > salePrice;
+    }
+
+    function getAvailableStock(product) {
+      const value = Number(
+        product.stock ??
+        product.inventory ??
+        product.inventory_quantity ??
+        product.available ??
+        0
+      );
+      return Number.isFinite(value) ? Math.max(0, value) : 0;
+    }
+
+    function isPurchasable(product) {
+      const status = safeText(product.status, 'active').toLowerCase();
+      const inventoryEnabled = Number(product.inventory_enabled ?? 1) === 1;
+      const inventoryBlocked = Number(product.inventory_blocked ?? 0) === 1;
+      const stock = getAvailableStock(product);
+      return status === 'active' && inventoryEnabled && !inventoryBlocked && stock > 0;
+    }
+
+    function getStockLabel(product) {
+      return isPurchasable(product) ? `متوفر (${getAvailableStock(product)})` : 'نفدت الكمية';
+    }
+
+    function getPriceMarkup(product, variant = 'card') {
+      const finalPrice = getPrice(product);
+      const regularPrice = getRegularPrice(product);
+      const sale = hasSale(product);
+      const cls = variant === 'hero' ? 'hero' : variant === 'search' ? 'search-item' : 'card';
+
+      return `
+        <div class="${cls}-price-wrap">
+          ${sale ? `<div class="offer-badge">عرض خاص</div>` : ''}
+          ${sale ? `<div class="${cls}-price-old">KWD ${regularPrice.toFixed(3)}</div>` : ''}
+          <div class="${cls}-price">KWD ${finalPrice.toFixed(3)}</div>
+        </div>
+      `;
     }
 
     function getProductUrl(product) {
@@ -1039,11 +1177,23 @@
     }
 
     function addToCart(product) {
+      if (!isPurchasable(product)) {
+        alert('هذا المنتج نفدت كميته وغير متاح للشراء حالياً');
+        return;
+      }
+
       const id = product.id || product.slug || getTitle(product);
       const found = cart.find(item => String(item.id) === String(id));
+      const nextQuantity = found ? Number(found.quantity || 0) + 1 : 1;
+      const availableStock = getAvailableStock(product);
+
+      if (nextQuantity > availableStock) {
+        alert(`الكمية المتاحة فقط هي ${availableStock}`);
+        return;
+      }
 
       if (found) {
-        found.quantity += 1;
+        found.quantity = nextQuantity;
       } else {
         cart.push({
           id,
@@ -1099,16 +1249,21 @@
         return;
       }
 
-      box.innerHTML = results.map(product => `
-        <div class="search-item">
-          <div class="search-item-title">${escapeHtml(getTitle(product))}</div>
-          <div class="search-item-price">KWD ${getPrice(product).toFixed(3)}</div>
-          <div class="search-item-actions">
-            <button type="button" data-action="add" data-id="${escapeHtml(product.slug || product.id || '')}">إضافة للسلة</button>
-            <a href="${getProductUrl(product)}">فتح المنتج</a>
+      box.innerHTML = results.map(product => {
+        const purchasable = isPurchasable(product);
+        const id = escapeHtml(product.slug || product.id || '');
+        return `
+          <div class="search-item">
+            <div class="search-item-title">${escapeHtml(getTitle(product))}</div>
+            <div class="search-item-stock${purchasable ? '' : ' out'}">${escapeHtml(getStockLabel(product))}</div>
+            ${getPriceMarkup(product, 'search')}
+            <div class="search-item-actions">
+              <button type="button" class="${purchasable ? '' : 'is-disabled'}" data-action="add" data-id="${id}" ${purchasable ? '' : 'disabled'}>${purchasable ? 'إضافة للسلة' : 'نفدت الكمية'}</button>
+              <a href="${getProductUrl(product)}">فتح المنتج</a>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
 
       box.querySelectorAll('button[data-action="add"]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1121,6 +1276,7 @@
 
     function heroSlide(product) {
       const url = getProductUrl(product);
+      const purchasable = isPurchasable(product);
       return `
         <div class="hero-slide">
           <a class="hero-card" href="${url}">
@@ -1129,8 +1285,9 @@
             </div>
             <div class="hero-info">
               <div class="hero-title">${escapeHtml(getTitle(product))}</div>
-              <div class="hero-price">KWD ${getPrice(product).toFixed(3)}</div>
-              <button class="hero-btn" type="button" data-add-id="${escapeHtml(product.slug || product.id || '')}">أضف للسلة</button>
+              <div class="hero-stock-badge${purchasable ? '' : ' out'}">${escapeHtml(getStockLabel(product))}</div>
+              ${getPriceMarkup(product, 'hero')}
+              <button class="hero-btn${purchasable ? '' : ' is-disabled'}" type="button" data-add-id="${escapeHtml(product.slug || product.id || '')}" ${purchasable ? '' : 'disabled'}>${purchasable ? 'أضف للسلة' : 'نفدت الكمية'}</button>
             </div>
           </a>
         </div>
@@ -1139,6 +1296,7 @@
 
     function cardItem(product) {
       const url = getProductUrl(product);
+      const purchasable = isPurchasable(product);
       return `
         <article class="card">
           <a class="card-link" href="${url}">
@@ -1148,8 +1306,9 @@
               </div>
               <div class="card-info">
                 <div class="card-title">${escapeHtml(getTitle(product))}</div>
-                <div class="card-price">KWD ${getPrice(product).toFixed(3)}</div>
-                <button class="card-btn" type="button" data-add-id="${escapeHtml(product.slug || product.id || '')}">أضف للسلة</button>
+                <div class="card-stock-badge${purchasable ? '' : ' out'}">${escapeHtml(getStockLabel(product))}</div>
+                ${getPriceMarkup(product, 'card')}
+                <button class="card-btn${purchasable ? '' : ' is-disabled'}" type="button" data-add-id="${escapeHtml(product.slug || product.id || '')}" ${purchasable ? '' : 'disabled'}>${purchasable ? 'أضف للسلة' : 'نفدت الكمية'}</button>
               </div>
             </div>
           </a>
