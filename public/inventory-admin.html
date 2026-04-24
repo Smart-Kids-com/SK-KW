@@ -543,16 +543,16 @@
             </div>
 
             <div class="field">
-              <label for="sortField">الترتيب حسب</label>
-              <select id="sortField">
-                <option value="product_name">اسم المنتج</option>
-                <option value="sku">SKU</option>
-                <option value="available">Available</option>
-                <option value="on_hand">On hand</option>
-                <option value="committed">Committed</option>
-                <option value="unavailable">Unavailable</option>
-              </select>
-            </div>
+  <label for="sortField">الترتيب حسب</label>
+  <select id="sortField">
+    <option value="on_hand">On hand</option>
+    <option value="available">Available</option>
+    <option value="committed">Committed</option>
+    <option value="unavailable">Unavailable</option>
+    <option value="product_name">اسم المنتج</option>
+    <option value="sku">SKU</option>
+  </select>
+</div>
 
             <div class="field">
               <label for="sortOrder">اتجاه الترتيب</label>
@@ -692,7 +692,7 @@
       if (stockStatus) params.set('stock_status', stockStatus);
       params.set('sort', sort);
       params.set('order', order);
-      params.set('limit', '200');
+      params.set('limit', '20');
       params.set('offset', '0');
 
       return params.toString();
