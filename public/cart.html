@@ -196,20 +196,35 @@
       display:block;
     }
 
-    .side-menu__icons{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      justify-content:flex-start;
-    }
+.side-menu__icons{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  justify-content:flex-start;
+}
 
-    .side-menu__body{
-      flex:1;
-      overflow:auto;
-      padding:8px 0 0;
-      background:#4a064f;
-      color:#fff;
-    }
+.cart-icon-btn{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0;
+}
+
+.cart-icon-img{
+  width:24px;
+  height:24px;
+  object-fit:contain;
+  display:block;
+}
+
+.side-menu__body{
+  flex:1;
+  overflow:auto;
+  padding:8px 0 0;
+  background:#4a064f;
+  color:#fff;
+}
 
     .side-menu__nav a{
       display:block;
@@ -627,10 +642,10 @@
 
     <div class="site-header-icons">
       <button class="site-icon-btn" id="searchBtn" type="button" aria-label="بحث">🔍</button>
-      <button class="site-icon-btn" id="cartBtn" type="button" aria-label="السلة">
-        🛍️
-        <span class="cart-badge" id="cartBadge">0</span>
-      </button>
+      <button class="site-icon-btn cart-icon-btn" id="cartBtn" type="button" aria-label="السلة">
+  <img src="/icon-cart.webp" alt="" class="cart-icon-img" aria-hidden="true">
+  <span class="cart-badge" id="cartBadge">0</span>
+</button>
     </div>
   </header>
 
@@ -645,13 +660,13 @@
       </a>
 
       <div class="side-menu__icons">
-        <button class="site-icon-btn" id="sideMenuSearchBtn" type="button" aria-label="بحث">🔍</button>
-        <button class="site-icon-btn" id="menuCartBtn" type="button" aria-label="السلة">
-          🛍️
-          <span class="cart-badge" id="menuCartBadge">0</span>
-        </button>
-      </div>
-    </div>
+  <button class="site-icon-btn" id="sideMenuSearchBtn" type="button" aria-label="بحث">🔎</button>
+  <button class="site-icon-btn cart-icon-btn" id="menuCartBtn" type="button" aria-label="السلة">
+    <img src="/icon-cart.webp" alt="" class="cart-icon-img" aria-hidden="true">
+    <span class="cart-badge" id="menuCartBadge">0</span>
+  </button>
+ </div>
+</div>
 
     <div class="side-menu__body">
       <nav class="side-menu__nav">
