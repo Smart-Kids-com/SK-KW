@@ -727,12 +727,12 @@ router.post('/', async (req, res) => {
     const stockValidation = await validateOrderItemsStock(normalizedItems);
 
     if (!stockValidation.valid) {
-  return res.status(400).json({
-    success: false,
-    error: stockValidation.message,
-    details: stockValidation.errors
-  });
-   }
+      return res.status(400).json({
+        success: false,
+        error: stockValidation.message,
+        details: stockValidation.errors
+      });
+    }
 
     const subtotal = calculateSubtotal(normalizedItems);
 
@@ -2239,7 +2239,7 @@ router.get('/:id', async (req, res) => {
 
 /**
  * GET /api/orders
- * يدعم الآن:
+ * سريع ومناسب لـ Turso:
  * - status
  * - search
  * - limit
@@ -2258,34 +2258,64 @@ router.get('/', async (req, res) => {
       order = 'DESC'
     } = req.query;
 
-    const parsedLimit = Math.max(1, toInt(limit, 50));
+    const parsedLimit = Math.max(1, Math.min(100, toInt(limit, 50)));
     const parsedOffset = Math.max(0, toInt(offset, 0));
+
     const validSortColumns = ['created_at', 'updated_at', 'total', 'order_number', 'status'];
-    const sortColumn = validSortColumns.includes(sort) ? sort : 'created_at';
+    const sortColumn = validSortColumns.includes(String(sort)) ? String(sort) : 'created_at';
     const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
-    let sql = `SELECT * FROM ${ORDERS_TABLE}`;
+    const whereParts = [];
     const params = [];
 
     if (status) {
-      sql += ` WHERE status = ?`;
+      whereParts.push(`status = ?`);
       params.push(status);
     }
 
-    sql += ` ORDER BY ${sortColumn} ${sortOrder}`;
-    const orders = await db.all(sql, params);
-    const merged = orders.map(mergeOrderMeta);
-    const filtered = applySearchFilterLocally(merged, search);
-    const paginated = filtered.slice(parsedOffset, parsedOffset + parsedLimit);
+    const searchText = safeText(search).toLowerCase();
+    if (searchText) {
+      const like = `%${searchText}%`;
+      whereParts.push(`(
+        LOWER(COALESCE(order_number, '')) LIKE ?
+        OR LOWER(COALESCE(customer_name, '')) LIKE ?
+        OR LOWER(COALESCE(customer_email, '')) LIKE ?
+        OR LOWER(COALESCE(customer_phone, '')) LIKE ?
+        OR LOWER(COALESCE(customer_city, '')) LIKE ?
+        OR LOWER(COALESCE(customer_district, '')) LIKE ?
+        OR LOWER(COALESCE(customer_address, '')) LIKE ?
+        OR LOWER(COALESCE(notes, '')) LIKE ?
+      )`);
+      params.push(like, like, like, like, like, like, like, like);
+    }
+
+    const whereSql = whereParts.length ? `WHERE ${whereParts.join(' AND ')}` : '';
+
+    const countRow = await db.get(
+      `SELECT COUNT(*) as count FROM ${ORDERS_TABLE} ${whereSql}`,
+      params
+    );
+
+    const rows = await db.all(
+      `SELECT *
+       FROM ${ORDERS_TABLE}
+       ${whereSql}
+       ORDER BY ${sortColumn} ${sortOrder}
+       LIMIT ? OFFSET ?`,
+      [...params, parsedLimit, parsedOffset]
+    );
+
+    const data = rows.map(mergeOrderMeta);
+    const total = Number(countRow?.count || 0);
 
     return res.json({
       success: true,
-      data: paginated,
+      data,
       pagination: {
-        total: filtered.length,
+        total,
         limit: parsedLimit,
         offset: parsedOffset,
-        totalPages: Math.ceil(filtered.length / parsedLimit)
+        totalPages: Math.ceil(total / parsedLimit)
       }
     });
   } catch (error) {
