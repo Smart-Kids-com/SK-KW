@@ -3,10 +3,17 @@ const router = express.Router();
 const db = require('../db/turso-manager');
 
 const ACTIVE_VISITOR_WINDOW_MS = 2 * 60 * 1000;
+const MAX_SEARCH_LENGTH = 80;
+const MAX_TEXT_LENGTH = 500;
 
 function safeText(value, fallback = '') {
   const text = String(value ?? '').trim();
   return text || fallback;
+}
+
+function safeLimitedText(value, fallback = '', maxLength = MAX_TEXT_LENGTH) {
+  const text = safeText(value, fallback);
+  return text.length > maxLength ? text.slice(0, maxLength) : text;
 }
 
 function safeNumber(value, fallback = 0) {
@@ -15,6 +22,7 @@ function safeNumber(value, fallback = 0) {
 }
 
 function toDate(value) {
+  if (!value) return null;
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? null : d;
 }
@@ -33,9 +41,28 @@ function endOfDay(date) {
 
 function getDateRange(query) {
   const now = new Date();
-  const from = toDate(query.from) || startOfDay(now);
-  const to = toDate(query.to) || endOfDay(now);
+
+  let from = toDate(query.from) || startOfDay(now);
+  let to = toDate(query.to) || endOfDay(now);
+
+  if (from.getTime() > to.getTime()) {
+    const temp = from;
+    from = to;
+    to = temp;
+  }
+
   return { from, to };
+}
+
+function escapeLike(value) {
+  return String(value ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/%/g, '\\%')
+    .replace(/_/g, '\\_');
+}
+
+function makeLikeQuery(value) {
+  return `%${escapeLike(value)}%`;
 }
 
 async function ensureHeartbeatTable() {
@@ -73,8 +100,10 @@ async function tryGetOrdersInRange(fromIso, toIso) {
        ORDER BY datetime(created_at) DESC`,
       [fromIso, toIso]
     );
+
     return Array.isArray(rows) ? rows : [];
-  } catch (_) {
+  } catch (error) {
+    console.error('tryGetOrdersInRange error:', error);
     return [];
   }
 }
@@ -122,13 +151,21 @@ async function tryGetAbandonedSummaryInRange(fromIso, toIso) {
       recovered: safeNumber(recovered?.count, 0),
       closed: safeNumber(closed?.count, 0)
     };
-  } catch (_) {
-    return { total: 0, open: 0, recovered: 0, closed: 0 };
+  } catch (error) {
+    console.error('tryGetAbandonedSummaryInRange error:', error);
+    return {
+      total: 0,
+      open: 0,
+      recovered: 0,
+      closed: 0
+    };
   }
 }
 
 async function countSessionsInRange(fromIso, toIso) {
   try {
+    await ensureHeartbeatTable();
+
     const row = await db.get(
       `SELECT COUNT(DISTINCT visitor_id) as count
        FROM visitor_heartbeats
@@ -139,13 +176,16 @@ async function countSessionsInRange(fromIso, toIso) {
     );
 
     return safeNumber(row?.count, 0);
-  } catch (_) {
+  } catch (error) {
+    console.error('countSessionsInRange error:', error);
     return 0;
   }
 }
 
 async function countLiveVisitors() {
   try {
+    await ensureHeartbeatTable();
+
     const activeSince = new Date(Date.now() - ACTIVE_VISITOR_WINDOW_MS).toISOString();
 
     const row = await db.get(
@@ -157,94 +197,110 @@ async function countLiveVisitors() {
     );
 
     return safeNumber(row?.count, 0);
-  } catch (_) {
+  } catch (error) {
+    console.error('countLiveVisitors error:', error);
     return 0;
   }
 }
 
 async function trySearchOrders(q) {
   try {
-    return await db.all(
+    const rows = await db.all(
       `SELECT id, order_number, customer_name, customer_email, customer_phone, total, status, created_at
        FROM orders
-       WHERE order_number LIKE ?
-          OR customer_name LIKE ?
-          OR customer_email LIKE ?
-          OR customer_phone LIKE ?
+       WHERE order_number LIKE ? ESCAPE '\\'
+          OR customer_name LIKE ? ESCAPE '\\'
+          OR customer_email LIKE ? ESCAPE '\\'
+          OR customer_phone LIKE ? ESCAPE '\\'
        ORDER BY datetime(created_at) DESC
        LIMIT 8`,
       [q, q, q, q]
     );
-  } catch (_) {
+
+    return Array.isArray(rows) ? rows : [];
+  } catch (error) {
+    console.error('trySearchOrders error:', error);
     return [];
   }
 }
 
 async function trySearchAbandoned(q) {
   try {
-    return await db.all(
+    const rows = await db.all(
       `SELECT id, checkout_token, customer_name, customer_email, customer_phone, contact_value, total, status, created_at
        FROM abandoned_checkouts
-       WHERE checkout_token LIKE ?
-          OR customer_name LIKE ?
-          OR customer_email LIKE ?
-          OR customer_phone LIKE ?
-          OR contact_value LIKE ?
+       WHERE checkout_token LIKE ? ESCAPE '\\'
+          OR customer_name LIKE ? ESCAPE '\\'
+          OR customer_email LIKE ? ESCAPE '\\'
+          OR customer_phone LIKE ? ESCAPE '\\'
+          OR contact_value LIKE ? ESCAPE '\\'
        ORDER BY datetime(created_at) DESC
        LIMIT 8`,
       [q, q, q, q, q]
     );
-  } catch (_) {
+
+    return Array.isArray(rows) ? rows : [];
+  } catch (error) {
+    console.error('trySearchAbandoned error:', error);
     return [];
   }
 }
 
 async function trySearchProducts(q) {
   try {
-    return await db.all(
+    const rows = await db.all(
       `SELECT id, name, slug, sku
        FROM products
-       WHERE name LIKE ?
-          OR slug LIKE ?
-          OR sku LIKE ?
+       WHERE name LIKE ? ESCAPE '\\'
+          OR slug LIKE ? ESCAPE '\\'
+          OR sku LIKE ? ESCAPE '\\'
        ORDER BY id DESC
        LIMIT 8`,
       [q, q, q]
     );
-  } catch (_) {
+
+    return Array.isArray(rows) ? rows : [];
+  } catch (error) {
+    console.error('trySearchProducts error:', error);
     return [];
   }
 }
 
 async function trySearchCollections(q) {
   try {
-    return await db.all(
+    const rows = await db.all(
       `SELECT id, name, slug
        FROM collections
-       WHERE name LIKE ?
-          OR slug LIKE ?
+       WHERE name LIKE ? ESCAPE '\\'
+          OR slug LIKE ? ESCAPE '\\'
        ORDER BY id DESC
        LIMIT 8`,
       [q, q]
     );
-  } catch (_) {
+
+    return Array.isArray(rows) ? rows : [];
+  } catch (error) {
+    console.error('trySearchCollections error:', error);
     return [];
   }
 }
 
 async function trySearchCustomers(q) {
   try {
-    return await db.all(
+    const rows = await db.all(
       `SELECT id, name, email, phone
        FROM customers
-       WHERE name LIKE ?
-          OR email LIKE ?
-          OR phone LIKE ?
+       WHERE name LIKE ? ESCAPE '\\'
+          OR email LIKE ? ESCAPE '\\'
+          OR phone LIKE ? ESCAPE '\\'
        ORDER BY id DESC
        LIMIT 8`,
       [q, q, q]
     );
-  } catch (_) {
+
+    return Array.isArray(rows) ? rows : [];
+  } catch (error) {
+    console.error('trySearchCustomers error:', error);
     return [];
   }
 }
@@ -296,6 +352,7 @@ router.get('/summary', async (req, res) => {
     });
   } catch (error) {
     console.error('admin dashboard summary error:', error);
+
     return res.status(500).json({
       success: false,
       error: 'Failed to load admin dashboard summary'
@@ -306,7 +363,8 @@ router.get('/summary', async (req, res) => {
 router.get('/search', async (req, res) => {
   try {
     const rawQ = safeText(req.query.q);
-    if (!rawQ) {
+
+    if (rawQ.length < 2) {
       return res.json({
         success: true,
         data: {
@@ -319,7 +377,14 @@ router.get('/search', async (req, res) => {
       });
     }
 
-    const q = `%${rawQ}%`;
+    if (rawQ.length > MAX_SEARCH_LENGTH) {
+      return res.status(400).json({
+        success: false,
+        error: 'Search query too long'
+      });
+    }
+
+    const q = makeLikeQuery(rawQ);
 
     const [orders, abandoned, products, collections, customers] = await Promise.all([
       trySearchOrders(q),
@@ -332,15 +397,16 @@ router.get('/search', async (req, res) => {
     return res.json({
       success: true,
       data: {
-        orders: Array.isArray(orders) ? orders : [],
-        abandoned: Array.isArray(abandoned) ? abandoned : [],
-        products: Array.isArray(products) ? products : [],
-        collections: Array.isArray(collections) ? collections : [],
-        customers: Array.isArray(customers) ? customers : []
+        orders,
+        abandoned,
+        products,
+        collections,
+        customers
       }
     });
   } catch (error) {
     console.error('admin dashboard search error:', error);
+
     return res.status(500).json({
       success: false,
       error: 'Failed to run admin search'
@@ -352,7 +418,8 @@ router.post('/heartbeat', async (req, res) => {
   try {
     await ensureHeartbeatTable();
 
-    const visitorId = safeText(req.body?.visitorId);
+    const visitorId = safeLimitedText(req.body?.visitorId, '', 120);
+
     if (!visitorId) {
       return res.status(400).json({
         success: false,
@@ -360,12 +427,18 @@ router.post('/heartbeat', async (req, res) => {
       });
     }
 
-    const page = safeText(req.body?.page);
-    const source = safeText(req.body?.source, 'storefront');
-    const userAgent = safeText(req.headers['user-agent']);
-    const ipAddress =
-      safeText(req.headers['x-forwarded-for']) ||
-      safeText(req.socket?.remoteAddress);
+    const page = safeLimitedText(req.body?.page, '', 300);
+    const source = safeLimitedText(req.body?.source, 'storefront', 80);
+    const userAgent = safeLimitedText(req.headers['user-agent'], '', 500);
+
+    const forwardedFor = safeText(req.headers['x-forwarded-for']);
+    const firstForwardedIp = forwardedFor ? forwardedFor.split(',')[0].trim() : '';
+
+    const ipAddress = safeLimitedText(
+      firstForwardedIp || req.socket?.remoteAddress,
+      '',
+      120
+    );
 
     const existing = await db.get(
       `SELECT id FROM visitor_heartbeats WHERE visitor_id = ?`,
@@ -402,6 +475,7 @@ router.post('/heartbeat', async (req, res) => {
     });
   } catch (error) {
     console.error('admin dashboard heartbeat error:', error);
+
     return res.status(500).json({
       success: false,
       error: 'Failed to record visitor heartbeat'
@@ -413,7 +487,8 @@ router.post('/leave', async (req, res) => {
   try {
     await ensureHeartbeatTable();
 
-    const visitorId = safeText(req.body?.visitorId);
+    const visitorId = safeLimitedText(req.body?.visitorId, '', 120);
+
     if (!visitorId) {
       return res.status(400).json({
         success: false,
@@ -433,6 +508,7 @@ router.post('/leave', async (req, res) => {
     });
   } catch (error) {
     console.error('admin dashboard leave error:', error);
+
     return res.status(500).json({
       success: false,
       error: 'Failed to record visitor leave'
