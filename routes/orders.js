@@ -2278,10 +2278,23 @@ router.get('/', async (req, res) => {
       status,
       search,
       searchMode,
+      sort = 'id',
       limit = DEFAULT_LIMIT,
       offset = 0,
-      order = 'DESC'
+      order = 'DESC',
+      includeImages = '0'
     } = req.query;
+
+    const sortField = String(sort || 'id').trim().toLowerCase();
+    if (sortField !== 'id') {
+      return res.status(400).json({
+        success: false,
+        error: 'قيمة sort غير صحيحة. القيمة المدعومة حاليًا: id'
+      });
+    }
+
+    // Accepted for parity with products-admin.html; orders list has no images.
+    void includeImages;
 
     const parsedLimit = Math.min(100, Math.max(1, toInt(limit, DEFAULT_LIMIT)));
     const parsedOffset = Math.max(0, toInt(offset, 0));
