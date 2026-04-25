@@ -979,86 +979,32 @@
           </a>
         </section>
 
-        <section class="dashboard-grid">
-          <section class="card">
-            <div class="card-head">
-              <span>Recent Orders</span>
-              <div class="card-actions">
-                <button class="btn dark" id="reloadBtn" type="button">Refresh</button>
-                <a class="btn" href="/orders-admin.html">Open Orders</a>
+        
+        <section class="card">
+          <div class="card-head">
+            <span>Dashboard Controls</span>
+            <div class="card-actions">
+              <button class="btn dark" id="reloadBtn" type="button">Refresh</button>
+              <a class="btn" href="/orders-admin.html">Open Orders</a>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="notes-list">
+              <div class="note-item">
+                <div class="note-main">
+                  <div class="note-title">Light dashboard mode</div>
+                  <div class="note-sub">Recent Orders and Quick Snapshot were removed to keep this page light and stable.</div>
+                </div>
+              </div>
+
+              <div class="note-item">
+                <div class="note-main">
+                  <div class="note-title">What stays here</div>
+                  <div class="note-sub">Live visitors, date ranges, sessions, total sales, orders, conversion rate, orders to fulfill, payments to capture, sidebar, and search remain active.</div>
+                </div>
               </div>
             </div>
-
-            <div class="card-body">
-              <div class="order-list" id="recentOrdersList">
-                <div class="order-item">
-                  <div class="order-main">
-                    <div class="order-title">Loading orders...</div>
-                    <div class="order-sub">Please wait</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <div style="display:grid; gap:16px;">
-            <section class="card">
-              <div class="card-head">
-                <span>Quick Snapshot</span>
-              </div>
-
-              <div class="card-body">
-                <div class="mini-grid">
-                  <div class="mini-box">
-                    <div class="mini-label">Loaded Orders</div>
-                    <div class="mini-value" id="loadedOrdersValue">0</div>
-                    <div class="mini-sub">All fetched orders from backend</div>
-                  </div>
-
-                  <div class="mini-box">
-                    <div class="mini-label">Filtered Orders</div>
-                    <div class="mini-value" id="filteredOrdersValue">0</div>
-                    <div class="mini-sub">Current date selection only</div>
-                  </div>
-
-                  <div class="mini-box">
-                    <div class="mini-label">Open Abandoned</div>
-                    <div class="mini-value" id="openAbandonedValue">0</div>
-                    <div class="mini-sub">Open abandoned checkouts</div>
-                  </div>
-
-                  <div class="mini-box">
-                    <div class="mini-label">Recovered</div>
-                    <div class="mini-value" id="recoveredAbandonedValue">0</div>
-                    <div class="mini-sub">Recovered abandoned checkouts</div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section class="card">
-              <div class="card-head">
-                <span>System Notes</span>
-              </div>
-
-              <div class="card-body">
-                <div class="notes-list">
-                  <div class="note-item">
-                    <div class="note-main">
-                      <div class="note-title">Dashboard APIs</div>
-                      <div class="note-sub">This page now reads `summary`, `search`, and `heartbeat` from `/api/admin-dashboard/*`.</div>
-                    </div>
-                  </div>
-
-                  <div class="note-item">
-                    <div class="note-main">
-                      <div class="note-title">Compact tiles</div>
-                      <div class="note-sub">Orders to fulfill and payments to capture remain compact clickable tiles instead of oversized image blocks.</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
           </div>
         </section>
       </div>
@@ -1144,10 +1090,8 @@
 
   <script>
     const ADMIN_DASHBOARD_API = '/api/admin-dashboard';
-    const ORDERS_API = '/api/orders';
 
     const state = {
-      allOrders: [],
       summary: {
         sessions: 0,
         liveVisitors: 0,
@@ -1173,7 +1117,6 @@
       searchTimer: null,
       loading: false,
       liveHeartbeatTimer: null,
-      ordersLoadFailed: false,
       summaryLoadFailed: false
     };
 
@@ -1340,15 +1283,6 @@
       };
     }
 
-    async function loadOrders() {
-      const { response, result } = await fetchJson(`${ORDERS_API}?limit=20&offset=0&sort=created_at&order=DESC`, {}, 10000);
-      if (!response.ok || !result?.success) {
-        throw new Error(result?.error || 'Failed to load orders');
-      }
-      state.allOrders = Array.isArray(result.data) ? result.data : [];
-      state.ordersLoadFailed = false;
-    }
-
     async function loadSummary() {
       const range = getSelectedDateRange();
       const url = `${ADMIN_DASHBOARD_API}/summary?from=${encodeURIComponent(range.from.toISOString())}&to=${encodeURIComponent(range.to.toISOString())}`;
@@ -1383,78 +1317,10 @@
       qs('ordersValue').textContent = state.summaryLoadFailed ? '0' : String(state.summary.orders);
       qs('conversionValue').textContent = state.summaryLoadFailed ? '—' : `${safeNumber(state.summary.conversionRate, 0).toFixed(2)}%`;
 
-      qs('ordersCountBadge').textContent = String(state.allOrders.length);
-      qs('loadedOrdersValue').textContent = String(state.allOrders.length);
-      qs('filteredOrdersValue').textContent = state.summaryLoadFailed ? '0' : String(state.summary.orders);
-      qs('openAbandonedValue').textContent = state.summaryLoadFailed ? '0' : String(state.summary.abandoned.open);
-      qs('recoveredAbandonedValue').textContent = state.summaryLoadFailed ? '0' : String(state.summary.abandoned.recovered);
-
+      qs('ordersCountBadge').textContent = state.summaryLoadFailed ? '0' : String(state.summary.orders);
       qs('fulfillBadge').textContent = state.summaryLoadFailed ? '0' : String(state.summary.ordersToFulfill);
       qs('paymentsBadge').textContent = state.summaryLoadFailed ? '0' : String(state.summary.paymentsToCapture);
       qs('liveVisitorsLabel').textContent = `${safeNumber(state.summary.liveVisitors, 0)} Live Visitor`;
-
-      renderRecentOrders();
-    }
-
-    function getRecentFilteredOrders() {
-      const range = getSelectedDateRange();
-      return state.allOrders
-        .filter(order => {
-          const d = getOrderDate(order);
-          return d && d >= range.from && d <= range.to;
-        })
-        .sort((a, b) => (getOrderDate(b)?.getTime() || 0) - (getOrderDate(a)?.getTime() || 0))
-        .slice(0, 6);
-    }
-
-    function renderRecentOrders() {
-      const list = qs('recentOrdersList');
-
-      if (state.ordersLoadFailed) {
-        list.innerHTML = `
-          <div class="order-item">
-            <div class="order-main">
-              <div class="order-title">Orders temporarily unavailable</div>
-              <div class="order-sub">The orders endpoint is taking too long to respond. Try again after reducing backend query load.</div>
-            </div>
-          </div>
-        `;
-        return;
-      }
-
-      const rows = getRecentFilteredOrders();
-
-      if (!rows.length) {
-        list.innerHTML = `
-          <div class="order-item">
-            <div class="order-main">
-              <div class="order-title">No orders found</div>
-              <div class="order-sub">No orders inside the selected date range</div>
-            </div>
-          </div>
-        `;
-        return;
-      }
-
-      list.innerHTML = rows.map(order => {
-        const id = order.id || '';
-        const number = escapeHtml(order.order_number || `#${id}`);
-        const customer = escapeHtml(getOrderCustomer(order));
-        const total = formatMoney(getOrderTotal(order));
-        const status = getOrderStatus(order);
-        const pill = STATUS_COLORS[status] || 'grey';
-        const dateLabel = formatShortDate(getOrderDate(order));
-
-        return `
-          <a class="order-item" href="/order-details.html?id=${encodeURIComponent(id)}">
-            <div class="order-main">
-              <div class="order-title">${number} - ${customer}</div>
-              <div class="order-sub">${total} | ${dateLabel}</div>
-            </div>
-            <span class="pill ${pill}">${escapeHtml(status)}</span>
-          </a>
-        `;
-      }).join('');
     }
 
     async function searchDashboard(query) {
@@ -1947,7 +1813,6 @@
       qs('reloadBtn').disabled = true;
       qs('reloadBtn').textContent = 'Refreshing...';
 
-      let ordersError = null;
       let summaryError = null;
 
       try {
@@ -1958,23 +1823,10 @@
         summaryError = error;
       }
 
-      try {
-        await loadOrders();
-      } catch (error) {
-        console.error(error);
-        state.ordersLoadFailed = true;
-        state.allOrders = [];
-        ordersError = error;
-      }
-
       renderDashboard();
 
-      if (summaryError && ordersError) {
-        showAlert('Failed to load dashboard data and orders', 'error');
-      } else if (summaryError) {
+      if (summaryError) {
         showAlert('Dashboard summary failed to load', 'warning');
-      } else if (ordersError) {
-        showAlert('Orders failed to load, but the rest of the dashboard is still working', 'warning');
       } else if (showMessage) {
         showAlert('Dashboard updated successfully', 'success');
       }
