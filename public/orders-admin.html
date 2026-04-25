@@ -72,7 +72,7 @@
 
   <script>
     const API_BASE = '/api/orders';
-    const PAGE_LIMIT = 25;
+    const PAGE_LIMIT = 50;
     const LOCAL_TAB_FETCH_LIMIT = 100;
 
     let currentTab = 'all';
@@ -80,12 +80,12 @@
     let currentPage = 1;
     let totalPages = 1;
     let totalRows = 0;
+    let paginationTotalKnown = true;
+    let hasNextPage = false;
     let currentSearch = '';
     let allRows = [];
     let visibleOrders = [];
     let selectedIds = new Set();
-    let paginationTotalKnown = true;
-    let hasNextPage = false;
 
     function setText(id, value) {
       const el = document.getElementById(id);
@@ -223,7 +223,9 @@
     function updatePaginationUI() {
       const start = visibleOrders.length === 0 ? 0 : ((currentPage - 1) * PAGE_LIMIT) + 1;
       const end = visibleOrders.length === 0 ? 0 : ((currentPage - 1) * PAGE_LIMIT) + visibleOrders.length;
-      const text = paginationTotalKnown ? `${start}-${end} of ${totalRows}` : `${start}-${end} of more`;
+      const text = paginationTotalKnown || !hasNextPage
+        ? `${start}-${end} of ${totalRows}`
+        : `${start}-${end} of more`;
 
       setText('desktopPaginationText', text);
       setText('mobilePaginationText', text);
@@ -235,7 +237,7 @@
 
       ['desktopNextBtn', 'mobileNextBtn'].forEach(id => {
         const btn = document.getElementById(id);
-        if (btn) btn.disabled = paginationTotalKnown ? currentPage >= totalPages : !hasNextPage;
+        if (btn) btn.disabled = !hasNextPage;
       });
     }
 
@@ -356,37 +358,47 @@
 
       try {
         const response = await fetch(url, {
-          cache: 'no-store',
           ...options,
-          signal: controller.signal
+          signal: controller.signal,
+          cache: options.cache || 'no-store',
+          headers: {
+            Accept: 'application/json',
+            ...(options.headers || {})
+          }
         });
-        const data = await response.json().catch(() => null);
-        if (!response.ok || !data?.success) throw new Error(data?.error || data?.message || 'Request failed');
+
+        const text = await response.text();
+        let data = null;
+
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch {
+            const shortPreview = text.slice(0, 180).replace(/\s+/g, ' ').trim();
+            throw new Error(`Non-JSON response: ${shortPreview || 'empty response'}`);
+          }
+        }
+
+        if (!response.ok || !data?.success) {
+          throw new Error(data?.error || data?.message || 'Request failed');
+        }
+
         return data;
       } catch (error) {
-        if (error.name === 'AbortError') throw new Error(`Request timeout: ${url}`);
+        if (error.name === 'AbortError') {
+          throw new Error('Request timeout');
+        }
         throw error;
       } finally {
         clearTimeout(timer);
       }
     }
 
-    async function loadOrdersCount() {
-      try {
-        const result = await request(`${API_BASE}?sort=id&order=DESC&limit=1&offset=0&includeImages=0`);
-        const total = result?.pagination?.total ?? result?.total ?? result?.count ?? result?.data?.total ?? null;
-        if (total !== null && total !== undefined) {
-          setText('desktopOrdersCountBadge', String(Number(total || 0)));
-          setText('desktopOrdersValue', String(Number(total || 0)));
-        }
-      } catch (_) {}
-    }
-
     function buildBaseParams(limit, offset) {
       const params = new URLSearchParams();
       params.set('sort', 'id');
       params.set('order', currentSortDirection || 'DESC');
-      params.set('limit', String(limit || PAGE_LIMIT));
+      params.set('limit', String(limit || 50));
       params.set('offset', String(offset || 0));
       params.set('includeImages', '0');
       if (currentSearch) {
@@ -401,8 +413,10 @@
       if (currentTab === 'cancelled') params.set('status', 'cancelled');
 
       const response = await request(`${API_BASE}?${params.toString()}`);
-      allRows = (response.data || []).map(normalizeOrder);
-      visibleOrders = [...allRows];
+      const rows = (response.data || []).map(normalizeOrder);
+
+      allRows = rows;
+      visibleOrders = [...rows];
 
       const rawTotal = response.pagination?.total;
       const numericTotal = Number(rawTotal);
@@ -413,8 +427,8 @@
         totalPages = Math.max(1, Number(response.pagination?.totalPages || Math.ceil(totalRows / PAGE_LIMIT) || 1));
         hasNextPage = currentPage < totalPages;
       } else {
-        const endCount = ((currentPage - 1) * PAGE_LIMIT) + visibleOrders.length;
-        hasNextPage = visibleOrders.length === PAGE_LIMIT;
+        const endCount = ((currentPage - 1) * PAGE_LIMIT) + rows.length;
+        hasNextPage = rows.length === PAGE_LIMIT;
         totalRows = endCount + (hasNextPage ? 1 : 0);
         totalPages = currentPage + (hasNextPage ? 1 : 0);
       }
@@ -460,7 +474,6 @@
     }
 
     async function refreshData(showMessage = true) {
-
       try {
         if (currentTab === 'all' || currentTab === 'cancelled') {
           await loadServerPage();
@@ -469,8 +482,7 @@
         }
 
         updateStats();
-        loadOrdersCount();
-        loadSummary();
+        await loadSummary();
         renderDesktopOrders();
         renderMobileOrders();
         updatePaginationUI();
