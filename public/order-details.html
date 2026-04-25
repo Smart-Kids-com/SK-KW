@@ -1837,6 +1837,44 @@
     const H = (typeof HELPERS !== 'undefined' && HELPERS) ? HELPERS : HELPERS_FALLBACK;
     let currentOrder = null;
 
+    async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 20000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+      try {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+          cache: options.cache || 'no-store',
+          headers: {
+            Accept: 'application/json',
+            ...(options.headers || {})
+          }
+        });
+
+        const text = await response.text();
+        let result = null;
+
+        if (text) {
+          try {
+            result = JSON.parse(text);
+          } catch {
+            const shortPreview = text.slice(0, 180).replace(/\s+/g, ' ').trim();
+            throw new Error(`Non-JSON response: ${shortPreview || 'empty response'}`);
+          }
+        }
+
+        return { response, result };
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          throw new Error('Request timeout');
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       loadOrder();
       document.addEventListener('click', event => {
@@ -1862,17 +1900,14 @@
 
         if (!id && !orderNumber) throw new Error('Order id is missing');
 
-        let response;
-        if (id) {
-          response = await fetch(`${API_BASE}/${encodeURIComponent(id)}`);
-        } else {
-          response = await fetch(`${API_BASE}/track/${encodeURIComponent(orderNumber)}`);
-        }
+        const url = id
+          ? `${API_BASE}/${encodeURIComponent(id)}`
+          : `${API_BASE}/track/${encodeURIComponent(orderNumber)}`;
 
-        const data = await response.json();
-        if (!response.ok || !data.success) throw new Error(data.error || 'Failed to load order');
+        const { response, result } = await fetchJsonWithTimeout(url);
+        if (!response.ok || !result?.success) throw new Error(result?.error || 'Failed to load order');
 
-        currentOrder = normalizeOrder(data.data);
+        currentOrder = normalizeOrder(result.data);
         renderOrder(currentOrder);
       } catch (error) {
         showAlert(error.message || 'Failed to load order', 'error');
@@ -2031,12 +2066,11 @@
 
     async function loadProductsCatalog() {
       if (productsCatalogCache.length) return productsCatalogCache;
-      const response = await fetch('/api/products?status=active&limit=1000', { cache: 'no-store' });
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to load products');
+      const { response, result } = await fetchJsonWithTimeout('/api/products?status=active&limit=100&includeImages=0');
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error || 'Failed to load products');
       }
-      productsCatalogCache = Array.isArray(data.data) ? data.data : [];
+      productsCatalogCache = Array.isArray(result.data) ? result.data : [];
       return productsCatalogCache;
     }
 

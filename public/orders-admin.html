@@ -80,6 +80,8 @@
     let currentPage = 1;
     let totalPages = 1;
     let totalRows = 0;
+    let paginationTotalKnown = true;
+    let hasNextPage = false;
     let currentSearch = '';
     let allRows = [];
     let visibleOrders = [];
@@ -219,9 +221,11 @@
     }
 
     function updatePaginationUI() {
-      const start = totalRows === 0 ? 0 : ((currentPage - 1) * PAGE_LIMIT) + 1;
-      const end = Math.min(currentPage * PAGE_LIMIT, totalRows);
-      const text = `${start}-${end} of ${totalRows}`;
+      const start = visibleOrders.length === 0 ? 0 : ((currentPage - 1) * PAGE_LIMIT) + 1;
+      const end = visibleOrders.length === 0 ? 0 : ((currentPage - 1) * PAGE_LIMIT) + visibleOrders.length;
+      const text = paginationTotalKnown || !hasNextPage
+        ? `${start}-${end} of ${totalRows}`
+        : `${start}-${end} of more`;
 
       setText('desktopPaginationText', text);
       setText('mobilePaginationText', text);
@@ -233,7 +237,7 @@
 
       ['desktopNextBtn', 'mobileNextBtn'].forEach(id => {
         const btn = document.getElementById(id);
-        if (btn) btn.disabled = currentPage >= totalPages;
+        if (btn) btn.disabled = !hasNextPage;
       });
     }
 
@@ -348,20 +352,57 @@
       return 'All';
     }
 
-    async function request(url, options = {}) {
-      const response = await fetch(url, options);
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.success) throw new Error(data?.error || 'Request failed');
-      return data;
+    async function request(url, options = {}, timeoutMs = 20000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+      try {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+          cache: options.cache || 'no-store',
+          headers: {
+            Accept: 'application/json',
+            ...(options.headers || {})
+          }
+        });
+
+        const text = await response.text();
+        let data = null;
+
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch {
+            const shortPreview = text.slice(0, 180).replace(/\s+/g, ' ').trim();
+            throw new Error(`Non-JSON response: ${shortPreview || 'empty response'}`);
+          }
+        }
+
+        if (!response.ok || !data?.success) {
+          throw new Error(data?.error || data?.message || 'Request failed');
+        }
+
+        return data;
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          throw new Error('Request timeout');
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+      }
     }
 
     function buildBaseParams(limit, offset) {
       const params = new URLSearchParams();
       params.set('limit', String(limit));
       params.set('offset', String(offset));
-      params.set('sort', 'created_at');
       params.set('order', currentSortDirection);
-      if (currentSearch) params.set('search', currentSearch);
+      if (currentSearch) {
+        params.set('search', currentSearch);
+        params.set('searchMode', 'full');
+      }
       return params;
     }
 
@@ -370,10 +411,25 @@
       if (currentTab === 'cancelled') params.set('status', 'cancelled');
 
       const response = await request(`${API_BASE}?${params.toString()}`);
-      allRows = (response.data || []).map(normalizeOrder);
-      visibleOrders = [...allRows];
-      totalRows = Number(response.pagination?.total || 0);
-      totalPages = Math.max(1, Number(response.pagination?.totalPages || 1));
+      const rows = (response.data || []).map(normalizeOrder);
+
+      allRows = rows;
+      visibleOrders = [...rows];
+
+      const rawTotal = response.pagination?.total;
+      const numericTotal = Number(rawTotal);
+      paginationTotalKnown = rawTotal !== null && rawTotal !== undefined && Number.isFinite(numericTotal);
+
+      if (paginationTotalKnown) {
+        totalRows = numericTotal;
+        totalPages = Math.max(1, Number(response.pagination?.totalPages || Math.ceil(totalRows / PAGE_LIMIT) || 1));
+        hasNextPage = currentPage < totalPages;
+      } else {
+        const endCount = ((currentPage - 1) * PAGE_LIMIT) + rows.length;
+        hasNextPage = rows.length === PAGE_LIMIT;
+        totalRows = endCount + (hasNextPage ? 1 : 0);
+        totalPages = currentPage + (hasNextPage ? 1 : 0);
+      }
     }
 
     async function loadHybridTab() {
@@ -392,6 +448,27 @@
       if (currentPage > totalPages) currentPage = totalPages;
       const start = (currentPage - 1) * PAGE_LIMIT;
       visibleOrders = filtered.slice(start, start + PAGE_LIMIT);
+      paginationTotalKnown = true;
+      hasNextPage = currentPage < totalPages;
+    }
+
+    async function loadSummary() {
+      try {
+        const response = await request(`${API_BASE}/stats/summary`);
+        const data = response.data || {};
+        const statusCounts = data.ordersByStatus || {};
+        const openTotal = ['pending', 'processing', 'shipped', 'on_hold']
+          .reduce((sum, key) => sum + Number(statusCounts[key] || 0), 0);
+
+        if (data.totalOrders !== undefined) {
+          setText('desktopOrdersCountBadge', String(Number(data.totalOrders || 0)));
+          setText('desktopOrdersValue', String(Number(data.totalOrders || 0)));
+        }
+        setText('desktopOpenValue', String(openTotal));
+        setText('desktopCancelledValue', String(Number(statusCounts.cancelled || 0)));
+      } catch (error) {
+        console.error('loadSummary error:', error);
+      }
     }
 
     async function refreshData(showMessage = true) {
@@ -403,6 +480,7 @@
         }
 
         updateStats();
+        await loadSummary();
         renderDesktopOrders();
         renderMobileOrders();
         updatePaginationUI();
