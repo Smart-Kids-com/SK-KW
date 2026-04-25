@@ -18,15 +18,18 @@ const { validateOrderItemsStock } = require('../services/inventory-service');
  */
 const CUSTOMERS_TABLE = 'customers';
 const CUSTOMER_SYNC_BATCH_LIMIT = 5000; // backfill safety limit per request
-const DEFAULT_LIMIT = 50;
-const MAX_SEARCH_LEN = 120;
-const DB_OP_TIMEOUT_MS = 8000;
 
-function withTimeout(promise, ms, label = 'db operation') {
+const MAX_LIMIT = 1000;
+const DEFAULT_LIMIT = 50;
+const MAX_SEARCH_LEN = 80;
+const DB_OP_TIMEOUT_MS = 15000;
+
+function withTimeout(promise, ms, label = 'operation') {
   let timer;
   const timeout = new Promise((_, reject) => {
-    timer = setTimeout(() => reject(new Error(`${label} timeout after ${ms}ms`)), ms);
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
   });
+
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
@@ -877,27 +880,50 @@ router.post('/', async (req, res) => {
  */
 router.get('/stats/summary', async (req, res) => {
   try {
-    const [totalOrders, ordersByStatus, totalRevenue, avgOrderValue] = await Promise.all([
+    const [
+      totalOrders,
+      ordersByStatus,
+      totalRevenue,
+      avgOrderValue
+    ] = await Promise.all([
       withTimeout(db.get(`SELECT COUNT(*) as count FROM ${ORDERS_TABLE}`), DB_OP_TIMEOUT_MS, 'ordersSummary(total)'),
-      withTimeout(db.all(`SELECT status, COUNT(*) as count FROM ${ORDERS_TABLE} GROUP BY status`), DB_OP_TIMEOUT_MS, 'ordersSummary(status)'),
+      withTimeout(
+        db.all(
+          `SELECT status, COUNT(*) as count
+           FROM ${ORDERS_TABLE}
+           GROUP BY status`
+        ),
+        DB_OP_TIMEOUT_MS,
+        'ordersSummary(status)'
+      ),
       withTimeout(db.get(`SELECT SUM(total) as total FROM ${ORDERS_TABLE}`), DB_OP_TIMEOUT_MS, 'ordersSummary(revenue)'),
       withTimeout(db.get(`SELECT AVG(total) as average FROM ${ORDERS_TABLE}`), DB_OP_TIMEOUT_MS, 'ordersSummary(avg)')
     ]);
+
+    const statusCounts = (ordersByStatus || []).reduce((acc, row) => {
+      acc[row.status] = Number(row.count || 0);
+      return acc;
+    }, {});
 
     return res.json({
       success: true,
       data: {
         totalOrders: Number(totalOrders?.count || 0),
-        ordersByStatus: (ordersByStatus || []).reduce((acc, row) => {
-          acc[row.status] = Number(row.count || 0);
-          return acc;
-        }, {}),
+        ordersByStatus: statusCounts,
         totalRevenue: Number(totalRevenue?.total || 0),
         averageOrderValue: Number(avgOrderValue?.average || 0)
       }
     });
   } catch (error) {
     console.error('❌ خطأ في جلب الإحصائيات:', error);
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({
+        success: false,
+        error: 'استعلام إحصائيات الطلبات استغرق وقتًا طويلاً'
+      });
+    }
+
     return res.status(500).json({
       success: false,
       error: 'فشل في جلب الإحصائيات'
@@ -907,7 +933,6 @@ router.get('/stats/summary', async (req, res) => {
 
 /**
  * GET /api/orders/track/:orderNumber
-
  */
 router.get('/track/:orderNumber', async (req, res) => {
   try {
@@ -2240,27 +2265,25 @@ router.get('/:id', async (req, res) => {
 
 /**
  * GET /api/orders
- * same fast products list logic
- * - sort=id only
+ * نفس منطق products.js:
+ * - fetch خفيف على Turso باستخدام loop على id بدل COUNT + OFFSET الثقيل
+ * - limit / offset
+ * - status
+ * - search / searchMode
  * - order ASC/DESC
- * - limit/offset
- * - includeImages=0 accepted for UI compatibility
- * - no COUNT(*) while loading the list
  */
 router.get('/', async (req, res) => {
   try {
     const {
       status,
-      search = '',
+      search,
       searchMode,
       sort = 'id',
-      order = 'DESC',
       limit = DEFAULT_LIMIT,
       offset = 0,
+      order = 'DESC',
       includeImages = '0'
     } = req.query;
-
-    void includeImages;
 
     const sortField = String(sort || 'id').trim().toLowerCase();
     if (sortField !== 'id') {
@@ -2270,44 +2293,57 @@ router.get('/', async (req, res) => {
       });
     }
 
-    const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    // Accepted for parity with products-admin.html; orders list has no images.
+    void includeImages;
+
     const parsedLimit = Math.min(100, Math.max(1, toInt(limit, DEFAULT_LIMIT)));
     const parsedOffset = Math.max(0, toInt(offset, 0));
     const targetCount = parsedLimit + parsedOffset;
+    const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
     const where = [];
     const baseParams = [];
 
     if (status) {
+      const cleanStatus = safeText(status).toLowerCase();
+      if (!isValidOrderStatus(cleanStatus)) {
+        return res.status(400).json({
+          success: false,
+          error: 'قيمة status غير صحيحة'
+        });
+      }
       where.push(`status = ?`);
-      baseParams.push(status);
+      baseParams.push(cleanStatus);
     }
 
-    const searchText = safeText(search).slice(0, MAX_SEARCH_LEN);
-    if (searchText) {
-      const like = `%${searchText.toLowerCase()}%`;
-      const mode = String(searchMode || 'fast').trim().toLowerCase();
-      const isFull = mode === 'full';
+    if (search) {
+      const s = safeText(search).slice(0, MAX_SEARCH_LEN).toLowerCase();
+      if (s) {
+        const like = `%${s}%`;
+        const mode = String(searchMode || 'fast').trim().toLowerCase();
+        const isFull = mode === 'full';
 
-      if (isFull) {
-        where.push(`(
-          LOWER(COALESCE(order_number, '')) LIKE ?
-          OR LOWER(COALESCE(customer_name, '')) LIKE ?
-          OR LOWER(COALESCE(customer_email, '')) LIKE ?
-          OR LOWER(COALESCE(customer_phone, '')) LIKE ?
-          OR LOWER(COALESCE(customer_city, '')) LIKE ?
-          OR LOWER(COALESCE(customer_district, '')) LIKE ?
-          OR LOWER(COALESCE(customer_address, '')) LIKE ?
-          OR LOWER(COALESCE(notes, '')) LIKE ?
-        )`);
-        baseParams.push(like, like, like, like, like, like, like, like);
-      } else {
-        where.push(`(
-          LOWER(COALESCE(order_number, '')) LIKE ?
-          OR LOWER(COALESCE(customer_name, '')) LIKE ?
-          OR LOWER(COALESCE(customer_phone, '')) LIKE ?
-        )`);
-        baseParams.push(like, like, like);
+        if (isFull) {
+          where.push(`(
+            LOWER(COALESCE(order_number, '')) LIKE ?
+            OR LOWER(COALESCE(customer_name, '')) LIKE ?
+            OR LOWER(COALESCE(customer_email, '')) LIKE ?
+            OR LOWER(COALESCE(customer_phone, '')) LIKE ?
+            OR LOWER(COALESCE(customer_city, '')) LIKE ?
+            OR LOWER(COALESCE(customer_district, '')) LIKE ?
+            OR LOWER(COALESCE(customer_address, '')) LIKE ?
+            OR LOWER(COALESCE(notes, '')) LIKE ?
+          )`);
+          baseParams.push(like, like, like, like, like, like, like, like);
+        } else {
+          where.push(`(
+            LOWER(COALESCE(order_number, '')) LIKE ?
+            OR LOWER(COALESCE(customer_name, '')) LIKE ?
+            OR LOWER(COALESCE(customer_email, '')) LIKE ?
+            OR LOWER(COALESCE(customer_phone, '')) LIKE ?
+          )`);
+          baseParams.push(like, like, like, like);
+        }
       }
     }
 
@@ -2326,30 +2362,20 @@ router.get('/', async (req, res) => {
         params.push(lastId);
       }
 
-      let sql =
-        `SELECT
-          id,
-          order_number,
-          customer_name,
-          customer_email,
-          customer_phone,
-          customer_city,
-          customer_district,
-          customer_address,
-          subtotal,
-          shipping_cost,
-          total,
-          status,
-          payment_method,
-          notes,
-          created_at,
-          updated_at
-         FROM ${ORDERS_TABLE}`;
+      let sql = `SELECT * FROM ${ORDERS_TABLE}`;
 
-      if (clauses.length) sql += ` WHERE ${clauses.join(' AND ')}`;
+      if (clauses.length) {
+        sql += ` WHERE ${clauses.join(' AND ')}`;
+      }
+
       sql += ` ORDER BY id ${sortOrder} LIMIT 1`;
 
-      const row = await withTimeout(db.get(sql, params), DB_OP_TIMEOUT_MS, 'listOrders(get-loop)');
+      const row = await withTimeout(
+        db.get(sql, params),
+        DB_OP_TIMEOUT_MS,
+        'listOrders(get-loop)'
+      );
+
       if (!row) break;
 
       rows.push(row);
@@ -2367,14 +2393,24 @@ router.get('/', async (req, res) => {
         offset: parsedOffset,
         total: null,
         totalPages: null,
-        cursor: data.length ? { id: data[data.length - 1].id } : null
+        cursor: data.length
+          ? { id: data[data.length - 1].id }
+          : null
       }
     });
   } catch (error) {
     console.error('❌ خطأ في جلب الطلبات:', error);
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({
+        success: false,
+        error: 'استعلام الطلبات استغرق وقتًا طويلاً'
+      });
+    }
+
     return res.status(500).json({
       success: false,
-      error: 'فشل في جلب الطلبات'
+      error: error.message || 'فشل في جلب الطلبات'
     });
   }
 });
