@@ -143,17 +143,8 @@
       gap:8px;
     }
 
-    .stat .label{
-      color:var(--muted);
-      font-size:13px;
-    }
-
-    .stat .value{
-      font-size:28px;
-      font-weight:800;
-      color:var(--primary);
-      line-height:1;
-    }
+    .stat .label{ color:var(--muted); font-size:13px; }
+    .stat .value{ font-size:28px; font-weight:800; color:var(--primary); line-height:1; }
 
     .field{ margin-bottom:14px; }
 
@@ -224,6 +215,48 @@
       flex:1 1 180px;
     }
 
+    .bulk-panel{
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:#faf7ff;
+      padding:14px;
+      margin-bottom:16px;
+    }
+
+    .bulk-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+
+    .bulk-head h3{
+      margin:0;
+      font-size:16px;
+      color:var(--primary);
+    }
+
+    .bulk-meta{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .bulk-grid{
+      display:grid;
+      grid-template-columns:repeat(6, minmax(0,1fr));
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .bulk-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
     .table-wrap{
       overflow:auto;
       border:1px solid var(--line);
@@ -234,7 +267,7 @@
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:1350px;
+      min-width:1440px;
     }
 
     th, td{
@@ -259,6 +292,18 @@
       display:block;
       margin-top:4px;
       line-height:1.5;
+    }
+
+    .select-cell{
+      width:54px;
+      text-align:center;
+    }
+
+    .select-cell input{
+      width:18px;
+      height:18px;
+      accent-color:var(--primary);
+      cursor:pointer;
     }
 
     .badge{
@@ -304,10 +349,7 @@
     .message.error{ background:#fde7e7; color:#991b1b; border:1px solid #f3c2c2; }
     .message.info{ background:#e8f1ff; color:#1d4ed8; border:1px solid #cdddff; }
 
-    .loading{
-      opacity:.65;
-      pointer-events:none;
-    }
+    .loading{ opacity:.65; pointer-events:none; }
 
     .empty{
       padding:34px 18px;
@@ -323,30 +365,29 @@
       line-height:1.7;
     }
 
-    .pager{
+    .pagination{
       display:flex;
-      justify-content:space-between;
       align-items:center;
+      justify-content:space-between;
       gap:12px;
-      margin-top:16px;
+      margin-top:14px;
       flex-wrap:wrap;
     }
 
-    .pager-info{
+    .pagination-info{
       color:var(--muted);
       font-size:13px;
       font-weight:700;
     }
 
-    .pager-actions{
+    .pagination-actions{
       display:flex;
-      gap:8px;
+      gap:10px;
       flex-wrap:wrap;
     }
 
-    .pager .btn[disabled]{
-      opacity:.45;
-      cursor:not-allowed;
+    @media (max-width: 1260px){
+      .bulk-grid{ grid-template-columns:repeat(3, minmax(0,1fr)); }
     }
 
     @media (max-width: 1180px){
@@ -355,6 +396,7 @@
 
     @media (max-width: 900px){
       .stats{ grid-template-columns:1fr 1fr; }
+      .bulk-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); }
     }
 
     @media (max-width: 700px){
@@ -364,9 +406,8 @@
       .topbar{ align-items:stretch; }
       .top-actions{ width:100%; }
       .top-actions .btn{ flex:1 1 180px; }
-      .pager{ align-items:stretch; }
-      .pager-actions{ width:100%; }
-      .pager-actions .btn{ flex:1 1 120px; }
+      .bulk-grid{ grid-template-columns:1fr; }
+      .pagination{ align-items:stretch; }
     }
   </style>
 </head>
@@ -400,7 +441,7 @@
         <div class="value" id="statOutOfStock">0</div>
       </div>
       <div class="stat">
-        <div class="label">إجمالي Available في الصفحة</div>
+        <div class="label">إجمالي Available</div>
         <div class="value" id="statAvailable">0</div>
       </div>
     </div>
@@ -488,7 +529,7 @@
       <section class="card" id="listCard">
         <div class="card-header">
           <h2>قائمة المخزون</h2>
-          <p>ابحث وصفِّ ثم اختر أي منتج لتعديل بيانات Inventory.</p>
+          <p>ابحث وصفِّ ثم اختر أي منتج لتعديل بيانات Inventory أو استخدم التعديل الجماعي للمنتجات المحددة.</p>
         </div>
 
         <div class="card-body">
@@ -528,10 +569,70 @@
             </div>
           </div>
 
+          <div class="bulk-panel">
+            <div class="bulk-head">
+              <h3>Bulk Edit</h3>
+              <div class="bulk-meta">عدد المنتجات المحددة: <strong id="selectedCount">0</strong></div>
+            </div>
+
+            <div class="bulk-grid">
+              <div class="field">
+                <label for="bulkOnHand">On hand</label>
+                <input type="number" id="bulkOnHand" min="0" step="1" placeholder="بدون تغيير" />
+              </div>
+
+              <div class="field">
+                <label for="bulkCommitted">Committed</label>
+                <input type="number" id="bulkCommitted" min="0" step="1" placeholder="بدون تغيير" />
+              </div>
+
+              <div class="field">
+                <label for="bulkUnavailable">Unavailable</label>
+                <input type="number" id="bulkUnavailable" min="0" step="1" placeholder="بدون تغيير" />
+              </div>
+
+              <div class="field">
+                <label for="bulkStatus">Status</label>
+                <select id="bulkStatus">
+                  <option value="">بدون تغيير</option>
+                  <option value="active">active</option>
+                  <option value="archived">archived</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="bulkInventoryEnabled">Inventory tracking</label>
+                <select id="bulkInventoryEnabled">
+                  <option value="">بدون تغيير</option>
+                  <option value="1">ON</option>
+                  <option value="0">OFF</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="bulkInventoryBlocked">Storefront</label>
+                <select id="bulkInventoryBlocked">
+                  <option value="">بدون تغيير</option>
+                  <option value="0">مفتوح</option>
+                  <option value="1">مغلق</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="bulk-actions">
+              <button class="btn primary" type="button" id="applyBulkBtn">تطبيق التعديل الجماعي</button>
+              <button class="btn light" type="button" id="selectVisibleBtn">تحديد المعروض</button>
+              <button class="btn light" type="button" id="clearSelectionBtn">مسح التحديد</button>
+            </div>
+          </div>
+
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
+                  <th class="select-cell">
+                    <input type="checkbox" id="selectAllCheckbox" />
+                  </th>
                   <th>المنتج</th>
                   <th>SKU</th>
                   <th>Status</th>
@@ -546,15 +647,15 @@
               </thead>
               <tbody id="inventoryTableBody">
                 <tr>
-                  <td colspan="10" class="empty">جاري التحميل...</td>
+                  <td colspan="11" class="empty">جاري التحميل...</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <div class="pager">
-            <div class="pager-info" id="pagerInfo">الصفحة 1 من 1</div>
-            <div class="pager-actions">
+          <div class="pagination">
+            <div class="pagination-info" id="paginationInfo">الصفحة 1 من 1</div>
+            <div class="pagination-actions">
               <button class="btn light" type="button" id="prevPageBtn">السابق</button>
               <button class="btn light" type="button" id="nextPageBtn">التالي</button>
             </div>
@@ -566,13 +667,14 @@
 
   <script>
     const API_BASE = '/api/inventory';
-    const PAGE_SIZE = 20;
+    const PAGE_LIMIT = 20;
 
     let inventoryItems = [];
     let currentEditingId = '';
     let currentPage = 1;
     let totalPages = 1;
     let totalItems = 0;
+    const selectedIds = new Set();
 
     const els = {
       messageBox: document.getElementById('messageBox'),
@@ -603,9 +705,20 @@
       sortField: document.getElementById('sortField'),
       sortOrder: document.getElementById('sortOrder'),
       tableBody: document.getElementById('inventoryTableBody'),
+      paginationInfo: document.getElementById('paginationInfo'),
       prevPageBtn: document.getElementById('prevPageBtn'),
       nextPageBtn: document.getElementById('nextPageBtn'),
-      pagerInfo: document.getElementById('pagerInfo')
+      selectedCount: document.getElementById('selectedCount'),
+      selectAllCheckbox: document.getElementById('selectAllCheckbox'),
+      selectVisibleBtn: document.getElementById('selectVisibleBtn'),
+      clearSelectionBtn: document.getElementById('clearSelectionBtn'),
+      applyBulkBtn: document.getElementById('applyBulkBtn'),
+      bulkOnHand: document.getElementById('bulkOnHand'),
+      bulkCommitted: document.getElementById('bulkCommitted'),
+      bulkUnavailable: document.getElementById('bulkUnavailable'),
+      bulkStatus: document.getElementById('bulkStatus'),
+      bulkInventoryEnabled: document.getElementById('bulkInventoryEnabled'),
+      bulkInventoryBlocked: document.getElementById('bulkInventoryBlocked')
     };
 
     function safeText(value, fallback = '') {
@@ -639,13 +752,12 @@
 
     function setLoading(isLoading) {
       document.body.classList.toggle('loading', isLoading);
-      els.saveBtn.disabled = isLoading;
-      els.refreshBtn.disabled = isLoading;
-      els.openBtn.disabled = isLoading;
-      els.closeBtn.disabled = isLoading;
-      els.setAvailableBtn.disabled = isLoading;
-      els.prevPageBtn.disabled = isLoading || currentPage <= 1;
-      els.nextPageBtn.disabled = isLoading || currentPage >= totalPages;
+      [
+        els.saveBtn, els.refreshBtn, els.openBtn, els.closeBtn, els.setAvailableBtn,
+        els.prevPageBtn, els.nextPageBtn, els.applyBulkBtn, els.selectVisibleBtn, els.clearSelectionBtn
+      ].forEach(btn => {
+        if (btn) btn.disabled = isLoading;
+      });
     }
 
     function calculateAvailablePreview() {
@@ -664,14 +776,13 @@
       const stockStatus = safeText(els.stockStatusFilter.value);
       const sort = safeText(els.sortField.value, 'on_hand');
       const order = safeText(els.sortOrder.value, 'ASC');
-      const offset = (currentPage - 1) * PAGE_SIZE;
 
       if (search) params.set('search', search);
       if (stockStatus) params.set('stock_status', stockStatus);
       params.set('sort', sort);
       params.set('order', order);
-      params.set('limit', String(PAGE_SIZE));
-      params.set('offset', String(offset));
+      params.set('limit', String(PAGE_LIMIT));
+      params.set('offset', String((currentPage - 1) * PAGE_LIMIT));
 
       return params.toString();
     }
@@ -696,15 +807,28 @@
     }
 
     function updateStats() {
+      const visibleTotal = inventoryItems.length;
       const inStock = inventoryItems.filter(item => item.storefront_status === 'in_stock').length;
       const outOfStock = inventoryItems.filter(item => item.storefront_status === 'out_of_stock').length;
       const availableSum = inventoryItems.reduce((sum, item) => sum + toInt(item.available, 0), 0);
 
-      els.statTotal.textContent = String(totalItems);
+      els.statTotal.textContent = String(totalItems || visibleTotal);
       els.statInStock.textContent = String(inStock);
       els.statOutOfStock.textContent = String(outOfStock);
       els.statAvailable.textContent = String(availableSum);
-      els.pagerInfo.textContent = `الصفحة ${currentPage} من ${totalPages} — إجمالي المنتجات ${totalItems}`;
+    }
+
+    function updateSelectionUi() {
+      els.selectedCount.textContent = String(selectedIds.size);
+
+      const visibleIds = inventoryItems.map(item => String(item.id));
+      const selectedVisibleCount = visibleIds.filter(id => selectedIds.has(id)).length;
+      els.selectAllCheckbox.checked = visibleIds.length > 0 && selectedVisibleCount === visibleIds.length;
+      els.selectAllCheckbox.indeterminate = selectedVisibleCount > 0 && selectedVisibleCount < visibleIds.length;
+    }
+
+    function updatePaginationUi() {
+      els.paginationInfo.textContent = `الصفحة ${currentPage} من ${totalPages} — إجمالي المنتجات ${totalItems}`;
       els.prevPageBtn.disabled = currentPage <= 1;
       els.nextPageBtn.disabled = currentPage >= totalPages;
     }
@@ -712,26 +836,30 @@
     async function loadInventory() {
       const query = buildQuery();
       const result = await fetchJson(`${API_BASE}?${query}`);
+
       inventoryItems = Array.isArray(result.data) ? result.data : [];
       totalItems = Number(result.pagination?.total || inventoryItems.length || 0);
       totalPages = Math.max(1, Number(result.pagination?.totalPages || 1));
-      currentPage = Math.min(currentPage, totalPages);
+
       updateStats();
       renderTable();
+      updatePaginationUi();
+      updateSelectionUi();
     }
 
     function renderTable() {
       if (!inventoryItems.length) {
         els.tableBody.innerHTML = `
           <tr>
-            <td colspan="10" class="empty">لا توجد منتجات مطابقة للفلاتر الحالية.</td>
+            <td colspan="11" class="empty">لا توجد منتجات مطابقة للفلاتر الحالية.</td>
           </tr>
         `;
         return;
       }
 
       els.tableBody.innerHTML = inventoryItems.map(item => {
-        const id = Number(item.id || 0);
+        const id = String(item.id || '');
+        const numericId = Number(item.id || 0);
         const name = escapeHtml(item.product_name || '');
         const sku = escapeHtml(item.sku || '—');
         const status = safeText(item.status, 'active');
@@ -739,12 +867,16 @@
         const stockLabel = storefrontStatus === 'in_stock' ? 'متاح' : 'نفدت الكمية';
         const inventoryMode = Number(item.inventory_enabled || 0) ? 'ON' : 'OFF';
         const blockedLabel = Number(item.inventory_blocked || 0) ? 'مغلق' : 'مفتوح';
+        const checked = selectedIds.has(id) ? 'checked' : '';
 
         return `
           <tr>
+            <td class="select-cell">
+              <input type="checkbox" class="row-select" data-id="${escapeHtml(id)}" ${checked} />
+            </td>
             <td>
               <strong>${name}</strong>
-              <small>ID: ${id}</small>
+              <small>ID: ${numericId}</small>
             </td>
             <td>${sku}</td>
             <td>
@@ -764,14 +896,24 @@
             </td>
             <td>
               <div class="table-actions">
-                <button class="btn light" type="button" onclick="editInventory(${id})">تعديل</button>
-                <button class="btn success" type="button" onclick="openInventory(${id})">فتح</button>
-                <button class="btn warning" type="button" onclick="closeInventory(${id})">إغلاق</button>
+                <button class="btn light" type="button" onclick="editInventory(${numericId})">تعديل</button>
+                <button class="btn success" type="button" onclick="openInventory(${numericId})">فتح</button>
+                <button class="btn warning" type="button" onclick="closeInventory(${numericId})">إغلاق</button>
               </div>
             </td>
           </tr>
         `;
       }).join('');
+
+      els.tableBody.querySelectorAll('.row-select').forEach(input => {
+        input.addEventListener('change', () => {
+          const id = safeText(input.dataset.id);
+          if (!id) return;
+          if (input.checked) selectedIds.add(id);
+          else selectedIds.delete(id);
+          updateSelectionUi();
+        });
+      });
     }
 
     function resetForm() {
@@ -789,6 +931,15 @@
       els.formTitle.textContent = 'تعديل مخزون المنتج';
     }
 
+    function resetBulkForm() {
+      els.bulkOnHand.value = '';
+      els.bulkCommitted.value = '';
+      els.bulkUnavailable.value = '';
+      els.bulkStatus.value = '';
+      els.bulkInventoryEnabled.value = '';
+      els.bulkInventoryBlocked.value = '';
+    }
+
     function fillForm(item) {
       currentEditingId = String(item.id || '');
       els.productId.value = currentEditingId;
@@ -804,12 +955,30 @@
       calculateAvailablePreview();
     }
 
+    function buildBulkPayloadTemplate() {
+      const payload = {};
+      const onHand = safeText(els.bulkOnHand.value);
+      const committed = safeText(els.bulkCommitted.value);
+      const unavailable = safeText(els.bulkUnavailable.value);
+      const status = safeText(els.bulkStatus.value);
+      const inventoryEnabled = safeText(els.bulkInventoryEnabled.value);
+      const inventoryBlocked = safeText(els.bulkInventoryBlocked.value);
+
+      if (onHand !== '') payload.on_hand = Math.max(0, toInt(onHand, 0));
+      if (committed !== '') payload.committed = Math.max(0, toInt(committed, 0));
+      if (unavailable !== '') payload.unavailable = Math.max(0, toInt(unavailable, 0));
+      if (status !== '') payload.status = status;
+      if (inventoryEnabled !== '') payload.inventory_enabled = Number(inventoryEnabled) ? 1 : 0;
+      if (inventoryBlocked !== '') payload.inventory_blocked = Number(inventoryBlocked) ? 1 : 0;
+
+      return payload;
+    }
+
     async function editInventory(id) {
       try {
         clearMessage();
         const result = await fetchJson(`${API_BASE}/${id}`);
-        const item = result.data;
-        fillForm(item);
+        fillForm(result.data);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (error) {
         showMessage(error.message, 'error');
@@ -919,7 +1088,59 @@
       }
     }
 
-    function resetToFirstPageAndReload() {
+    async function applyBulkUpdate() {
+      const ids = Array.from(selectedIds);
+      if (!ids.length) {
+        showMessage('حدد منتجًا واحدًا على الأقل أولًا', 'error');
+        return;
+      }
+
+      const template = buildBulkPayloadTemplate();
+      if (!Object.keys(template).length) {
+        showMessage('أدخل قيمة واحدة على الأقل في Bulk Edit', 'error');
+        return;
+      }
+
+      try {
+        clearMessage();
+        setLoading(true);
+
+        const updates = ids.map(id => ({
+          id,
+          ...template
+        }));
+
+        await fetchJson(`${API_BASE}/bulk`, {
+          method: 'POST',
+          body: JSON.stringify({ updates })
+        });
+
+        showMessage(`تم تطبيق التعديل الجماعي على ${ids.length} منتج`, 'success');
+        resetBulkForm();
+        await loadInventory();
+      } catch (error) {
+        showMessage(error.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function selectVisibleItems() {
+      inventoryItems.forEach(item => {
+        const id = safeText(item.id);
+        if (id) selectedIds.add(id);
+      });
+      renderTable();
+      updateSelectionUi();
+    }
+
+    function clearSelection() {
+      selectedIds.clear();
+      renderTable();
+      updateSelectionUi();
+    }
+
+    function handleFilterChange() {
       currentPage = 1;
       loadInventory().catch(error => showMessage(error.message, 'error'));
     }
@@ -962,12 +1183,28 @@
     });
 
     els.setAvailableBtn.addEventListener('click', setAvailableDirectly);
+    els.applyBulkBtn.addEventListener('click', applyBulkUpdate);
+    els.selectVisibleBtn.addEventListener('click', selectVisibleItems);
+    els.clearSelectionBtn.addEventListener('click', clearSelection);
+
+    els.selectAllCheckbox.addEventListener('change', () => {
+      if (els.selectAllCheckbox.checked) {
+        selectVisibleItems();
+      } else {
+        inventoryItems.forEach(item => {
+          const id = safeText(item.id);
+          if (id) selectedIds.delete(id);
+        });
+        renderTable();
+        updateSelectionUi();
+      }
+    });
 
     els.prevPageBtn.addEventListener('click', async () => {
       if (currentPage <= 1) return;
+      currentPage -= 1;
       try {
         clearMessage();
-        currentPage -= 1;
         setLoading(true);
         await loadInventory();
       } catch (error) {
@@ -979,9 +1216,9 @@
 
     els.nextPageBtn.addEventListener('click', async () => {
       if (currentPage >= totalPages) return;
+      currentPage += 1;
       try {
         clearMessage();
-        currentPage += 1;
         setLoading(true);
         await loadInventory();
       } catch (error) {
@@ -996,14 +1233,15 @@
     });
 
     [els.searchInput, els.stockStatusFilter, els.sortField, els.sortOrder].forEach(el => {
-      el.addEventListener('input', resetToFirstPageAndReload);
-      el.addEventListener('change', resetToFirstPageAndReload);
+      el.addEventListener('input', handleFilterChange);
+      el.addEventListener('change', handleFilterChange);
     });
 
     async function boot() {
       try {
         setLoading(true);
         resetForm();
+        resetBulkForm();
         await loadInventory();
       } catch (error) {
         showMessage(error.message, 'error');

@@ -139,19 +139,6 @@
 
     .nav-item.active{background:#e9eaeb}
 
-    .badge-count{
-      background:#e5e7eb;
-      min-width:34px;
-      height:24px;
-      border-radius:999px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:13px;
-      color:#444;
-      padding:0 8px;
-    }
-
     .main{
       grid-area:main;
       padding:20px;
@@ -215,6 +202,10 @@
       font-weight:700;
       cursor:pointer;
       box-shadow:var(--shadow);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
     }
 
     .btn.primary{
@@ -246,21 +237,9 @@
     }
 
     .summary-cell:first-child{border-right:none}
-    .summary-label{
-      color:#444;
-      font-size:13px;
-      margin-bottom:8px;
-      font-weight:700;
-    }
-    .summary-value{
-      font-size:17px;
-      font-weight:800;
-    }
-    .summary-sub{
-      font-size:13px;
-      color:#6b7280;
-      margin-top:6px;
-    }
+    .summary-label{color:#444;font-size:13px;margin-bottom:8px;font-weight:700}
+    .summary-value{font-size:17px;font-weight:800}
+    .summary-sub{font-size:13px;color:#6b7280;margin-top:6px}
 
     .table-card{
       background:var(--card);
@@ -334,14 +313,12 @@
       cursor:pointer;
     }
 
-    .table-wrap{
-      overflow:auto;
-    }
+    .table-wrap{overflow:auto}
 
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:1240px;
+      min-width:1360px;
       direction:ltr;
     }
 
@@ -360,9 +337,7 @@
       white-space:nowrap;
     }
 
-    tr:hover td{
-      background:#fafafa;
-    }
+    tr:hover td{background:#fafafa}
 
     .status-badge{
       display:inline-flex;
@@ -376,20 +351,9 @@
       font-weight:800;
     }
 
-    .status-badge.open{
-      color:#92400e;
-      background:var(--yellow-bg);
-    }
-
-    .status-badge.recovered{
-      color:#166534;
-      background:var(--green-bg);
-    }
-
-    .status-badge.closed{
-      color:#374151;
-      background:#e5e7eb;
-    }
+    .status-badge.open{color:#92400e;background:var(--yellow-bg)}
+    .status-badge.recovered{color:#166534;background:var(--green-bg)}
+    .status-badge.closed{color:#374151;background:#e5e7eb}
 
     .mini-btn{
       border:none;
@@ -401,6 +365,11 @@
       cursor:pointer;
       font-weight:700;
       margin-right:6px;
+    }
+
+    .mini-btn.blue{
+      color:#1d4ed8;
+      background:#dbeafe;
     }
 
     .mini-btn.danger{
@@ -472,34 +441,19 @@
     }
 
     @media (max-width: 1100px){
-      .app{
-        grid-template-columns:1fr;
-        grid-template-rows:auto 1fr;
-        grid-template-areas:"main";
-      }
+      .app{grid-template-columns:1fr;grid-template-rows:auto 1fr;grid-template-areas:"main"}
       .topbar,.sidebar{display:none}
       .mobile-top{display:block}
       .main{padding:14px}
       .page{max-width:100%}
-      .summary-grid{
-        grid-template-columns:1fr 1fr;
-      }
-      .summary-cell{
-        border-right:none;
-        border-bottom:1px solid var(--line);
-      }
-      .filters-row{
-        grid-template-columns:1fr;
-      }
+      .summary-grid{grid-template-columns:1fr 1fr}
+      .summary-cell{border-right:none;border-bottom:1px solid var(--line)}
+      .filters-row{grid-template-columns:1fr}
     }
 
     @media (max-width: 700px){
-      .summary-grid{
-        grid-template-columns:1fr;
-      }
-      table{
-        min-width:1040px;
-      }
+      .summary-grid{grid-template-columns:1fr}
+      table{min-width:1180px}
     }
   </style>
 </head>
@@ -514,19 +468,9 @@
 
   <div class="app">
     <header class="topbar">
-      <div class="top-left">
-        <div class="brand">Smartkidsfy</div>
-      </div>
-
-      <div class="search-wrap">
-        <input class="top-search" id="desktopSearchTop" type="text" placeholder="Search abandoned checkouts">
-      </div>
-
-      <div class="top-right">
-        <div class="avatar">🛍️</div>
-        <div class="avatar">🔔</div>
-        <div style="font-weight:800">الأطفال المبتكرون الكويت</div>
-      </div>
+      <div class="top-left"><div class="brand">Smartkidsfy</div></div>
+      <div class="search-wrap"><input class="top-search" id="desktopSearchTop" type="text" placeholder="Search abandoned checkouts"></div>
+      <div class="top-right"><div class="avatar">🛍️</div><div class="avatar">🔔</div><div style="font-weight:800">الأطفال المبتكرون الكويت</div></div>
     </header>
 
     <aside class="sidebar">
@@ -545,42 +489,16 @@
 
         <div class="page-head">
           <div class="page-title">🛒 Abandoned Checkouts</div>
-          <div class="page-actions">
-            <button class="btn" onclick="refreshData()">Refresh</button>
-          </div>
+          <div class="page-actions"><button class="btn" onclick="refreshData()">Refresh</button></div>
         </div>
 
         <section class="summary">
           <div class="summary-grid">
-            <div class="summary-cell">
-              <div class="summary-label">Overview</div>
-              <div class="summary-value">Abandoned Checkouts</div>
-              <div class="summary-sub">Recovery tracking</div>
-            </div>
-
-            <div class="summary-cell">
-              <div class="summary-label">Total</div>
-              <div class="summary-value" id="totalValue">—</div>
-              <div class="summary-sub">All records</div>
-            </div>
-
-            <div class="summary-cell">
-              <div class="summary-label">Open</div>
-              <div class="summary-value" id="openValue">—</div>
-              <div class="summary-sub">Need follow-up</div>
-            </div>
-
-            <div class="summary-cell">
-              <div class="summary-label">Recovered</div>
-              <div class="summary-value" id="recoveredValue">—</div>
-              <div class="summary-sub">Turned into orders</div>
-            </div>
-
-            <div class="summary-cell">
-              <div class="summary-label">Closed</div>
-              <div class="summary-value" id="closedValue">—</div>
-              <div class="summary-sub">Manually closed</div>
-            </div>
+            <div class="summary-cell"><div class="summary-label">Overview</div><div class="summary-value">Abandoned Checkouts</div><div class="summary-sub">Recovery tracking</div></div>
+            <div class="summary-cell"><div class="summary-label">Total</div><div class="summary-value" id="totalValue">—</div><div class="summary-sub">All records</div></div>
+            <div class="summary-cell"><div class="summary-label">Open</div><div class="summary-value" id="openValue">—</div><div class="summary-sub">Need follow-up</div></div>
+            <div class="summary-cell"><div class="summary-label">Recovered</div><div class="summary-value" id="recoveredValue">—</div><div class="summary-sub">Turned into orders</div></div>
+            <div class="summary-cell"><div class="summary-label">Closed</div><div class="summary-value" id="closedValue">—</div><div class="summary-sub">Manually closed</div></div>
           </div>
         </section>
 
@@ -595,10 +513,7 @@
           </div>
 
           <div class="filters-row">
-            <div class="field">
-              <input id="searchInput" type="text" placeholder="Search by name, email, phone, token">
-            </div>
-
+            <div class="field"><input id="searchInput" type="text" placeholder="Search by name, email, phone, token"></div>
             <div class="field">
               <select id="sortSelect">
                 <option value="last_activity_at:DESC">Latest activity</option>
@@ -609,7 +524,6 @@
                 <option value="customer_name:ASC">Customer A-Z</option>
               </select>
             </div>
-
             <div class="field">
               <select id="limitSelect">
                 <option value="10">10 per page</option>
@@ -618,7 +532,6 @@
                 <option value="100">100 per page</option>
               </select>
             </div>
-
             <button class="search-btn" onclick="applyFilters()">Search</button>
           </div>
 
@@ -637,9 +550,7 @@
                 </tr>
               </thead>
               <tbody id="tableBody">
-                <tr>
-                  <td colspan="8" class="empty">Loading abandoned checkouts...</td>
-                </tr>
+                <tr><td colspan="8" class="empty">Loading abandoned checkouts...</td></tr>
               </tbody>
             </table>
           </div>
@@ -658,43 +569,24 @@
 
   <script>
     const API_BASE = '/api/abandoned-checkouts';
-
     let currentTab = 'all';
     let currentOffset = 0;
     let currentLimit = 20;
     let totalRows = 0;
     let currentRows = [];
 
-    function qs(id) {
-      return document.getElementById(id);
-    }
-
-    function safeText(value, fallback = '') {
-      const text = String(value ?? '').trim();
-      return text || fallback;
-    }
-
-    function safeNumber(value, fallback = 0) {
-      const n = Number(value);
-      return Number.isFinite(n) ? n : fallback;
-    }
+    function qs(id) { return document.getElementById(id); }
+    function safeText(value, fallback = '') { const text = String(value ?? '').trim(); return text || fallback; }
+    function safeNumber(value, fallback = 0) { const n = Number(value); return Number.isFinite(n) ? n : fallback; }
 
     function formatDate(value) {
       if (!value) return '—';
       const date = new Date(value);
       if (Number.isNaN(date.getTime())) return '—';
-      return date.toLocaleString('en-GB', {
-        year: 'numeric',
-        month: 'short',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      return date.toLocaleString('en-GB', { year:'numeric', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit' });
     }
 
-    function formatMoney(value) {
-      return `KWD ${safeNumber(value, 0).toFixed(3)}`;
-    }
+    function formatMoney(value) { return `KWD ${safeNumber(value, 0).toFixed(3)}`; }
 
     function escapeHtml(value) {
       return String(value || '')
@@ -709,23 +601,19 @@
       const box = qs('alertBox');
       box.textContent = message;
       box.className = `alert active ${type}`;
-
       clearTimeout(window.__alertTimer);
-      window.__alertTimer = setTimeout(() => {
-        box.className = 'alert';
-        box.textContent = '';
-      }, 3200);
+      window.__alertTimer = setTimeout(() => { box.className = 'alert'; box.textContent = ''; }, 3200);
     }
 
     function getStatusBadge(status) {
       const normalized = safeText(status, 'open').toLowerCase();
-      const label = normalized === 'recovered'
-        ? 'Recovered'
-        : normalized === 'closed'
-          ? 'Closed'
-          : 'Open';
-
+      const label = normalized === 'recovered' ? 'Recovered' : normalized === 'closed' ? 'Closed' : 'Open';
       return `<span class="status-badge ${normalized}">${label}</span>`;
+    }
+
+    function openDetails(id) {
+      if (!id) return;
+      window.location.href = `/abandoned-checkout-details.html?id=${encodeURIComponent(id)}`;
     }
 
     function buildQueryString() {
@@ -735,33 +623,28 @@
       const [sort, order] = sortValue.split(':');
 
       currentLimit = limit;
-
       const params = new URLSearchParams();
       params.set('limit', String(limit));
       params.set('offset', String(currentOffset));
       params.set('sort', sort || 'last_activity_at');
       params.set('order', order || 'DESC');
 
-      if (currentTab !== 'all') {
-        params.set('status', currentTab);
-      }
-
-      if (search) {
-        params.set('search', search);
-      }
+      if (currentTab !== 'all') params.set('status', currentTab);
+      if (search) params.set('search', search);
 
       return params.toString();
     }
 
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, options);
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.success) throw new Error(result?.error || 'Request failed');
+      return result;
+    }
+
     async function loadSummary() {
       try {
-        const response = await fetch(`${API_BASE}/stats/summary`, { cache: 'no-store' });
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result?.error || 'Failed to load summary');
-        }
-
+        const result = await fetchJson(`${API_BASE}/stats/summary`, { cache: 'no-store' });
         qs('totalValue').textContent = result.data.total ?? 0;
         qs('openValue').textContent = result.data.open ?? 0;
         qs('recoveredValue').textContent = result.data.recovered ?? 0;
@@ -773,44 +656,23 @@
 
     async function loadRows() {
       try {
-        qs('tableBody').innerHTML = `
-          <tr>
-            <td colspan="8" class="empty">Loading abandoned checkouts...</td>
-          </tr>
-        `;
-
-        const response = await fetch(`${API_BASE}?${buildQueryString()}`, { cache: 'no-store' });
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result?.error || 'Failed to load abandoned checkouts');
-        }
-
+        qs('tableBody').innerHTML = `<tr><td colspan="8" class="empty">Loading abandoned checkouts...</td></tr>`;
+        const result = await fetchJson(`${API_BASE}?${buildQueryString()}`, { cache: 'no-store' });
         currentRows = Array.isArray(result.data) ? result.data : [];
         totalRows = Number(result.pagination?.total || 0);
-
         renderTable();
         renderPagination();
       } catch (error) {
         console.error(error);
-        qs('tableBody').innerHTML = `
-          <tr>
-            <td colspan="8" class="empty">Failed to load abandoned checkouts</td>
-          </tr>
-        `;
+        qs('tableBody').innerHTML = `<tr><td colspan="8" class="empty">Failed to load abandoned checkouts</td></tr>`;
         showAlert(error.message || 'Failed to load abandoned checkouts', 'error');
       }
     }
 
     function renderTable() {
       const tbody = qs('tableBody');
-
       if (!currentRows.length) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="8" class="empty">No abandoned checkouts found</td>
-          </tr>
-        `;
+        tbody.innerHTML = `<tr><td colspan="8" class="empty">No abandoned checkouts found</td></tr>`;
         return;
       }
 
@@ -828,22 +690,18 @@
               <div style="font-weight:800; margin-bottom:4px;">${escapeHtml(customerName)}</div>
               <div style="font-size:13px; color:#6b7280;">${escapeHtml(row.checkout_token)}</div>
             </td>
-
             <td>
               <div>${email ? escapeHtml(email) : '—'}</div>
               <div style="font-size:13px; color:#6b7280; margin-top:4px;">${phone ? escapeHtml(phone) : '—'}</div>
             </td>
-
             <td>${itemsCount} items / ${quantity} qty</td>
             <td>${formatMoney(row.total)}</td>
             <td>${getStatusBadge(row.status)}</td>
             <td>${escapeHtml(formatDate(row.last_activity_at || row.updated_at || row.created_at))}</td>
             <td>${escapeHtml(recoveredOrder)}</td>
-
             <td>
-              ${safeText(row.status) === 'open'
-                ? `<button class="mini-btn" type="button" onclick="closeCheckout(${Number(row.id)})">Close</button>`
-                : ''}
+              <button class="mini-btn blue" type="button" onclick="openDetails(${Number(row.id)})">Details</button>
+              ${safeText(row.status) === 'open' ? `<button class="mini-btn" type="button" onclick="closeCheckout(${Number(row.id)})">Close</button>` : ''}
               <button class="mini-btn danger" type="button" onclick="deleteCheckout(${Number(row.id)})">Delete</button>
             </td>
           </tr>
@@ -854,7 +712,6 @@
     function renderPagination() {
       const start = totalRows === 0 ? 0 : currentOffset + 1;
       const end = Math.min(currentOffset + currentLimit, totalRows);
-
       qs('paginationInfo').textContent = `${start}-${end} of ${totalRows}`;
       qs('prevBtn').disabled = currentOffset <= 0;
       qs('nextBtn').disabled = currentOffset + currentLimit >= totalRows;
@@ -863,49 +720,24 @@
     function setTab(tab) {
       currentTab = tab;
       currentOffset = 0;
-
-      document.querySelectorAll('.tab').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tab);
-      });
-
+      document.querySelectorAll('.tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
       loadRows();
     }
 
-    function applyFilters() {
-      currentOffset = 0;
-      loadRows();
-    }
-
-    function goToPrevPage() {
-      if (currentOffset <= 0) return;
-      currentOffset = Math.max(0, currentOffset - currentLimit);
-      loadRows();
-    }
-
-    function goToNextPage() {
-      if (currentOffset + currentLimit >= totalRows) return;
-      currentOffset += currentLimit;
-      loadRows();
-    }
+    function applyFilters() { currentOffset = 0; loadRows(); }
+    function goToPrevPage() { if (currentOffset <= 0) return; currentOffset = Math.max(0, currentOffset - currentLimit); loadRows(); }
+    function goToNextPage() { if (currentOffset + currentLimit >= totalRows) return; currentOffset += currentLimit; loadRows(); }
 
     async function closeCheckout(id) {
       try {
         const row = currentRows.find(item => Number(item.id) === Number(id));
         if (!row) return;
-
-        const response = await fetch(`${API_BASE}/close`, {
+        const result = await fetchJson(`${API_BASE}/close`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ checkoutToken: row.checkout_token })
         });
-
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result?.error || 'Failed to close checkout');
-        }
-
-        showAlert('Checkout closed successfully', 'success');
+        showAlert(result.message || 'Checkout closed successfully', 'success');
         await refreshData();
       } catch (error) {
         console.error(error);
@@ -917,21 +749,11 @@
       try {
         const row = currentRows.find(item => Number(item.id) === Number(id));
         const label = safeText(row?.customer_name, `#${id}`);
-
         const confirmed = window.confirm(`Delete abandoned checkout "${label}"?`);
         if (!confirmed) return;
 
-        const response = await fetch(`${API_BASE}/${id}`, {
-          method: 'DELETE'
-        });
-
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result?.error || 'Failed to delete checkout');
-        }
-
-        showAlert('Abandoned checkout deleted successfully', 'success');
+        const result = await fetchJson(`${API_BASE}/${id}`, { method: 'DELETE' });
+        showAlert(result.message || 'Abandoned checkout deleted successfully', 'success');
         await refreshData();
       } catch (error) {
         console.error(error);
@@ -939,10 +761,7 @@
       }
     }
 
-    async function refreshData() {
-      await loadSummary();
-      await loadRows();
-    }
+    async function refreshData() { await loadSummary(); await loadRows(); }
 
     function bindSearchInputs() {
       const desktop = qs('desktopSearchTop');
