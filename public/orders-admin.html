@@ -72,7 +72,7 @@
 
   <script>
     const API_BASE = '/api/orders';
-    const PAGE_LIMIT = 25;
+    const PAGE_LIMIT = 50;
     const LOCAL_TAB_FETCH_LIMIT = 100;
 
     let currentTab = 'all';
@@ -396,9 +396,11 @@
 
     function buildBaseParams(limit, offset) {
       const params = new URLSearchParams();
-      params.set('limit', String(limit));
-      params.set('offset', String(offset));
-      params.set('order', currentSortDirection);
+      params.set('sort', 'id');
+      params.set('order', currentSortDirection || 'DESC');
+      params.set('limit', String(limit || 50));
+      params.set('offset', String(offset || 0));
+      params.set('includeImages', '0');
       if (currentSearch) {
         params.set('search', currentSearch);
         params.set('searchMode', 'full');
