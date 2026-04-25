@@ -1046,7 +1046,7 @@
                   <div class="note-item">
                     <div class="note-main">
                       <div class="note-title">Dashboard APIs</div>
-                      <div class="note-sub">This page now reads summary, search, and heartbeat from /api/admin-dashboard/*.</div>
+                      <div class="note-sub">This page now reads `summary`, `search`, and `heartbeat` from `/api/admin-dashboard/*`.</div>
                     </div>
                   </div>
 
@@ -1213,7 +1213,7 @@
     function showAlert(message, type = 'success') {
       const box = qs('alertBox');
       box.textContent = message;
-      box.className = `alertopen-${type}`;
+      box.className = `alert open ${type}`;
       clearTimeout(window.__alertTimer);
       window.__alertTimer = setTimeout(() => {
         box.className = 'alert';
@@ -1322,15 +1322,12 @@
         });
 
         const text = await response.text();
-let result = null;
+        let result = null;
+        if (text) {
+          result = JSON.parse(text);
+        }
 
-try {
-  result = text ? JSON.parse(text) : null;
-} catch {
-  result = { success: false, error: 'Invalid JSON response from server' };
-}
-
-return { response, result };
+        return { response, result };
       } finally {
         clearTimeout(timer);
       }
@@ -1344,21 +1341,13 @@ return { response, result };
     }
 
     async function loadOrders() {
-  const range = getSelectedDateRange();
-  const url =
-    `${ORDERS_API}?limit=20&offset=0&sort=created_at&order=DESC` +
-    `&from=${encodeURIComponent(range.from.toISOString())}` +
-    `&to=${encodeURIComponent(range.to.toISOString())}`;
-
-  const { response, result } = await fetchJson(url, {}, 10000);
-
-  if (!response.ok || !result?.success) {
-    throw new Error(result?.error || 'Failed to load orders');
-  }
-
-  state.allOrders = Array.isArray(result.data) ? result.data : [];
-  state.ordersLoadFailed = false;
-}
+      const { response, result } = await fetchJson(`${ORDERS_API}?limit=20&offset=0&sort=created_at&order=DESC`, {}, 10000);
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error || 'Failed to load orders');
+      }
+      state.allOrders = Array.isArray(result.data) ? result.data : [];
+      state.ordersLoadFailed = false;
+    }
 
     async function loadSummary() {
       const range = getSelectedDateRange();
@@ -1402,7 +1391,7 @@ return { response, result };
 
       qs('fulfillBadge').textContent = state.summaryLoadFailed ? '0' : String(state.summary.ordersToFulfill);
       qs('paymentsBadge').textContent = state.summaryLoadFailed ? '0' : String(state.summary.paymentsToCapture);
-      qs('liveVisitorsLabel').textContent = `${safeNumber(state.summary.liveVisitors, 0)} LiveVisitor`;
+      qs('liveVisitorsLabel').textContent = `${safeNumber(state.summary.liveVisitors, 0)} Live Visitor`;
 
       renderRecentOrders();
     }
@@ -1422,41 +1411,41 @@ return { response, result };
       const list = qs('recentOrdersList');
 
       if (state.ordersLoadFailed) {
-        list.innerHTML = 
+        list.innerHTML = `
           <div class="order-item">
             <div class="order-main">
               <div class="order-title">Orders temporarily unavailable</div>
               <div class="order-sub">The orders endpoint is taking too long to respond. Try again after reducing backend query load.</div>
             </div>
           </div>
-        ;
+        `;
         return;
       }
 
       const rows = getRecentFilteredOrders();
 
       if (!rows.length) {
-        list.innerHTML = 
+        list.innerHTML = `
           <div class="order-item">
             <div class="order-main">
               <div class="order-title">No orders found</div>
               <div class="order-sub">No orders inside the selected date range</div>
             </div>
           </div>
-        ;
+        `;
         return;
       }
 
       list.innerHTML = rows.map(order => {
         const id = order.id || '';
-        const number = escapeHtml(order.order_number || `Order #${id}`);
+        const number = escapeHtml(order.order_number || `#${id}`);
         const customer = escapeHtml(getOrderCustomer(order));
         const total = formatMoney(getOrderTotal(order));
         const status = getOrderStatus(order);
         const pill = STATUS_COLORS[status] || 'grey';
         const dateLabel = formatShortDate(getOrderDate(order));
 
-        return 
+        return `
           <a class="order-item" href="/order-details.html?id=${encodeURIComponent(id)}">
             <div class="order-main">
               <div class="order-title">${number} - ${customer}</div>
@@ -1464,7 +1453,7 @@ return { response, result };
             </div>
             <span class="pill ${pill}">${escapeHtml(status)}</span>
           </a>
-        ;
+        `;
       }).join('');
     }
 
@@ -1473,16 +1462,16 @@ return { response, result };
       const inner = qs('searchResultsInner');
 
       if (!safeText(query)) {
-        inner.innerHTML = <div class="search-empty">Start typing to search...</div>;
+        inner.innerHTML = `<div class="search-empty">Start typing to search...</div>`;
         box.classList.remove('open');
         return;
       }
 
-      inner.innerHTML = <div class="search-loading">Searching...</div>;
+      inner.innerHTML = `<div class="search-loading">Searching...</div>`;
       box.classList.add('open');
 
       try {
-        const { response, result } = await fetchJson(`${ADMIN_DASHBOARD_API}/search?q='${encodeURIComponent(query)}'`, {}, 10000);
+        const { response, result } = await fetchJson(`${ADMIN_DASHBOARD_API}/search?q=${encodeURIComponent(query)}`, {}, 10000);
 
         if (!response.ok || !result?.success) {
           throw new Error(result?.error || 'Search failed');
@@ -1557,14 +1546,14 @@ return { response, result };
         }
 
         if (!groups.length) {
-          inner.innerHTML = <div class="search-empty">No results found</div>;
+          inner.innerHTML = `<div class="search-empty">No results found</div>`;
           return;
         }
 
-        inner.innerHTML = groups.map(group => 
+        inner.innerHTML = groups.map(group => `
           <div class="search-group">
             <div class="search-group-title">${escapeHtml(group.title)}</div>
-            ${group.items.map(item => 
+            ${group.items.map(item => `
               <a class="search-item" href="${escapeHtml(item.href)}">
                 <div class="search-icon">${escapeHtml(group.icon)}</div>
                 <div class="search-main">
@@ -1572,11 +1561,11 @@ return { response, result };
                   <div class="search-sub">${escapeHtml(item.sub)}</div>
                 </div>
               </a>
-            ).join('')}
+            `).join('')}
           </div>
-        ).join('');
+        `).join('');
       } catch (_) {
-        inner.innerHTML = <div class="search-empty">Search failed</div>;
+        inner.innerHTML = `<div class="search-empty">Search failed</div>`;
       }
     }
 
@@ -1791,39 +1780,34 @@ return { response, result };
       return getTodayRange();
     }
 
-    function applyTempRange(start, end, label, preserveTime = false) {
-  state.tempStart = preserveTime ? cloneDate(start) : startOfDay(start);
-  state.tempEnd = preserveTime ? cloneDate(end) : endOfDay(end);
-  state.dateLabel = label;
-  state.currentBaseMonth = new Date(state.tempStart.getFullYear(), state.tempStart.getMonth(), 1);
-  renderCalendars();
-}
+    function applyTempRange(start, end, label) {
+      state.tempStart = startOfDay(start);
+      state.tempEnd = endOfDay(end);
+      state.dateLabel = label;
+      state.currentBaseMonth = new Date(state.tempStart.getFullYear(), state.tempStart.getMonth(), 1);
+      renderCalendars();
+    }
 
     function handleDateClick(clicked) {
-  const clickedStart = startOfDay(clicked);
-  const clickedEnd = endOfDay(clicked);
+      const clickedStart = startOfDay(clicked);
+      const clickedEnd = endOfDay(clicked);
 
-  const selectingNewRange =
-    !state.tempStart ||
-    !state.tempEnd ||
-    !isSameDay(state.tempStart, state.tempEnd);
+      if (!state.tempStart || !state.tempEnd || state.tempStart.getTime() !== state.tempEnd.getTime()) {
+        state.tempStart = clickedStart;
+        state.tempEnd = clickedEnd;
+      } else {
+        if (clickedStart.getTime() < state.tempStart.getTime()) {
+          state.tempEnd = endOfDay(state.tempStart);
+          state.tempStart = clickedStart;
+        } else {
+          state.tempEnd = clickedEnd;
+        }
+      }
 
-  if (selectingNewRange) {
-    state.tempStart = clickedStart;
-    state.tempEnd = clickedEnd;
-  } else {
-    if (clickedStart.getTime() < state.tempStart.getTime()) {
-      state.tempEnd = endOfDay(state.tempStart);
-      state.tempStart = clickedStart;
-    } else {
-      state.tempEnd = clickedEnd;
+      state.dateLabel = 'Custom range';
+      activateCustomPicker();
+      renderCalendars();
     }
-  }
-
-  state.dateLabel = 'Custom range';
-  activateCustomPicker();
-  renderCalendars();
-}
 
     function bindDatePicker() {
       qs('openDatePickerBtn').addEventListener('click', () => {
@@ -1845,30 +1829,12 @@ return { response, result };
       });
 
       qs('applyPickerBtn').addEventListener('click', async () => {
-  const start = cloneDate(state.tempStart);
-  const end = cloneDate(state.tempEnd);
-
-  const startTime = qs('startTimeInput').value || '00:00';
-  const endTime = qs('endTimeInput').value || '23:59';
-
-  const [sh, sm] = startTime.split(':').map(Number);
-  const [eh, em] = endTime.split(':').map(Number);
-
-  start.setHours(sh, sm, 0, 0);
-  end.setHours(eh, em, 59, 999);
-
-  if (start.getTime() > end.getTime()) {
-    showAlert('Start date/time cannot be after end date/time', 'error');
-    return;
-  }
-
-  state.selectedStart = start;
-  state.selectedEnd = end;
-
-  qs('dateTriggerLabel').textContent = state.dateLabel;
-  qs('pickerBackdrop').classList.remove('open');
-  await reloadPageData(false);
-});
+        state.selectedStart = cloneDate(state.tempStart);
+        state.selectedEnd = cloneDate(state.tempEnd);
+        qs('dateTriggerLabel').textContent = state.dateLabel;
+        qs('pickerBackdrop').classList.remove('open');
+        await reloadPageData(false);
+      });
 
       qs('toggleTimeBtn').addEventListener('click', () => {
         qs('timeRow').classList.toggle('open');
@@ -1913,16 +1879,13 @@ return { response, result };
       });
 
       document.querySelectorAll('[data-last]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const key = btn.dataset.last;
-    const [s, e] = getLastRange(key);
-    clearActivePickerItems();
-    qs('lastToggle').classList.add('active');
-
-    const preserveTime = key === '30m' || key === '12h';
-    applyTempRange(s, e, 'Last', preserveTime);
-  });
-});
+        btn.addEventListener('click', () => {
+          const [s, e] = getLastRange(btn.dataset.last);
+          clearActivePickerItems();
+          qs('lastToggle').classList.add('active');
+          applyTempRange(s, e, 'Last');
+        });
+      });
 
       document.querySelectorAll('[data-period]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1973,7 +1936,7 @@ return { response, result };
 
         if (response.ok && result?.success) {
           state.summary.liveVisitors = safeNumber(result.data?.liveVisitors, state.summary.liveVisitors);
-          qs('liveVisitorsLabel').textContent = `${state.summary.liveVisitors} Live Visitors`;
+          qs('liveVisitorsLabel').textContent = `${state.summary.liveVisitors} Live Visitor`;
         }
       } catch (_) {}
     }
