@@ -19,6 +19,20 @@ const { validateOrderItemsStock } = require('../services/inventory-service');
 const CUSTOMERS_TABLE = 'customers';
 const CUSTOMER_SYNC_BATCH_LIMIT = 5000; // backfill safety limit per request
 
+const MAX_LIMIT = 1000;
+const DEFAULT_LIMIT = 50;
+const MAX_SEARCH_LEN = 80;
+const DB_OP_TIMEOUT_MS = 15000;
+
+function withTimeout(promise, ms, label = 'operation') {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+  });
+
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
 function toNumber(value, fallback = 0) {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
@@ -866,38 +880,50 @@ router.post('/', async (req, res) => {
  */
 router.get('/stats/summary', async (req, res) => {
   try {
-    const totalOrders = await db.get(
-      `SELECT COUNT(*) as count FROM ${ORDERS_TABLE}`
-    );
+    const [
+      totalOrders,
+      ordersByStatus,
+      totalRevenue,
+      avgOrderValue
+    ] = await Promise.all([
+      withTimeout(db.get(`SELECT COUNT(*) as count FROM ${ORDERS_TABLE}`), DB_OP_TIMEOUT_MS, 'ordersSummary(total)'),
+      withTimeout(
+        db.all(
+          `SELECT status, COUNT(*) as count
+           FROM ${ORDERS_TABLE}
+           GROUP BY status`
+        ),
+        DB_OP_TIMEOUT_MS,
+        'ordersSummary(status)'
+      ),
+      withTimeout(db.get(`SELECT SUM(total) as total FROM ${ORDERS_TABLE}`), DB_OP_TIMEOUT_MS, 'ordersSummary(revenue)'),
+      withTimeout(db.get(`SELECT AVG(total) as average FROM ${ORDERS_TABLE}`), DB_OP_TIMEOUT_MS, 'ordersSummary(avg)')
+    ]);
 
-    const ordersByStatus = await db.all(
-      `SELECT status, COUNT(*) as count
-       FROM ${ORDERS_TABLE}
-       GROUP BY status`
-    );
-
-    const totalRevenue = await db.get(
-      `SELECT SUM(total) as total FROM ${ORDERS_TABLE}`
-    );
-
-    const avgOrderValue = await db.get(
-      `SELECT AVG(total) as average FROM ${ORDERS_TABLE}`
-    );
+    const statusCounts = (ordersByStatus || []).reduce((acc, row) => {
+      acc[row.status] = Number(row.count || 0);
+      return acc;
+    }, {});
 
     return res.json({
       success: true,
       data: {
         totalOrders: Number(totalOrders?.count || 0),
-        ordersByStatus: ordersByStatus.reduce((acc, row) => {
-          acc[row.status] = Number(row.count || 0);
-          return acc;
-        }, {}),
+        ordersByStatus: statusCounts,
         totalRevenue: Number(totalRevenue?.total || 0),
         averageOrderValue: Number(avgOrderValue?.average || 0)
       }
     });
   } catch (error) {
     console.error('❌ خطأ في جلب الإحصائيات:', error);
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({
+        success: false,
+        error: 'استعلام إحصائيات الطلبات استغرق وقتًا طويلاً'
+      });
+    }
+
     return res.status(500).json({
       success: false,
       error: 'فشل في جلب الإحصائيات'
@@ -2239,90 +2265,139 @@ router.get('/:id', async (req, res) => {
 
 /**
  * GET /api/orders
- * سريع ومناسب لـ Turso:
+ * نفس منطق products.js:
+ * - fetch خفيف على Turso باستخدام loop على id بدل COUNT + OFFSET الثقيل
+ * - limit / offset
  * - status
- * - search
- * - limit
- * - offset
- * - sort
- * - order
+ * - search / searchMode
+ * - order ASC/DESC
  */
 router.get('/', async (req, res) => {
   try {
     const {
       status,
-      search = '',
-      limit = 50,
+      search,
+      searchMode,
+      limit = DEFAULT_LIMIT,
       offset = 0,
-      sort = 'created_at',
       order = 'DESC'
     } = req.query;
 
-    const parsedLimit = Math.max(1, Math.min(100, toInt(limit, 50)));
+    const parsedLimit = Math.min(100, Math.max(1, toInt(limit, DEFAULT_LIMIT)));
     const parsedOffset = Math.max(0, toInt(offset, 0));
-
-    const validSortColumns = ['created_at', 'updated_at', 'total', 'order_number', 'status'];
-    const sortColumn = validSortColumns.includes(String(sort)) ? String(sort) : 'created_at';
+    const targetCount = parsedLimit + parsedOffset;
     const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
-    const whereParts = [];
-    const params = [];
+    const where = [];
+    const baseParams = [];
 
     if (status) {
-      whereParts.push(`status = ?`);
-      params.push(status);
+      const cleanStatus = safeText(status).toLowerCase();
+      if (!isValidOrderStatus(cleanStatus)) {
+        return res.status(400).json({
+          success: false,
+          error: 'قيمة status غير صحيحة'
+        });
+      }
+      where.push(`status = ?`);
+      baseParams.push(cleanStatus);
     }
 
-    const searchText = safeText(search).toLowerCase();
-    if (searchText) {
-      const like = `%${searchText}%`;
-      whereParts.push(`(
-        LOWER(COALESCE(order_number, '')) LIKE ?
-        OR LOWER(COALESCE(customer_name, '')) LIKE ?
-        OR LOWER(COALESCE(customer_email, '')) LIKE ?
-        OR LOWER(COALESCE(customer_phone, '')) LIKE ?
-        OR LOWER(COALESCE(customer_city, '')) LIKE ?
-        OR LOWER(COALESCE(customer_district, '')) LIKE ?
-        OR LOWER(COALESCE(customer_address, '')) LIKE ?
-        OR LOWER(COALESCE(notes, '')) LIKE ?
-      )`);
-      params.push(like, like, like, like, like, like, like, like);
+    if (search) {
+      const s = safeText(search).slice(0, MAX_SEARCH_LEN).toLowerCase();
+      if (s) {
+        const like = `%${s}%`;
+        const mode = String(searchMode || 'fast').trim().toLowerCase();
+        const isFull = mode === 'full';
+
+        if (isFull) {
+          where.push(`(
+            LOWER(COALESCE(order_number, '')) LIKE ?
+            OR LOWER(COALESCE(customer_name, '')) LIKE ?
+            OR LOWER(COALESCE(customer_email, '')) LIKE ?
+            OR LOWER(COALESCE(customer_phone, '')) LIKE ?
+            OR LOWER(COALESCE(customer_city, '')) LIKE ?
+            OR LOWER(COALESCE(customer_district, '')) LIKE ?
+            OR LOWER(COALESCE(customer_address, '')) LIKE ?
+            OR LOWER(COALESCE(notes, '')) LIKE ?
+          )`);
+          baseParams.push(like, like, like, like, like, like, like, like);
+        } else {
+          where.push(`(
+            LOWER(COALESCE(order_number, '')) LIKE ?
+            OR LOWER(COALESCE(customer_name, '')) LIKE ?
+            OR LOWER(COALESCE(customer_email, '')) LIKE ?
+            OR LOWER(COALESCE(customer_phone, '')) LIKE ?
+          )`);
+          baseParams.push(like, like, like, like);
+        }
+      }
     }
 
-    const whereSql = whereParts.length ? `WHERE ${whereParts.join(' AND ')}` : '';
+    const rows = [];
+    let lastId = sortOrder === 'DESC' ? Number.MAX_SAFE_INTEGER : 0;
 
-    const countRow = await db.get(
-      `SELECT COUNT(*) as count FROM ${ORDERS_TABLE} ${whereSql}`,
-      params
-    );
+    while (rows.length < targetCount) {
+      const params = [...baseParams];
+      const clauses = [...where];
 
-    const rows = await db.all(
-      `SELECT *
-       FROM ${ORDERS_TABLE}
-       ${whereSql}
-       ORDER BY ${sortColumn} ${sortOrder}
-       LIMIT ? OFFSET ?`,
-      [...params, parsedLimit, parsedOffset]
-    );
+      if (sortOrder === 'DESC') {
+        clauses.push(`id < ?`);
+        params.push(lastId);
+      } else {
+        clauses.push(`id > ?`);
+        params.push(lastId);
+      }
 
-    const data = rows.map(mergeOrderMeta);
-    const total = Number(countRow?.count || 0);
+      let sql = `SELECT * FROM ${ORDERS_TABLE}`;
+
+      if (clauses.length) {
+        sql += ` WHERE ${clauses.join(' AND ')}`;
+      }
+
+      sql += ` ORDER BY id ${sortOrder} LIMIT 1`;
+
+      const row = await withTimeout(
+        db.get(sql, params),
+        DB_OP_TIMEOUT_MS,
+        'listOrders(get-loop)'
+      );
+
+      if (!row) break;
+
+      rows.push(row);
+      lastId = Number(row.id);
+    }
+
+    const pageRows = rows.slice(parsedOffset, parsedOffset + parsedLimit);
+    const data = pageRows.map(mergeOrderMeta);
 
     return res.json({
       success: true,
       data,
       pagination: {
-        total,
         limit: parsedLimit,
         offset: parsedOffset,
-        totalPages: Math.ceil(total / parsedLimit)
+        total: null,
+        totalPages: null,
+        cursor: data.length
+          ? { id: data[data.length - 1].id }
+          : null
       }
     });
   } catch (error) {
     console.error('❌ خطأ في جلب الطلبات:', error);
+
+    if (String(error?.message || '').includes('timed out')) {
+      return res.status(503).json({
+        success: false,
+        error: 'استعلام الطلبات استغرق وقتًا طويلاً'
+      });
+    }
+
     return res.status(500).json({
       success: false,
-      error: 'فشل في جلب الطلبات'
+      error: error.message || 'فشل في جلب الطلبات'
     });
   }
 });
