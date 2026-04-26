@@ -7,18 +7,26 @@
   <meta name="description" content="تصفح جميع المجموعات في Smart Kids Kuwait">
   <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457">
   <script src="/js/meta-pixel.js"></script>
-  <style>
+    <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     :root {
       --purple-dark: #6a4c93;
       --purple-light: #9b59b6;
       --header-blue: #3160e0;
       --topbar-bg: #3f0448;
+      --page-bg-1: #5b267f;
+      --page-bg-2: #7b3fa8;
+      --page-bg-3: #5b126d;
     }
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #6a4c93 0%, #9b59b6 100%);
+      background:
+        radial-gradient(circle at 18% 10%, rgba(255, 134, 232, 0.18), transparent 28%),
+        radial-gradient(circle at 85% 16%, rgba(100, 156, 255, 0.13), transparent 25%),
+        radial-gradient(circle at 50% 92%, rgba(255, 255, 255, 0.06), transparent 30%),
+        linear-gradient(180deg, var(--page-bg-1) 0%, var(--page-bg-2) 46%, var(--page-bg-3) 100%);
       color: #333;
       line-height: 1.6;
       min-height: 100vh;
@@ -106,10 +114,7 @@
       z-index: 1190;
     }
 
-    body.menu-open .menu-backdrop {
-      opacity: 1;
-      pointer-events: auto;
-    }
+    body.menu-open .menu-backdrop { opacity: 1; pointer-events: auto; }
 
     .side-menu {
       position: fixed;
@@ -119,6 +124,7 @@
       height: 100vh;
       background: rgba(255,255,255,0.98);
       backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       border-left: 1px solid rgba(0,0,0,0.08);
       box-shadow: -12px 0 30px rgba(0,0,0,0.18);
       z-index: 1200;
@@ -224,96 +230,195 @@
     }
 
     .container {
-      max-width: 1400px;
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 2rem 1rem;
+      padding: 2rem 1rem 2.5rem;
+      position: relative;
+      z-index: 1;
     }
 
     .page-title {
       text-align: center;
       color: #fff;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.55rem;
     }
 
     .page-title h1 {
-      font-size: 1.8rem;
-      margin-bottom: 0.4rem;
-      font-weight: 800;
+      font-size: clamp(1.8rem, 5vw, 2.75rem);
+      margin-bottom: 0.42rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      text-shadow: 0 8px 28px rgba(35, 0, 55, 0.35);
     }
 
-    .page-title p { opacity: .95; font-size: 1rem; }
+    .page-title p {
+      color: rgba(255,255,255,0.88);
+      font-size: 1rem;
+      font-weight: 800;
+      text-shadow: 0 4px 16px rgba(35, 0, 55, 0.25);
+    }
 
     .collections-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 1.1rem;
       margin: 0;
-    }
-
-    .collection-card {
-      background: rgba(255,255,255,0.22);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 18px;
-      padding: 1.15rem;
-      box-shadow: 0 8px 24px rgba(31, 38, 135, 0.24);
-      transition: all 0.3s;
-      text-align: center;
-      cursor: pointer;
-      min-height: 250px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
       align-items: stretch;
     }
 
+    .collection-card {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      border-radius: 28px;
+      padding: 1.15rem;
+      min-height: 168px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.22), rgba(255,255,255,0.075));
+      border: 1px solid rgba(255,255,255,0.26);
+      box-shadow:
+        0 24px 55px rgba(35, 5, 58, 0.30),
+        inset 0 1px 0 rgba(255,255,255,0.34),
+        inset 0 -1px 0 rgba(255,255,255,0.08);
+      backdrop-filter: blur(18px) saturate(145%);
+      -webkit-backdrop-filter: blur(18px) saturate(145%);
+      cursor: pointer;
+      transition: transform .26s ease, box-shadow .26s ease, border-color .26s ease;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 170px;
+      grid-template-rows: auto 1fr auto;
+      gap: .62rem 1rem;
+      align-items: center;
+      text-align: right;
+    }
+
+    .collection-card::before {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      top: -128px;
+      left: -115px;
+      border-radius: 45% 55% 60% 40%;
+      background:
+        radial-gradient(circle at 30% 28%, rgba(255,255,255,0.50), transparent 17%),
+        radial-gradient(circle at 63% 42%, rgba(255, 113, 234, 0.48), transparent 34%),
+        radial-gradient(circle at 42% 72%, rgba(91, 142, 255, 0.32), transparent 42%),
+        linear-gradient(135deg, rgba(196, 74, 255, 0.60), rgba(88, 25, 175, 0.16));
+      filter: blur(2px);
+      opacity: .70;
+      transform: rotate(-18deg);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .collection-card::after {
+      content: "";
+      position: absolute;
+      width: 230px;
+      height: 230px;
+      right: -120px;
+      bottom: -124px;
+      border-radius: 58% 42% 48% 52%;
+      background:
+        radial-gradient(circle at 34% 28%, rgba(255,255,255,0.30), transparent 18%),
+        radial-gradient(circle at 50% 45%, rgba(178, 107, 255, 0.45), transparent 38%),
+        radial-gradient(circle at 72% 68%, rgba(255, 116, 205, 0.24), transparent 42%);
+      filter: blur(3px);
+      opacity: .56;
+      transform: rotate(14deg);
+      pointer-events: none;
+      z-index: -1;
+    }
+
     .collection-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 14px 34px rgba(0,0,0,0.22);
+      transform: translateY(-6px) scale(1.008);
+      border-color: rgba(255,255,255,0.38);
+      box-shadow:
+        0 34px 74px rgba(35, 5, 58, 0.42),
+        inset 0 1px 0 rgba(255,255,255,0.42);
     }
 
     .collection-title {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: var(--purple-dark);
-      margin-bottom: 0.65rem;
-      line-height: 1.45;
+      grid-column: 1;
+      grid-row: 1;
+      color: #fff;
+      font-size: clamp(1.04rem, 2.4vw, 1.26rem);
+      font-weight: 950;
+      line-height: 1.42;
+      margin: 0;
+      text-shadow: 0 4px 20px rgba(36, 0, 64, 0.44);
+      overflow-wrap: anywhere;
     }
 
     .collection-description {
-      color: #555;
-      margin-bottom: 1rem;
-      font-size: 0.88rem;
-      line-height: 1.55;
-      min-height: 56px;
-      display: none;
+      grid-column: 1;
+      grid-row: 2 / 4;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      color: rgba(255,255,255,0.82);
+      font-size: .92rem;
+      line-height: 1.65;
+      font-weight: 650;
+      margin: 0;
+      min-height: 0;
+      text-shadow: 0 3px 14px rgba(35, 0, 55, 0.24);
     }
 
     .collection-count {
-      background: linear-gradient(45deg, #6a4c93, #9b59b6);
-      color: white;
-      padding: 7px 14px;
-      border-radius: 20px;
-      font-weight: 700;
-      display: inline-block;
-      margin-bottom: 0.9rem;
-      font-size: .9rem;
+      grid-column: 2;
+      grid-row: 1;
+      min-height: 46px;
+      width: 100%;
+      padding: 0 16px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(135deg, rgba(116, 58, 190, 0.96), rgba(211, 73, 222, 0.88));
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.30);
+      box-shadow:
+        0 13px 30px rgba(65, 8, 95, 0.28),
+        inset 0 1px 0 rgba(255,255,255,0.35);
+      font-weight: 950;
+      font-size: 1rem;
+      text-shadow: 0 2px 12px rgba(35,0,55,.24);
+      white-space: nowrap;
     }
 
     .browse-btn {
+      grid-column: 2;
+      grid-row: 2 / 4;
+      min-height: 52px;
       width: 100%;
-      padding: 11px 18px;
-      background: linear-gradient(45deg, #6a4c93, #9b59b6);
-      color: white;
-      border: none;
-      border-radius: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-      text-decoration: none;
-      display: inline-block;
-      font-size: .95rem;
+      padding: 0 18px;
+      border-radius: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(135deg, rgba(143, 80, 200, 0.98), rgba(205, 70, 213, 0.92));
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.28);
+      box-shadow:
+        0 14px 32px rgba(42, 0, 75, 0.26),
+        inset 0 1px 0 rgba(255,255,255,0.32);
+      font-weight: 950;
+      font-size: .96rem;
+      text-align: center;
+      transition: transform .22s ease, box-shadow .22s ease;
+    }
+
+    .browse-btn:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 18px 38px rgba(42, 0, 75, 0.32),
+        inset 0 1px 0 rgba(255,255,255,0.34);
     }
 
     .loading {
@@ -321,6 +426,7 @@
       padding: 3rem;
       color: white;
       grid-column: 1 / -1;
+      font-weight: 800;
     }
 
     .whatsapp-float {
@@ -346,429 +452,91 @@
       display: block;
     }
 
+    @media (max-width: 900px) {
+      .collections-grid {
+        grid-template-columns: 1fr;
+        gap: .95rem;
+      }
+    }
+
     @media (max-width: 768px) {
       .site-header {
         grid-template-columns: 52px 1fr 96px;
         min-height: 82px;
         padding: 10px 12px;
       }
+
       .site-header-logo img,
       .side-menu__logo img { max-height: 54px; }
 
       .site-menu-btn,
-      .site-icon-btn { width: 40px; height: 40px; font-size: 1.5rem; }
+      .site-icon-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+      }
 
-      .container { padding: 1.5rem 1rem 2rem; }
-      .page-title h1 { font-size: 1.45rem; }
+      .container {
+        padding: 1.45rem .9rem 2rem;
+      }
 
-      .collections-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem; }
-      .collection-card { padding: 1rem; min-height: 220px; }
-      .collection-title { font-size: 0.95rem; }
-      .collection-description { font-size: 0.82rem; min-height: 48px; }
-      .browse-btn { font-size: .9rem; }
-    }
+      .page-title {
+        margin-bottom: 1.25rem;
+      }
 
-    @media (max-width: 420px) {
-      .collections-grid { grid-template-columns: 1fr 1fr; }
-    }
-
-    /* =========================================================
-       PREMIUM POLISH — Collections Cards + Footer
-       CSS-only modern liquid/glass style
-       ========================================================= */
-
-    body {
-      background:
-        radial-gradient(circle at 18% 10%, rgba(255, 134, 232, 0.22), transparent 28%),
-        radial-gradient(circle at 85% 16%, rgba(100, 156, 255, 0.16), transparent 25%),
-        radial-gradient(circle at 50% 92%, rgba(255, 255, 255, 0.08), transparent 30%),
-        linear-gradient(180deg, #5b267f 0%, #7b3fa8 46%, #5b126d 100%) !important;
-    }
-
-    .container {
-      position: relative;
-      z-index: 1;
-    }
-
-    .page-title {
-      margin-bottom: 2rem !important;
-    }
-
-    .page-title h1 {
-      font-size: clamp(1.75rem, 5vw, 2.75rem) !important;
-      letter-spacing: -0.02em;
-      text-shadow: 0 8px 28px rgba(35, 0, 55, 0.35);
-    }
-
-    .page-title p {
-      color: rgba(255,255,255,0.88) !important;
-      font-weight: 700;
-      text-shadow: 0 4px 16px rgba(35, 0, 55, 0.25);
-    }
-
-    .collections-grid {
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
-      gap: 1.35rem !important;
-      align-items: stretch !important;
-    }
-
-    .collection-card {
-      position: relative !important;
-      overflow: hidden !important;
-      isolation: isolate !important;
-      border-radius: 30px !important;
-      padding: 1.45rem 1.25rem !important;
-      min-height: 250px !important;
-      background:
-        linear-gradient(145deg, rgba(255,255,255,0.22), rgba(255,255,255,0.075)) !important;
-      border: 1px solid rgba(255,255,255,0.26) !important;
-      box-shadow:
-        0 24px 55px rgba(35, 5, 58, 0.32),
-        inset 0 1px 0 rgba(255,255,255,0.34),
-        inset 0 -1px 0 rgba(255,255,255,0.08) !important;
-      backdrop-filter: blur(18px) saturate(145%) !important;
-      -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
-      transition:
-        transform .26s ease,
-        box-shadow .26s ease,
-        border-color .26s ease,
-        background .26s ease !important;
-    }
-
-    .collection-card::before {
-      content: "" !important;
-      position: absolute !important;
-      width: 245px !important;
-      height: 245px !important;
-      top: -105px !important;
-      left: -92px !important;
-      border-radius: 45% 55% 60% 40% !important;
-      background:
-        radial-gradient(circle at 30% 28%, rgba(255,255,255,0.55), transparent 17%),
-        radial-gradient(circle at 63% 42%, rgba(255, 113, 234, 0.54), transparent 34%),
-        radial-gradient(circle at 42% 72%, rgba(91, 142, 255, 0.38), transparent 42%),
-        linear-gradient(135deg, rgba(196, 74, 255, 0.70), rgba(88, 25, 175, 0.18)) !important;
-      filter: blur(2px) !important;
-      opacity: .76 !important;
-      transform: rotate(-18deg) !important;
-      pointer-events: none !important;
-      z-index: -1 !important;
-    }
-
-    .collection-card::after {
-      content: "" !important;
-      position: absolute !important;
-      width: 230px !important;
-      height: 230px !important;
-      right: -104px !important;
-      bottom: -112px !important;
-      border-radius: 58% 42% 48% 52% !important;
-      background:
-        radial-gradient(circle at 34% 28%, rgba(255,255,255,0.36), transparent 18%),
-        radial-gradient(circle at 50% 45%, rgba(178, 107, 255, 0.52), transparent 38%),
-        radial-gradient(circle at 72% 68%, rgba(255, 116, 205, 0.30), transparent 42%) !important;
-      filter: blur(3px) !important;
-      opacity: .62 !important;
-      transform: rotate(14deg) !important;
-      pointer-events: none !important;
-      z-index: -1 !important;
-    }
-
-    .collection-card:hover {
-      transform: translateY(-7px) scale(1.012) !important;
-      border-color: rgba(255,255,255,0.40) !important;
-      box-shadow:
-        0 34px 74px rgba(35, 5, 58, 0.44),
-        inset 0 1px 0 rgba(255,255,255,0.42) !important;
-    }
-
-    .collection-title {
-      color: #fff !important;
-      font-size: clamp(1.05rem, 3.2vw, 1.3rem) !important;
-      font-weight: 900 !important;
-      line-height: 1.38 !important;
-      margin-bottom: .78rem !important;
-      text-shadow: 0 4px 20px rgba(36, 0, 64, 0.46) !important;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .collection-description {
-      display: block !important;
-      color: rgba(255,255,255,0.82) !important;
-      font-size: .93rem !important;
-      line-height: 1.7 !important;
-      font-weight: 650 !important;
-      margin: 0 auto 1rem !important;
-      min-height: 3.2em !important;
-      max-width: 95% !important;
-      text-shadow: 0 3px 14px rgba(35, 0, 55, 0.26) !important;
-      display: -webkit-box !important;
-      -webkit-line-clamp: 2;
-      line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .collection-count {
-      min-height: 50px !important;
-      min-width: 150px !important;
-      padding: 0 22px !important;
-      margin: auto auto 1rem !important;
-      border-radius: 999px !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      background:
-        linear-gradient(135deg, rgba(116, 58, 190, 0.96), rgba(211, 73, 222, 0.88)) !important;
-      color: #fff !important;
-      border: 1px solid rgba(255,255,255,0.30) !important;
-      box-shadow:
-        0 13px 30px rgba(65, 8, 95, 0.30),
-        inset 0 1px 0 rgba(255,255,255,0.35) !important;
-      font-weight: 900 !important;
-      font-size: 1.02rem !important;
-      text-shadow: 0 2px 12px rgba(35,0,55,.24);
-    }
-
-    .browse-btn {
-      min-height: 54px !important;
-      padding: 0 20px !important;
-      border-radius: 18px !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      background:
-        linear-gradient(135deg, rgba(143, 80, 200, 0.98), rgba(205, 70, 213, 0.92)) !important;
-      color: #fff !important;
-      border: 1px solid rgba(255,255,255,0.28) !important;
-      box-shadow:
-        0 14px 32px rgba(42, 0, 75, 0.28),
-        inset 0 1px 0 rgba(255,255,255,0.32) !important;
-      font-weight: 900 !important;
-      transition: transform .22s ease, box-shadow .22s ease !important;
-    }
-
-    .browse-btn:hover {
-      transform: translateY(-2px);
-      box-shadow:
-        0 18px 38px rgba(42, 0, 75, 0.34),
-        inset 0 1px 0 rgba(255,255,255,0.34) !important;
-    }
-
-    /* Footer polish — works with footer.js injected markup */
-    #site-footer,
-    .site-footer,
-    footer {
-      position: relative !important;
-      overflow: hidden !important;
-      background:
-        radial-gradient(circle at 18% 16%, rgba(255, 122, 225, 0.20), transparent 25%),
-        radial-gradient(circle at 82% 30%, rgba(99, 143, 255, 0.15), transparent 28%),
-        linear-gradient(180deg, #5b106c 0%, #6f1580 48%, #4a0757 100%) !important;
-      color: #fff !important;
-      padding: 34px 18px 32px !important;
-      border-top: 1px solid rgba(255,255,255,0.12) !important;
-    }
-
-    #site-footer::before,
-    .site-footer::before,
-    footer::before {
-      content: "" !important;
-      position: absolute !important;
-      width: 360px !important;
-      height: 360px !important;
-      right: -145px !important;
-      top: -155px !important;
-      border-radius: 48% 52% 58% 42% !important;
-      background:
-        radial-gradient(circle at 32% 28%, rgba(255,255,255,0.34), transparent 16%),
-        radial-gradient(circle at 50% 50%, rgba(196, 79, 255, 0.36), transparent 42%),
-        radial-gradient(circle at 72% 70%, rgba(76, 135, 255, 0.18), transparent 48%) !important;
-      filter: blur(4px) !important;
-      opacity: .62 !important;
-      pointer-events: none !important;
-    }
-
-    #site-footer::after,
-    .site-footer::after,
-    footer::after {
-      content: "" !important;
-      position: absolute !important;
-      width: 300px !important;
-      height: 300px !important;
-      left: -135px !important;
-      bottom: -150px !important;
-      border-radius: 58% 42% 48% 52% !important;
-      background:
-        radial-gradient(circle at 35% 30%, rgba(255,255,255,0.26), transparent 18%),
-        radial-gradient(circle at 50% 50%, rgba(255, 104, 214, 0.24), transparent 44%),
-        radial-gradient(circle at 72% 70%, rgba(128, 93, 255, 0.20), transparent 50%) !important;
-      filter: blur(5px) !important;
-      opacity: .60 !important;
-      pointer-events: none !important;
-    }
-
-    #site-footer > *,
-    .site-footer > *,
-    footer > * {
-      position: relative !important;
-      z-index: 2 !important;
-    }
-
-    #site-footer,
-    .site-footer,
-    footer {
-      font-size: clamp(14px, 2.8vw, 18px) !important;
-      line-height: 1.55 !important;
-    }
-
-    #site-footer h1,
-    #site-footer h2,
-    #site-footer h3,
-    .site-footer h1,
-    .site-footer h2,
-    .site-footer h3,
-    footer h1,
-    footer h2,
-    footer h3 {
-      font-size: clamp(21px, 4.8vw, 32px) !important;
-      line-height: 1.25 !important;
-      margin: 16px 0 20px !important;
-      font-weight: 900 !important;
-      text-shadow: 0 4px 20px rgba(30, 0, 50, .35) !important;
-    }
-
-    #site-footer a,
-    .site-footer a,
-    footer a {
-      text-decoration: none !important;
-    }
-
-    #site-footer a[href*="privacy"],
-    #site-footer a[href*="refund"],
-    #site-footer a[href*="shipping"],
-    #site-footer a[href*="terms"],
-    #site-footer a[href*="contact"],
-    .site-footer a[href*="privacy"],
-    .site-footer a[href*="refund"],
-    .site-footer a[href*="shipping"],
-    .site-footer a[href*="terms"],
-    .site-footer a[href*="contact"],
-    footer a[href*="privacy"],
-    footer a[href*="refund"],
-    footer a[href*="shipping"],
-    footer a[href*="terms"],
-    footer a[href*="contact"] {
-      min-height: 46px !important;
-      padding: 0 17px !important;
-      border-radius: 999px !important;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.08)) !important;
-      border: 1px solid rgba(255,255,255,0.30) !important;
-      box-shadow:
-        0 12px 28px rgba(35, 0, 60, 0.22),
-        inset 0 1px 0 rgba(255,255,255,0.24) !important;
-      color: #fff !important;
-      font-weight: 800 !important;
-      font-size: clamp(13px, 3.2vw, 17px) !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-    }
-
-    #site-footer img,
-    .site-footer img,
-    footer img {
-      max-width: 52px !important;
-      height: auto !important;
-    }
-
-    #site-footer a:has(img),
-    .site-footer a:has(img),
-    footer a:has(img) {
-      width: 54px !important;
-      height: 54px !important;
-      border-radius: 18px !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      background: rgba(255,255,255,0.08) !important;
-      border: 1px solid rgba(255,255,255,0.12) !important;
-      box-shadow: 0 10px 24px rgba(30, 0, 55, 0.22) !important;
-    }
-
-    @media (max-width: 768px) {
-      .container { padding: 1.65rem .95rem 2rem !important; }
-
-      .collections-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: .95rem !important;
+      .page-title h1 {
+        font-size: 1.75rem;
       }
 
       .collection-card {
-        border-radius: 24px !important;
-        padding: 1.12rem .88rem !important;
-        min-height: 232px !important;
-      }
-
-      .collection-description {
-        font-size: .82rem !important;
-        min-height: 3em !important;
-      }
-
-      .collection-count {
-        min-width: 128px !important;
-        min-height: 46px !important;
-        font-size: .96rem !important;
-        padding: 0 16px !important;
-      }
-
-      .browse-btn {
-        min-height: 50px !important;
-        border-radius: 16px !important;
-        font-size: .92rem !important;
-      }
-
-      #site-footer,
-      .site-footer,
-      footer {
-        padding: 28px 14px 28px !important;
-      }
-
-      #site-footer img,
-      .site-footer img,
-      footer img {
-        max-width: 44px !important;
-      }
-
-      #site-footer a:has(img),
-      .site-footer a:has(img),
-      footer a:has(img) {
-        width: 48px !important;
-        height: 48px !important;
-        border-radius: 15px !important;
-      }
-    }
-
-    @media (max-width: 420px) {
-      .collections-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: .82rem !important;
-      }
-
-      .collection-card {
-        min-height: 224px !important;
+        grid-template-columns: minmax(0, 1fr) 126px;
+        min-height: 145px;
+        padding: .95rem;
+        border-radius: 24px;
+        gap: .55rem .72rem;
       }
 
       .collection-title {
-        font-size: .96rem !important;
+        font-size: 1.03rem;
+        line-height: 1.42;
+      }
+
+      .collection-description {
+        font-size: .82rem;
+        line-height: 1.55;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+      }
+
+      .collection-count {
+        min-height: 42px;
+        padding: 0 10px;
+        font-size: .92rem;
+      }
+
+      .browse-btn {
+        min-height: 48px;
+        border-radius: 16px;
+        padding: 0 10px;
+        font-size: .88rem;
       }
     }
 
+    @media (max-width: 390px) {
+      .container { padding-inline: .78rem; }
+
+      .collection-card {
+        grid-template-columns: minmax(0, 1fr) 118px;
+        min-height: 140px;
+        padding: .88rem;
+        gap: .5rem .62rem;
+      }
+
+      .collection-title { font-size: .96rem; }
+      .collection-description { font-size: .78rem; }
+      .collection-count { min-height: 40px; font-size: .86rem; }
+      .browse-btn { min-height: 44px; font-size: .82rem; }
+    }
   </style>
 </head>
 <body>
