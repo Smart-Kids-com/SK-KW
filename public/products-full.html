@@ -1183,6 +1183,310 @@
       }
     }
 
+  
+    /* =========================================================
+       SIDE MENU — CLEAN NAV + DYNAMIC COLLECTIONS DROPDOWN
+       ========================================================= */
+    .side-menu__dropdown{
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    .side-menu__dropdown-btn{
+      width:100%;
+      min-height:58px;
+      padding:18px 26px;
+      border:0;
+      background:transparent;
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      font-size:1.08rem;
+      font-weight:700;
+      cursor:pointer;
+      text-align:right;
+    }
+
+    .side-menu__dropdown-arrow{
+      font-size:1.05rem;
+      transition:transform .22s ease;
+      line-height:1;
+    }
+
+    .side-menu__dropdown.open .side-menu__dropdown-arrow{
+      transform:rotate(180deg);
+    }
+
+    .side-menu__dropdown-list{
+      display:none;
+      background:rgba(255,255,255,.045);
+      padding:4px 0 8px;
+      max-height:44vh;
+      overflow:auto;
+    }
+
+    .side-menu__dropdown.open .side-menu__dropdown-list{
+      display:block;
+    }
+
+    .side-menu__dropdown-list a{
+      display:block;
+      padding:13px 34px !important;
+      color:rgba(255,255,255,.92) !important;
+      font-size:.98rem !important;
+      font-weight:700 !important;
+      border-bottom:1px solid rgba(255,255,255,.04) !important;
+      line-height:1.5;
+    }
+
+    .side-menu__dropdown-list a:hover{
+      background:rgba(255,255,255,.055);
+    }
+
+    /* =========================================================
+       FINAL PRODUCTS-FULL PATCH — OPEN TILES + CATEGORY SLIDER
+       ========================================================= */
+
+    .filter-toggle-wrap{
+      display:none !important;
+    }
+
+    .layout-grid{
+      display:block !important;
+      margin:1rem 0 !important;
+    }
+
+    .sidebar{
+      display:block !important;
+      position:relative !important;
+      top:auto !important;
+      height:auto !important;
+      padding:0 !important;
+      margin:0 0 1.15rem !important;
+      background:transparent !important;
+      border:0 !important;
+      box-shadow:none !important;
+      backdrop-filter:none !important;
+      -webkit-backdrop-filter:none !important;
+      border-radius:0 !important;
+    }
+
+    .sidebar h3{
+      display:none !important;
+    }
+
+    #categoryFilters{
+      display:flex !important;
+      align-items:center !important;
+      gap:10px !important;
+      overflow-x:auto !important;
+      overflow-y:hidden !important;
+      padding:4px 2px 10px !important;
+      scroll-snap-type:x proximity !important;
+      -webkit-overflow-scrolling:touch !important;
+    }
+
+    #categoryFilters::-webkit-scrollbar{
+      height:0 !important;
+    }
+
+    #categoryFilters .filter-btn{
+      flex:0 0 auto !important;
+      width:auto !important;
+      min-width:max-content !important;
+      min-height:42px !important;
+      padding:0 16px !important;
+      border-radius:999px !important;
+      white-space:nowrap !important;
+      text-align:center !important;
+      scroll-snap-align:start !important;
+      background:rgba(255,255,255,.12) !important;
+      border:1px solid rgba(255,255,255,.18) !important;
+      box-shadow:none !important;
+      backdrop-filter:blur(10px) !important;
+      -webkit-backdrop-filter:blur(10px) !important;
+    }
+
+    #categoryFilters .filter-btn.active{
+      background:linear-gradient(135deg, rgba(143, 80, 200, .98), rgba(205, 70, 213, .92)) !important;
+      border-color:rgba(255,255,255,.28) !important;
+      box-shadow:0 10px 24px rgba(34,0,58,.20) !important;
+    }
+
+    .products{
+      grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+      gap:24px 16px !important;
+      align-items:start !important;
+    }
+
+    .product{
+      position:relative !important;
+      overflow:visible !important;
+      border-radius:0 !important;
+      padding:0 !important;
+      background:transparent !important;
+      border:0 !important;
+      box-shadow:none !important;
+      backdrop-filter:none !important;
+      -webkit-backdrop-filter:none !important;
+    }
+
+    .product::before,
+    .product::after{
+      display:none !important;
+      content:none !important;
+    }
+
+    .product:hover{
+      transform:translateY(-3px) !important;
+      border-color:transparent !important;
+      box-shadow:none !important;
+    }
+
+    .product-image{
+      width:100% !important;
+      aspect-ratio:1 / 1 !important;
+      border-radius:12px !important;
+      overflow:hidden !important;
+      margin-bottom:10px !important;
+      background:rgba(255,255,255,.06) !important;
+      border:1px solid rgba(255,255,255,.14) !important;
+      box-shadow:0 8px 20px rgba(25,0,45,.16) !important;
+    }
+
+    .product-image img{
+      width:100% !important;
+      height:100% !important;
+      object-fit:cover !important;
+      display:block !important;
+    }
+
+    .product-info{
+      padding:0 !important;
+      background:transparent !important;
+    }
+
+    .product-title{
+      color:#fff !important;
+      font-size:.96rem !important;
+      font-weight:850 !important;
+      line-height:1.48 !important;
+      margin:0 0 6px !important;
+      min-height:2.9em !important;
+      text-shadow:none !important;
+    }
+
+    .product-description{
+      display:none !important;
+    }
+
+    .product-price-wrap{
+      align-items:flex-start !important;
+      gap:5px !important;
+      min-height:0 !important;
+      margin:0 0 10px !important;
+      direction:ltr !important;
+      text-align:left !important;
+    }
+
+    .product-price{
+      color:#fff4d8 !important;
+      font-size:1rem !important;
+      font-weight:900 !important;
+      line-height:1.2 !important;
+      text-shadow:none !important;
+      direction:ltr !important;
+      text-align:left !important;
+    }
+
+    .product-price-old{
+      color:rgba(255,255,255,.58) !important;
+      font-size:.82rem !important;
+      font-weight:800 !important;
+      text-decoration:line-through !important;
+      direction:ltr !important;
+      text-align:left !important;
+    }
+
+    .product-offer-badge{
+      min-height:24px !important;
+      padding:3px 9px !important;
+      border-radius:999px !important;
+      background:rgba(255,213,74,.16) !important;
+      color:#fff1b8 !important;
+      border:1px solid rgba(255,213,74,.26) !important;
+      box-shadow:none !important;
+      font-size:.72rem !important;
+      font-weight:900 !important;
+      direction:rtl !important;
+    }
+
+    .product-actions{
+      display:grid !important;
+      grid-template-columns:1fr !important;
+      gap:7px !important;
+    }
+
+    .add-to-cart,
+    .view-product-btn{
+      min-height:42px !important;
+      border-radius:12px !important;
+      font-size:.82rem !important;
+      font-weight:850 !important;
+      padding:0 10px !important;
+      box-shadow:none !important;
+    }
+
+    .add-to-cart{
+      background:transparent !important;
+      color:#fff !important;
+      border:1.5px solid rgba(255,255,255,.62) !important;
+    }
+
+    .add-to-cart.is-disabled{
+      background:rgba(255,255,255,.08) !important;
+      border:1px solid rgba(255,255,255,.14) !important;
+      color:rgba(255,255,255,.72) !important;
+      opacity:1 !important;
+    }
+
+    .view-product-btn{
+      background:rgba(255,255,255,.96) !important;
+      color:#5b1970 !important;
+      border:1px solid rgba(255,255,255,.32) !important;
+    }
+
+    @media (min-width:900px){
+      .products{
+        grid-template-columns:repeat(4, minmax(0, 1fr)) !important;
+        gap:30px 22px !important;
+      }
+    }
+
+    @media (max-width:520px){
+      .container{
+        padding:1rem .8rem 2rem !important;
+      }
+
+      .products{
+        gap:22px 12px !important;
+      }
+
+      .product-title{
+        font-size:.86rem !important;
+      }
+
+      .product-price{
+        font-size:.92rem !important;
+      }
+
+      .add-to-cart,
+      .view-product-btn{
+        min-height:40px !important;
+        font-size:.76rem !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -1230,10 +1534,18 @@
     <div class="side-menu__body">
       <nav class="side-menu__nav">
         <a href="./index.html">الصفحة الرئيسية</a>
-        <a href="./products-full.html">كل المنتجات</a>
-        <a href="./collections.html">المجموعات</a>
-        <a href="./cart.html">عربة التسوق</a>
-        <a href="./checkout.html">إتمام الطلب</a>
+        <a href="./products-full.html">المتجر</a>
+
+        <div class="side-menu__dropdown" id="collectionsMenuDropdown">
+          <button class="side-menu__dropdown-btn" type="button" id="collectionsMenuToggle">
+            <span>المجموعات</span>
+            <span class="side-menu__dropdown-arrow">⌄</span>
+          </button>
+
+          <div class="side-menu__dropdown-list" id="collectionsMenuList">
+            <a href="./collections.html">جميع المجموعات</a>
+          </div>
+        </div>
       </nav>
     </div>
 
@@ -1744,9 +2056,63 @@
       }
     }
 
+
+    function getCollectionMenuUrl(collection) {
+      const slug = safeText(collection?.slug);
+      const id = safeText(collection?.id);
+
+      if (slug) return `./collection.html?slug=${encodeURIComponent(slug)}`;
+      return `./collection.html?id=${encodeURIComponent(id)}`;
+    }
+
+    async function loadSideMenuCollections() {
+      const list = document.getElementById("collectionsMenuList") || document.getElementById('collectionsMenuList');
+      if (!list) return;
+
+      list.innerHTML = `<a href="./collections.html">جميع المجموعات</a>`;
+
+      try {
+        const response = await fetch('/api/collections?status=active&limit=80&offset=0&sort=created_at&order=DESC', {
+          cache: 'no-store',
+          headers: { Accept: 'application/json' }
+        });
+
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result || !result.success || !Array.isArray(result.data)) return;
+
+        const links = result.data
+          .filter(item => String(item.status || 'active').toLowerCase() !== 'archived')
+          .map(item => {
+            const title = escapeHtml(safeText(item.title, 'مجموعة'));
+            const url = getCollectionMenuUrl(item);
+            return `<a href="${url}">${title}</a>`;
+          })
+          .join('');
+
+        if (links) {
+          list.innerHTML = `<a href="./collections.html">جميع المجموعات</a>${links}`;
+        }
+      } catch (_) {
+        // Keep the static "جميع المجموعات" link on API error
+      }
+    }
+
+    function initCollectionsDropdown() {
+      const toggle = document.getElementById("collectionsMenuToggle") || document.getElementById('collectionsMenuToggle');
+      if (!toggle) return;
+
+      toggle.addEventListener("click", () => {
+        const dropdown = toggle.closest(".side-menu__dropdown");
+        if (dropdown) dropdown.classList.toggle("open");
+      });
+
+      loadSideMenuCollections();
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       updateCartDisplay();
       loadProducts();
+      initCollectionsDropdown();
 
       const menuBtn = document.getElementById('menuBtn');
       const menuClose = document.getElementById('menuClose');

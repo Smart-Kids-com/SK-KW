@@ -1160,6 +1160,243 @@
       }
     }
 
+  
+    /* =========================================================
+       SIDE MENU — CLEAN NAV + DYNAMIC COLLECTIONS DROPDOWN
+       ========================================================= */
+    .side-menu__dropdown{
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    .side-menu__dropdown-btn{
+      width:100%;
+      min-height:58px;
+      padding:18px 26px;
+      border:0;
+      background:transparent;
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      font-size:1.08rem;
+      font-weight:700;
+      cursor:pointer;
+      text-align:right;
+    }
+
+    .side-menu__dropdown-arrow{
+      font-size:1.05rem;
+      transition:transform .22s ease;
+      line-height:1;
+    }
+
+    .side-menu__dropdown.open .side-menu__dropdown-arrow{
+      transform:rotate(180deg);
+    }
+
+    .side-menu__dropdown-list{
+      display:none;
+      background:rgba(255,255,255,.045);
+      padding:4px 0 8px;
+      max-height:44vh;
+      overflow:auto;
+    }
+
+    .side-menu__dropdown.open .side-menu__dropdown-list{
+      display:block;
+    }
+
+    .side-menu__dropdown-list a{
+      display:block;
+      padding:13px 34px !important;
+      color:rgba(255,255,255,.92) !important;
+      font-size:.98rem !important;
+      font-weight:700 !important;
+      border-bottom:1px solid rgba(255,255,255,.04) !important;
+      line-height:1.5;
+    }
+
+    .side-menu__dropdown-list a:hover{
+      background:rgba(255,255,255,.055);
+    }
+
+    /* =========================================================
+       FINAL PRODUCT PAGE PATCH — THUMBS SLIDER + OPEN RELATED
+       ========================================================= */
+
+    .thumbs{
+      display:flex !important;
+      grid-template-columns:none !important;
+      gap:10px !important;
+      margin-top:14px !important;
+      overflow-x:auto !important;
+      overflow-y:hidden !important;
+      padding:2px 2px 8px !important;
+      scroll-snap-type:x proximity !important;
+      -webkit-overflow-scrolling:touch !important;
+    }
+
+    .thumbs::-webkit-scrollbar{
+      height:0 !important;
+    }
+
+    .thumb{
+      flex:0 0 72px !important;
+      width:72px !important;
+      height:72px !important;
+      aspect-ratio:1 / 1 !important;
+      border-radius:12px !important;
+      border:2px solid rgba(255,255,255,.16) !important;
+      scroll-snap-align:start !important;
+      background:rgba(255,255,255,.06) !important;
+    }
+
+    .thumb.active{
+      border-color:var(--cream) !important;
+      box-shadow:0 0 0 2px rgba(239,234,184,.18) inset !important;
+    }
+
+    .product-meta{
+      display:none !important;
+    }
+
+    .related-grid{
+      grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+      gap:24px 16px !important;
+      align-items:start !important;
+    }
+
+    .related-card{
+      display:block !important;
+      background:transparent !important;
+      border:0 !important;
+      border-radius:0 !important;
+      overflow:visible !important;
+      box-shadow:none !important;
+      backdrop-filter:none !important;
+      -webkit-backdrop-filter:none !important;
+    }
+
+    .related-card:hover{
+      transform:translateY(-3px) !important;
+      box-shadow:none !important;
+    }
+
+    .related-image{
+      width:100% !important;
+      aspect-ratio:1 / 1 !important;
+      border-radius:12px !important;
+      overflow:hidden !important;
+      margin:0 0 10px !important;
+      background:rgba(255,255,255,.06) !important;
+      border:1px solid rgba(255,255,255,.14) !important;
+      box-shadow:0 8px 20px rgba(25,0,45,.16) !important;
+    }
+
+    .related-body{
+      padding:0 !important;
+      background:transparent !important;
+    }
+
+    .related-name{
+      color:#fff !important;
+      font-size:.96rem !important;
+      font-weight:850 !important;
+      line-height:1.48 !important;
+      margin:0 0 6px !important;
+      min-height:2.9em !important;
+      display:-webkit-box !important;
+      -webkit-line-clamp:2 !important;
+      line-clamp:2 !important;
+      -webkit-box-orient:vertical !important;
+      overflow:hidden !important;
+    }
+
+    .related-price-wrap{
+      align-items:flex-start !important;
+      gap:5px !important;
+      margin:0 !important;
+      direction:ltr !important;
+      text-align:left !important;
+    }
+
+    .related-price-current{
+      color:#fff4d8 !important;
+      font-size:1rem !important;
+      font-weight:900 !important;
+      line-height:1.2 !important;
+      direction:ltr !important;
+      text-align:left !important;
+    }
+
+    .related-price-old{
+      color:rgba(255,255,255,.58) !important;
+      font-size:.82rem !important;
+      font-weight:800 !important;
+      text-decoration:line-through !important;
+      direction:ltr !important;
+      text-align:left !important;
+    }
+
+    .related-offer-badge{
+      min-height:24px !important;
+      padding:3px 9px !important;
+      border-radius:999px !important;
+      background:rgba(255,213,74,.16) !important;
+      color:#fff1b8 !important;
+      border:1px solid rgba(255,213,74,.26) !important;
+      font-size:.72rem !important;
+      font-weight:900 !important;
+      direction:rtl !important;
+    }
+
+    .related-stock-badge{
+      display:inline-flex !important;
+      min-height:25px !important;
+      padding:3px 9px !important;
+      margin-top:7px !important;
+      border-radius:999px !important;
+      background:rgba(217,48,37,.16) !important;
+      color:#ffd8d4 !important;
+      border:1px solid rgba(217,48,37,.24) !important;
+      font-size:.72rem !important;
+      font-weight:900 !important;
+    }
+
+    @media (min-width:900px){
+      .related-grid{
+        grid-template-columns:repeat(4, minmax(0, 1fr)) !important;
+        gap:30px 22px !important;
+      }
+    }
+
+    @media (max-width:560px){
+      .thumb{
+        flex-basis:62px !important;
+        width:62px !important;
+        height:62px !important;
+        border-radius:10px !important;
+      }
+
+      .related-grid{
+        grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+        gap:22px 12px !important;
+      }
+
+      .related-name{
+        font-size:.84rem !important;
+        min-height:2.8em !important;
+      }
+
+      .related-price-current{
+        font-size:.92rem !important;
+      }
+
+      .related-price-old{
+        font-size:.72rem !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -1210,10 +1447,19 @@
 
     <div class="side-menu__body">
       <nav class="side-menu__nav">
-        <a href="./index.html">الرئيسية</a>
-        <a href="./products-full.html">كل المنتجات</a>
-        <a href="./cart.html">عربة التسوق</a>
-        <a href="./checkout.html">إتمام الطلب</a>
+        <a href="./index.html">الصفحة الرئيسية</a>
+        <a href="./products-full.html">المتجر</a>
+
+        <div class="side-menu__dropdown" id="collectionsMenuDropdown">
+          <button class="side-menu__dropdown-btn" type="button" id="collectionsMenuToggle">
+            <span>المجموعات</span>
+            <span class="side-menu__dropdown-arrow">⌄</span>
+          </button>
+
+          <div class="side-menu__dropdown-list" id="collectionsMenuList">
+            <a href="./collections.html">جميع المجموعات</a>
+          </div>
+        </div>
       </nav>
     </div>
 
@@ -2031,9 +2277,63 @@
       };
     }
 
+
+    function getCollectionMenuUrl(collection) {
+      const slug = safeText(collection?.slug);
+      const id = safeText(collection?.id);
+
+      if (slug) return `./collection.html?slug=${encodeURIComponent(slug)}`;
+      return `./collection.html?id=${encodeURIComponent(id)}`;
+    }
+
+    async function loadSideMenuCollections() {
+      const list = document.getElementById("collectionsMenuList") || document.getElementById('collectionsMenuList');
+      if (!list) return;
+
+      list.innerHTML = `<a href="./collections.html">جميع المجموعات</a>`;
+
+      try {
+        const response = await fetch('/api/collections?status=active&limit=80&offset=0&sort=created_at&order=DESC', {
+          cache: 'no-store',
+          headers: { Accept: 'application/json' }
+        });
+
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result || !result.success || !Array.isArray(result.data)) return;
+
+        const links = result.data
+          .filter(item => String(item.status || 'active').toLowerCase() !== 'archived')
+          .map(item => {
+            const title = escapeHtml(safeText(item.title, 'مجموعة'));
+            const url = getCollectionMenuUrl(item);
+            return `<a href="${url}">${title}</a>`;
+          })
+          .join('');
+
+        if (links) {
+          list.innerHTML = `<a href="./collections.html">جميع المجموعات</a>${links}`;
+        }
+      } catch (_) {
+        // Keep the static "جميع المجموعات" link on API error
+      }
+    }
+
+    function initCollectionsDropdown() {
+      const toggle = document.getElementById("collectionsMenuToggle") || document.getElementById('collectionsMenuToggle');
+      if (!toggle) return;
+
+      toggle.addEventListener("click", () => {
+        const dropdown = toggle.closest(".side-menu__dropdown");
+        if (dropdown) dropdown.classList.toggle("open");
+      });
+
+      loadSideMenuCollections();
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       updateCartBadge();
       loadProduct();
+      initCollectionsDropdown();
 
       const menuBtn = document.getElementById("menuBtn");
       const menuClose = document.getElementById("menuClose");
