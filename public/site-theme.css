@@ -1,0 +1,338 @@
+/* SMART KIDS — SHARED HEADER THEME */
+
+.sk-announcement-bar {
+  background: #3f0448;
+  color: #fff;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 14px;
+  text-align: center;
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.sk-header {
+  background: #fff;
+  min-height: 84px;
+  display: grid;
+  grid-template-columns: 58px 1fr 104px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.sk-header-icon-btn {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  text-decoration: none;
+}
+
+.sk-header-icon-btn img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  display: block;
+}
+
+.sk-menu-toggle {
+  justify-self: start;
+}
+
+.sk-header-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.sk-header-logo img {
+  width: 320px;
+  max-width: 100%;
+  max-height: 58px;
+  object-fit: contain;
+  display: block;
+}
+
+.sk-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #5b1970;
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 900;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+  z-index: 1190;
+}
+
+body.menu-open .menu-backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: min(92vw, 400px);
+  height: 100vh;
+  background: rgba(255,255,255,.98);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-left: 1px solid rgba(0,0,0,.08);
+  box-shadow: -12px 0 30px rgba(0,0,0,.18);
+  z-index: 1200;
+  transform: translateX(105%);
+  transition: transform .25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+body.menu-open .side-menu {
+  transform: translateX(0);
+}
+
+.side-menu__head {
+  min-height: 82px;
+  display: grid;
+  grid-template-columns: 52px 1fr 100px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.side-menu__close {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  background: transparent;
+  color: #3160e0;
+  font-size: 2rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.side-menu__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.side-menu__logo img {
+  width: 300px;
+  max-width: 100%;
+  max-height: 56px;
+  object-fit: contain;
+  display: block;
+}
+
+.side-menu__icons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.side-menu__body {
+  flex: 1;
+  overflow: auto;
+  padding: 8px 0 0;
+  background: #4a064f;
+  color: #fff;
+}
+
+.side-menu__nav a {
+  display: block;
+  padding: 18px 26px;
+  font-size: 1.08rem;
+  font-weight: 800;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  color: #fff;
+  text-decoration: none;
+}
+
+.side-menu__dropdown {
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+
+.side-menu__dropdown-btn {
+  width: 100%;
+  min-height: 58px;
+  padding: 18px 26px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.08rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: right;
+}
+
+.side-menu__dropdown-arrow {
+  font-size: 1.05rem;
+  transition: transform .22s ease;
+  line-height: 1;
+}
+
+.side-menu__dropdown.open .side-menu__dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.side-menu__dropdown-list {
+  display: none;
+  background: rgba(255,255,255,.045);
+  padding: 4px 0 8px;
+  max-height: 44vh;
+  overflow: auto;
+}
+
+.side-menu__dropdown.open .side-menu__dropdown-list {
+  display: block;
+}
+
+.side-menu__dropdown-list a {
+  padding: 13px 34px;
+  color: rgba(255,255,255,.92);
+  font-size: .98rem;
+  line-height: 1.5;
+}
+
+.side-menu__footer {
+  padding: 18px 22px 24px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  background: #4a064f;
+  color: #fff;
+}
+
+.side-menu__social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.side-menu__social a {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.side-menu__social img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Shared product shapes */
+.product-image,
+.related-image {
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: 0 8px 20px rgba(25,0,45,.16);
+  overflow: hidden;
+}
+
+.product-offer-badge,
+.related-offer-badge {
+  border-radius: 999px;
+  background: rgba(255,213,74,.16);
+  color: #fff1b8;
+  border: 1px solid rgba(255,213,74,.26);
+  font-weight: 900;
+}
+
+.product-stock-badge,
+.related-stock-badge,
+.stock-alert {
+  border-radius: 999px;
+  background: rgba(217,48,37,.16);
+  color: #ffd8d4;
+  border: 1px solid rgba(217,48,37,.24);
+  font-weight: 900;
+}
+
+@media (max-width: 768px) {
+  .sk-announcement-bar {
+    min-height: 42px;
+    font-size: .9rem;
+    padding: 8px 12px;
+  }
+
+  .sk-header {
+    grid-template-columns: 52px 1fr 96px;
+    min-height: 78px;
+    padding: 9px 12px;
+  }
+
+  .sk-header-icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .sk-header-icon-btn img {
+    width: 35px;
+    height: 35px;
+  }
+
+  .sk-header-logo img {
+    max-height: 52px;
+  }
+
+  .side-menu__head {
+    min-height: 78px;
+    grid-template-columns: 48px 1fr 92px;
+    padding: 9px 12px;
+  }
+
+  .side-menu__logo img {
+    max-height: 52px;
+  }
+}
