@@ -8,13 +8,13 @@
     style.id = FOOTER_STYLES_ID;
     style.textContent = `
       .site-footer{
-        margin-top: 38px;
+        margin-top: 32px;
         color: #fff;
         position: relative;
         overflow: hidden;
         background:
-          radial-gradient(circle at 18% 12%, rgba(255, 118, 226, .16), transparent 30%),
-          radial-gradient(circle at 84% 18%, rgba(98, 147, 255, .12), transparent 32%),
+          radial-gradient(circle at 18% 12%, rgba(255, 118, 226, .14), transparent 30%),
+          radial-gradient(circle at 84% 18%, rgba(98, 147, 255, .10), transparent 32%),
           linear-gradient(180deg, #65177c 0%, #5a0f6c 52%, #50085f 100%);
         border-top: 1px solid rgba(255,255,255,.10);
         isolation: isolate;
@@ -27,33 +27,33 @@
         pointer-events:none;
         z-index:0;
         background:
-          linear-gradient(135deg, rgba(255,255,255,.045), transparent 42%),
-          linear-gradient(315deg, rgba(255,255,255,.035), transparent 48%);
-        opacity: .75;
+          linear-gradient(135deg, rgba(255,255,255,.035), transparent 42%),
+          linear-gradient(315deg, rgba(255,255,255,.028), transparent 48%);
+        opacity: .70;
       }
 
       .site-footer::after{
         content:"";
         position:absolute;
         left: 50%;
-        bottom: -180px;
-        width: 680px;
-        height: 320px;
+        bottom: -190px;
+        width: 650px;
+        height: 300px;
         transform: translateX(-50%);
         border-radius: 999px;
         pointer-events:none;
         z-index:0;
         background:
-          radial-gradient(circle at 50% 42%, rgba(185, 68, 232, .20), transparent 62%);
-        filter: blur(18px);
-        opacity: .70;
+          radial-gradient(circle at 50% 42%, rgba(185, 68, 232, .14), transparent 62%);
+        filter: blur(20px);
+        opacity: .58;
       }
 
       .site-footer__topline{
-        height: 8px;
+        height: 6px;
         background:
-          linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
-        border-top: 1px solid rgba(255,255,255,.05);
+          linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent);
+        border-top: 1px solid rgba(255,255,255,.04);
         position: relative;
         z-index: 1;
       }
@@ -61,7 +61,7 @@
       .site-footer__inner{
         max-width: 1120px;
         margin: 0 auto;
-        padding: 30px 18px 20px;
+        padding: 24px 18px 16px;
         text-align: center;
         position: relative;
         z-index: 1;
@@ -71,68 +71,68 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 38px;
-        padding: 0 18px;
+        min-height: 34px;
+        padding: 0 16px;
         color: rgba(255,255,255,.94);
         text-decoration: none;
-        font-size: clamp(15px, 2.5vw, 20px);
+        font-size: clamp(14px, 2.3vw, 18px);
         font-weight: 900;
-        margin-bottom: 16px;
+        margin-bottom: 13px;
         border-radius: 999px;
-        background: rgba(255,255,255,.08);
-        border: 1px solid rgba(255,255,255,.16);
+        background: rgba(255,255,255,.075);
+        border: 1px solid rgba(255,255,255,.14);
         box-shadow:
-          inset 0 1px 0 rgba(255,255,255,.16),
-          0 10px 24px rgba(34, 0, 54, .16);
+          inset 0 1px 0 rgba(255,255,255,.14),
+          0 8px 20px rgba(34, 0, 54, .14);
       }
 
       .site-footer__company{
         max-width: 760px;
-        margin: 0 auto 8px;
-        font-size: clamp(17px, 2.5vw, 24px);
+        margin: 0 auto 6px;
+        font-size: clamp(16px, 2.35vw, 22px);
         font-weight: 900;
         line-height: 1.35;
         letter-spacing: .02em;
         color: #fff;
-        text-shadow: 0 4px 18px rgba(33, 0, 52, .25);
+        text-shadow: 0 4px 16px rgba(33, 0, 52, .22);
       }
 
       .site-footer__rights{
-        font-size: clamp(14px, 2.2vw, 18px);
-        line-height: 1.55;
-        margin-bottom: 24px;
-        color: rgba(255,255,255,.82);
+        font-size: clamp(13px, 2vw, 16px);
+        line-height: 1.5;
+        margin-bottom: 18px;
+        color: rgba(255,255,255,.80);
       }
 
       .site-footer__newsletter-title{
-        font-size: clamp(19px, 3vw, 28px);
+        font-size: clamp(18px, 2.8vw, 24px);
         font-weight: 900;
         line-height: 1.35;
-        margin-bottom: 18px;
+        margin-bottom: 15px;
         color: #fff;
-        text-shadow: 0 4px 18px rgba(33, 0, 52, .28);
+        text-shadow: 0 4px 16px rgba(33, 0, 52, .24);
       }
 
       .site-footer__newsletter{
         max-width: 720px;
-        margin: 0 auto 22px;
+        margin: 0 auto 18px;
         display: grid;
-        grid-template-columns: 62px 1fr;
+        grid-template-columns: 58px 1fr;
         align-items: stretch;
-        border: 2px solid rgba(255,255,255,.18);
-        border-radius: 22px;
+        border: 2px solid rgba(255,255,255,.16);
+        border-radius: 20px;
         overflow: hidden;
-        background: rgba(255,255,255,.08);
+        background: rgba(255,255,255,.075);
         box-shadow:
-          0 14px 34px rgba(35, 0, 55, .20),
-          inset 0 1px 0 rgba(255,255,255,.13);
+          0 12px 28px rgba(35, 0, 55, .18),
+          inset 0 1px 0 rgba(255,255,255,.11);
       }
 
       .site-footer__newsletter-btn{
         border: 0;
-        background: rgba(255,255,255,.06);
+        background: rgba(255,255,255,.055);
         color: #fff;
-        font-size: 30px;
+        font-size: 28px;
         cursor: pointer;
       }
 
@@ -142,58 +142,58 @@
         outline: none;
         background: transparent;
         color: #fff;
-        font-size: 18px;
-        padding: 14px 18px;
+        font-size: 17px;
+        padding: 13px 17px;
         text-align: right;
       }
 
       .site-footer__newsletter-input::placeholder{
-        color: rgba(255,255,255,.75);
+        color: rgba(255,255,255,.72);
       }
 
       .site-footer__social{
         display: grid;
-        grid-template-columns: repeat(6, 46px);
+        grid-template-columns: repeat(6, 44px);
         justify-content: center;
         align-items: center;
-        gap: 12px;
-        padding: 6px 10px 2px;
+        gap: 11px;
+        padding: 4px 10px 0;
         margin: 0 auto;
       }
 
       .site-footer__social a{
-        width: 46px;
-        height: 46px;
-        border-radius: 16px;
+        width: 44px;
+        height: 44px;
+        border-radius: 15px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         transition: transform .2s ease, background .2s ease, border-color .2s ease;
         background:
-          linear-gradient(145deg, rgba(255,255,255,.15), rgba(255,255,255,.06));
-        border: 1px solid rgba(255,255,255,.15);
+          linear-gradient(145deg, rgba(255,255,255,.14), rgba(255,255,255,.055));
+        border: 1px solid rgba(255,255,255,.14);
         box-shadow:
-          0 12px 26px rgba(28, 0, 48, .18),
-          inset 0 1px 0 rgba(255,255,255,.16);
+          0 10px 22px rgba(28, 0, 48, .16),
+          inset 0 1px 0 rgba(255,255,255,.14);
       }
 
       .site-footer__social a:hover{
         transform: translateY(-2px) scale(1.04);
         background:
-          linear-gradient(145deg, rgba(255,255,255,.22), rgba(255,255,255,.09));
-        border-color: rgba(255,255,255,.24);
+          linear-gradient(145deg, rgba(255,255,255,.20), rgba(255,255,255,.08));
+        border-color: rgba(255,255,255,.22);
       }
 
       .site-footer__social img{
-        width: 25px;
-        height: 25px;
+        width: 24px;
+        height: 24px;
         object-fit: contain;
         display: block;
       }
 
       .site-footer__bottom{
-        border-top: 1px solid rgba(255,255,255,.10);
-        padding: 20px 18px 26px;
+        border-top: 1px solid rgba(255,255,255,.09);
+        padding: 16px 18px 22px;
         text-align: center;
         position: relative;
         z-index: 1;
@@ -201,10 +201,10 @@
       }
 
       .site-footer__copyright{
-        color: rgba(255,255,255,.82);
-        font-size: clamp(13px, 2.1vw, 17px);
-        line-height: 1.6;
-        margin-bottom: 18px;
+        color: rgba(255,255,255,.80);
+        font-size: clamp(12.5px, 2vw, 16px);
+        line-height: 1.55;
+        margin-bottom: 15px;
       }
 
       .site-footer__links{
@@ -212,7 +212,7 @@
         margin: 0 auto;
         display: flex;
         justify-content: center;
-        gap: 10px;
+        gap: 9px;
         flex-wrap: wrap;
       }
 
@@ -222,17 +222,17 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 42px;
-        padding: 8px 16px;
+        min-height: 38px;
+        padding: 7px 14px;
         border-radius: 999px;
-        font-size: clamp(13px, 2.2vw, 15px);
+        font-size: clamp(12.5px, 2vw, 14px);
         font-weight: 800;
         background:
-          linear-gradient(145deg, rgba(255,255,255,.16), rgba(255,255,255,.07));
-        border: 1px solid rgba(255,255,255,.20);
+          linear-gradient(145deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+        border: 1px solid rgba(255,255,255,.18);
         box-shadow:
-          inset 0 1px 0 rgba(255,255,255,.18),
-          0 10px 22px rgba(35, 0, 55, .16);
+          inset 0 1px 0 rgba(255,255,255,.16),
+          0 8px 18px rgba(35, 0, 55, .14);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         transition: transform .2s ease, border-color .2s ease, background .2s ease;
@@ -240,111 +240,111 @@
 
       .site-footer__links a:hover{
         transform: translateY(-1px);
-        border-color: rgba(255,255,255,.30);
+        border-color: rgba(255,255,255,.28);
         background:
-          linear-gradient(145deg, rgba(255,255,255,.22), rgba(255,255,255,.09));
+          linear-gradient(145deg, rgba(255,255,255,.20), rgba(255,255,255,.08));
       }
 
       @media (max-width: 768px){
         .site-footer{
-          margin-top: 32px;
+          margin-top: 28px;
         }
 
         .site-footer__topline{
-          height: 6px;
+          height: 5px;
         }
 
         .site-footer__inner{
-          padding: 26px 14px 18px;
+          padding: 20px 14px 14px;
         }
 
         .site-footer__site-link{
-          min-height: 34px;
-          padding: 0 14px;
-          font-size: 15px;
-          margin-bottom: 14px;
+          min-height: 32px;
+          padding: 0 13px;
+          font-size: 14px;
+          margin-bottom: 12px;
         }
 
         .site-footer__company{
-          font-size: 17px;
+          font-size: 16px;
           max-width: 330px;
-          margin-bottom: 6px;
+          margin-bottom: 5px;
         }
 
         .site-footer__rights{
-          font-size: 14px;
-          margin-bottom: 18px;
+          font-size: 13px;
+          margin-bottom: 15px;
         }
 
         .site-footer__newsletter-title{
-          font-size: 20px;
-          margin: 0 auto 16px;
+          font-size: 18px;
+          margin: 0 auto 14px;
           max-width: 340px;
         }
 
         .site-footer__newsletter{
-          grid-template-columns: 54px 1fr;
-          border-radius: 18px;
-          margin-bottom: 18px;
+          grid-template-columns: 52px 1fr;
+          border-radius: 17px;
+          margin-bottom: 16px;
         }
 
         .site-footer__newsletter-btn{
-          font-size: 26px;
+          font-size: 25px;
         }
 
         .site-footer__newsletter-input{
-          font-size: 16px;
-          padding: 12px 14px;
+          font-size: 15px;
+          padding: 11px 13px;
         }
 
         .site-footer__social{
-          grid-template-columns: repeat(3, 44px);
-          gap: 12px 16px;
-          padding-top: 4px;
-          max-width: 190px;
+          grid-template-columns: repeat(3, 42px);
+          gap: 11px 15px;
+          padding-top: 3px;
+          max-width: 186px;
         }
 
         .site-footer__social a{
-          width: 44px;
-          height: 44px;
-          border-radius: 15px;
+          width: 42px;
+          height: 42px;
+          border-radius: 14px;
         }
 
         .site-footer__social img{
-          width: 23px;
-          height: 23px;
+          width: 22px;
+          height: 22px;
         }
 
         .site-footer__bottom{
-          padding: 18px 12px 22px;
+          padding: 14px 12px 18px;
         }
 
         .site-footer__copyright{
-          font-size: 13px;
-          margin-bottom: 16px;
+          font-size: 12.5px;
+          margin-bottom: 14px;
         }
 
         .site-footer__links{
           max-width: 360px;
-          gap: 9px;
+          gap: 8px;
         }
 
         .site-footer__links a{
-          min-height: 39px;
-          padding: 7px 13px;
-          font-size: 13px;
+          min-height: 36px;
+          padding: 7px 12px;
+          font-size: 12.5px;
         }
       }
 
       @media (max-width: 390px){
         .site-footer__links{
           max-width: 330px;
-          gap: 8px;
+          gap: 7px;
         }
 
         .site-footer__links a{
-          font-size: 12.5px;
-          padding: 7px 11px;
+          font-size: 12px;
+          padding: 7px 10px;
         }
       }
     `;
