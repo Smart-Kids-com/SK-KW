@@ -474,10 +474,7 @@
     }
 
     .product-category {
-      color: rgba(255,255,255,.75);
-      margin-bottom: 10px;
-      font-size: 0.88rem;
-      line-height: 1.4;
+      display: none !important;
     }
 
     .product-price {
@@ -532,16 +529,11 @@
     }
 
     .product-stock-badge{
-      background:rgba(255,255,255,.12);
-      color:#fff;
-      border:1px solid rgba(255,255,255,.16);
-      margin-bottom:10px;
+      display: none !important;
     }
 
     .product-stock-badge.out-of-stock{
-      background:rgba(217,48,37,.18);
-      color:#ffd8d4;
-      border-color:rgba(217,48,37,.25);
+      display: none !important;
     }
 
     .add-to-cart.is-disabled{
@@ -817,6 +809,380 @@
         min-height: 3em;
       }
     }
+  
+    /* =========================================================
+       PRODUCTS FULL — PREMIUM GLASS / LIQUID POLISH
+       CSS only. Footer remains controlled by footer.js.
+       ========================================================= */
+
+    body {
+      background:
+        radial-gradient(circle at 14% 10%, rgba(255, 112, 221, 0.20), transparent 28%),
+        radial-gradient(circle at 86% 16%, rgba(102, 152, 255, 0.16), transparent 30%),
+        radial-gradient(circle at 48% 88%, rgba(255,255,255,0.08), transparent 32%),
+        linear-gradient(180deg, #5a2581 0%, #7b3fa8 46%, #58156a 100%) !important;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .nav a,
+    .products-stats,
+    .search-input,
+    .filter-toggle-btn,
+    .sidebar,
+    .load-more-btn {
+      box-shadow:
+        0 18px 38px rgba(34, 0, 58, 0.18),
+        inset 0 1px 0 rgba(255,255,255,0.14) !important;
+    }
+
+    .nav a {
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.17), rgba(255,255,255,0.08)) !important;
+      border: 1px solid rgba(255,255,255,0.18) !important;
+      backdrop-filter: blur(14px) saturate(140%) !important;
+      -webkit-backdrop-filter: blur(14px) saturate(140%) !important;
+    }
+
+    .search-input {
+      max-width: 620px !important;
+      min-height: 56px !important;
+      border-radius: 999px !important;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.18), rgba(255,255,255,0.08)) !important;
+      border: 1px solid rgba(255,255,255,0.22) !important;
+      backdrop-filter: blur(18px) saturate(145%) !important;
+      -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+      font-weight: 700 !important;
+    }
+
+    .products-stats {
+      max-width: 620px;
+      margin-inline: auto !important;
+      border-radius: 22px !important;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.17), rgba(255,255,255,0.07)) !important;
+      border: 1px solid rgba(255,255,255,0.18) !important;
+      backdrop-filter: blur(18px) saturate(145%) !important;
+      -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+    }
+
+    .sidebar {
+      border-radius: 26px !important;
+      padding: 1.05rem !important;
+      background:
+        radial-gradient(circle at 85% 12%, rgba(255, 116, 221, 0.18), transparent 35%),
+        linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.07)) !important;
+      border: 1px solid rgba(255,255,255,0.18) !important;
+      backdrop-filter: blur(22px) saturate(150%) !important;
+      -webkit-backdrop-filter: blur(22px) saturate(150%) !important;
+    }
+
+    #categoryFilters .filter-btn {
+      min-height: 44px !important;
+      border-radius: 16px !important;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.06)) !important;
+      border: 1px solid rgba(255,255,255,0.13) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10) !important;
+    }
+
+    #categoryFilters .filter-btn.active {
+      background:
+        linear-gradient(135deg, rgba(119, 54, 184, 0.98), rgba(207, 74, 215, 0.90)) !important;
+      box-shadow:
+        0 12px 28px rgba(39, 0, 65, 0.24),
+        inset 0 1px 0 rgba(255,255,255,0.24) !important;
+    }
+
+    .products {
+      gap: 24px 18px !important;
+    }
+
+    .product {
+      position: relative !important;
+      overflow: hidden !important;
+      border-radius: 28px !important;
+      padding: 12px 12px 14px !important;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.18), rgba(255,255,255,0.07)) !important;
+      border: 1px solid rgba(255,255,255,0.20) !important;
+      box-shadow:
+        0 24px 55px rgba(35, 5, 58, 0.26),
+        inset 0 1px 0 rgba(255,255,255,0.24),
+        inset 0 -1px 0 rgba(255,255,255,0.06) !important;
+      backdrop-filter: blur(18px) saturate(145%) !important;
+      -webkit-backdrop-filter: blur(18px) saturate(145%) !important;
+      transition:
+        transform .24s ease,
+        box-shadow .24s ease,
+        border-color .24s ease !important;
+    }
+
+    .product::before {
+      content: "" !important;
+      position: absolute !important;
+      width: 220px !important;
+      height: 220px !important;
+      top: -118px !important;
+      left: -105px !important;
+      border-radius: 52% 48% 58% 42% !important;
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255,255,255,0.44), transparent 17%),
+        radial-gradient(circle at 58% 46%, rgba(255, 111, 229, 0.46), transparent 38%),
+        radial-gradient(circle at 72% 72%, rgba(91, 145, 255, 0.28), transparent 48%) !important;
+      filter: blur(4px) !important;
+      opacity: .74 !important;
+      pointer-events: none !important;
+      z-index: 0 !important;
+    }
+
+    .product::after {
+      content: "" !important;
+      position: absolute !important;
+      width: 190px !important;
+      height: 190px !important;
+      right: -112px !important;
+      bottom: -112px !important;
+      border-radius: 45% 55% 42% 58% !important;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255,255,255,0.24), transparent 18%),
+        radial-gradient(circle at 50% 50%, rgba(182, 91, 255, 0.36), transparent 44%),
+        radial-gradient(circle at 74% 70%, rgba(255, 114, 208, 0.22), transparent 50%) !important;
+      filter: blur(5px) !important;
+      opacity: .70 !important;
+      pointer-events: none !important;
+      z-index: 0 !important;
+    }
+
+    .product:hover {
+      transform: translateY(-7px) scale(1.012) !important;
+      border-color: rgba(255,255,255,0.34) !important;
+      box-shadow:
+        0 34px 72px rgba(35, 5, 58, 0.38),
+        inset 0 1px 0 rgba(255,255,255,0.34) !important;
+    }
+
+    .product-image,
+    .product-info {
+      position: relative !important;
+      z-index: 2 !important;
+    }
+
+    .product-image {
+      border-radius: 22px !important;
+      border: 1px solid rgba(255,255,255,0.20) !important;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.05)) !important;
+      box-shadow:
+        0 18px 36px rgba(28, 0, 48, 0.24),
+        inset 0 1px 0 rgba(255,255,255,0.16) !important;
+      margin-bottom: 14px !important;
+    }
+
+    .product-image img {
+      transform-origin: center !important;
+    }
+
+    .product-info {
+      padding: 0 2px 2px !important;
+    }
+
+    .product-title {
+      color: #ffffff !important;
+      font-weight: 900 !important;
+      text-shadow: 0 3px 16px rgba(34, 0, 56, 0.36) !important;
+      margin-bottom: 7px !important;
+    }
+
+    .product-description {
+      color: rgba(255,255,255,0.72) !important;
+      font-weight: 600 !important;
+      min-height: 2.6em !important;
+      margin-bottom: 10px !important;
+    }
+
+    .product-price-wrap {
+      align-items: flex-start !important;
+      gap: 7px !important;
+      margin: 10px 0 14px !important;
+      min-height: 58px !important;
+    }
+
+    .product-price {
+      color: #fff4d8 !important;
+      font-size: 1.12rem !important;
+      font-weight: 950 !important;
+      text-shadow: 0 4px 18px rgba(44, 0, 65, .30) !important;
+    }
+
+    .product-price-old {
+      color: rgba(255,255,255,0.58) !important;
+      font-weight: 800 !important;
+      font-size: .9rem !important;
+    }
+
+    .product-offer-badge {
+      min-height: 26px !important;
+      padding: 4px 10px !important;
+      background:
+        linear-gradient(135deg, rgba(255, 214, 84, 0.26), rgba(255, 149, 95, 0.15)) !important;
+      color: #fff4bd !important;
+      border: 1px solid rgba(255, 222, 116, 0.38) !important;
+      box-shadow:
+        0 8px 18px rgba(48, 0, 70, 0.18),
+        inset 0 1px 0 rgba(255,255,255,0.20) !important;
+    }
+
+    .product-actions {
+      gap: 9px !important;
+    }
+
+    .add-to-cart,
+    .view-product-btn {
+      min-height: 52px !important;
+      border-radius: 18px !important;
+      font-size: .94rem !important;
+      font-weight: 900 !important;
+      box-shadow:
+        0 14px 28px rgba(34, 0, 58, 0.22),
+        inset 0 1px 0 rgba(255,255,255,0.18) !important;
+    }
+
+    .add-to-cart {
+      background:
+        linear-gradient(135deg, rgba(133, 72, 205, 0.95), rgba(209, 76, 216, 0.88)) !important;
+      border: 1px solid rgba(255,255,255,0.24) !important;
+      color: #fff !important;
+    }
+
+    .add-to-cart:hover {
+      background:
+        linear-gradient(135deg, rgba(149, 82, 222, 1), rgba(224, 83, 229, 0.96)) !important;
+    }
+
+    .add-to-cart.is-disabled {
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.06)) !important;
+      border: 1px solid rgba(255,255,255,0.14) !important;
+      color: rgba(255,255,255,0.72) !important;
+      box-shadow: none !important;
+    }
+
+    .view-product-btn {
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.96), rgba(244, 232, 255, 0.88)) !important;
+      color: #5b1970 !important;
+      border: 1px solid rgba(255,255,255,0.32) !important;
+    }
+
+    .load-more-btn {
+      min-height: 54px !important;
+      padding: 0 28px !important;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,0.17), rgba(255,255,255,0.08)) !important;
+      border: 1px solid rgba(255,255,255,0.20) !important;
+      backdrop-filter: blur(16px) saturate(145%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(145%) !important;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        border-radius: 22px !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem .85rem 2rem !important;
+      }
+
+      .products {
+        gap: 18px 12px !important;
+      }
+
+      .product {
+        border-radius: 22px !important;
+        padding: 9px 9px 12px !important;
+      }
+
+      .product-image {
+        border-radius: 17px !important;
+        margin-bottom: 11px !important;
+      }
+
+      .product-title {
+        font-size: .92rem !important;
+        line-height: 1.45 !important;
+        min-height: 2.9em !important;
+      }
+
+      .product-description {
+        font-size: .78rem !important;
+        min-height: 2.4em !important;
+        margin-bottom: 8px !important;
+      }
+
+      .product-price-wrap {
+        min-height: 52px !important;
+        margin: 8px 0 12px !important;
+      }
+
+      .product-price {
+        font-size: .98rem !important;
+      }
+
+      .product-price-old {
+        font-size: .78rem !important;
+      }
+
+      .product-offer-badge {
+        font-size: .72rem !important;
+        min-height: 24px !important;
+        padding: 3px 8px !important;
+      }
+
+      .add-to-cart,
+      .view-product-btn {
+        min-height: 46px !important;
+        font-size: .82rem !important;
+        border-radius: 15px !important;
+        padding: 0 10px !important;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .products {
+        gap: 16px 10px !important;
+      }
+
+      .product {
+        border-radius: 20px !important;
+        padding: 8px 8px 10px !important;
+      }
+
+      .product-title {
+        font-size: .86rem !important;
+      }
+
+      .product-description {
+        display: none !important;
+      }
+
+      .product-price-wrap {
+        min-height: 48px !important;
+      }
+
+      .add-to-cart,
+      .view-product-btn {
+        min-height: 44px !important;
+        font-size: .78rem !important;
+      }
+    }
+
   </style>
 </head>
 
@@ -916,7 +1282,7 @@
         type="text"
         class="search-input"
         id="mainSearchInput"
-        placeholder="🔍 ابحث في المنتجات بالاسم أو الوصف أو الفئة..."
+        placeholder="🔍 ابحث في المنتجات بالاسم أو الوصف..."
       >
     </div>
 
@@ -992,30 +1358,63 @@
       return safeText(product.category ?? product.product_type ?? product.type, 'غير مصنف');
     }
 
-    function getRegularPrice(product) {
-      const value = Number(
-        product.compare_at_price ??
-        product.regular_price ??
+    function toNumber(value) {
+      if (value === null || value === undefined || value === '') return 0;
+      const number = Number(String(value).replace(/[^0-9.-]/g, ''));
+      return Number.isFinite(number) ? number : 0;
+    }
+
+    function getCurrentRawPrice(product) {
+      return toNumber(
         product.price ??
+        product.current_price ??
+        product.final_price ??
+        product.amount ??
         0
       );
-      return Number.isFinite(value) ? value : 0;
+    }
+
+    function getRegularPrice(product) {
+      const regular = toNumber(
+        product.regular_price ??
+        product.compare_at_price ??
+        product.price_before ??
+        product.original_price ??
+        product.list_price ??
+        0
+      );
+
+      if (regular > 0) return regular;
+
+      const current = getCurrentRawPrice(product);
+      const explicitSale = toNumber(
+        product.sale_price ??
+        product.price_after ??
+        product.discounted_price ??
+        product.discount_price ??
+        product.special_price ??
+        0
+      );
+
+      return current > 0 ? current : explicitSale;
     }
 
     function getSalePrice(product) {
-      const value = Number(
+      const explicitSale = toNumber(
         product.sale_price ??
+        product.price_after ??
         product.discounted_price ??
+        product.discount_price ??
+        product.special_price ??
         0
       );
-      return Number.isFinite(value) ? value : 0;
-    }
 
-    function extractPrice(product) {
       const regular = getRegularPrice(product);
-      const sale = getSalePrice(product);
-      if (sale > 0 && regular > sale) return sale;
-      return regular;
+      const current = getCurrentRawPrice(product);
+
+      if (explicitSale > 0 && regular > explicitSale) return explicitSale;
+      if (current > 0 && regular > current) return current;
+      return 0;
     }
 
     function hasSale(product) {
@@ -1024,35 +1423,44 @@
       return sale > 0 && regular > sale;
     }
 
+    function extractPrice(product) {
+      const regular = getRegularPrice(product);
+      const sale = getSalePrice(product);
+      const current = getCurrentRawPrice(product);
+
+      if (hasSale(product)) return sale;
+      if (current > 0) return current;
+      return regular;
+    }
+
     function getDisplayDescription(product) {
-      const description = safeText(product.description ?? product.body_html ?? product.short_description ?? '');
-      if (description) return description;
-      const category = extractCategory(product);
-      return category && category !== 'غير مصنف' ? `القسم: ${category}` : '';
+      return safeText(product.description ?? product.body_html ?? product.short_description ?? '');
     }
 
     function getAvailableStock(product) {
-      const value = Number(
-        product.stock ??
-        product.inventory ??
+      const value = toNumber(
+        product.stock_quantity ??
+        product.quantity ??
         product.inventory_quantity ??
+        product.inventory ??
+        product.stock ??
+        product.available_quantity ??
         product.available ??
         0
       );
-      return Number.isFinite(value) ? Math.max(0, value) : 0;
+      return Math.max(0, value);
     }
 
     function isPurchasable(product) {
       const status = safeText(product.status, 'active').toLowerCase();
-      const inventoryEnabled = Number(product.inventory_enabled ?? 1) === 1;
       const inventoryBlocked = Number(product.inventory_blocked ?? 0) === 1;
       const stock = getAvailableStock(product);
 
-      return status === 'active' && inventoryEnabled && !inventoryBlocked && stock > 0;
+      return status === 'active' && !inventoryBlocked && stock > 0;
     }
 
     function getStockLabel(product) {
-      return isPurchasable(product) ? `متوفر (${getAvailableStock(product)})` : 'نفدت الكمية';
+      return isPurchasable(product) ? 'متوفر' : 'نفدت الكمية';
     }
 
     function getPriceMarkup(product) {
@@ -1255,12 +1663,10 @@
     function productCard(product) {
       const title = extractTitle(product);
       const description = getDisplayDescription(product);
-      const category = extractCategory(product);
       const image = extractImage(product);
       const url = getProductUrl(product);
       const id = product.id || product.slug || title;
       const purchasable = isPurchasable(product);
-      const stockClass = purchasable ? '' : ' out-of-stock';
 
       return `
         <article class="product">
@@ -1276,8 +1682,6 @@
             </a>
 
             ${description ? `<div class="product-description">${escapeHtml(description)}</div>` : ''}
-            <div class="product-category">${escapeHtml(category)}</div>
-            <div class="product-stock-badge${stockClass}">${escapeHtml(getStockLabel(product))}</div>
             ${getPriceMarkup(product)}
 
             <div class="product-actions">
