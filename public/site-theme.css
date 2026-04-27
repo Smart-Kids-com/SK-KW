@@ -739,3 +739,241 @@ body.shipping-policy {
   }
 }
 
+/* =========================================================
+   SMART KIDS — POLISH PATCH
+   Header logo / hidden stock / policy spacing / footer mobile
+   ========================================================= */
+
+/* Header logo clarity */
+.sk-header {
+  grid-template-columns: 58px minmax(190px, 1fr) 104px;
+  min-height: 92px;
+}
+
+.sk-header-logo img {
+  width: min(390px, 100%);
+  max-height: 72px;
+}
+
+.side-menu__logo img {
+  width: min(330px, 100%);
+  max-height: 64px;
+}
+
+/* Hide stock badges globally */
+.product-stock-badge,
+.related-stock-badge,
+.stock-alert,
+.stock-badge,
+.inventory-badge,
+.product-inventory,
+.product-stock,
+.related-stock,
+.available-badge,
+.availability-badge,
+[class*="stock"],
+[class*="inventory"],
+[class*="available"] {
+  display: none !important;
+}
+
+/* Keep cart badge visible even though it contains badge */
+.cart-badge {
+  display: none;
+}
+
+/* Product / collection buttons cleaner */
+.add-to-cart,
+.view-details,
+.open-collection,
+.collection-btn,
+.hero-cta,
+.slide-cta,
+.product-card button,
+.product-card .btn,
+.collection-card button,
+.collection-card .btn {
+  border-radius: 18px;
+  min-height: 48px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.add-to-cart,
+.collection-btn,
+.open-collection {
+  background: linear-gradient(145deg, #ffffff, #f6f1fa);
+  color: #4a064f;
+  border: 1px solid rgba(74, 6, 79, .16);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.75),
+    0 10px 22px rgba(26,0,45,.16);
+}
+
+.view-details {
+  background: rgba(255,255,255,.94);
+  color: #4a064f;
+  border: 1px solid rgba(74, 6, 79, .14);
+}
+
+/* Policy page spacing */
+.sk-policy-wrap {
+  padding-bottom: 72px;
+}
+
+.sk-policy-card {
+  overflow: hidden;
+}
+
+.sk-policy-actions {
+  margin: 30px -4px 0;
+  padding: 22px 4px 0;
+}
+
+.sk-policy-btn {
+  min-height: 54px;
+  padding: 0 24px;
+  box-shadow: 0 10px 22px rgba(90,53,31,.14);
+}
+
+.sk-policy-btn.secondary {
+  box-shadow: inset 0 0 0 1px rgba(90,53,31,.18);
+}
+
+/* Footer breathing room and mobile polish */
+.site-footer {
+  margin-top: 0;
+}
+
+.site-footer__inner {
+  padding-top: 38px;
+}
+
+.site-footer__bottom {
+  padding-bottom: max(34px, env(safe-area-inset-bottom));
+}
+
+.site-footer__links {
+  padding-bottom: 18px;
+}
+
+.site-footer__links a {
+  white-space: nowrap;
+}
+
+/* Slider arrows and CTA soft global tuning */
+.slider-arrow,
+.hero-arrow,
+.carousel-arrow,
+.swiper-button-prev,
+.swiper-button-next {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 999px !important;
+  background: rgba(255,255,255,.92) !important;
+  color: #2f063a !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,.22) !important;
+}
+
+.hero-button,
+.shop-now,
+.order-now,
+.slide-button {
+  min-height: 48px !important;
+  border-radius: 16px !important;
+  padding: 0 22px !important;
+  font-weight: 950 !important;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .sk-header {
+    grid-template-columns: 50px minmax(170px, 1fr) 92px;
+    min-height: 88px;
+    padding: 9px 10px;
+  }
+
+  .sk-header-logo img {
+    width: min(310px, 100%);
+    max-height: 66px;
+  }
+
+  .sk-header-icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .sk-header-icon-btn img {
+    width: 37px;
+    height: 37px;
+  }
+
+  .side-menu__logo img {
+    width: min(270px, 100%);
+    max-height: 58px;
+  }
+
+  .sk-policy-wrap {
+    width: min(100% - 22px, 980px);
+    padding-bottom: 58px;
+  }
+
+  .sk-policy-card {
+    padding: 20px 18px 24px;
+    border-radius: 22px;
+  }
+
+  .sk-policy-actions {
+    margin-top: 26px;
+    padding-top: 18px;
+    gap: 12px;
+  }
+
+  .sk-policy-btn {
+    width: 100%;
+    min-height: 54px;
+    padding: 0 16px;
+  }
+
+  .site-footer__inner {
+    padding: 30px 14px 18px;
+  }
+
+  .site-footer__social {
+    display: grid !important;
+    grid-template-columns: repeat(3, 42px);
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .site-footer__social a {
+    width: 42px;
+    height: 42px;
+  }
+
+  .site-footer__bottom {
+    padding-bottom: max(86px, calc(env(safe-area-inset-bottom) + 54px));
+  }
+
+  .site-footer__links {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .site-footer__links a {
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .add-to-cart,
+  .view-details,
+  .open-collection,
+  .collection-btn {
+    min-height: 46px;
+    border-radius: 16px;
+    font-size: .92rem;
+  }
+}
+
