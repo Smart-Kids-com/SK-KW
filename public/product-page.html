@@ -1398,90 +1398,13 @@
     }
 
   </style>
+  <link rel="stylesheet" href="./site-theme.css">
 </head>
 
 <body>
-  <div class="topbar">
-    <span>التوصيل مجانًا للطلبات بقيمة 20 د.ك أو أكثر</span>
-  </div>
-
-  <header class="site-header">
-    <button class="site-menu-btn" id="menuBtn" type="button" aria-label="فتح القائمة">☰</button>
-
-    <a class="site-header-logo" href="./index.html" aria-label="الصفحة الرئيسية">
-      <img
-        src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543"
-        alt="Smart Kids Kuwait Logo"
-      />
-    </a>
-
-    <div class="site-header-icons">
-      <button class="site-icon-btn" id="searchBtn" type="button" aria-label="بحث">🔍</button>
-      <a class="site-icon-btn" href="./cart.html" aria-label="عربة التسوق">
-        🛍️
-        <span class="cart-badge" id="cartBadge">0</span>
-      </a>
-    </div>
-  </header>
-
-  <div class="menu-backdrop" id="menuBackdrop"></div>
-
-  <aside class="side-menu" id="sideMenu" aria-hidden="true">
-    <div class="side-menu__head">
-      <button class="side-menu__close" id="menuClose" type="button" aria-label="إغلاق">×</button>
-
-      <a class="side-menu__logo" href="./index.html">
-        <img
-          src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543"
-          alt="Smart Kids Kuwait Logo"
-        />
-      </a>
-
-      <div class="side-menu__icons">
-        <a class="site-icon-btn" href="./cart.html" aria-label="عربة التسوق">
-          🛍️
-          <span class="cart-badge" id="menuCartBadge">0</span>
-        </a>
-      </div>
-    </div>
-
-    <div class="side-menu__body">
-      <nav class="side-menu__nav">
-        <a href="./index.html">الصفحة الرئيسية</a>
-        <a href="./products-full.html">المتجر</a>
-
-        <div class="side-menu__dropdown" id="collectionsMenuDropdown">
-          <button class="side-menu__dropdown-btn" type="button" id="collectionsMenuToggle">
-            <span>المجموعات</span>
-            <span class="side-menu__dropdown-arrow">⌄</span>
-          </button>
-
-          <div class="side-menu__dropdown-list" id="collectionsMenuList">
-            <a href="./collections.html">جميع المجموعات</a>
-          </div>
-        </div>
-      </nav>
-    </div>
-
-    <div class="side-menu__footer">
-  <div class="side-menu__social">
-    <a href="https://www.instagram.com/smartkidskwt/" target="_blank" rel="noopener" aria-label="Instagram">
-      <img src="/icon-instagram.webp" alt="Instagram" />
-    </a>
-    <a href="https://www.tiktok.com/@smartkidskw" target="_blank" rel="noopener" aria-label="TikTok">
-      <img src="/icon-tiktok.webp" alt="TikTok" />
-    </a>
-    <a href="https://snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat">
-      <img src="/icon-snapchat.webp" alt="Snapchat" />
-    </a>
-    <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube">
-      <img src="/icon-youtube.webp" alt="YouTube" />
-    </a>
-  </div>
-</div>
-</aside>
-
-  <div class="search-overlay" id="searchOverlay"></div>
+  <div id="site-header"></div>
+  <script src="./header.js"></script>
+<div class="search-overlay" id="searchOverlay"></div>
   <div class="search-panel" id="searchPanel">
     <input type="text" id="searchInput" placeholder="ابحث في المنتجات..." />
     <div class="search-results" id="searchResults"></div>
@@ -2278,67 +2201,21 @@
     }
 
 
-    function getCollectionMenuUrl(collection) {
-      const slug = safeText(collection?.slug);
-      const id = safeText(collection?.id);
-
-      if (slug) return `./collection.html?slug=${encodeURIComponent(slug)}`;
-      return `./collection.html?id=${encodeURIComponent(id)}`;
-    }
-
-    async function loadSideMenuCollections() {
-      const list = document.getElementById("collectionsMenuList") || document.getElementById('collectionsMenuList');
-      if (!list) return;
-
-      list.innerHTML = `<a href="./collections.html">جميع المجموعات</a>`;
-
-      try {
-        const response = await fetch('/api/collections?status=active&limit=80&offset=0&sort=created_at&order=DESC', {
-          cache: 'no-store',
-          headers: { Accept: 'application/json' }
-        });
-
-        const result = await response.json().catch(() => null);
-        if (!response.ok || !result || !result.success || !Array.isArray(result.data)) return;
-
-        const links = result.data
-          .filter(item => String(item.status || 'active').toLowerCase() !== 'archived')
-          .map(item => {
-            const title = escapeHtml(safeText(item.title, 'مجموعة'));
-            const url = getCollectionMenuUrl(item);
-            return `<a href="${url}">${title}</a>`;
-          })
-          .join('');
-
-        if (links) {
-          list.innerHTML = `<a href="./collections.html">جميع المجموعات</a>${links}`;
-        }
-      } catch (_) {
-        // Keep the static "جميع المجموعات" link on API error
-      }
-    }
-
-    function initCollectionsDropdown() {
-      const toggle = document.getElementById("collectionsMenuToggle") || document.getElementById('collectionsMenuToggle');
-      if (!toggle) return;
-
-      toggle.addEventListener("click", () => {
-        const dropdown = toggle.closest(".side-menu__dropdown");
-        if (dropdown) dropdown.classList.toggle("open");
-      });
-
-      loadSideMenuCollections();
-    }
-
     document.addEventListener("DOMContentLoaded", () => {
       updateCartBadge();
       loadProduct();
-      initCollectionsDropdown();
 
-      const menuBtn = document.getElementById("menuBtn");
-      const menuClose = document.getElementById("menuClose");
-      const menuBackdrop = document.getElementById("menuBackdrop");
-      const searchBtn = document.getElementById("searchBtn");
+      document.addEventListener("click", (event) => {
+        const headerSearchButton = event.target.closest("#headerSearchBtn, #menuSearchBtn");
+        if (!headerSearchButton) return;
+
+        if (document.getElementById("searchPanel")) {
+          event.preventDefault();
+          openSearch();
+        }
+      });
+
+
       const searchOverlay = document.getElementById("searchOverlay");
       const searchInput = document.getElementById("searchInput");
       const toastClose = document.getElementById("toastClose");
@@ -2355,11 +2232,7 @@
       const lightbox = document.getElementById("lightbox");
       const lightboxClose = document.getElementById("lightboxClose");
 
-      if (menuBtn) menuBtn.addEventListener("click", openMenu);
-      if (menuClose) menuClose.addEventListener("click", closeMenu);
-      if (menuBackdrop) menuBackdrop.addEventListener("click", closeMenu);
 
-      if (searchBtn) searchBtn.addEventListener("click", openSearch);
       if (searchOverlay) searchOverlay.addEventListener("click", closeSearch);
 
       if (searchInput) {

@@ -854,75 +854,12 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="./site-theme.css">
 </head>
 <body>
-
-  <div class="topbar">
-    <span>←</span>
-    <span>التوصيل مجاناً للطلبات بقيمة 20 د.ك أو أكثر</span>
-  </div>
-
-  <header class="header">
-    <button class="menu-btn" id="menuBtn" type="button" aria-label="فتح القائمة">☰</button>
-
-    <a href="./index.html" class="logo-wrap" aria-label="الصفحة الرئيسية">
-      <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo">
-    </a>
-
-    <div class="header-icons">
-      <button class="icon-btn" id="searchBtn" type="button" aria-label="بحث">🔍</button>
-      <a class="icon-btn" href="./cart.html" aria-label="السلة">
-        🛍️
-        <span class="cart-count" id="cartCount">0</span>
-      </a>
-    </div>
-  </header>
-
-  <div class="drawer-backdrop" id="drawerBackdrop"></div>
-
-  <aside class="drawer" id="drawer">
-    <div class="drawer-head">
-      <button class="drawer-close" id="drawerClose" type="button" aria-label="إغلاق">×</button>
-
-      <div class="drawer-logo">
-        <a href="./index.html" aria-label="الصفحة الرئيسية">
-          <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait">
-        </a>
-      </div>
-
-      <div class="drawer-icons">
-        <button class="icon-btn" id="drawerSearchBtn" type="button" aria-label="بحث">🔍</button>
-        <a class="icon-btn" href="./cart.html" aria-label="السلة">🛍️</a>
-      </div>
-    </div>
-
-    <div class="drawer-body">
-      <nav class="drawer-nav" id="drawerNav">
-        <a href="./index.html">الصفحة الرئيسية</a>
-        <a href="./collections.html">جميع المجموعات</a>
-        <a href="./products-full.html">تسوق جميع المنتجات</a>
-        <a href="./cart.html">عربة التسوق</a>
-      </nav>
-    </div>
-
-    <div class="drawer-footer">
-      <a class="drawer-login" href="./collections.html">
-        <span>◉</span>
-        <span>استعرض المجموعات</span>
-      </a>
-
-      <div class="drawer-social">
-        <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.webp" alt="Facebook"></a>
-        <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.webp" alt="Instagram"></a>
-        <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.webp" alt="Pinterest"></a>
-        <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.webp" alt="TikTok"></a>
-        <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.webp" alt="Snapchat"></a>
-        <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.webp" alt="YouTube"></a>
-      </div>
-    </div>
-  </aside>
-
-  <div class="search-panel" id="searchPanel">
+  <div id="site-header"></div>
+  <script src="./header.js"></script>
+<div class="search-panel" id="searchPanel">
     <div class="search-box">
       <input type="text" id="searchInput" placeholder="ابحث في المنتجات..." />
       <div class="search-results" id="searchResults"></div>
@@ -1143,14 +1080,27 @@
     }
 
     function updateCartCount() {
-      const el = document.getElementById('cartCount');
       const count = cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-      if (count > 0) {
-        el.style.display = 'flex';
-        el.textContent = count;
-      } else {
-        el.style.display = 'none';
-        el.textContent = '0';
+      const badges = [
+        document.getElementById('cartCount'),
+        document.getElementById('cartBadge'),
+        document.getElementById('menuCartBadge')
+      ];
+
+      badges.forEach((el) => {
+        if (!el) return;
+
+        if (count > 0) {
+          el.style.display = 'flex';
+          el.textContent = count;
+        } else {
+          el.style.display = 'none';
+          el.textContent = '0';
+        }
+      });
+
+      if (typeof window.updateHeaderCartBadges === 'function') {
+        window.updateHeaderCartBadges();
       }
     }
 
@@ -1547,21 +1497,15 @@
 
       // Topbar text — use textContent to prevent XSS
       if (settings.announcementText) {
-        const bar = document.querySelector('.topbar');
+        const bar = document.querySelector('.sk-announcement-bar');
         if (bar) {
-          const iconSpan = document.createElement('span');
-          iconSpan.textContent = settings.announcementIcon || '←';
-          const textSpan = document.createElement('span');
-          textSpan.textContent = settings.announcementText;
-          bar.innerHTML = '';
-          bar.appendChild(iconSpan);
-          bar.appendChild(textSpan);
+          bar.textContent = settings.announcementText;
         }
       }
 
       // Logo — only allow http/https URLs
       if (settings.logoUrl && /^https?:\/\//i.test(settings.logoUrl)) {
-        document.querySelectorAll('.logo-wrap img, .drawer-logo img').forEach(img => {
+        document.querySelectorAll('.sk-header-logo img, .side-menu__logo img').forEach(img => {
           img.src = settings.logoUrl;
         });
       }
@@ -1678,15 +1622,16 @@
       fillTrack('collectionsTrack', allCollections, 'collections');
     }
 
-    document.getElementById('menuBtn').addEventListener('click', openMenu);
-    document.getElementById('drawerClose').addEventListener('click', closeMenu);
-    document.getElementById('drawerBackdrop').addEventListener('click', closeMenu);
+    document.addEventListener('click', (event) => {
+      const headerSearchButton = event.target.closest('#headerSearchBtn, #menuSearchBtn');
+      if (!headerSearchButton) return;
 
-    document.getElementById('searchBtn').addEventListener('click', openSearch);
-    document.getElementById('drawerSearchBtn').addEventListener('click', () => {
-      closeMenu();
-      openSearch();
+      if (document.getElementById('searchPanel')) {
+        event.preventDefault();
+        openSearch();
+      }
     });
+
     document.getElementById('searchClose').addEventListener('click', closeSearch);
     document.getElementById('searchPanel').addEventListener('click', (e) => {
       if (e.target.id === 'searchPanel') closeSearch();
@@ -1708,7 +1653,6 @@
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        closeMenu();
         closeSearch();
         hideCartToast();
       }

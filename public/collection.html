@@ -473,32 +473,12 @@
       background:#f5f2f8;color:#6f6380;cursor:pointer;font-size:1.2rem;
     }
   </style>
+  <link rel="stylesheet" href="./site-theme.css">
 </head>
 <body>
-  <div class="topbar">
-    <span class="topbar-arrow">←</span>
-    <span>التوصيل مجاناً للطلبات بقيمة 20 د.ك أو أكثر</span>
-  </div>
-
-  <header class="header">
-    <a href="./collections.html" class="header-back" aria-label="العودة">←</a>
-
-    <div class="header-logo">
-      <a href="./index.html" aria-label="الصفحة الرئيسية">
-        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo" />
-      </a>
-    </div>
-
-    <div class="header-icons">
-      <a href="./cart.html" class="header-icon-btn" aria-label="السلة">
-        🛍️
-        <span class="cart-badge" id="cartBadge">0</span>
-      </a>
-      <a href="./products-full.html" class="header-icon-btn" aria-label="بحث">🔍</a>
-    </div>
-  </header>
-
-  <a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
+  <div id="site-header"></div>
+  <script src="./header.js"></script>
+<a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
     <img src="/icon-whatsapp.webp" alt="WhatsApp" class="whatsapp-icon-img">
   </a>
 
@@ -957,15 +937,26 @@
     }
 
     function updateCartDisplay() {
-      const cartBadge = document.getElementById('cartBadge');
       const totalQty = cart.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+      const badges = [
+        document.getElementById('cartBadge'),
+        document.getElementById('menuCartBadge')
+      ];
 
-      if (totalQty > 0) {
-        cartBadge.style.display = 'flex';
-        cartBadge.textContent = totalQty;
-      } else {
-        cartBadge.style.display = 'none';
-        cartBadge.textContent = '0';
+      badges.forEach((cartBadge) => {
+        if (!cartBadge) return;
+
+        if (totalQty > 0) {
+          cartBadge.style.display = 'flex';
+          cartBadge.textContent = totalQty;
+        } else {
+          cartBadge.style.display = 'none';
+          cartBadge.textContent = '0';
+        }
+      });
+
+      if (typeof window.updateHeaderCartBadges === 'function') {
+        window.updateHeaderCartBadges();
       }
     }
 
@@ -1024,4 +1015,3 @@
   <script src="/js/live-visitors.js"></script>
 </body>
 </html>
-
