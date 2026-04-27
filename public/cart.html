@@ -7,6 +7,7 @@
   <meta name="description" content="عربة التسوق - Smart Kids Kuwait" />
   <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457" />
   <script src="/js/meta-pixel.js"></script>
+  <link rel="stylesheet" href="./site-theme.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -628,67 +629,8 @@
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <span>←</span>
-    <span>التوصيل مجاناً للطلبات بقيمة 20 د.ك أو أكثر</span>
-  </div>
-
-  <header class="site-header">
-    <button class="site-menu-btn" id="menuBtn" type="button" aria-label="فتح القائمة">☰</button>
-
-    <a href="./index.html" class="site-header-logo" aria-label="الصفحة الرئيسية">
-      <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo">
-    </a>
-
-    <div class="site-header-icons">
-      <button class="site-icon-btn" id="searchBtn" type="button" aria-label="بحث">🔍</button>
-      <button class="site-icon-btn cart-icon-btn" id="cartBtn" type="button" aria-label="السلة">
-  <img src="/icon-cart.webp" alt="" class="cart-icon-img" aria-hidden="true">
-  <span class="cart-badge" id="cartBadge">0</span>
-</button>
-    </div>
-  </header>
-
-  <div class="menu-backdrop" id="menuBackdrop"></div>
-
-  <aside class="side-menu" id="sideMenu">
-    <div class="side-menu__head">
-      <button class="side-menu__close" id="menuClose" type="button" aria-label="إغلاق">×</button>
-
-      <a href="./index.html" class="side-menu__logo" aria-label="الصفحة الرئيسية">
-        <img src="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Logo_smart_kids-of-header-tag.png?v=1756574543" alt="Smart Kids Kuwait Logo">
-      </a>
-
-      <div class="side-menu__icons">
-  <button class="site-icon-btn" id="sideMenuSearchBtn" type="button" aria-label="بحث">🔎</button>
-  <button class="site-icon-btn cart-icon-btn" id="menuCartBtn" type="button" aria-label="السلة">
-    <img src="/icon-cart.webp" alt="" class="cart-icon-img" aria-hidden="true">
-    <span class="cart-badge" id="menuCartBadge">0</span>
-  </button>
- </div>
-</div>
-
-    <div class="side-menu__body">
-      <nav class="side-menu__nav">
-        <a href="./index.html">الصفحة الرئيسية</a>
-        <a href="./products-full.html">كل المنتجات</a>
-        <a href="./cart.html">عربة التسوق</a>
-        <a href="./checkout.html">إتمام الطلب</a>
-      </nav>
-    </div>
-
-   <div class="side-menu__footer">
-  <div class="side-menu__social">
-    <a href="https://www.facebook.com/KuwaitSmartKids" target="_blank" rel="noopener" aria-label="Facebook"><img src="/icon-facebook.webp" alt="Facebook"></a>
-    <a href="https://www.instagram.com/kuwaitsmartkids/" target="_blank" rel="noopener" aria-label="Instagram"><img src="/icon-instagram.webp" alt="Instagram"></a>
-    <a href="https://www.pinterest.com/smartkidsgulf" target="_blank" rel="noopener" aria-label="Pinterest"><img src="/icon-pinterest.webp" alt="Pinterest"></a>
-    <a href="https://www.tiktok.com/@smartkids.gulf" target="_blank" rel="noopener" aria-label="TikTok"><img src="/icon-tiktok.webp" alt="TikTok"></a>
-    <a href="https://www.snapchat.com/add/smart.kidskw" target="_blank" rel="noopener" aria-label="Snapchat"><img src="/icon-snapchat.webp" alt="Snapchat"></a>
-    <a href="https://www.youtube.com/@SmartKids-Gulf" target="_blank" rel="noopener" aria-label="YouTube"><img src="/icon-youtube.webp" alt="YouTube"></a>
-  </div>
-</div>
-</aside>
-
+  <div id="site-header"></div>
+  <script src="./header.js"></script>
 <div class="search-overlay" id="searchOverlay"></div>
 <div class="search-panel" id="searchPanel">
   <input type="text" id="searchInput" placeholder="ابحث في المنتجات..." />
@@ -1003,6 +945,21 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       renderCartPage();
+
+      document.addEventListener('click', function(event) {
+        const headerSearchButton = event.target.closest('#headerSearchBtn, #menuSearchBtn');
+        if (!headerSearchButton) return;
+
+        if (document.getElementById('searchPanel')) {
+          event.preventDefault();
+          document.body.classList.add('search-open');
+          setTimeout(() => {
+            const input = document.getElementById('searchInput');
+            if (input) input.focus();
+          }, 80);
+        }
+      });
+
 
       const menuBtn = document.getElementById('menuBtn');
       const menuClose = document.getElementById('menuClose');
