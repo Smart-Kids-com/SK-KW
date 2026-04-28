@@ -977,3 +977,39 @@ body.shipping-policy {
   }
 }
 
+/* =========================================================
+   SMART KIDS — POLICY BUTTON ALIGNMENT FIX
+   ========================================================= */
+
+.sk-policy-card[dir="ltr"] .sk-policy-content {
+  text-align: left;
+}
+
+.sk-policy-card[dir="ltr"] .sk-policy-content ul,
+.sk-policy-card[dir="ltr"] .sk-policy-content ol {
+  margin: 0 0 16px 22px;
+  padding: 0;
+}
+
+.sk-policy-actions {
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center;
+}
+
+.sk-policy-btn {
+  text-align: center;
+  min-width: 180px;
+}
+
+@media (max-width: 768px) {
+  .sk-policy-actions {
+    justify-content: stretch !important;
+  }
+
+  .sk-policy-btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+

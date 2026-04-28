@@ -855,6 +855,152 @@
     }
   </style>
   <link rel="stylesheet" href="./site-theme.css">
+
+  <style id="index-page-polish">
+    /* INDEX PAGE POLISH — hero/cards only */
+
+    .page {
+      width: min(100%, 760px);
+      padding: 18px 12px 42px;
+    }
+
+    .hero {
+      border-radius: 24px;
+      border: 2px solid rgba(255,255,255,.18);
+      padding: 10px;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255,255,255,.26), transparent 28%),
+        linear-gradient(145deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+      box-shadow: 0 22px 46px rgba(26,0,45,.26);
+    }
+
+    .hero-card {
+      background: #0d0d11;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .hero-image {
+      aspect-ratio: 1 / 1;
+      background: #17171d;
+    }
+
+    .hero-info {
+      padding: 14px 14px 16px;
+      text-align: center;
+    }
+
+    .hero-title {
+      text-align: center;
+      min-height: auto;
+      margin-bottom: 10px;
+      font-size: 1rem;
+      line-height: 1.55;
+    }
+
+    .hero-price-wrap,
+    .card-price-wrap,
+    .search-item-price-wrap {
+      align-items: center;
+      text-align: center;
+    }
+
+    .hero-price-old,
+    .card-price-old,
+    .search-item-price-old,
+    .hero-price,
+    .card-price,
+    .search-item-price {
+      text-align: center;
+      direction: ltr;
+    }
+
+    .hero-btn,
+    .card-btn {
+      min-height: 46px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, #ffffff, #f4eef8);
+      color: #4a064f;
+      font-weight: 950;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.76),
+        0 10px 20px rgba(26,0,45,.16);
+    }
+
+    .hero-stock-badge,
+    .card-stock-badge,
+    .search-item-stock {
+      display: none !important;
+    }
+
+    .hero-arrow,
+    .scroll-btn {
+      width: 42px;
+      height: 42px;
+      border: 0;
+      background: rgba(255,255,255,.94);
+      color: #2f063a;
+      box-shadow: 0 10px 22px rgba(0,0,0,.22);
+    }
+
+    .hero-arrow.prev { right: 8px; }
+    .hero-arrow.next { left: 8px; }
+
+    .card {
+      flex: 0 0 74%;
+      border-radius: 22px;
+      padding: 8px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: 0 18px 34px rgba(25,0,45,.22);
+    }
+
+    .card-inner {
+      border-radius: 18px;
+    }
+
+    .card-info {
+      text-align: center;
+      padding: 12px 11px 13px;
+    }
+
+    .card-title {
+      text-align: center;
+      min-height: 46px;
+      font-size: .96rem;
+      line-height: 1.5;
+    }
+
+    @media (min-width: 700px) {
+      .card {
+        flex-basis: 46%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page {
+        width: min(100%, 680px);
+        padding-inline: 11px;
+      }
+
+      .hero {
+        border-radius: 22px;
+      }
+
+      .hero-title {
+        font-size: .96rem;
+      }
+
+      .card {
+        flex-basis: 76%;
+      }
+
+      .scroll-btn {
+        width: 38px;
+        height: 38px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div id="site-header"></div>
@@ -1205,7 +1351,6 @@
         return `
           <div class="search-item">
             <div class="search-item-title">${escapeHtml(getTitle(product))}</div>
-            <div class="search-item-stock${purchasable ? '' : ' out'}">${escapeHtml(getStockLabel(product))}</div>
             ${getPriceMarkup(product, 'search')}
             <div class="search-item-actions">
               <button type="button" class="${purchasable ? '' : 'is-disabled'}" data-action="add" data-id="${id}" ${purchasable ? '' : 'disabled'}>${purchasable ? 'إضافة للسلة' : 'نفدت الكمية'}</button>
@@ -1235,7 +1380,6 @@
             </div>
             <div class="hero-info">
               <div class="hero-title">${escapeHtml(getTitle(product))}</div>
-              <div class="hero-stock-badge${purchasable ? '' : ' out'}">${escapeHtml(getStockLabel(product))}</div>
               ${getPriceMarkup(product, 'hero')}
               <button class="hero-btn${purchasable ? '' : ' is-disabled'}" type="button" data-add-id="${escapeHtml(product.slug || product.id || '')}" ${purchasable ? '' : 'disabled'}>${purchasable ? 'أضف للسلة' : 'نفدت الكمية'}</button>
             </div>
@@ -1256,7 +1400,6 @@
               </div>
               <div class="card-info">
                 <div class="card-title">${escapeHtml(getTitle(product))}</div>
-                <div class="card-stock-badge${purchasable ? '' : ' out'}">${escapeHtml(getStockLabel(product))}</div>
                 ${getPriceMarkup(product, 'card')}
                 <button class="card-btn${purchasable ? '' : ' is-disabled'}" type="button" data-add-id="${escapeHtml(product.slug || product.id || '')}" ${purchasable ? '' : 'disabled'}>${purchasable ? 'أضف للسلة' : 'نفدت الكمية'}</button>
               </div>
@@ -1534,12 +1677,9 @@
           <a class="hero-card" href="${escapeHtml(slide.link || '#')}">
             <div class="hero-image">
               <img src="${escapeHtml(slide.imageUrl)}"
-                alt="${escapeHtml(slide.buttonText || '')}" loading="eager"
+                alt="${escapeHtml(slide.buttonText || 'Smart Kids Kuwait')}" loading="eager"
                 style="width:100%;height:100%;object-fit:cover;">
             </div>
-            ${slide.buttonText
-              ? `<div class="hero-info"><div class="hero-btn">${escapeHtml(slide.buttonText)}</div></div>`
-              : ''}
           </a>
         </div>`).join('');
 
