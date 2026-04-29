@@ -515,7 +515,7 @@
           <div class="filters-row">
             <div class="field"><input id="searchInput" type="text" placeholder="Search by name, email, phone, token"></div>
             <div class="field">
-              <select id="sortSelect">
+              <select id="sortSelect" aria-label="Sort results">
                 <option value="last_activity_at:DESC">Latest activity</option>
                 <option value="created_at:DESC">Newest first</option>
                 <option value="created_at:ASC">Oldest first</option>
@@ -525,7 +525,7 @@
               </select>
             </div>
             <div class="field">
-              <select id="limitSelect">
+              <select id="limitSelect" aria-label="Results per page">
                 <option value="10" selected>10 per page</option>
                 <option value="20">20 per page</option>
                 <option value="50">50 per page</option>
