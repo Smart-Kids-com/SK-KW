@@ -187,7 +187,8 @@
       padding-top:8px;
       color:var(--text);
       font-size:14px;
-      user-select:none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     .checkbox input{
@@ -631,7 +632,7 @@
               <thead>
                 <tr>
                   <th class="select-cell">
-                    <input type="checkbox" id="selectAllCheckbox" />
+                    <input type="checkbox" id="selectAllCheckbox" aria-label="Select all" />
                   </th>
                   <th>المنتج</th>
                   <th>SKU</th>

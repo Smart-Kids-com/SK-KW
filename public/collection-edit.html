@@ -709,7 +709,7 @@
                 <div class="products-toolbar">
                   <input id="productSearchInput" type="text" placeholder="Search inside collection..." oninput="filterCollectionProducts()">
 
-                  <select id="sortModeSelect" onchange="handleSortModeChange()">
+                  <select id="sortModeSelect" onchange="handleSortModeChange()" aria-label="Sort mode"></select>
                     <option value="manual">Manually</option>
                     <option value="best_selling">Best selling</option>
                     <option value="title_asc">Product title A-Z</option>
@@ -742,7 +742,7 @@
                   <table>
                     <thead>
                       <tr>
-                        <th><input id="selectAllProductsCheckbox" class="check" type="checkbox" onchange="toggleSelectAllProducts(this.checked)"></th>
+                        <th><input id="selectAllProductsCheckbox" class="check" type="checkbox" onchange="toggleSelectAllProducts(this.checked)" aria-label="Select all products"></th>
                         <th>Move</th>
                         <th>Product</th>
                         <th>Price</th>
