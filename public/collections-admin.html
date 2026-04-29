@@ -819,7 +819,7 @@
             </div>
 
             <div class="field">
-              <select id="sortSelect">
+              <select id="sortSelect" aria-label="Sort"></select>
                 <option value="created_at:DESC">Newest first</option>
                 <option value="created_at:ASC">Oldest first</option>
                 <option value="updated_at:DESC">Recently updated</option>
@@ -829,7 +829,7 @@
             </div>
 
             <div class="field">
-              <select id="limitSelect">
+              <select id="limitSelect" aria-label="Results per page"></select>
                 <option value="10">10 per page</option>
                 <option value="25" selected>25 per page</option>
                 <option value="50">50 per page</option>
@@ -844,7 +844,7 @@
             <table>
               <thead>
                 <tr>
-                  <th><input id="selectAllCheckbox" class="check" type="checkbox" onchange="toggleSelectAll(this.checked)"></th>
+                  <th><input id="selectAllCheckbox" class="check" type="checkbox" onchange="toggleSelectAll(this.checked)" aria-label="Select all"></th>
                   <th>Collection</th>
                   <th>Products</th>
                   <th>Status</th>

@@ -154,6 +154,7 @@
       width: min(92vw, 400px);
       height: 100vh;
       background: rgba(255,255,255,0.98);
+      -webkit-backdrop-filter: blur(18px);
       backdrop-filter: blur(18px);
       border-left: 1px solid rgba(0,0,0,0.08);
       box-shadow: -12px 0 30px rgba(0,0,0,0.18);
@@ -296,6 +297,7 @@
       border: 1px solid rgba(255,255,255,0.26);
       border-radius: 25px;
       background: rgba(255,255,255,0.14);
+      -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
       color: #fff;
       font-size: 1.05rem;
@@ -332,6 +334,7 @@
       margin: 0 0 1rem;
       padding: 0.95rem 1rem;
       background: rgba(255,255,255,0.12);
+      -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
       border-radius: 15px;
       border: 1px solid rgba(255,255,255,0.14);
@@ -349,6 +352,7 @@
 
     .sidebar {
       background: rgba(255,255,255,0.10);
+      -webkit-backdrop-filter: blur(20px);
       backdrop-filter: blur(20px);
       border-radius: 18px;
       padding: 1rem;
@@ -1494,9 +1498,9 @@
 <body>
   <div id="site-header"></div>
   <script src="./header.js"></script>
-<a href="https://wa.me/96566635393" target="_blank" class="whatsapp-float" title="تواصل عبر واتساب">
-    <img src="/icon-whatsapp.webp" alt="WhatsApp" class="whatsapp-icon-img">
-  </a>
+<a href="https://wa.me/96566635393" target="_blank" rel="noopener noreferrer" class="whatsapp-float" title="تواصل عبر واتساب">
+  <img src="/icon-whatsapp.webp" alt="WhatsApp" class="whatsapp-icon-img">
+</a>
 
   <div class="toast" id="cartToast">
     <div class="toast-inner">

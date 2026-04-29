@@ -77,7 +77,7 @@
 .cart-badge {
   position: absolute;
   top: -4px;
-  inset-inline-end: -4px;
+  right: -4px;
   min-width: 22px;
   height: 22px;
   padding: 0 6px;
@@ -208,7 +208,7 @@ body.menu-open .side-menu {
   font-size: 1.08rem;
   font-weight: 800;
   cursor: pointer;
-  text-align: start;
+  text-align: right;
 }
 
 .side-menu__dropdown-arrow {
@@ -567,7 +567,7 @@ body:has(.hero):has(#orderSection) {
 .sk-policy-content td {
   border: 1px solid rgba(90, 53, 31, .25);
   padding: 12px;
-  text-align: start;
+  text-align: right;
 }
 
 .sk-policy-content th {
@@ -771,15 +771,22 @@ body.shipping-policy {
 .related-stock,
 .available-badge,
 .availability-badge,
-.product-card [class*="stock"],
-.product-card [class*="inventory"],
-.product-card [class*="available"],
-.related-products [class*="stock"],
-.related-products [class*="inventory"],
-.related-products [class*="available"] {
+[class*="stock"],
+[class*="inventory"],
+[class*="available"] {
   display: none !important;
-  }
+}
 
+/* Keep cart badge visible even though it contains badge */
+.cart-badge {
+  display: none;
+}
+
+/* Product / collection buttons cleaner */
+.add-to-cart,
+.view-details,
+.open-collection,
+.collection-btn,
 .hero-cta,
 .slide-cta,
 .product-card button,
@@ -1005,3 +1012,4 @@ body.shipping-policy {
     min-width: 0;
   }
 }
+

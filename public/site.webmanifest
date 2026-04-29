@@ -28,14 +28,12 @@
     {
       "src": "/screenshots/desktop-1.png",
       "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
+      "type": "image/png"
     },
     {
       "src": "/screenshots/mobile-1.png",
       "sizes": "430x932",
-      "type": "image/png",
-      "form_factor": "narrow"
+      "type": "image/png"
     }
   ]
 }
