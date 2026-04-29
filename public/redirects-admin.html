@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redirects Admin - Smart Kids Kuwait</title>
+  <style>
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Segoe UI,Tahoma,Arial,sans-serif;
+      background:#f7f3fb;
+      color:#251b35;
+      padding:24px;
+    }
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+    }
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:18px;
+    }
+    h1{
+      margin:0;
+      font-size:28px;
+      color:#5f2a84;
+    }
+    .card{
+      background:#fff;
+      border:1px solid #e8dff2;
+      border-radius:18px;
+      box-shadow:0 14px 34px rgba(61,28,92,.08);
+      padding:18px;
+      margin-bottom:18px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr 120px 120px;
+      gap:12px;
+    }
+    label{
+      display:block;
+      font-weight:700;
+      font-size:13px;
+      margin-bottom:7px;
+      color:#5f2a84;
+    }
+    input,select{
+      width:100%;
+      border:1px solid #d9c9ea;
+      border-radius:12px;
+      padding:12px;
+      font-size:14px;
+      outline:none;
+      background:#fff;
+    }
+    input:focus,select:focus{
+      border-color:#8d48b8;
+      box-shadow:0 0 0 4px rgba(141,72,184,.12);
+    }
+    .actions{
+      display:flex;
+      gap:10px;
+      margin-top:14px;
+      flex-wrap:wrap;
+    }
+    button{
+      border:none;
+      border-radius:12px;
+      padding:12px 16px;
+      font-weight:800;
+      cursor:pointer;
+      background:#6f2c91;
+      color:#fff;
+    }
+    button.secondary{
+      background:#eee6f5;
+      color:#5f2a84;
+    }
+    button.danger{
+      background:#c0392b;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+      border-radius:14px;
+    }
+    th,td{
+      padding:12px;
+      border-bottom:1px solid #eee6f5;
+      text-align:right;
+      font-size:14px;
+      vertical-align:middle;
+    }
+    th{
+      background:#f2e8fb;
+      color:#5f2a84;
+      font-size:13px;
+    }
+    tr:hover td{
+      background:#fbf8ff;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:5px 9px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      background:#e9f8ef;
+      color:#147a3d;
+    }
+    .pill.off{
+      background:#ffeaea;
+      color:#a93226;
+    }
+    .muted{
+      color:#7b7088;
+      font-size:13px;
+    }
+    .ltr{
+      direction:ltr;
+      text-align:left;
+      font-family:Consolas,monospace;
+    }
+    @media(max-width:850px){
+      .grid{
+        grid-template-columns:1fr;
+      }
+      table{
+        min-width:800px;
+      }
+      .table-wrap{
+        overflow:auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>إدارة التحويلات</h1>
+        <div class="muted">أضف أي صفحة قديمة وحوّلها لصفحة جديدة بدون تعديل الكود</div>
+      </div>
+      <button class="secondary" onclick="loadRedirects()">تحديث</button>
+    </div>
+
+    <div class="card">
+      <input type="hidden" id="redirectId" />
+
+      <div class="grid">
+        <div>
+          <label for="sourcePath">Redirect From</label>
+          <input id="sourcePath" class="ltr" placeholder="/product-page" />
+        </div>
+
+        <div>
+          <label for="destinationPath">Redirect To</label>
+          <input id="destinationPath" class="ltr" placeholder="/products-full.html" />
+        </div>
+
+        <div>
+          <label for="statusCode">Status</label>
+          <select id="statusCode">
+            <option value="301">301 Permanent</option>
+            <option value="302">302 Temporary</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="isActive">Active</label>
+          <select id="isActive">
+            <option value="1">Active</option>
+            <option value="0">Disabled</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <label for="notes">Notes</label>
+        <input id="notes" placeholder="اختياري" />
+      </div>
+
+      <div class="actions">
+        <button onclick="saveRedirect()">حفظ التحويل</button>
+        <button class="secondary" onclick="resetForm()">تفريغ</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>From</th>
+              <th>To</th>
+              <th>Status</th>
+              <th>Active</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="redirectsBody">
+            <tr>
+              <td colspan="7">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = '/api/redirects-admin';
+
+    function normalizePath(value) {
+      const text = String(value || '').trim();
+      if (!text) return '';
+      if (text.startsWith('/')) return text;
+      return '/' + text;
+    }
+
+    async function requestJson(url, options = {}) {
+      const response = await fetch(url, {
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options.headers || {})
+        },
+        ...options
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || data.success === false) {
+        throw new Error(data.error || 'Request failed');
+      }
+
+      return data;
+    }
+
+    function resetForm() {
+      document.getElementById('redirectId').value = '';
+      document.getElementById('sourcePath').value = '';
+      document.getElementById('destinationPath').value = '';
+      document.getElementById('statusCode').value = '301';
+      document.getElementById('isActive').value = '1';
+      document.getElementById('notes').value = '';
+    }
+
+    function editRedirect(item) {
+      document.getElementById('redirectId').value = item.id || '';
+      document.getElementById('sourcePath').value = item.source_path || '';
+      document.getElementById('destinationPath').value = item.destination_path || '';
+      document.getElementById('statusCode').value = String(item.status_code || 301);
+      document.getElementById('isActive').value = String(item.is_active ? 1 : 0);
+      document.getElementById('notes').value = item.notes || '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function saveRedirect() {
+      try {
+        const id = document.getElementById('redirectId').value.trim();
+
+        const payload = {
+          source_path: normalizePath(document.getElementById('sourcePath').value),
+          destination_path: normalizePath(document.getElementById('destinationPath').value),
+          status_code: Number(document.getElementById('statusCode').value),
+          is_active: Number(document.getElementById('isActive').value),
+          notes: document.getElementById('notes').value.trim()
+        };
+
+        if (!payload.source_path || !payload.destination_path) {
+          alert('اكتب From و To');
+          return;
+        }
+
+        if (id) {
+          await requestJson(`${API_URL}/${encodeURIComponent(id)}`, {
+            method: 'PATCH',
+            body: JSON.stringify(payload)
+          });
+        } else {
+          await requestJson(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+        }
+
+        resetForm();
+        await loadRedirects();
+      } catch (error) {
+        alert(error.message || 'Failed to save redirect');
+      }
+    }
+
+    async function deleteRedirect(id) {
+      if (!confirm('حذف التحويل؟')) return;
+
+      try {
+        await requestJson(`${API_URL}/${encodeURIComponent(id)}`, {
+          method: 'DELETE'
+        });
+
+        await loadRedirects();
+      } catch (error) {
+        alert(error.message || 'Failed to delete redirect');
+      }
+    }
+
+    async function loadRedirects() {
+      const body = document.getElementById('redirectsBody');
+
+      body.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
+
+      try {
+        const result = await requestJson(API_URL);
+        const rows = Array.isArray(result.data) ? result.data : [];
+
+        if (!rows.length) {
+          body.innerHTML = '<tr><td colspan="7">لا توجد تحويلات حتى الآن</td></tr>';
+          return;
+        }
+
+        body.innerHTML = rows.map(item => `
+          <tr>
+            <td>${item.id}</td>
+            <td class="ltr">${item.source_path || ''}</td>
+            <td class="ltr">${item.destination_path || ''}</td>
+            <td>${item.status_code || 301}</td>
+            <td>
+              <span class="pill ${item.is_active ? '' : 'off'}">
+                ${item.is_active ? 'Active' : 'Disabled'}
+              </span>
+            </td>
+            <td>${item.notes || ''}</td>
+            <td>
+              <button class="secondary" onclick='editRedirect(${JSON.stringify(item).replace(/'/g, '&apos;')})'>Edit</button>
+              <button class="danger" onclick="deleteRedirect(${item.id})">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (error) {
+        body.innerHTML = `<tr><td colspan="7">${error.message || 'Failed to load redirects'}</td></tr>`;
+      }
+    }
+
+    loadRedirects();
+  </script>
+</body>
+</html>

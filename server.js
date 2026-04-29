@@ -11,6 +11,8 @@ const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
 
 const db = require('./db/turso-manager');
+const redirectsRoutes = require('./routes/redirects');
+const redirectsAdminRoutes = require('./routes/redirects-admin');
 const ordersRoutes = require('./routes/orders');
 const productsRoutes = require('./routes/products');
 const collectionsRoutes = require('./routes/collections');
@@ -21,6 +23,7 @@ const discountsRoutes = require('./routes/discounts');
 const storeDiscountsRoutes = require('./routes/store-discounts');
 const adminDashboardRoutes = require('./routes/admin-dashboard');
 const inventoryRoutes = require('./routes/inventory');
+
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
@@ -228,6 +231,17 @@ if (method === 'POST' && pathname === '/abandoned-checkouts/save') {
 }
 
   // admin-only writes
+  if (isAdminAuthenticated(req)) {
+    return next();
+  }
+
+  return res.status(401).json({
+    success: false,
+    error: 'غير مصرح. هذه العملية تتطلب دخول الإدارة.'
+  });
+}
+
+function requireAdminApiAuth(req, res, next) {
   if (isAdminAuthenticated(req)) {
     return next();
   }
@@ -618,6 +632,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(redirectsRoutes);
+
 /* =========================================
    صفحات الإدارة المحمية قبل static
 ========================================= */
@@ -626,6 +642,8 @@ app.use(
   [
     '/admin-enhanced',
     '/admin-enhanced.html',
+    '/redirects-admin',
+    '/redirects-admin.html',
     '/products-admin',
     '/products-admin.html',
     '/product-edit.html',
@@ -665,7 +683,7 @@ app.use('/api', async (req, res, next) => {
  * and without breaking public checkout (POST /api/orders).
  */
 app.use('/api', requireAdminApiWriteAuth);
-
+app.use('/api/redirects-admin', requireAdminApiAuth, redirectsAdminRoutes);
 /* =========================================
    Routes للـ API
 ========================================= */
@@ -941,6 +959,15 @@ app.get('/discounts-admin', (req, res) => {
 
 app.get('/discounts-admin.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'discounts-admin.html'));
+});
+
+
+app.get('/redirects-admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'redirects-admin.html'));
+});
+
+app.get('/redirects-admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'redirects-admin.html'));
 });
 
 /* =========================================
