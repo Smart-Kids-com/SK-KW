@@ -41,7 +41,7 @@ Thumbs.db
 coverage/
 .playwright/
 
-# Misc
+# Misc
 *.local
 BRANDING_APPLY_REPORT.txt
 local.txt
@@ -50,3 +50,6 @@ tree-needed.txt
 
 # SQLite database files
 db/*.db
+*.db
+*.sqlite
+*.sqlite3

@@ -370,7 +370,7 @@
               <input type="text" id="searchInput" placeholder="Search by name / SKU / slug / tags">
             </div>
             <div class="field">
-              <select id="statusFilter">
+              <select id="statusFilter" aria-label="Status filter">
                 <option value="">All statuses</option>
                 <option value="active">Active</option>
                 <option value="draft">Draft</option>
@@ -378,7 +378,7 @@
               </select>
             </div>
             <div class="field">
-              <select id="sortFilter">
+              <select id="sortFilter" title="Sort filter">
                 <option value="id-DESC">Newest first</option>
                 <option value="id-ASC">Oldest first</option>
                 <option value="product_name-ASC">Product A-Z</option>
@@ -396,7 +396,7 @@
             <table>
               <thead>
                 <tr>
-                  <th style="width:52px"><input id="selectAllCheckbox" class="check" type="checkbox"></th>
+                  <th style="width:52px"><input id="selectAllCheckbox" class="check" type="checkbox" aria-label="Select all products"></th>
                   <th>Product</th>
                   <th>Status</th>
                   <th>Inventory</th>
@@ -415,8 +415,8 @@
           <div class="pagination">
             <div class="pagination-left" id="paginationText">0-0</div>
             <div class="pagination-right">
-              <button class="icon-btn" onclick="noopPager()">‹</button>
-              <button class="icon-btn" onclick="noopPager()">›</button>
+              <button class="icon-btn" onclick="noopPager()" aria-label="Previous page">‹</button>
+              <button class="icon-btn" onclick="noopPager()" aria-label="Next page">›</button>
             </div>
           </div>
         </section>
