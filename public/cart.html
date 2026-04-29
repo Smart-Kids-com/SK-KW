@@ -626,6 +626,277 @@
         font-size:1.6rem;
       }
     }
+  
+    /* CART PAGE FIX — desktop image/layout polish */
+    .wrap.cart-page {
+      max-width: 1040px;
+      padding: 2rem 1rem 3.5rem;
+    }
+
+    .cart-filled h1,
+    .cart-empty h1 {
+      text-align: center;
+    }
+
+    .cart-header-row {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+
+    .cart-columns {
+      display: grid;
+      grid-template-columns: 170px minmax(0, 1fr) 130px;
+      gap: 22px;
+      align-items: center;
+      color: rgba(244,239,229,.74);
+      font-size: .95rem;
+      margin-bottom: .8rem;
+      padding: 0 0 1rem;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+
+    .cart-columns > div:first-child,
+    .cart-columns > div:nth-child(2) {
+      text-align: right;
+    }
+
+    .cart-columns > div:last-child {
+      text-align: left;
+    }
+
+    .cart-item {
+      display: grid;
+      grid-template-columns: 170px minmax(0, 1fr) 130px;
+      gap: 22px;
+      align-items: center;
+      padding: 1.35rem 0;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      direction: rtl;
+    }
+
+    .cart-thumb {
+      width: 170px;
+      max-width: 170px;
+      aspect-ratio: 1 / 1;
+      border-radius: 18px;
+      overflow: hidden;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 14px 28px rgba(0,0,0,.18);
+      display: block;
+      justify-self: start;
+    }
+
+    .cart-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cart-info {
+      min-width: 0;
+      align-self: center;
+    }
+
+    .cart-title {
+      display: block;
+      font-size: 1.08rem;
+      line-height: 1.65;
+      color: var(--soft-white);
+      font-weight: 800;
+      margin-bottom: .45rem;
+      max-width: 100%;
+    }
+
+    .cart-price-small {
+      font-size: .98rem;
+      color: rgba(244,239,229,.74);
+      margin-bottom: .95rem;
+      direction: ltr;
+      text-align: right;
+    }
+
+    .qty-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .qty-box {
+      width: 172px;
+      min-height: 48px;
+      border: 1px solid rgba(255,245,190,.52);
+      border-radius: 14px;
+      box-shadow: 0 10px 22px rgba(0,0,0,.16);
+      display: grid;
+      grid-template-columns: 48px 1fr 48px;
+      align-items: center;
+      justify-items: center;
+      background: rgba(53, 9, 63, .48);
+      color: var(--soft-white);
+      font-size: 1rem;
+      overflow: hidden;
+    }
+
+    .qty-btn {
+      width: 100%;
+      height: 48px;
+      border: 0;
+      background: rgba(255,255,255,.06);
+      color: var(--soft-white);
+      font-size: 1.45rem;
+      cursor: pointer;
+    }
+
+    .remove-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid rgba(228,205,75,.22);
+      background: rgba(255,255,255,.06);
+      color: var(--gold);
+      font-size: 1.15rem;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .cart-line-total {
+      min-width: 0;
+      color: var(--soft-white);
+      text-align: left;
+      justify-self: end;
+      align-self: center;
+      direction: ltr;
+      padding-top: 0;
+    }
+
+    .cart-line-total strong {
+      display: inline;
+      font-size: 1rem;
+      line-height: 1.3;
+      margin-inline-end: 6px;
+    }
+
+    .cart-line-total span {
+      font-size: 1.06rem;
+      font-weight: 800;
+    }
+
+    @media (max-width: 768px) {
+      .wrap.cart-page {
+        padding: 1.4rem .85rem 2.5rem;
+      }
+
+      .cart-columns {
+        display: none;
+      }
+
+      .cart-header-row {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 8px;
+      }
+
+      .cart-item {
+        grid-template-columns: 96px minmax(0, 1fr);
+        grid-template-areas:
+          "thumb info"
+          "total info";
+        gap: 12px;
+        align-items: start;
+        padding: 1rem;
+        margin-bottom: 12px;
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 18px;
+        background: rgba(255,255,255,.045);
+      }
+
+      .cart-thumb {
+        grid-area: thumb;
+        width: 96px;
+        max-width: 96px;
+        border-radius: 14px;
+      }
+
+      .cart-info {
+        grid-area: info;
+      }
+
+      .cart-title {
+        font-size: .98rem;
+        line-height: 1.55;
+      }
+
+      .cart-price-small {
+        font-size: .9rem;
+        margin-bottom: .75rem;
+      }
+
+      .qty-box {
+        width: 148px;
+        min-height: 42px;
+        grid-template-columns: 42px 1fr 42px;
+      }
+
+      .qty-btn {
+        height: 42px;
+        font-size: 1.25rem;
+      }
+
+      .remove-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+      }
+
+      .cart-line-total {
+        grid-area: total;
+        justify-self: start;
+        text-align: right;
+        direction: ltr;
+        font-size: .9rem;
+      }
+
+      .cart-line-total strong,
+      .cart-line-total span {
+        font-size: .9rem;
+      }
+
+      .notes-box {
+        min-height: 150px;
+        border-width: 2px;
+      }
+
+      .checkout-main-btn {
+        min-height: 66px;
+        font-size: 1.35rem;
+        border-width: 2px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .cart-item {
+        grid-template-columns: 84px minmax(0, 1fr);
+        padding: .85rem;
+      }
+
+      .cart-thumb {
+        width: 84px;
+        max-width: 84px;
+      }
+
+      .qty-row {
+        gap: 8px;
+      }
+
+      .qty-box {
+        width: 132px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -659,8 +930,9 @@
       </div>
 
       <div class="cart-columns">
-        <div>الإجمالي</div>
         <div>المنتج</div>
+        <div>التفاصيل</div>
+        <div>الإجمالي</div>
       </div>
 
       <div id="cartItemsContainer"></div>
@@ -801,28 +1073,28 @@
 
         return `
           <article class="cart-item">
-            <div class="cart-line-total">
-              <strong>KWD</strong>
-              <span>${lineTotal.toFixed(3)}</span>
-            </div>
+            <a class="cart-thumb" href="${getProductUrl(item)}" aria-label="${escapeHtml(item.name || 'منتج')}">
+              <img src="${escapeHtml(image)}" alt="${escapeHtml(item.name || 'منتج')}">
+            </a>
 
             <div class="cart-info">
-              <div class="cart-title">${escapeHtml(item.name || 'منتج')}</div>
+              <a class="cart-title" href="${getProductUrl(item)}">${escapeHtml(item.name || 'منتج')}</a>
               <div class="cart-price-small">KWD ${price.toFixed(3)}</div>
 
               <div class="qty-row">
                 <div class="qty-box">
-                  <button class="qty-btn" type="button" onclick="decreaseQty(${index})">−</button>
+                  <button class="qty-btn" type="button" onclick="decreaseQty(${index})" aria-label="تقليل الكمية">−</button>
                   <span>${quantity}</span>
-                  <button class="qty-btn" type="button" onclick="increaseQty(${index})">+</button>
+                  <button class="qty-btn" type="button" onclick="increaseQty(${index})" aria-label="زيادة الكمية">+</button>
                 </div>
 
-                <button class="remove-btn" type="button" onclick="removeItem(${index})">🗑</button>
+                <button class="remove-btn" type="button" onclick="removeItem(${index})" aria-label="حذف المنتج">🗑</button>
               </div>
             </div>
 
-            <div class="cart-thumb">
-              <img src="${escapeHtml(image)}" alt="${escapeHtml(item.name || 'منتج')}">
+            <div class="cart-line-total">
+              <strong>KWD</strong>
+              <span>${lineTotal.toFixed(3)}</span>
             </div>
           </article>
         `;
