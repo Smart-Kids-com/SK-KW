@@ -367,14 +367,34 @@
       .grid{grid-template-columns:1fr}
     }
 
-    @media (max-width: 760px){
-      .page{padding:14px}
-      .kv-grid{grid-template-columns:1fr}
-      .item{grid-template-columns:60px minmax(0,1fr)}
-      .item-price{grid-column:2;justify-self:start;text-align:left}
-      .topbar{padding:12px 14px;min-height:auto;align-items:flex-start}
-      .topbar-right{width:100%}
-    }
+   @media (max-width: 760px) {
+  .page {
+    padding: 14px;
+  }
+
+  .kv-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .item {
+    grid-template-columns: 60px minmax(0, 1fr);
+  }
+
+  .item-price {
+    grid-column: 2;
+    justify-self: start;
+    text-align: left;
+  }
+
+  .topbar {
+    padding: 12px 14px;
+    align-items: flex-start;
+  }
+
+  .topbar-right {
+    width: 100%;
+  }
+}
   </style>
 </head>
 <body>
