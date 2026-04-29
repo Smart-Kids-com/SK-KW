@@ -65,6 +65,37 @@ function makeLikeQuery(value) {
   return `%${escapeLike(value)}%`;
 }
 
+const tableColumnsCache = new Map();
+
+function quoteIdentifier(identifier) {
+  return `"${String(identifier).replace(/"/g, '""')}"`;
+}
+
+async function getTableColumns(tableName) {
+  if (tableColumnsCache.has(tableName)) {
+    return tableColumnsCache.get(tableName);
+  }
+
+  const rows = await db.all(`PRAGMA table_info(${quoteIdentifier(tableName)})`);
+
+  const columns = new Set(
+    (Array.isArray(rows) ? rows : [])
+      .map(row => row?.name)
+      .filter(Boolean)
+  );
+
+  tableColumnsCache.set(tableName, columns);
+  return columns;
+}
+
+function firstExistingColumn(columns, candidates) {
+  return candidates.find(column => columns.has(column)) || null;
+}
+
+function existingColumns(columns, candidates) {
+  return candidates.filter(column => columns.has(column));
+}
+
 async function ensureHeartbeatTable() {
   await db.run(`
     CREATE TABLE IF NOT EXISTS visitor_heartbeats (
@@ -248,15 +279,43 @@ async function trySearchAbandoned(q) {
 
 async function trySearchProducts(q) {
   try {
+    const columns = await getTableColumns('products');
+
+    const nameColumn = firstExistingColumn(columns, [
+      'name',
+      'product_name',
+      'title',
+      'product_title'
+    ]);
+
+    const searchColumns = existingColumns(
+      columns,
+      [nameColumn, 'slug', 'sku', 'barcode'].filter(Boolean)
+    );
+
+    if (!nameColumn || searchColumns.length === 0) {
+      return [];
+    }
+
+    const selectColumns = [
+      'id',
+      `${quoteIdentifier(nameColumn)} AS name`
+    ];
+
+    if (columns.has('slug')) selectColumns.push('slug');
+    if (columns.has('sku')) selectColumns.push('sku');
+
+    const whereClause = searchColumns
+      .map(column => `${quoteIdentifier(column)} LIKE ? ESCAPE '\\'`)
+      .join(' OR ');
+
     const rows = await db.all(
-      `SELECT id, name, slug, sku
+      `SELECT ${selectColumns.join(', ')}
        FROM products
-       WHERE name LIKE ? ESCAPE '\\'
-          OR slug LIKE ? ESCAPE '\\'
-          OR sku LIKE ? ESCAPE '\\'
+       WHERE ${whereClause}
        ORDER BY id DESC
        LIMIT 8`,
-      [q, q, q]
+      searchColumns.map(() => q)
     );
 
     return Array.isArray(rows) ? rows : [];
@@ -268,14 +327,46 @@ async function trySearchProducts(q) {
 
 async function trySearchCollections(q) {
   try {
+    const columns = await getTableColumns('collections');
+
+    const nameColumn = firstExistingColumn(columns, [
+      'name',
+      'title',
+      'collection_name',
+      'handle'
+    ]);
+
+    const searchColumns = existingColumns(
+      columns,
+      [nameColumn, 'slug', 'handle'].filter(Boolean)
+    );
+
+    if (!nameColumn || searchColumns.length === 0) {
+      return [];
+    }
+
+    const selectColumns = [
+      'id',
+      `${quoteIdentifier(nameColumn)} AS name`
+    ];
+
+    if (columns.has('slug')) {
+      selectColumns.push('slug');
+    } else if (columns.has('handle')) {
+      selectColumns.push(`${quoteIdentifier('handle')} AS slug`);
+    }
+
+    const whereClause = searchColumns
+      .map(column => `${quoteIdentifier(column)} LIKE ? ESCAPE '\\'`)
+      .join(' OR ');
+
     const rows = await db.all(
-      `SELECT id, name, slug
+      `SELECT ${selectColumns.join(', ')}
        FROM collections
-       WHERE name LIKE ? ESCAPE '\\'
-          OR slug LIKE ? ESCAPE '\\'
+       WHERE ${whereClause}
        ORDER BY id DESC
        LIMIT 8`,
-      [q, q]
+      searchColumns.map(() => q)
     );
 
     return Array.isArray(rows) ? rows : [];
@@ -288,9 +379,9 @@ async function trySearchCollections(q) {
 async function trySearchCustomers(q) {
   try {
     const rows = await db.all(
-      `SELECT id, name, email, phone
+      `SELECT id, full_name AS name, email, phone
        FROM customers
-       WHERE name LIKE ? ESCAPE '\\'
+       WHERE full_name LIKE ? ESCAPE '\\'
           OR email LIKE ? ESCAPE '\\'
           OR phone LIKE ? ESCAPE '\\'
        ORDER BY id DESC
