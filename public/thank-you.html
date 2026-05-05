@@ -165,7 +165,12 @@
       font-weight:800;
     }
 
-    .status-badge.pending{background:#fef3c7;color:#92400e}
+    .status-badge.pending,
+    .status-badge.received{
+      background:#dcfce7;
+      color:#166534;
+    }
+
     .status-badge.processing{background:#dbeafe;color:#1e40af}
     .status-badge.shipped{background:#e9d5ff;color:#6b21a8}
     .status-badge.completed{background:#dcfce7;color:#166534}
@@ -291,6 +296,7 @@
       .item-name{max-width:100%}
     }
   </style>
+
   <script src="/js/meta-pixel.js"></script>
 </head>
 <body>
@@ -322,7 +328,7 @@
           <div class="info-box">
             <div class="info-label">الحالة</div>
             <div class="info-value">
-              <span id="orderStatus" class="status-badge pending">--</span>
+              <span id="orderStatus" class="status-badge received">--</span>
             </div>
           </div>
 
@@ -407,30 +413,16 @@
         const num = Number(value || 0);
         return `KWD ${num.toFixed(3)}`;
       },
-      formatDateTime(value) {
-        if (!value) return '-';
-        const d = new Date(value);
-        if (isNaN(d.getTime())) return String(value);
-        return d.toLocaleString('ar-KW', {
-          timeZone: 'Asia/Kuwait',
-          weekday: 'short',
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true
-        });
-      },
       getStatusLabel(status) {
         const labels = {
-          pending: 'في الانتظار',
+          pending: 'تم استلام الطلب',
+          received: 'تم استلام الطلب',
           processing: 'قيد التجهيز',
           shipped: 'تم الشحن',
           completed: 'مكتمل',
           cancelled: 'ملغي'
         };
-        return labels[status] || status || '-';
+        return labels[status] || 'تم استلام الطلب';
       }
     };
 
@@ -486,6 +478,42 @@
       return parts.join(' - ') || '-';
     }
 
+    function formatOrderDateKuwait(value) {
+      if (!value) return '-';
+      const d = new Date(value);
+      if (isNaN(d.getTime())) return String(value);
+
+      return d.toLocaleString('ar-KW', {
+        timeZone: 'Asia/Kuwait',
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    }
+
+    function getCustomerFacingStatus(status) {
+      const normalized = String(status || 'pending').trim().toLowerCase();
+      const labels = {
+        pending: 'تم استلام الطلب',
+        received: 'تم استلام الطلب',
+        processing: 'قيد التجهيز',
+        shipped: 'تم الشحن',
+        completed: 'مكتمل',
+        cancelled: 'ملغي'
+      };
+      return labels[normalized] || 'تم استلام الطلب';
+    }
+
+    function getCustomerFacingStatusClass(status) {
+      const normalized = String(status || 'pending').trim().toLowerCase();
+      if (normalized === 'pending') return 'received';
+      return normalized || 'received';
+    }
+
     function renderItems(items) {
       const itemsList = document.getElementById('itemsList');
 
@@ -530,7 +558,7 @@
         'أحتاج مساعدة بخصوص طلبي.',
         orderNumber ? `رقم الطلب: ${orderNumber}` : '',
         customerName ? `الاسم: ${customerName}` : ''
-      ].filter(Boolean).join('\\n');
+      ].filter(Boolean).join('\n');
 
       btn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     }
@@ -597,7 +625,7 @@
       const discountValue = Number(order.discount_amount || 0);
 
       document.getElementById('orderNumber').textContent = order.order_number || '-';
-      document.getElementById('orderDate').textContent = order.created_at ? H.formatDateTime(order.created_at) : '-';
+      document.getElementById('orderDate').textContent = formatOrderDateKuwait(order.created_at);
       document.getElementById('customerName').textContent = order.customer_name || '-';
       document.getElementById('customerEmail').textContent = order.customer_email || '-';
       document.getElementById('customerPhone').textContent = order.customer_phone || '-';
@@ -606,8 +634,8 @@
       const statusEl = document.getElementById('orderStatus');
       const status = String(order.status || 'pending').trim().toLowerCase();
 
-      statusEl.className = `status-badge ${status}`;
-      statusEl.textContent = H.getStatusLabel(status);
+      statusEl.className = `status-badge ${getCustomerFacingStatusClass(status)}`;
+      statusEl.textContent = getCustomerFacingStatus(status);
 
       document.getElementById('subtotal').textContent = H.formatCurrency(order.subtotal || 0);
       document.getElementById('shipping').textContent = H.formatCurrency(order.shipping_cost || 0);
