@@ -14,9 +14,11 @@
       --info:#3b82f6;
       --light:#f3f4f6;
       --dark:#1f2937;
+      --muted:#6b7280;
       --border:#e5e7eb;
       --card:#ffffff;
       --whatsapp:#25d366;
+      --shadow:0 14px 36px rgba(0,0,0,.14);
     }
 
     body{
@@ -27,23 +29,23 @@
     }
 
     .container{
-      max-width:900px;
+      max-width:980px;
       margin:0 auto;
       padding:1.25rem;
     }
 
     .hero{
-      background:rgba(255,255,255,.96);
-      border-radius:18px;
+      background:rgba(255,255,255,.97);
+      border-radius:20px;
       padding:2rem 1.5rem;
-      box-shadow:0 18px 40px rgba(0,0,0,.18);
+      box-shadow:var(--shadow);
       text-align:center;
-      margin:1.5rem 0;
+      margin:1.4rem 0 1.2rem;
     }
 
     .hero-icon{
-      width:84px;
-      height:84px;
+      width:86px;
+      height:86px;
       margin:0 auto 1rem;
       border-radius:50%;
       background:rgba(16,185,129,.12);
@@ -51,40 +53,42 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:2.2rem;
+      font-size:2.3rem;
       font-weight:800;
     }
 
     .hero h1{
       color:var(--success);
       font-size:2rem;
-      margin-bottom:.5rem;
+      margin-bottom:.55rem;
     }
 
     .hero p{
-      color:#666;
-      line-height:1.8;
+      color:var(--muted);
+      line-height:1.9;
       font-size:1rem;
+      max-width:720px;
+      margin:0 auto;
     }
 
     .card{
       background:var(--card);
-      border-radius:16px;
-      padding:1.4rem;
-      margin-bottom:1.25rem;
-      box-shadow:0 10px 28px rgba(0,0,0,.14);
+      border-radius:18px;
+      padding:1.35rem;
+      margin-bottom:1.1rem;
+      box-shadow:var(--shadow);
     }
 
     .card h2{
       color:var(--primary);
       margin-bottom:1rem;
-      font-size:1.2rem;
+      font-size:1.18rem;
     }
 
     .alert{
       display:none;
       padding:1rem;
-      border-radius:10px;
+      border-radius:12px;
       margin-bottom:1rem;
       line-height:1.8;
     }
@@ -106,8 +110,9 @@
     .loading{
       display:none;
       text-align:center;
-      color:var(--primary);
+      color:#fff;
       padding:2rem 0;
+      font-weight:700;
     }
 
     .loading.active{display:block}
@@ -116,8 +121,8 @@
       width:42px;
       height:42px;
       border-radius:50%;
-      border:4px solid var(--light);
-      border-top-color:var(--primary);
+      border:4px solid rgba(255,255,255,.25);
+      border-top-color:#fff;
       animation:spin 1s linear infinite;
       margin:0 auto 1rem;
     }
@@ -135,13 +140,13 @@
     .info-box{
       background:#fafafa;
       border:1px solid var(--border);
-      border-radius:12px;
+      border-radius:14px;
       padding:1rem;
     }
 
     .info-label{
       font-size:.9rem;
-      color:#666;
+      color:var(--muted);
       margin-bottom:.35rem;
     }
 
@@ -149,15 +154,15 @@
       font-weight:700;
       color:var(--dark);
       word-break:break-word;
-      line-height:1.7;
+      line-height:1.8;
     }
 
     .status-badge{
       display:inline-block;
-      padding:.5rem .9rem;
+      padding:.5rem .95rem;
       border-radius:999px;
       font-size:.9rem;
-      font-weight:700;
+      font-weight:800;
     }
 
     .status-badge.pending{background:#fef3c7;color:#92400e}
@@ -173,7 +178,7 @@
 
     .item{
       border:1px solid var(--border);
-      border-radius:12px;
+      border-radius:14px;
       padding:1rem;
       background:#fff;
     }
@@ -182,20 +187,28 @@
       display:flex;
       justify-content:space-between;
       gap:1rem;
-      align-items:center;
-      margin-bottom:.5rem;
+      align-items:flex-start;
+      margin-bottom:.45rem;
       flex-wrap:wrap;
     }
 
     .item-name{
-      font-weight:700;
+      font-weight:800;
       color:var(--dark);
+      line-height:1.8;
+      max-width:72%;
+    }
+
+    .item-total{
+      font-weight:800;
+      color:var(--dark);
+      white-space:nowrap;
     }
 
     .item-meta{
-      color:#666;
-      font-size:.92rem;
-      line-height:1.7;
+      color:var(--muted);
+      font-size:.93rem;
+      line-height:1.8;
     }
 
     .summary{
@@ -210,7 +223,7 @@
       justify-content:space-between;
       gap:1rem;
       margin-bottom:.7rem;
-      line-height:1.7;
+      line-height:1.8;
     }
 
     .summary-row.total{
@@ -235,10 +248,10 @@
       gap:.5rem;
       min-height:48px;
       padding:0 1rem;
-      border-radius:10px;
+      border-radius:12px;
       border:none;
       cursor:pointer;
-      font-weight:700;
+      font-weight:800;
       text-decoration:none;
       transition:.2s ease;
     }
@@ -265,8 +278,8 @@
 
     .note{
       margin-top:1rem;
-      color:#6b7280;
-      line-height:1.8;
+      color:var(--muted);
+      line-height:1.9;
       text-align:center;
       font-size:.95rem;
     }
@@ -275,10 +288,9 @@
       .order-grid{grid-template-columns:1fr}
       .hero h1{font-size:1.6rem}
       .actions .btn{width:100%}
+      .item-name{max-width:100%}
     }
   </style>
-
-  <!-- Meta Pixel base loader -->
   <script src="/js/meta-pixel.js"></script>
 </head>
 <body>
@@ -289,7 +301,7 @@
       <div class="hero-icon">✓</div>
       <h1>شكراً لطلبك</h1>
       <p>
-        تم استلام طلبك بنجاح. ستجد تفاصيل الطلب كاملة هنا في نفس الصفحة.
+        تم استلام طلبك بنجاح. ستجد تفاصيل الطلب كاملة هنا في نفس الصفحة، وسنتواصل معك قريبًا لتأكيده وتجهيزه.
       </p>
     </section>
 
@@ -321,7 +333,7 @@
 
           <div class="info-box">
             <div class="info-label">ملاحظة</div>
-            <div class="info-value">احتفظ برقم الطلب للرجوع إليه عند الحاجة</div>
+            <div class="info-value">سيتم التواصل معك لتأكيد الطلب، لذلك احتفظ برقم الطلب عند الحاجة.</div>
           </div>
         </div>
       </div>
@@ -363,6 +375,10 @@
             <span>الإجمالي الجزئي</span>
             <span id="subtotal">KWD 0.000</span>
           </div>
+          <div class="summary-row" id="discountRow">
+            <span>الخصم</span>
+            <span id="discount">KWD 0.000</span>
+          </div>
           <div class="summary-row">
             <span>الشحن</span>
             <span id="shipping">KWD 0.000</span>
@@ -395,7 +411,16 @@
         if (!value) return '-';
         const d = new Date(value);
         if (isNaN(d.getTime())) return String(value);
-        return d.toLocaleString('ar-KW');
+        return d.toLocaleString('ar-KW', {
+          timeZone: 'Asia/Kuwait',
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
       },
       getStatusLabel(status) {
         const labels = {
@@ -446,15 +471,19 @@
     }
 
     function normalizeItems(order) {
-      if (Array.isArray(order?.items) && order.items.length) {
-        return order.items;
-      }
-
-      if (Array.isArray(order?.products) && order.products.length) {
-        return order.products;
-      }
-
+      if (Array.isArray(order?.items) && order.items.length) return order.items;
+      if (Array.isArray(order?.products) && order.products.length) return order.products;
       return [];
+    }
+
+    function normalizeAddress(order) {
+      const parts = [
+        order?.customer_address,
+        order?.customer_district,
+        order?.customer_city
+      ].map(v => String(v || '').trim()).filter(Boolean);
+
+      return parts.join(' - ') || '-';
     }
 
     function renderItems(items) {
@@ -479,7 +508,7 @@
           <div class="item">
             <div class="item-top">
               <div class="item-name">${itemName}</div>
-              <div class="item-name">${H.formatCurrency(itemSubtotal)}</div>
+              <div class="item-total">${H.formatCurrency(itemSubtotal)}</div>
             </div>
             <div class="item-meta">
               الكمية: ${qty} × ${H.formatCurrency(unitPrice)}
@@ -501,7 +530,7 @@
         'أحتاج مساعدة بخصوص طلبي.',
         orderNumber ? `رقم الطلب: ${orderNumber}` : '',
         customerName ? `الاسم: ${customerName}` : ''
-      ].filter(Boolean).join('\n');
+      ].filter(Boolean).join('\\n');
 
       btn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     }
@@ -565,13 +594,14 @@
 
     function renderOrder(order) {
       const items = normalizeItems(order);
+      const discountValue = Number(order.discount_amount || 0);
 
       document.getElementById('orderNumber').textContent = order.order_number || '-';
       document.getElementById('orderDate').textContent = order.created_at ? H.formatDateTime(order.created_at) : '-';
       document.getElementById('customerName').textContent = order.customer_name || '-';
       document.getElementById('customerEmail').textContent = order.customer_email || '-';
       document.getElementById('customerPhone').textContent = order.customer_phone || '-';
-      document.getElementById('customerAddress').textContent = order.customer_address || '-';
+      document.getElementById('customerAddress').textContent = normalizeAddress(order);
 
       const statusEl = document.getElementById('orderStatus');
       const status = String(order.status || 'pending').trim().toLowerCase();
@@ -581,7 +611,9 @@
 
       document.getElementById('subtotal').textContent = H.formatCurrency(order.subtotal || 0);
       document.getElementById('shipping').textContent = H.formatCurrency(order.shipping_cost || 0);
+      document.getElementById('discount').textContent = H.formatCurrency(discountValue);
       document.getElementById('total').textContent = H.formatCurrency(order.total || 0);
+      document.getElementById('discountRow').style.display = discountValue > 0 ? 'flex' : 'none';
 
       renderItems(items);
       setWhatsAppLink(order);
