@@ -1,9 +1,15 @@
-const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const { createClient } = require('@libsql/client');
 const { SYSTEM_CONFIG } = require('../config/system');
 
 const USE_TURSO = !!process.env.DATABASE_URL;
+
+let sqlite3 = null;
+
+if (!USE_TURSO) {
+  sqlite3 = require('sqlite3').verbose();
+}
+
 const DB_PATH = path.join(__dirname, '.', SYSTEM_CONFIG.DATABASE_CONFIG.NAME);
 
 // IMPORTANT: make timeouts more forgiving in production
