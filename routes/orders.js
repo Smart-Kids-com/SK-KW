@@ -6,6 +6,7 @@ const router = express.Router();
 const db = require('../db/turso-manager');
 const { SYSTEM_CONFIG, HELPERS } = require('../config/system');
 const { sendOrderEmails } = require('../utils/email');
+const { sendMetaPurchase } = require('../services/meta-capi');
 
 const ORDERS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS;
 const ORDER_ITEMS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS;
@@ -854,6 +855,14 @@ router.post('/', async (req, res) => {
     });
 
     const createdOrder = await getOrderWithItems(savedOrder.id);
+
+    // Meta CAPI must never make order creation fail.
+    // It uses the same deterministic event_id as the browser Pixel for deduplication.
+    try {
+      await sendMetaPurchase({ req, order: createdOrder });
+    } catch (metaError) {
+      console.error('❌ Meta CAPI Purchase error:', metaError?.message || metaError);
+    }
 
     try {
       await sendOrderEmails({ order: createdOrder });

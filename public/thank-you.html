@@ -20,20 +20,17 @@
       --whatsapp:#25d366;
       --shadow:0 14px 36px rgba(0,0,0,.14);
     }
-
     body{
       font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
       background:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%);
       min-height:100vh;
       color:var(--dark);
     }
-
     .container{
       max-width:980px;
       margin:0 auto;
       padding:1.25rem;
     }
-
     .hero{
       background:rgba(255,255,255,.97);
       border-radius:20px;
@@ -42,7 +39,6 @@
       text-align:center;
       margin:1.4rem 0 1.2rem;
     }
-
     .hero-icon{
       width:86px;
       height:86px;
@@ -56,13 +52,11 @@
       font-size:2.3rem;
       font-weight:800;
     }
-
     .hero h1{
       color:var(--success);
       font-size:2rem;
       margin-bottom:.55rem;
     }
-
     .hero p{
       color:var(--muted);
       line-height:1.9;
@@ -70,7 +64,6 @@
       max-width:720px;
       margin:0 auto;
     }
-
     .card{
       background:var(--card);
       border-radius:18px;
@@ -78,13 +71,11 @@
       margin-bottom:1.1rem;
       box-shadow:var(--shadow);
     }
-
     .card h2{
       color:var(--primary);
       margin-bottom:1rem;
       font-size:1.18rem;
     }
-
     .alert{
       display:none;
       padding:1rem;
@@ -92,21 +83,17 @@
       margin-bottom:1rem;
       line-height:1.8;
     }
-
     .alert.active{display:block}
-
     .alert.error{
       background:#fee2e2;
       color:#991b1b;
       border:1px solid #fca5a5;
     }
-
     .alert.info{
       background:#dbeafe;
       color:#1e40af;
       border:1px solid #93c5fd;
     }
-
     .loading{
       display:none;
       text-align:center;
@@ -114,9 +101,7 @@
       padding:2rem 0;
       font-weight:700;
     }
-
     .loading.active{display:block}
-
     .spinner{
       width:42px;
       height:42px;
@@ -126,37 +111,31 @@
       animation:spin 1s linear infinite;
       margin:0 auto 1rem;
     }
-
     @keyframes spin{
       to{transform:rotate(360deg)}
     }
-
     .order-grid{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:1rem;
     }
-
     .info-box{
       background:#fafafa;
       border:1px solid var(--border);
       border-radius:14px;
       padding:1rem;
     }
-
     .info-label{
       font-size:.9rem;
       color:var(--muted);
       margin-bottom:.35rem;
     }
-
     .info-value{
       font-weight:700;
       color:var(--dark);
       word-break:break-word;
       line-height:1.8;
     }
-
     .status-badge{
       display:inline-block;
       padding:.5rem .95rem;
@@ -164,30 +143,25 @@
       font-size:.9rem;
       font-weight:800;
     }
-
     .status-badge.pending,
     .status-badge.received{
       background:#dcfce7;
       color:#166534;
     }
-
     .status-badge.processing{background:#dbeafe;color:#1e40af}
     .status-badge.shipped{background:#e9d5ff;color:#6b21a8}
     .status-badge.completed{background:#dcfce7;color:#166534}
     .status-badge.cancelled{background:#fee2e2;color:#991b1b}
-
     .items-list{
       display:grid;
       gap:.85rem;
     }
-
     .item{
       border:1px solid var(--border);
       border-radius:14px;
       padding:1rem;
       background:#fff;
     }
-
     .item-top{
       display:flex;
       justify-content:space-between;
@@ -196,33 +170,28 @@
       margin-bottom:.45rem;
       flex-wrap:wrap;
     }
-
     .item-name{
       font-weight:800;
       color:var(--dark);
       line-height:1.8;
       max-width:72%;
     }
-
     .item-total{
       font-weight:800;
       color:var(--dark);
       white-space:nowrap;
     }
-
     .item-meta{
       color:var(--muted);
       font-size:.93rem;
       line-height:1.8;
     }
-
     .summary{
       background:linear-gradient(135deg,var(--primary),var(--secondary));
       color:#fff;
       border-radius:14px;
       padding:1.2rem;
     }
-
     .summary-row{
       display:flex;
       justify-content:space-between;
@@ -230,7 +199,6 @@
       margin-bottom:.7rem;
       line-height:1.8;
     }
-
     .summary-row.total{
       border-top:1px solid rgba(255,255,255,.25);
       padding-top:.8rem;
@@ -238,14 +206,12 @@
       font-size:1.15rem;
       font-weight:800;
     }
-
     .actions{
       display:flex;
       gap:.8rem;
       flex-wrap:wrap;
       margin-top:1rem;
     }
-
     .btn{
       display:inline-flex;
       align-items:center;
@@ -260,27 +226,21 @@
       text-decoration:none;
       transition:.2s ease;
     }
-
     .btn.primary{
       background:var(--primary);
       color:#fff;
     }
-
     .btn.primary:hover{
       background:var(--secondary);
     }
-
     .btn.whatsapp{
       background:var(--whatsapp);
       color:#fff;
     }
-
     .btn.whatsapp:hover{
       filter:brightness(.95);
     }
-
     .hide{display:none!important}
-
     .note{
       margin-top:1rem;
       color:var(--muted);
@@ -288,7 +248,6 @@
       text-align:center;
       font-size:.95rem;
     }
-
     @media (max-width:700px){
       .order-grid{grid-template-columns:1fr}
       .hero h1{font-size:1.6rem}
@@ -296,13 +255,11 @@
       .item-name{max-width:100%}
     }
   </style>
-
   <script src="/js/meta-pixel.js"></script>
 </head>
 <body>
   <div class="container">
     <div id="alert" class="alert"></div>
-
     <section class="hero">
       <div class="hero-icon">✓</div>
       <h1>شكراً لطلبك</h1>
@@ -310,12 +267,10 @@
         تم استلام طلبك بنجاح. ستجد تفاصيل الطلب كاملة هنا في نفس الصفحة، وسنتواصل معك قريبًا لتأكيده وتجهيزه.
       </p>
     </section>
-
     <div id="loading" class="loading active">
       <div class="spinner"></div>
       <p>جاري تحميل تفاصيل الطلب...</p>
     </div>
-
     <section id="orderSection" class="hide">
       <div class="card">
         <h2>معلومات الطلب</h2>
@@ -324,26 +279,22 @@
             <div class="info-label">رقم الطلب</div>
             <div class="info-value" id="orderNumber">--</div>
           </div>
-
           <div class="info-box">
             <div class="info-label">الحالة</div>
             <div class="info-value">
               <span id="orderStatus" class="status-badge received">--</span>
             </div>
           </div>
-
           <div class="info-box">
             <div class="info-label">تاريخ الطلب</div>
             <div class="info-value" id="orderDate">--</div>
           </div>
-
           <div class="info-box">
             <div class="info-label">ملاحظة</div>
             <div class="info-value">سيتم التواصل معك لتأكيد الطلب، لذلك احتفظ برقم الطلب عند الحاجة.</div>
           </div>
         </div>
       </div>
-
       <div class="card">
         <h2>بيانات العميل</h2>
         <div class="order-grid">
@@ -351,29 +302,24 @@
             <div class="info-label">الاسم</div>
             <div class="info-value" id="customerName">--</div>
           </div>
-
           <div class="info-box">
             <div class="info-label">البريد الإلكتروني</div>
             <div class="info-value" id="customerEmail">--</div>
           </div>
-
           <div class="info-box">
             <div class="info-label">رقم الهاتف</div>
             <div class="info-value" id="customerPhone">--</div>
           </div>
-
           <div class="info-box">
             <div class="info-label">العنوان</div>
             <div class="info-value" id="customerAddress">--</div>
           </div>
         </div>
       </div>
-
       <div class="card">
         <h2>المنتجات</h2>
         <div id="itemsList" class="items-list"></div>
       </div>
-
       <div class="card">
         <h2>ملخص الطلب</h2>
         <div class="summary">
@@ -394,19 +340,16 @@
             <span id="total">KWD 0.000</span>
           </div>
         </div>
-
         <div class="actions">
           <a class="btn primary" href="./index.html">العودة للمتجر</a>
           <a id="whatsappBtn" class="btn whatsapp" href="#" target="_blank" rel="noopener">واتساب</a>
         </div>
-
         <div class="note">
           في حال احتجت أي مساعدة، يمكنك التواصل معنا عبر واتساب مع إرسال رقم الطلب.
         </div>
       </div>
     </section>
   </div>
-
   <script>
     const HELPERS_FALLBACK = {
       formatCurrency(value) {
@@ -425,26 +368,21 @@
         return labels[status] || 'تم استلام الطلب';
       }
     };
-
     const H = (typeof HELPERS !== 'undefined' && HELPERS) ? HELPERS : HELPERS_FALLBACK;
     const WHATSAPP_NUMBER = '96566635393';
-
     function showAlert(message, type = 'info') {
       const alert = document.getElementById('alert');
       alert.textContent = message;
       alert.className = `alert active ${type}`;
     }
-
     function hideAlert() {
       const alert = document.getElementById('alert');
       alert.className = 'alert';
       alert.textContent = '';
     }
-
     function showLoading(show) {
       document.getElementById('loading').classList.toggle('active', show);
     }
-
     function getQueryParam(name) {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -453,7 +391,6 @@
         return '';
       }
     }
-
     function getLastOrder() {
       try {
         return JSON.parse(localStorage.getItem('last_order') || 'null');
@@ -461,28 +398,23 @@
         return null;
       }
     }
-
     function normalizeItems(order) {
       if (Array.isArray(order?.items) && order.items.length) return order.items;
       if (Array.isArray(order?.products) && order.products.length) return order.products;
       return [];
     }
-
     function normalizeAddress(order) {
       const parts = [
         order?.customer_address,
         order?.customer_district,
         order?.customer_city
       ].map(v => String(v || '').trim()).filter(Boolean);
-
       return parts.join(' - ') || '-';
     }
-
     function formatOrderDateKuwait(value) {
       if (!value) return '-';
       const d = new Date(value);
       if (isNaN(d.getTime())) return String(value);
-
       return d.toLocaleString('ar-KW', {
         timeZone: 'Asia/Kuwait',
         weekday: 'long',
@@ -494,7 +426,6 @@
         hour12: true
       });
     }
-
     function getCustomerFacingStatus(status) {
       const normalized = String(status || 'pending').trim().toLowerCase();
       const labels = {
@@ -507,16 +438,13 @@
       };
       return labels[normalized] || 'تم استلام الطلب';
     }
-
     function getCustomerFacingStatusClass(status) {
       const normalized = String(status || 'pending').trim().toLowerCase();
       if (normalized === 'pending') return 'received';
       return normalized || 'received';
     }
-
     function renderItems(items) {
       const itemsList = document.getElementById('itemsList');
-
       if (!items || !items.length) {
         itemsList.innerHTML = `
           <div class="item">
@@ -525,13 +453,11 @@
         `;
         return;
       }
-
       itemsList.innerHTML = items.map(item => {
         const unitPrice = Number(item.product_price ?? item.price ?? item.unit_price ?? 0);
         const qty = Number(item.quantity ?? item.qty ?? 0);
         const itemSubtotal = Number(item.subtotal ?? (unitPrice * qty));
         const itemName = item.product_name || item.name || 'منتج';
-
         return `
           <div class="item">
             <div class="item-top">
@@ -545,30 +471,29 @@
         `;
       }).join('');
     }
-
     function setWhatsAppLink(order) {
       const btn = document.getElementById('whatsappBtn');
       if (!btn) return;
-
       const orderNumber = String(order?.order_number || '').trim();
       const customerName = String(order?.customer_name || '').trim();
-
       const message = [
         'مرحباً،',
         'أحتاج مساعدة بخصوص طلبي.',
         orderNumber ? `رقم الطلب: ${orderNumber}` : '',
         customerName ? `الاسم: ${customerName}` : ''
       ].filter(Boolean).join('\n');
-
       btn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     }
-
     function getPurchaseEventKey(order) {
       const orderNumber = String(order?.order_number || '').trim();
       if (!orderNumber) return '';
       return `pixel_purchase_sent_${orderNumber}`;
     }
-
+    function getPurchaseEventId(order) {
+      const orderNumber = String(order?.order_number || '').trim();
+      if (!orderNumber) return '';
+      return `purchase_${orderNumber}`;
+    }
     function hasPurchaseBeenTracked(order) {
       try {
         const key = getPurchaseEventKey(order);
@@ -578,7 +503,6 @@
         return false;
       }
     }
-
     function markPurchaseTracked(order) {
       try {
         const key = getPurchaseEventKey(order);
@@ -586,92 +510,77 @@
         sessionStorage.setItem(key, '1');
       } catch (e) {}
     }
-
     function trackPurchaseEvent(order) {
       try {
         if (typeof SmartKidsPixel === 'undefined' || !SmartKidsPixel || typeof SmartKidsPixel.trackPurchase !== 'function') {
           return;
         }
-
         if (hasPurchaseBeenTracked(order)) {
           return;
         }
-
         const items = normalizeItems(order);
         const ids = items
           .map(item => item.product_id ?? item.id ?? item.productId ?? '')
           .map(String)
           .filter(Boolean);
-
         const quantity = items.reduce((sum, item) => {
           return sum + Number(item.quantity ?? item.qty ?? 0);
         }, 0);
-
+        const eventId = getPurchaseEventId(order);
+        if (!eventId) {
+          return;
+        }
         SmartKidsPixel.trackPurchase({
           value: Number(order.total || 0),
           quantity,
           ids,
-          currency: 'KWD'
+          currency: 'KWD',
+          eventId
         });
-
         markPurchaseTracked(order);
       } catch (error) {
         console.error('Purchase pixel error:', error);
       }
     }
-
     function renderOrder(order) {
       const items = normalizeItems(order);
       const discountValue = Number(order.discount_amount || 0);
-
       document.getElementById('orderNumber').textContent = order.order_number || '-';
       document.getElementById('orderDate').textContent = formatOrderDateKuwait(order.created_at);
       document.getElementById('customerName').textContent = order.customer_name || '-';
       document.getElementById('customerEmail').textContent = order.customer_email || '-';
       document.getElementById('customerPhone').textContent = order.customer_phone || '-';
       document.getElementById('customerAddress').textContent = normalizeAddress(order);
-
       const statusEl = document.getElementById('orderStatus');
       const status = String(order.status || 'pending').trim().toLowerCase();
-
       statusEl.className = `status-badge ${getCustomerFacingStatusClass(status)}`;
       statusEl.textContent = getCustomerFacingStatus(status);
-
       document.getElementById('subtotal').textContent = H.formatCurrency(order.subtotal || 0);
       document.getElementById('shipping').textContent = H.formatCurrency(order.shipping_cost || 0);
       document.getElementById('discount').textContent = H.formatCurrency(discountValue);
       document.getElementById('total').textContent = H.formatCurrency(order.total || 0);
       document.getElementById('discountRow').style.display = discountValue > 0 ? 'flex' : 'none';
-
       renderItems(items);
       setWhatsAppLink(order);
-
       document.getElementById('orderSection').classList.remove('hide');
-
       trackPurchaseEvent(order);
     }
-
     function isMatchingOrder(queryOrder, storedOrder) {
       if (!queryOrder) return true;
       return String(storedOrder?.order_number || '').trim() === String(queryOrder).trim();
     }
-
     async function loadOrderDetails() {
       hideAlert();
       showLoading(true);
-
       try {
         const orderNumberFromUrl = getQueryParam('order');
         const lastOrder = getLastOrder();
-
         if (!lastOrder) {
           throw new Error('لم يتم العثور على بيانات الطلب. افتح الصفحة مباشرة بعد إتمام الشراء.');
         }
-
         if (!isMatchingOrder(orderNumberFromUrl, lastOrder)) {
           throw new Error('بيانات الطلب الحالية غير متطابقة مع رقم الطلب الموجود في الرابط.');
         }
-
         renderOrder(lastOrder);
       } catch (error) {
         console.error('Thank you load error:', error);
@@ -680,7 +589,6 @@
         showLoading(false);
       }
     }
-
     document.addEventListener('DOMContentLoaded', loadOrderDetails);
   </script>
   <script src="/js/live-visitors.js"></script>

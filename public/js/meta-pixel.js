@@ -2,7 +2,8 @@
   'use strict';
 
   const CONFIG = {
-pixelId: '899390561983033',    currency: 'KWD',
+    pixelId: '899390561983033',
+    currency: 'KWD',
     debug: false
   };
 
@@ -83,14 +84,21 @@ pixelId: '899390561983033',    currency: 'KWD',
     return true;
   }
 
-  function track(eventName, payload = {}) {
+  function track(eventName, payload = {}, options = {}) {
     if (!window.fbq) {
       logDebug('fbq not ready, skipped event:', eventName, payload);
       return;
     }
 
-    window.fbq('track', eventName, payload);
-    logDebug('Tracked:', eventName, payload);
+    const eventID = normalizeName(options.eventID || options.eventId);
+
+    if (eventID) {
+      window.fbq('track', eventName, payload, { eventID });
+    } else {
+      window.fbq('track', eventName, payload);
+    }
+
+    logDebug('Tracked:', eventName, payload, eventID ? { eventID } : {});
   }
 
   function trackCustom(eventName, payload = {}) {
@@ -134,13 +142,19 @@ pixelId: '899390561983033',    currency: 'KWD',
   }
 
   function trackPurchase(data = {}) {
-    track('Purchase', {
-      value: toNumber(data.value, 0),
-      currency: data.currency || CONFIG.currency,
-      num_items: toNumber(data.quantity ?? data.num_items, 0),
-      content_ids: normalizeIds(data.ids),
-      content_type: data.contentType || 'product'
-    });
+    const eventID = normalizeName(data.eventID || data.eventId);
+
+    track(
+      'Purchase',
+      {
+        value: toNumber(data.value, 0),
+        currency: data.currency || CONFIG.currency,
+        num_items: toNumber(data.quantity ?? data.num_items, 0),
+        content_ids: normalizeIds(data.ids),
+        content_type: data.contentType || 'product'
+      },
+      eventID ? { eventID } : {}
+    );
   }
 
   function trackSearch(data = {}) {
