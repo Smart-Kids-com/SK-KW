@@ -263,64 +263,6 @@
       display:block;
     }
 
-    .search-panel{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.42);
-      z-index:1300;
-      display:none;
-      align-items:flex-start;
-      justify-content:center;
-      padding:90px 14px 20px;
-    }
-
-    .search-box{
-      width:min(100%, 460px);
-      background:#fff;
-      color:#111;
-      border-radius:18px;
-      padding:14px;
-      box-shadow:var(--shadow);
-    }
-
-    .search-box input{
-      width:100%;
-      min-height:48px;
-      border:1px solid #ddd;
-      border-radius:12px;
-      padding:12px 14px;
-      font-size:1rem;
-    }
-
-    .search-results{
-      margin-top:12px;
-      max-height:54vh;
-      overflow:auto;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-
-    .search-item{
-      border:1px solid #ececec;
-      border-radius:12px;
-      padding:10px;
-      background:#fafafa;
-    }
-
-    .search-item-title{
-      font-weight:700;
-      color:#111;
-      margin-bottom:4px;
-    }
-
-    .search-item-price{
-      color:var(--deep-purple);
-      font-weight:700;
-      margin-bottom:8px;
-    }
-
-.search-item-price-wrap,
     .hero-price-wrap,
     .card-price-wrap{
       display:flex;
@@ -328,7 +270,6 @@
       gap:6px;
     }
 
-    .search-item-price-old,
     .hero-price-old,
     .card-price-old{
       color:rgba(255,255,255,.6);
@@ -337,11 +278,6 @@
       direction:ltr;
     }
 
-    .search-item-price-old{
-      color:#7a6a8f;
-    }
-
-    .search-item-stock,
     .hero-stock-badge,
     .card-stock-badge,
     .offer-badge{
@@ -363,13 +299,6 @@
       width:fit-content;
     }
 
-    .search-item-stock{
-      background:#f3eef7;
-      color:#5b1970;
-      margin-bottom:8px;
-    }
-
-    .search-item-stock.out,
     .hero-stock-badge.out,
     .card-stock-badge.out{
       background:rgba(217,48,37,.16);
@@ -387,47 +316,9 @@
     }
 
     .hero-btn.is-disabled,
-    .card-btn.is-disabled,
-    .search-item button.is-disabled{
+    .card-btn.is-disabled{
       opacity:.6;
       cursor:not-allowed;
-    }
-
-    .search-item-actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-
-    .search-item button,
-    .search-item a{
-      border:0;
-      border-radius:10px;
-      min-height:38px;
-      padding:0 14px;
-      background:var(--deep-purple);
-      color:#fff;
-      font-weight:700;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .search-item a{
-      background:#7d49a8;
-    }
-
-    .search-close{
-      width:100%;
-      min-height:44px;
-      margin-top:10px;
-      border:0;
-      border-radius:12px;
-      background:var(--deep-purple);
-      color:#fff;
-      font-weight:700;
-      cursor:pointer;
     }
 
     .page{
@@ -899,18 +790,15 @@
     }
 
     .hero-price-wrap,
-    .card-price-wrap,
-    .search-item-price-wrap {
+    .card-price-wrap {
       align-items: center;
       text-align: center;
     }
 
     .hero-price-old,
     .card-price-old,
-    .search-item-price-old,
     .hero-price,
-    .card-price,
-    .search-item-price {
+    .card-price {
       text-align: center;
       direction: ltr;
     }
@@ -928,8 +816,7 @@
     }
 
     .hero-stock-badge,
-    .card-stock-badge,
-    .search-item-stock {
+    .card-stock-badge {
       display: none !important;
     }
 
@@ -1005,14 +892,6 @@
 <body>
   <div id="site-header"></div>
   <script src="./header.js"></script>
-<div class="search-panel" id="searchPanel">
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="ابحث في المنتجات..." />
-      <div class="search-results" id="searchResults"></div>
-      <button class="search-close" id="searchClose" type="button">إغلاق</button>
-    </div>
-  </div>
-
   <div class="toast" id="cartToast">
     <div class="toast-inner">
       <div class="toast-thumb">
@@ -1198,7 +1077,7 @@
       const finalPrice = getPrice(product);
       const regularPrice = getRegularPrice(product);
       const sale = hasSale(product);
-      const cls = variant === 'hero' ? 'hero' : variant === 'search' ? 'search-item' : 'card';
+      const cls = variant === 'hero' ? 'hero' : 'card';
 
       return `
         <div class="${cls}-price-wrap">
@@ -1311,62 +1190,6 @@
 
     function closeMenu() {
       document.body.classList.remove('menu-open');
-    }
-
-    function openSearch() {
-      document.getElementById('searchPanel').style.display = 'flex';
-      setTimeout(() => document.getElementById('searchInput').focus(), 50);
-    }
-
-    function closeSearch() {
-      document.getElementById('searchPanel').style.display = 'none';
-      document.getElementById('searchInput').value = '';
-      document.getElementById('searchResults').innerHTML = '';
-    }
-
-    function renderSearch(query) {
-      const q = normalize(query);
-      const box = document.getElementById('searchResults');
-
-      if (!q) {
-        box.innerHTML = '';
-        return;
-      }
-
-      const results = allProducts.filter(product => {
-        const hay = normalize(
-          `${getTitle(product)} ${product.category || product.type || ''} ${getDescription(product)} ${product.vendor || ''} ${product.sku || ''}`
-        );
-        return hay.includes(q);
-      }).slice(0, 10);
-
-      if (!results.length) {
-        box.innerHTML = `<div class="search-item">لا توجد نتائج</div>`;
-        return;
-      }
-
-      box.innerHTML = results.map(product => {
-        const purchasable = isPurchasable(product);
-        const id = escapeHtml(product.slug || product.id || '');
-        return `
-          <div class="search-item">
-            <div class="search-item-title">${escapeHtml(getTitle(product))}</div>
-            ${getPriceMarkup(product, 'search')}
-            <div class="search-item-actions">
-              <button type="button" class="${purchasable ? '' : 'is-disabled'}" data-action="add" data-id="${id}" ${purchasable ? '' : 'disabled'}>${purchasable ? 'إضافة للسلة' : 'نفدت الكمية'}</button>
-              <a href="${getProductUrl(product)}">فتح المنتج</a>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      box.querySelectorAll('button[data-action="add"]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const id = btn.dataset.id;
-          const product = allProducts.find(p => String(p.slug || p.id || '') === String(id));
-          if (product) addToCart(product);
-        });
-      });
     }
 
     function heroSlide(product) {
@@ -1762,21 +1585,6 @@
       fillTrack('collectionsTrack', allCollections, 'collections');
     }
 
-    document.addEventListener('click', (event) => {
-      const headerSearchButton = event.target.closest('#headerSearchBtn, #menuSearchBtn');
-      if (!headerSearchButton) return;
-
-      if (document.getElementById('searchPanel')) {
-        event.preventDefault();
-        openSearch();
-      }
-    });
-
-    document.getElementById('searchClose').addEventListener('click', closeSearch);
-    document.getElementById('searchPanel').addEventListener('click', (e) => {
-      if (e.target.id === 'searchPanel') closeSearch();
-    });
-    document.getElementById('searchInput').addEventListener('input', (e) => renderSearch(e.target.value));
     document.getElementById('toastClose').addEventListener('click', hideCartToast);
     document.getElementById('toastContinue').addEventListener('click', (e) => {
       e.preventDefault();
@@ -1793,7 +1601,6 @@
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        closeSearch();
         hideCartToast();
       }
     });
