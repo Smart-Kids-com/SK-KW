@@ -170,6 +170,7 @@ function getOrderByForCollectionProducts(sortMode = 'manual') {
   if (normalized === 'price_asc') return 'p.price ASC, p.id ASC';
   if (normalized === 'newest') return 'p.created_at DESC, p.id DESC';
   if (normalized === 'oldest') return 'p.created_at ASC, p.id ASC';
+  if (normalized === 'best_selling') return 'p.stock DESC, p.price DESC, p.id DESC';
 
   // manual / default
   return 'cp.sort_order ASC, cp.id ASC';

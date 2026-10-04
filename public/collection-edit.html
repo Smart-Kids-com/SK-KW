@@ -709,7 +709,7 @@
                 <div class="products-toolbar">
                   <input id="productSearchInput" type="text" placeholder="Search inside collection..." oninput="filterCollectionProducts()">
 
-                  <select id="sortModeSelect" onchange="handleSortModeChange()" aria-label="Sort mode"></select>
+                  <select id="sortModeSelect" onchange="handleSortModeChange()" aria-label="Sort mode">
                     <option value="manual">Manually</option>
                     <option value="best_selling">Best selling</option>
                     <option value="title_asc">Product title A-Z</option>
@@ -1395,17 +1395,25 @@
     }
 
     async function handleSortModeChange() {
+      const nextMode = qs('sortModeSelect').value || 'manual';
       updateMetaSidebar();
 
-      if (qs('sortModeSelect').value !== 'manual') {
+      if (nextMode !== 'manual') {
         showAlert('Non-manual sort mode is saved with the collection. Manual drag and move actions work only in Manual mode.', 'info');
       }
 
-      if (currentCollectionId) {
-        await saveCollection();
+      if (!currentCollectionId) {
+        await refreshCollectionProducts(true);
+        return;
       }
 
-      // reload products from server in that sort mode
+      const savedMode = String(currentCollection?.sort_mode || 'manual');
+      if (nextMode === savedMode) {
+        await refreshCollectionProducts(true);
+        return;
+      }
+
+      await saveCollection();
       await refreshCollectionProducts(true);
     }
 
