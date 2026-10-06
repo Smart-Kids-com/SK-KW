@@ -80,22 +80,22 @@ async function getProductInventoryById(id) {
 
   const row = await db.get(
     `
-    SELECT
-      id,
-      product_name,
-      sku,
-      status,
-      COALESCE(stock, 0) as stock,
-      COALESCE(on_hand, 0) as on_hand,
-      COALESCE(committed, 0) as committed,
-      COALESCE(unavailable, 0) as unavailable,
-      COALESCE(inventory_enabled, 1) as inventory_enabled,
-      COALESCE(inventory_blocked, 0) as inventory_blocked,
-      created_at,
-      updated_at
-    FROM ${PRODUCTS_TABLE}
-    WHERE id = ?
-    LIMIT 1
+      SELECT
+        id,
+        product_name,
+        sku,
+        status,
+        COALESCE(stock, 0) as stock,
+        COALESCE(on_hand, 0) as on_hand,
+        COALESCE(committed, 0) as committed,
+        COALESCE(unavailable, 0) as unavailable,
+        COALESCE(inventory_enabled, 1) as inventory_enabled,
+        COALESCE(inventory_blocked, 0) as inventory_blocked,
+        created_at,
+        updated_at
+      FROM ${PRODUCTS_TABLE}
+      WHERE id = ?
+      LIMIT 1
     `,
     [id]
   );
@@ -120,20 +120,20 @@ async function syncProductInventoryById(id, overrides = {}) {
 
   const current = await db.get(
     `
-    SELECT
-      id,
-      product_name,
-      sku,
-      status,
-      COALESCE(stock, 0) as stock,
-      COALESCE(on_hand, 0) as on_hand,
-      COALESCE(committed, 0) as committed,
-      COALESCE(unavailable, 0) as unavailable,
-      COALESCE(inventory_enabled, 1) as inventory_enabled,
-      COALESCE(inventory_blocked, 0) as inventory_blocked
-    FROM ${PRODUCTS_TABLE}
-    WHERE id = ?
-    LIMIT 1
+      SELECT
+        id,
+        product_name,
+        sku,
+        status,
+        COALESCE(stock, 0) as stock,
+        COALESCE(on_hand, 0) as on_hand,
+        COALESCE(committed, 0) as committed,
+        COALESCE(unavailable, 0) as unavailable,
+        COALESCE(inventory_enabled, 1) as inventory_enabled,
+        COALESCE(inventory_blocked, 0) as inventory_blocked
+      FROM ${PRODUCTS_TABLE}
+      WHERE id = ?
+      LIMIT 1
     `,
     [id]
   );
@@ -157,18 +157,18 @@ async function syncProductInventoryById(id, overrides = {}) {
 
   await db.run(
     `
-    UPDATE ${PRODUCTS_TABLE}
-    SET
-      sku = ?,
-      status = ?,
-      stock = ?,
-      on_hand = ?,
-      committed = ?,
-      unavailable = ?,
-      inventory_enabled = ?,
-      inventory_blocked = ?,
-      updated_at = CURRENT_TIMESTAMP
-    WHERE id = ?
+      UPDATE ${PRODUCTS_TABLE}
+      SET
+        sku = ?,
+        status = ?,
+        stock = ?,
+        on_hand = ?,
+        committed = ?,
+        unavailable = ?,
+        inventory_enabled = ?,
+        inventory_blocked = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
     `,
     [
       next.sku,
@@ -202,19 +202,19 @@ async function validateOrderItemsStock(items) {
 
     const product = await db.get(
       `
-      SELECT
-        id,
-        product_name,
-        status,
-        COALESCE(stock, 0) as stock,
-        COALESCE(on_hand, 0) as on_hand,
-        COALESCE(committed, 0) as committed,
-        COALESCE(unavailable, 0) as unavailable,
-        COALESCE(inventory_enabled, 1) as inventory_enabled,
-        COALESCE(inventory_blocked, 0) as inventory_blocked
-      FROM ${PRODUCTS_TABLE}
-      WHERE id = ?
-      LIMIT 1
+        SELECT
+          id,
+          product_name,
+          status,
+          COALESCE(stock, 0) as stock,
+          COALESCE(on_hand, 0) as on_hand,
+          COALESCE(committed, 0) as committed,
+          COALESCE(unavailable, 0) as unavailable,
+          COALESCE(inventory_enabled, 1) as inventory_enabled,
+          COALESCE(inventory_blocked, 0) as inventory_blocked
+        FROM ${PRODUCTS_TABLE}
+        WHERE id = ?
+        LIMIT 1
       `,
       [productId]
     );
@@ -267,31 +267,9 @@ async function validateOrderItemsStock(items) {
   };
 }
 
-async function listInventory({
-  search = '',
-  stockStatus = '',
-  sort = 'product_name',
-  order = 'ASC',
-  limit = 50,
-  offset = 0
-} = {}) {
-  const safeLimit = Math.max(1, Math.min(200, toInt(limit, 50)));
-  const safeOffset = Math.max(0, toInt(offset, 0));
+function buildInventoryWhere({ search = '', stockStatus = '' } = {}) {
   const q = safeText(search).toLowerCase();
   const stockStatusNormalized = safeText(stockStatus).toLowerCase();
-  const sortOrder = String(order).toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
-
-    const sortMap = {
-  product_name: 'id',
-  sku: 'id',
-  unavailable: 'unavailable',
-  committed: 'committed',
-  available: 'stock',
-  on_hand: 'on_hand'
-};
-
-const sortColumn = sortMap[sort] || 'id';
-
   const where = [];
   const params = [];
 
@@ -320,36 +298,103 @@ const sortColumn = sortMap[sort] || 'id';
     )`);
   }
 
-  const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+  return {
+    whereSql: where.length ? `WHERE ${where.join(' AND ')}` : '',
+    params
+  };
+}
+
+async function getInventoryStats({ search = '', stockStatus = '' } = {}) {
+  await ensureInventoryColumns();
+
+  const { whereSql, params } = buildInventoryWhere({ search, stockStatus });
+
+  const row = await db.get(
+    `
+      SELECT
+        COUNT(*) as total,
+        COALESCE(SUM(CASE WHEN
+          COALESCE(inventory_enabled, 1) = 1
+          AND COALESCE(inventory_blocked, 0) = 0
+          AND LOWER(COALESCE(status, 'active')) = 'active'
+          AND COALESCE(stock, 0) > 0
+          THEN 1 ELSE 0 END), 0) as in_stock,
+        COALESCE(SUM(CASE WHEN
+          COALESCE(inventory_enabled, 1) = 0
+          OR COALESCE(inventory_blocked, 0) = 1
+          OR LOWER(COALESCE(status, 'active')) <> 'active'
+          OR COALESCE(stock, 0) <= 0
+          THEN 1 ELSE 0 END), 0) as out_of_stock,
+        COALESCE(SUM(COALESCE(stock, 0)), 0) as available
+      FROM ${PRODUCTS_TABLE}
+      ${whereSql}
+    `,
+    params
+  );
+
+  return {
+    total: Number(row?.total || 0),
+    in_stock: Number(row?.in_stock || 0),
+    out_of_stock: Number(row?.out_of_stock || 0),
+    available: Number(row?.available || 0)
+  };
+}
+
+async function listInventory({
+  search = '',
+  stockStatus = '',
+  sort = 'product_name',
+  order = 'ASC',
+  limit = 50,
+  offset = 0
+} = {}) {
+  await ensureInventoryColumns();
+
+  const safeLimit = Math.max(1, Math.min(200, toInt(limit, 50)));
+  const safeOffset = Math.max(0, toInt(offset, 0));
+  const sortOrder = String(order).toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
+  const sortMap = {
+    product_name: "LOWER(COALESCE(product_name, ''))",
+    sku: "LOWER(COALESCE(sku, ''))",
+    unavailable: 'unavailable',
+    committed: 'committed',
+    available: 'stock',
+    on_hand: 'on_hand',
+    id: 'id'
+  };
+
+  const sortColumn = sortMap[safeText(sort)] || sortMap.product_name;
+  const { whereSql, params } = buildInventoryWhere({ search, stockStatus });
 
   const countRow = await db.get(
     `
-    SELECT COUNT(*) as count
-    FROM ${PRODUCTS_TABLE}
-    ${whereSql}
+      SELECT COUNT(*) as count
+      FROM ${PRODUCTS_TABLE}
+      ${whereSql}
     `,
     params
   );
 
   const rows = await db.all(
     `
-    SELECT
-      id,
-      product_name,
-      sku,
-      status,
-      COALESCE(stock, 0) as stock,
-      COALESCE(on_hand, 0) as on_hand,
-      COALESCE(committed, 0) as committed,
-      COALESCE(unavailable, 0) as unavailable,
-      COALESCE(inventory_enabled, 1) as inventory_enabled,
-      COALESCE(inventory_blocked, 0) as inventory_blocked,
-      created_at,
-      updated_at
-    FROM ${PRODUCTS_TABLE}
-    ${whereSql}
-    ORDER BY ${sortColumn} ${sortOrder}
-    LIMIT ? OFFSET ?
+      SELECT
+        id,
+        product_name,
+        sku,
+        status,
+        COALESCE(stock, 0) as stock,
+        COALESCE(on_hand, 0) as on_hand,
+        COALESCE(committed, 0) as committed,
+        COALESCE(unavailable, 0) as unavailable,
+        COALESCE(inventory_enabled, 1) as inventory_enabled,
+        COALESCE(inventory_blocked, 0) as inventory_blocked,
+        created_at,
+        updated_at
+      FROM ${PRODUCTS_TABLE}
+      ${whereSql}
+      ORDER BY ${sortColumn} ${sortOrder}, id ASC
+      LIMIT ? OFFSET ?
     `,
     [...params, safeLimit, safeOffset]
   );
@@ -369,14 +414,16 @@ const sortColumn = sortMap[sort] || 'id';
   });
 
   const total = Number(countRow?.count || 0);
+  const stats = await getInventoryStats({ search, stockStatus });
 
   return {
     data: items,
+    stats,
     pagination: {
       total,
       limit: safeLimit,
       offset: safeOffset,
-      totalPages: Math.ceil(total / safeLimit)
+      totalPages: Math.max(1, Math.ceil(total / safeLimit))
     }
   };
 }
@@ -393,5 +440,6 @@ module.exports = {
   getProductInventoryById,
   syncProductInventoryById,
   validateOrderItemsStock,
+  getInventoryStats,
   listInventory
 };

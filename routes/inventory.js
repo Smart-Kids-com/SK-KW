@@ -12,6 +12,8 @@ const {
 
 router.get('/', async (req, res) => {
   try {
+    await ensureInventoryColumns();
+
     const result = await listInventory({
       search: req.query.search,
       stockStatus: req.query.stock_status,
@@ -24,6 +26,7 @@ router.get('/', async (req, res) => {
     return res.json({
       success: true,
       data: result.data,
+      stats: result.stats,
       pagination: result.pagination
     });
   } catch (error) {
@@ -113,9 +116,15 @@ router.post('/:id/open', async (req, res) => {
       status: 'active'
     });
 
+    const available = toInt(updated?.available, 0);
+    const message = available > 0
+      ? 'تم فتح المنتج وأصبح متاحًا على الواجهة'
+      : 'تم فتح المنتج، لكن الكمية المتاحة صفر. زوّد Available أو On hand عشان يظهر متاحًا للشراء.';
+
     return res.json({
       success: true,
-      message: 'تم فتح المنتج',
+      message,
+      warning: available <= 0,
       data: updated
     });
   } catch (error) {
@@ -222,7 +231,7 @@ router.post('/bulk', async (req, res) => {
 
     return res.json({
       success: true,
-      message: 'تم تحديث المخزون المحدد',
+      message: `تم تحديث ${results.length} منتج من المخزون المحدد`,
       data: results
     });
   } catch (error) {
