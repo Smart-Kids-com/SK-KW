@@ -590,7 +590,36 @@
       color:#e9dfeb;
       font-size:1.06rem;
       line-height:1.95;
-      white-space:pre-line;
+      white-space:normal;
+    }
+
+    .product-description p{
+      margin:0 0 12px;
+    }
+
+    .product-description ul,
+    .product-description ol{
+      margin:8px 0 14px;
+      padding:0 24px 0 0;
+    }
+
+    .product-description li{
+      margin:0 0 8px;
+    }
+
+    .product-description strong,
+    .product-description b{
+      color:#fff;
+      font-weight:800;
+    }
+
+    .product-description span,
+    .product-description div{
+      max-width:100%;
+    }
+
+    .product-description > :last-child{
+      margin-bottom:0;
     }
 
     .share-link{
@@ -1537,6 +1566,124 @@
       return text || fallback;
     }
 
+    function hasHtmlMarkup(value) {
+      return /<\/?[a-z][\s\S]*>/i.test(String(value || ""));
+    }
+
+    function normalizeSpaces(value) {
+      return String(value || "").replace(/\s+/g, " ").trim();
+    }
+
+    function getPlainDescriptionText(value) {
+      const raw = safeText(value);
+      if (!raw) return "";
+      if (!hasHtmlMarkup(raw)) return normalizeSpaces(raw);
+
+      try {
+        const doc = new DOMParser().parseFromString(raw, "text/html");
+        return normalizeSpaces(doc.body?.textContent || raw);
+      } catch (_) {
+        return normalizeSpaces(raw.replace(/<[^>]+>/g, " "));
+      }
+    }
+
+    function formatPlainDescription(raw) {
+      const text = safeText(raw, "وصف المنتج غير متوفر");
+      const paragraphs = text
+        .split(/\n{2,}/)
+        .map(part => safeText(part))
+        .filter(Boolean);
+
+      if (!paragraphs.length) return "<p>وصف المنتج غير متوفر</p>";
+
+      return paragraphs
+        .map(part => `<p>${escapeHtml(part).replace(/\n/g, "<br>")}</p>`)
+        .join("");
+    }
+
+    function sanitizeDescriptionHtml(raw) {
+      const fallback = "<p>وصف المنتج غير متوفر</p>";
+      const html = safeText(raw);
+      if (!html) return fallback;
+
+      try {
+        const doc = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
+        const allowedTags = new Set([
+          "p", "br", "strong", "b", "em", "i",
+          "ul", "ol", "li", "span", "div"
+        ]);
+
+        doc.querySelectorAll("script, style, iframe, object, embed, link, meta, form, input, button, svg, math").forEach(el => el.remove());
+
+        function cleanNode(node) {
+          if (node.nodeType === Node.TEXT_NODE) {
+            return document.createTextNode(node.textContent || "");
+          }
+
+          if (node.nodeType !== Node.ELEMENT_NODE) {
+            return document.createDocumentFragment();
+          }
+
+          const tag = node.tagName.toLowerCase();
+          const fragment = document.createDocumentFragment();
+
+          if (!allowedTags.has(tag)) {
+            Array.from(node.childNodes).forEach(child => {
+              fragment.appendChild(cleanNode(child));
+            });
+            return fragment;
+          }
+
+          const el = document.createElement(tag);
+          if (tag === "br") return el;
+
+          Array.from(node.childNodes).forEach(child => {
+            el.appendChild(cleanNode(child));
+          });
+
+          return el;
+        }
+
+        const cleanWrap = document.createElement("div");
+        Array.from(doc.body.firstElementChild?.childNodes || doc.body.childNodes).forEach(child => {
+          cleanWrap.appendChild(cleanNode(child));
+        });
+
+        let changed = true;
+        while (changed) {
+          changed = false;
+          cleanWrap.querySelectorAll("ul > ul, ul > ol, ol > ul, ol > ol").forEach(nested => {
+            const parent = nested.parentElement;
+            Array.from(nested.children).forEach(child => {
+              if (child.tagName && child.tagName.toLowerCase() === "li") {
+                parent.insertBefore(child, nested);
+              } else {
+                const li = document.createElement("li");
+                li.innerHTML = child.innerHTML || child.textContent || "";
+                parent.insertBefore(li, nested);
+              }
+            });
+            nested.remove();
+            changed = true;
+          });
+        }
+
+        const result = safeText(cleanWrap.innerHTML);
+        return result || fallback;
+      } catch (_) {
+        return formatPlainDescription(raw);
+      }
+    }
+
+    function renderProductDescription(element, rawDescription) {
+      if (!element) return;
+
+      const description = safeText(rawDescription, "وصف المنتج غير متوفر");
+      element.innerHTML = hasHtmlMarkup(description)
+        ? sanitizeDescriptionHtml(description)
+        : formatPlainDescription(description);
+    }
+
     function safeNumber(value, fallback = 0) {
       if (value === null || value === undefined || value === "") return fallback;
       const n = Number(String(value).replace(/[^0-9.-]/g, ""));
@@ -2079,15 +2226,16 @@
       const title = getProductTitle(product);
       const vendor = getProductVendor(product);
       const description = getProductDescription(product);
+      const plainDescription = getPlainDescriptionText(description);
 
       document.title = `${title} - Smart Kids Kuwait`;
       document.getElementById("pageTitle").textContent = `${title} - Smart Kids Kuwait`;
-      document.getElementById("pageDescription").setAttribute("content", description.slice(0, 160));
+      document.getElementById("pageDescription").setAttribute("content", plainDescription.slice(0, 160));
 
       document.getElementById("pName").textContent = title;
       document.getElementById("pVendor").textContent = vendor.toUpperCase();
       document.getElementById("pPrice").innerHTML = getPriceMarkup(product, { prefix: "product" });
-      document.getElementById("pDesc").textContent = description;
+      renderProductDescription(document.getElementById("pDesc"), description);
       document.getElementById("crumb").textContent = title;
 
       const outOfStock = isOutOfStock(product);
@@ -2262,7 +2410,7 @@
             if (navigator.share) {
               await navigator.share({
                 title: getProductTitle(currentProduct),
-                text: getProductDescription(currentProduct).slice(0, 120),
+                text: getPlainDescriptionText(getProductDescription(currentProduct)).slice(0, 120),
                 url: window.location.href
               });
             } else if (navigator.clipboard?.writeText) {
