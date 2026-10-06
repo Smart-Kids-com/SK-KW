@@ -889,16 +889,17 @@
     }
 
     function shouldSaveAbandonedCheckout(payload) {
-      return Boolean(
+      const hasCart = Array.isArray(payload.cartItems) &&
+        payload.cartItems.length > 0 &&
+        safeNumber(payload.cartQuantity, 0) > 0;
+
+      const contactText = safeText(
         payload.contactValue ||
-        payload.firstName ||
-        payload.lastName ||
-        payload.address1 ||
-        payload.city ||
-        payload.governorate ||
-        payload.notes ||
-        payload.cartQuantity > 0
+        payload.customerEmail ||
+        payload.customerPhone
       );
+
+      return hasCart && contactText.length >= 3;
     }
 
     async function saveAbandonedCheckout(force = false) {
@@ -1348,7 +1349,6 @@
       bindDynamicRecalc();
       renderSummary();
       getCheckoutToken();
-      setTimeout(() => saveAbandonedCheckout(false), 400);
     });
   </script>
   <script src="/js/live-visitors.js"></script>

@@ -1,42 +1,34 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db/turso-manager');
-
 const TABLE_NAME = 'abandoned_checkouts';
 const MAX_LIMIT = 100;
 const DEFAULT_LIMIT = 20;
 const MAX_SEARCH_LEN = 120;
 const ALLOWED_STATUSES = ['open', 'recovered', 'closed'];
-
 function safeText(value, fallback = '') {
   const text = String(value ?? '').trim();
   return text || fallback;
 }
-
 function toNumber(value, fallback = 0) {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
 }
-
 function toInt(value, fallback = 0) {
   const n = parseInt(value, 10);
   return Number.isFinite(n) ? n : fallback;
 }
-
 function normalizeStatus(status, fallback = 'open') {
   const value = safeText(status).toLowerCase();
   return ALLOWED_STATUSES.includes(value) ? value : fallback;
 }
-
 function normalizeContactType(value) {
   const normalized = safeText(value).toLowerCase();
   if (normalized === 'email' || normalized === 'phone') return normalized;
   return '';
 }
-
 function normalizeItems(items) {
   if (!Array.isArray(items)) return [];
-
   return items
     .map((item, index) => {
       const quantity = Math.max(1, toInt(item.quantity, 1));
@@ -45,7 +37,6 @@ function normalizeItems(items) {
       const slug = safeText(item.slug);
       const name = safeText(item.name || item.product_name || item.title || `Item ${index + 1}`);
       const image = safeText(item.image || item.image_url || item.product_image || '');
-
       return {
         id,
         slug,
@@ -57,11 +48,9 @@ function normalizeItems(items) {
     })
     .filter(item => item.name);
 }
-
 function stringifyItems(items) {
   return JSON.stringify(normalizeItems(items));
 }
-
 function parseItems(itemsJson) {
   try {
     const parsed = JSON.parse(itemsJson || '[]');
@@ -70,68 +59,54 @@ function parseItems(itemsJson) {
     return [];
   }
 }
-
 function buildCustomerName(firstName, lastName, fallback = '') {
   const full = `${safeText(firstName)} ${safeText(lastName)}`.trim();
   return full || safeText(fallback);
 }
-
 async function ensureTableExists() {
   await db.run(`
     CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       checkout_token TEXT NOT NULL UNIQUE,
       status TEXT NOT NULL DEFAULT 'open',
-
       contact_value TEXT DEFAULT '',
       contact_type TEXT DEFAULT '',
-
       customer_email TEXT DEFAULT '',
       customer_phone TEXT DEFAULT '',
-
       first_name TEXT DEFAULT '',
       last_name TEXT DEFAULT '',
       customer_name TEXT DEFAULT '',
-
       address1 TEXT DEFAULT '',
       address2 TEXT DEFAULT '',
       city TEXT DEFAULT '',
       governorate TEXT DEFAULT '',
       country TEXT DEFAULT 'Kuwait',
       postal_code TEXT DEFAULT '',
-
       notes TEXT DEFAULT '',
       discount_code TEXT DEFAULT '',
       discount_amount REAL NOT NULL DEFAULT 0,
-
       subtotal REAL NOT NULL DEFAULT 0,
       shipping_cost REAL NOT NULL DEFAULT 0,
       total REAL NOT NULL DEFAULT 0,
       currency TEXT DEFAULT 'KWD',
-
       cart_items TEXT DEFAULT '[]',
       cart_quantity INTEGER NOT NULL DEFAULT 0,
       item_count INTEGER NOT NULL DEFAULT 0,
-
       recovered_order_id TEXT DEFAULT '',
       recovered_order_number TEXT DEFAULT '',
-
       last_activity_at TEXT DEFAULT CURRENT_TIMESTAMP,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
-
   await db.run(`CREATE INDEX IF NOT EXISTS idx_abandoned_checkouts_token ON ${TABLE_NAME}(checkout_token)`);
   await db.run(`CREATE INDEX IF NOT EXISTS idx_abandoned_checkouts_status ON ${TABLE_NAME}(status)`);
   await db.run(`CREATE INDEX IF NOT EXISTS idx_abandoned_checkouts_last_activity ON ${TABLE_NAME}(last_activity_at)`);
   await db.run(`CREATE INDEX IF NOT EXISTS idx_abandoned_checkouts_email ON ${TABLE_NAME}(customer_email)`);
   await db.run(`CREATE INDEX IF NOT EXISTS idx_abandoned_checkouts_phone ON ${TABLE_NAME}(customer_phone)`);
 }
-
 function mapRow(row) {
   if (!row) return null;
-
   return {
     ...row,
     subtotal: toNumber(row.subtotal, 0),
@@ -143,7 +118,6 @@ function mapRow(row) {
     cart_items: parseItems(row.cart_items)
   };
 }
-
 async function getByToken(checkoutToken) {
   const row = await db.get(
     `SELECT * FROM ${TABLE_NAME} WHERE checkout_token = ?`,
@@ -151,7 +125,6 @@ async function getByToken(checkoutToken) {
   );
   return mapRow(row);
 }
-
 async function getById(id) {
   const row = await db.get(
     `SELECT * FROM ${TABLE_NAME} WHERE id = ?`,
@@ -159,7 +132,6 @@ async function getById(id) {
   );
   return mapRow(row);
 }
-
 /**
  * POST /api/abandoned-checkouts/save
  * Upsert checkout draft
@@ -167,7 +139,6 @@ async function getById(id) {
 router.post('/save', async (req, res) => {
   try {
     await ensureTableExists();
-
     const {
       checkoutToken,
       contactValue,
@@ -194,7 +165,6 @@ router.post('/save', async (req, res) => {
       cartQuantity,
       itemCount
     } = req.body || {};
-
     const token = safeText(checkoutToken);
     if (!token) {
       return res.status(400).json({
@@ -202,27 +172,41 @@ router.post('/save', async (req, res) => {
         error: 'checkoutToken is required'
       });
     }
-
     const normalizedItems = normalizeItems(cartItems);
     const finalItemCount = itemCount !== undefined ? Math.max(0, toInt(itemCount, 0)) : normalizedItems.length;
     const finalCartQuantity = cartQuantity !== undefined
       ? Math.max(0, toInt(cartQuantity, 0))
       : normalizedItems.reduce((sum, item) => sum + toInt(item.quantity, 0), 0);
-
+    const finalContactValue = safeText(contactValue);
+    const finalContactType = normalizeContactType(contactType);
+    const finalCustomerEmail = safeText(customerEmail).toLowerCase();
+    const finalCustomerPhone = safeText(customerPhone);
+    const hasCart = finalItemCount > 0 && finalCartQuantity > 0 && normalizedItems.length > 0;
+    const hasContact = Boolean(finalContactValue || finalCustomerEmail || finalCustomerPhone);
+    if (!hasCart) {
+      return res.status(400).json({
+        success: false,
+        error: 'Cannot save abandoned checkout without cart items'
+      });
+    }
+    if (!hasContact) {
+      return res.status(400).json({
+        success: false,
+        error: 'Cannot save abandoned checkout without customer contact'
+      });
+    }
     const finalFirstName = safeText(firstName);
     const finalLastName = safeText(lastName);
     const finalCustomerName = buildCustomerName(finalFirstName, finalLastName, customerName);
-
     const existing = await db.get(
       `SELECT id FROM ${TABLE_NAME} WHERE checkout_token = ?`,
       [token]
     );
-
     const values = [
-      safeText(contactValue),
-      normalizeContactType(contactType),
-      safeText(customerEmail),
-      safeText(customerPhone),
+      finalContactValue,
+      finalContactType,
+      finalCustomerEmail,
+      finalCustomerPhone,
       finalFirstName,
       finalLastName,
       finalCustomerName,
@@ -243,7 +227,6 @@ router.post('/save', async (req, res) => {
       finalCartQuantity,
       finalItemCount
     ];
-
     if (existing?.id) {
       await db.run(
         `UPDATE ${TABLE_NAME}
@@ -314,9 +297,7 @@ router.post('/save', async (req, res) => {
         [token, ...values]
       );
     }
-
     const saved = await getByToken(token);
-
     return res.json({
       success: true,
       message: 'Abandoned checkout saved',
@@ -330,7 +311,6 @@ router.post('/save', async (req, res) => {
     });
   }
 });
-
 /**
  * POST /api/abandoned-checkouts/recover
  * Mark abandoned checkout as recovered after order success
@@ -338,13 +318,11 @@ router.post('/save', async (req, res) => {
 router.post('/recover', async (req, res) => {
   try {
     await ensureTableExists();
-
     const {
       checkoutToken,
       orderId,
       orderNumber
     } = req.body || {};
-
     const token = safeText(checkoutToken);
     if (!token) {
       return res.status(400).json({
@@ -352,7 +330,6 @@ router.post('/recover', async (req, res) => {
         error: 'checkoutToken is required'
       });
     }
-
     const existing = await getByToken(token);
     if (!existing) {
       return res.status(404).json({
@@ -360,7 +337,6 @@ router.post('/recover', async (req, res) => {
         error: 'Checkout not found'
       });
     }
-
     await db.run(
       `UPDATE ${TABLE_NAME}
        SET
@@ -376,9 +352,7 @@ router.post('/recover', async (req, res) => {
         token
       ]
     );
-
     const updated = await getByToken(token);
-
     return res.json({
       success: true,
       message: 'Abandoned checkout recovered',
@@ -392,24 +366,20 @@ router.post('/recover', async (req, res) => {
     });
   }
 });
-
 /**
  * POST /api/abandoned-checkouts/close
  */
 router.post('/close', async (req, res) => {
   try {
     await ensureTableExists();
-
     const { checkoutToken } = req.body || {};
     const token = safeText(checkoutToken);
-
     if (!token) {
       return res.status(400).json({
         success: false,
         error: 'checkoutToken is required'
       });
     }
-
     const existing = await getByToken(token);
     if (!existing) {
       return res.status(404).json({
@@ -417,16 +387,13 @@ router.post('/close', async (req, res) => {
         error: 'Checkout not found'
       });
     }
-
     await db.run(
       `UPDATE ${TABLE_NAME}
        SET status = 'closed', updated_at = CURRENT_TIMESTAMP
        WHERE checkout_token = ?`,
       [token]
     );
-
     const updated = await getByToken(token);
-
     return res.json({
       success: true,
       message: 'Abandoned checkout closed',
@@ -440,19 +407,16 @@ router.post('/close', async (req, res) => {
     });
   }
 });
-
 /**
  * GET /api/abandoned-checkouts/stats/summary
  */
 router.get('/stats/summary', async (req, res) => {
   try {
     await ensureTableExists();
-
     const total = await db.get(`SELECT COUNT(*) as count FROM ${TABLE_NAME}`);
     const open = await db.get(`SELECT COUNT(*) as count FROM ${TABLE_NAME} WHERE status = 'open'`);
     const recovered = await db.get(`SELECT COUNT(*) as count FROM ${TABLE_NAME} WHERE status = 'recovered'`);
     const closed = await db.get(`SELECT COUNT(*) as count FROM ${TABLE_NAME} WHERE status = 'closed'`);
-
     return res.json({
       success: true,
       data: {
@@ -470,23 +434,19 @@ router.get('/stats/summary', async (req, res) => {
     });
   }
 });
-
 /**
  * GET /api/abandoned-checkouts/token/:token
  */
 router.get('/token/:token', async (req, res) => {
   try {
     await ensureTableExists();
-
     const checkout = await getByToken(req.params.token);
-
     if (!checkout) {
       return res.status(404).json({
         success: false,
         error: 'Checkout not found'
       });
     }
-
     return res.json({
       success: true,
       data: checkout
@@ -499,23 +459,19 @@ router.get('/token/:token', async (req, res) => {
     });
   }
 });
-
 /**
  * GET /api/abandoned-checkouts/:id
  */
 router.get('/:id', async (req, res) => {
   try {
     await ensureTableExists();
-
     const checkout = await getById(req.params.id);
-
     if (!checkout) {
       return res.status(404).json({
         success: false,
         error: 'Checkout not found'
       });
     }
-
     return res.json({
       success: true,
       data: checkout
@@ -528,7 +484,6 @@ router.get('/:id', async (req, res) => {
     });
   }
 });
-
 /**
  * GET /api/abandoned-checkouts
  * Query:
@@ -542,7 +497,6 @@ router.get('/:id', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     await ensureTableExists();
-
     const {
       status = '',
       search = '',
@@ -551,23 +505,19 @@ router.get('/', async (req, res) => {
       sort = 'last_activity_at',
       order = 'DESC'
     } = req.query;
-
     const parsedLimit = Math.max(1, Math.min(MAX_LIMIT, toInt(limit, DEFAULT_LIMIT)));
     const parsedOffset = Math.max(0, toInt(offset, 0));
     const validSortColumns = ['created_at', 'updated_at', 'last_activity_at', 'total', 'customer_name', 'status'];
     const sortColumn = validSortColumns.includes(sort) ? sort : 'last_activity_at';
     const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-
     let sql = `SELECT * FROM ${TABLE_NAME}`;
     const conditions = [];
     const params = [];
-
     const normalizedStatus = normalizeStatus(status, '');
     if (normalizedStatus) {
       conditions.push(`status = ?`);
       params.push(normalizedStatus);
     }
-
     const searchText = safeText(search).slice(0, MAX_SEARCH_LEN);
     if (searchText) {
       const q = `%${searchText}%`;
@@ -582,18 +532,14 @@ router.get('/', async (req, res) => {
       )`);
       params.push(q, q, q, q, q, q, q);
     }
-
     if (conditions.length) {
       sql += ` WHERE ${conditions.join(' AND ')}`;
     }
-
     const countSql = sql.replace('SELECT *', 'SELECT COUNT(*) as total');
     const countResult = await db.get(countSql, params);
     const total = toInt(countResult?.total, 0);
-
     sql += ` ORDER BY ${sortColumn} ${sortOrder} LIMIT ? OFFSET ?`;
     const rows = await db.all(sql, [...params, parsedLimit, parsedOffset]);
-
     return res.json({
       success: true,
       data: Array.isArray(rows) ? rows.map(mapRow) : [],
@@ -612,28 +558,23 @@ router.get('/', async (req, res) => {
     });
   }
 });
-
 /**
  * DELETE /api/abandoned-checkouts/:id
  */
 router.delete('/:id', async (req, res) => {
   try {
     await ensureTableExists();
-
     const checkout = await getById(req.params.id);
-
     if (!checkout) {
       return res.status(404).json({
         success: false,
         error: 'Checkout not found'
       });
     }
-
     await db.run(
       `DELETE FROM ${TABLE_NAME} WHERE id = ?`,
       [req.params.id]
     );
-
     return res.json({
       success: true,
       message: 'Abandoned checkout deleted',
@@ -650,5 +591,4 @@ router.delete('/:id', async (req, res) => {
     });
   }
 });
-
 module.exports = router;
