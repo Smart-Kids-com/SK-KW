@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db/turso-manager');
 const { SYSTEM_CONFIG, HELPERS } = require('../config/system');
-const { sendOrderEmails } = require('../utils/email');
+const { sendOrderEmails, sendInvoiceEmail } = require('../utils/email');
 const { sendMetaPurchase } = require('../services/meta-capi');
 
 const ORDERS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS;
@@ -13,6 +13,17 @@ const ORDER_ITEMS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS;
 const META_START = '\n<!--OAI_ORDER_META:';
 const META_END = ':OAI_ORDER_META-->';
 const { validateOrderItemsStock } = require('../services/inventory-service');
+const { priceOrder, OrderPricingError } = require('../services/order-pricing');
+const { savePricedOrder } = require('../services/order-storage');
+const {checkoutDetails}=require('../services/checkout-details');
+const { checkoutIdentity, replayCheckout, atomicBatch, restockOrder, updateOrderWithItems } = require('../services/order-inventory');
+function inventoryConflict(res, error) {
+  if (/ORDER_INVENTORY_|ORDER_STOCK_UNAVAILABLE/.test(String(error?.message || ''))) {
+    res.status(409).json({ success: false, error: 'حالة الطلب أو المخزون لا تسمح بهذه العملية' });
+    return true;
+  }
+  return false;
+}
 /**
  * Customer sync config
  * - Smartify-like identity: email OR phone
@@ -155,7 +166,7 @@ function mergeOrderMeta(order) {
     fulfillment_location: meta.fulfillment_location,
     restocked: meta.restocked,
     returned: meta.returned,
-    invoice_sent_at: meta.invoice_sent_at
+    invoice_sent_at: order.invoice_sent_at || meta.invoice_sent_at
   };
 }
 
@@ -243,24 +254,24 @@ function calculateSubtotal(items) {
 }
 
 async function replaceOrderItems(orderId, items) {
+  // Support both current Turso items and the legacy db/init.js schema.
+  const columns = (await db.all(`PRAGMA table_info(${ORDER_ITEMS_TABLE})`)).map(row => row.name);
   await db.run(
     `DELETE FROM ${ORDER_ITEMS_TABLE} WHERE order_id = ?`,
     [orderId]
   );
 
   for (const item of items) {
+    const values = {
+      order_id: orderId, product_id: item.product_id, product_name: item.product_name,
+      product_image: item.product_image, price: toNumber(item.price, 0),
+      product_price: toNumber(item.price, 0), quantity: toNumber(item.quantity, 1),
+      subtotal: Math.round(toNumber(item.price, 0) * toNumber(item.quantity, 1) * 1000) / 1000
+    };
+    const names = Object.keys(values).filter(name => columns.includes(name));
     await db.run(
-      `INSERT INTO ${ORDER_ITEMS_TABLE}
-      (order_id, product_id, product_name, product_image, price, quantity)
-      VALUES (?, ?, ?, ?, ?, ?)`,
-      [
-        orderId,
-        item.product_id,
-        item.product_name,
-        item.product_image,
-        toNumber(item.price, 0),
-        toNumber(item.quantity, 1)
-      ]
+      `INSERT INTO ${ORDER_ITEMS_TABLE} (${names.join(', ')}) VALUES (${names.map(() => '?').join(', ')})`,
+      names.map(name => values[name])
     );
   }
 }
@@ -305,29 +316,7 @@ async function ensureOrderExists(id) {
  * ----------------------------
  */
 
-async function ensureCustomersTableExists() {
-  // Mirrors your customers table schema (from customers routes)
-  await db.run(`
-    CREATE TABLE IF NOT EXISTS ${CUSTOMERS_TABLE} (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      full_name TEXT NOT NULL,
-      email TEXT,
-      phone TEXT,
-      city TEXT,
-      area TEXT,
-      status TEXT DEFAULT 'new',
-      total_orders INTEGER DEFAULT 0,
-      total_spent REAL DEFAULT 0,
-      accepts_marketing INTEGER DEFAULT 0,
-      marketing_opt_in INTEGER DEFAULT 0,
-      last_order_at TEXT,
-      is_blocked INTEGER DEFAULT 0,
-      notes TEXT,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-}
+async function ensureCustomersTableExists() { return require('../db/schema-readiness').assertTables(db, ['customers']); }
 
 async function findCustomerByEmailOrPhone(email, phone) {
   const e = normalizeEmail(email);
@@ -522,85 +511,19 @@ async function backfillCustomersFromOrders({ limit = CUSTOMER_SYNC_BATCH_LIMIT, 
 async function duplicateOrderById(id) {
   const source = await getOrderWithItems(id);
   if (!source) return null;
-
-  const tempOrderNumber = `TEMP-${Date.now()}-${id}`;
-
-  await db.run(
-    `INSERT INTO ${ORDERS_TABLE}
-    (
-      order_number,
-      customer_name,
-      customer_email,
-      customer_phone,
-      customer_address,
-      customer_city,
-      customer_district,
-      subtotal,
-      discount_code,
-      discount_type,
-      discount_value,
-      discount_amount,
-      shipping_cost,
-      total,
-      status,
-      notes
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      tempOrderNumber,
-      safeText(source.customer_name),
-      safeText(source.customer_email),
-      safeText(source.customer_phone),
-      safeText(source.customer_address),
-      safeText(source.customer_city),
-      safeText(source.customer_district),
-      toNumber(source.subtotal, 0),
-      safeText(source.discount_code),
-      safeText(source.discount_type),
-      toNumber(source.discount_value, 0),
-      toNumber(source.discount_amount, 0),
-      toNumber(source.shipping_cost, 0),
-      toNumber(source.total, 0),
-      normalizeStatus(source.status, SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING),
-      buildNotesWithMeta(source.notes || '', {
-        tags: Array.isArray(source.tags) ? source.tags : [],
-        archived: false,
-        archived_prev_status: null,
-        fulfillment_requested: false,
-        fulfillment_location: safeText(source.fulfillment_location),
-        restocked: false,
-        returned: false,
-        invoice_sent_at: null
-      })
-    ]
-  );
-
-  const savedOrder = await db.get(
-    `SELECT id
-     FROM ${ORDERS_TABLE}
-     WHERE order_number = ?
-     ORDER BY id DESC
-     LIMIT 1`,
-    [tempOrderNumber]
-  );
-
-  if (!savedOrder?.id) return null;
-
-  const SHOPIFY_LAST_ORDER = 4060;
-  const nextOrderNumber = `SK${SHOPIFY_LAST_ORDER + savedOrder.id}`;
-
-  await db.run(
-    `UPDATE ${ORDERS_TABLE}
-     SET order_number = ?, updated_at = CURRENT_TIMESTAMP
-     WHERE id = ?`,
-    [nextOrderNumber, savedOrder.id]
-  );
-
-  await replaceOrderItems(savedOrder.id, normalizeOrderItems(source.items));
-
-  return getOrderWithItems(savedOrder.id);
+  const pricing = await priceOrder(db, source.items, source.discount_code);
+  const savedId = await savePricedOrder(db, {
+    order_number: `TEMP-${require('node:crypto').randomUUID()}`,
+    customer_name: source.customer_name, customer_email: source.customer_email,
+    customer_phone: source.customer_phone, customer_address: source.customer_address,
+    customer_city: source.customer_city || '', customer_district: source.customer_district || '',
+    subtotal: pricing.subtotal, discount_code: pricing.discount_code, discount_type: pricing.discount_type,
+    discount_value: pricing.discount_value, discount_amount: pricing.discount_amount,
+    shipping_cost: pricing.shipping_cost, total: pricing.total, status: 'pending',
+    notes: buildNotesWithMeta(source.notes || '', { tags: source.tags || [], archived: false })
+  }, pricing.items, pricing);
+  return getOrderWithItems(savedId);
 }
-
 function applySearchFilterLocally(rows, search) {
   const q = safeText(search).toLowerCase();
   if (!q) return rows;
@@ -660,6 +583,8 @@ router.get('/customers-sync/preview', async (req, res) => {
 
     return res.json({ success: true, data: preview, pagination: { limit, offset, count: preview.length } });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ customers-sync preview error:', error);
     return res.status(500).json({ success: false, error: 'فشل في معاينة مزامنة العملاء' });
   }
@@ -685,6 +610,8 @@ router.post('/sync-customers', async (req, res) => {
       data: result
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ sync-customers error:', error);
     return res.status(500).json({ success: false, error: 'فشل في مزامنة العملاء من الطلبات' });
   }
@@ -696,6 +623,9 @@ router.post('/sync-customers', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
+    const identity = checkoutIdentity(req);
+    const replay = await replayCheckout(db, identity);
+    if (replay) return res.status(200).json({ success: true, data: await getOrderWithItems(replay.id), replayed: true });
     const {
       customerName,
       customerEmail,
@@ -705,8 +635,6 @@ router.post('/', async (req, res) => {
       customerDistrict,
       items,
       notes,
-      shippingCost,
-      discountAmount,
       discountCode
     } = req.body;
 
@@ -731,7 +659,15 @@ router.post('/', async (req, res) => {
       });
     }
 
-    const normalizedItems = normalizeOrderItems(items);
+    const pricing = await priceOrder(db, items, discountCode);
+    const details = checkoutDetails(req.body);
+    if(details.abandoned_checkout_token){
+      const cart=await db.get('SELECT customer_email,customer_phone,recovered_order_id FROM abandoned_checkouts WHERE checkout_token=?',[details.abandoned_checkout_token]);
+      if(cart && (cart.recovered_order_id || (normalizeEmail(cart.customer_email)!==normalizeEmail(customerEmail) && normalizePhone(cart.customer_phone)!==normalizePhone(customerPhone)))) {
+        throw new OrderPricingError('السلة لا تطابق محاولة الشراء الحالية');
+      }
+    }
+    const normalizedItems = pricing.items;
     if (!normalizedItems.length) {
       return res.status(400).json({
         success: false,
@@ -749,63 +685,31 @@ router.post('/', async (req, res) => {
       });
     }
 
-    const subtotal = calculateSubtotal(normalizedItems);
+    const { subtotal, shipping_cost: finalShippingCost, discount_amount: finalDiscountAmount,
+      discount_code: finalDiscountCode, discount_type: finalDiscountType,
+      discount_value: finalDiscountValue, total } = pricing;
+    const tempOrderNumber = `TEMP-${require('node:crypto').randomUUID()}`;
 
-    const finalShippingCost = Math.max(
-      0,
-      toNumber(shippingCost, HELPERS.calculateShipping(subtotal))
-    );
-
-    const finalDiscountAmount = Math.max(
-      0,
-      Math.min(toNumber(discountAmount, 0), subtotal)
-    );
-
-    const finalDiscountCode = safeText(discountCode).toUpperCase();
-    const finalDiscountType = finalDiscountAmount > 0 ? 'fixed' : '';
-    const finalDiscountValue = finalDiscountAmount;
-
-    const total = Math.max(0, subtotal - finalDiscountAmount + finalShippingCost);
-    const tempOrderNumber = `TEMP-${Date.now()}`;
-
-    await db.run(
-      `INSERT INTO ${ORDERS_TABLE}
-      (
-        order_number,
-        customer_name,
-        customer_email,
-        customer_phone,
-        customer_address,
-        customer_city,
-        customer_district,
+    const savedOrder = { id: await savePricedOrder(db, {
+        ...details,
+        order_number: tempOrderNumber,
+        checkout_key: identity.key,
+        checkout_fingerprint: identity.fingerprint,
+        customer_name: customerName,
+        customer_email: customerEmail,
+        customer_phone: customerPhone,
+        customer_address: customerAddress,
+        customer_city: customerCity || 'الكويت',
+        customer_district: customerDistrict || '',
         subtotal,
-        discount_code,
-        discount_type,
-        discount_value,
-        discount_amount,
-        shipping_cost,
+        discount_code: finalDiscountCode,
+        discount_type: finalDiscountType,
+        discount_value: finalDiscountValue,
+        discount_amount: finalDiscountAmount,
+        shipping_cost: finalShippingCost,
         total,
-        status,
-        notes
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        tempOrderNumber,
-        customerName,
-        customerEmail,
-        customerPhone,
-        customerAddress,
-        customerCity || 'الكويت',
-        customerDistrict || '',
-        subtotal,
-        finalDiscountCode,
-        finalDiscountType,
-        finalDiscountValue,
-        finalDiscountAmount,
-        finalShippingCost,
-        total,
-        SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING,
-        buildNotesWithMeta(notes || '', {
+        status: SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING,
+        notes: buildNotesWithMeta(notes || '', {
           tags: [],
           archived: false,
           archived_prev_status: null,
@@ -815,36 +719,7 @@ router.post('/', async (req, res) => {
           returned: false,
           invoice_sent_at: null
         })
-      ]
-    );
-
-    const savedOrder = await db.get(
-      `SELECT id
-       FROM ${ORDERS_TABLE}
-       WHERE order_number = ?
-       ORDER BY id DESC
-       LIMIT 1`,
-      [tempOrderNumber]
-    );
-
-    if (!savedOrder?.id) {
-      return res.status(500).json({
-        success: false,
-        error: 'فشل في استخراج معرف الطلب'
-      });
-    }
-
-    const SHOPIFY_LAST_ORDER = 4060;
-    const nextOrderNumber = `SK${SHOPIFY_LAST_ORDER + savedOrder.id}`;
-
-    await db.run(
-      `UPDATE ${ORDERS_TABLE}
-       SET order_number = ?, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?`,
-      [nextOrderNumber, savedOrder.id]
-    );
-
-    await replaceOrderItems(savedOrder.id, normalizedItems);
+      }, normalizedItems, pricing) };
 
     await upsertCustomerFromOrderSnapshot({
       customer_name: customerName,
@@ -876,6 +751,18 @@ router.post('/', async (req, res) => {
       data: createdOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
+    if (String(error.message).includes('orders.checkout_key')) {
+      try {
+        const replay = await replayCheckout(db, checkoutIdentity(req));
+        if (replay) return res.status(200).json({ success: true, data: await getOrderWithItems(replay.id), replayed: true });
+      } catch (replayError) { error = replayError; }
+    }
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (error instanceof OrderPricingError) {
+      return res.status(400).json({ success: false, error: error.message });
+    }
     console.error('❌ خطأ في إنشاء الطلب:', error);
     return res.status(500).json({
       success: false,
@@ -924,6 +811,8 @@ router.get('/stats/summary', async (req, res) => {
       }
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في جلب الإحصائيات:', error);
 
     if (String(error?.message || '').includes('timed out')) {
@@ -965,6 +854,8 @@ router.get('/track/:orderNumber', async (req, res) => {
       }
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في تتبع الطلب:', error);
     return res.status(500).json({
       success: false,
@@ -993,6 +884,8 @@ router.post('/:id/duplicate', async (req, res) => {
       data: duplicated
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في نسخ الطلب:', error);
     return res.status(500).json({
       success: false,
@@ -1086,6 +979,8 @@ router.put('/:id/customer', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في تحديث بيانات العميل:', error);
     return res.status(500).json({
       success: false,
@@ -1189,6 +1084,8 @@ router.put('/:id/shipping', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في تحديث الشحن:', error);
     return res.status(500).json({
       success: false,
@@ -1231,6 +1128,8 @@ router.put('/:id/notes', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في تحديث الملاحظات:', error);
     return res.status(500).json({
       success: false,
@@ -1257,9 +1156,9 @@ router.post('/:id/mark-paid', async (req, res) => {
 
     await db.run(
       `UPDATE ${ORDERS_TABLE}
-       SET status = ?, completed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+       SET payment_status = ?, updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
-      [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.COMPLETED, id]
+      ['paid', id]
     );
 
     const updatedOrder = await getOrderWithItems(id);
@@ -1270,6 +1169,8 @@ router.post('/:id/mark-paid', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في تعليم الطلب كمدفوع:', error);
     return res.status(500).json({
       success: false,
@@ -1312,6 +1213,8 @@ router.post('/:id/fulfill', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في تنفيذ الطلب:', error);
     return res.status(500).json({
       success: false,
@@ -1347,6 +1250,8 @@ router.post('/:id/request-fulfillment', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في طلب التنفيذ:', error);
     return res.status(500).json({
       success: false,
@@ -1382,6 +1287,8 @@ router.post('/:id/cancel-fulfillment-request', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في إلغاء طلب التنفيذ:', error);
     return res.status(500).json({
       success: false,
@@ -1418,6 +1325,8 @@ router.put('/:id/fulfillment-location', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في تحديث موقع التنفيذ:', error);
     return res.status(500).json({
       success: false,
@@ -1463,6 +1372,8 @@ router.post('/:id/archive', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في أرشفة الطلب:', error);
     return res.status(500).json({
       success: false,
@@ -1510,6 +1421,8 @@ router.post('/:id/unarchive', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في إلغاء أرشفة الطلب:', error);
     return res.status(500).json({
       success: false,
@@ -1549,6 +1462,8 @@ router.post('/:id/cancel', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في إلغاء الطلب:', error);
     return res.status(500).json({
       success: false,
@@ -1573,6 +1488,7 @@ router.post('/:id/restock', async (req, res) => {
       });
     }
 
+    if (order.inventory_managed) await restockOrder(db, id);
     const updatedOrder = await updateOrderNotesMeta(id, (meta) => ({
       ...meta,
       restocked: true
@@ -1584,6 +1500,8 @@ router.post('/:id/restock', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في إعادة التخزين:', error);
     return res.status(500).json({
       success: false,
@@ -1619,6 +1537,8 @@ router.post('/:id/return', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في تسجيل المرتجع:', error);
     return res.status(500).json({
       success: false,
@@ -1630,6 +1550,19 @@ router.post('/:id/return', async (req, res) => {
 /**
  * POST /api/orders/:id/send-invoice
  */
+router.get('/:id/invoice-status', async (req,res)=>{
+  try{const order=await getOrderWithItems(req.params.id);if(!order)return res.sendStatus(404);
+    res.json({success:true,data:await require('../services/order-invoice').invoiceStatus(db,order)});
+  }catch(error){res.status(500).json({success:false,error:'تعذر قراءة حالة الفاتورة'});}
+});
+router.post('/:id/invoice-review', async(req,res)=>{
+  try{
+    if(!['already_sent','new_version'].includes(req.body.decision))return res.status(400).json({success:false,error:'قرار المراجعة غير صحيح'});
+    const order=await getOrderWithItems(req.params.id);if(!order)return res.sendStatus(404);
+    await require('../services/order-invoice').reviewLegacyInvoice(db,order,req.body.version,req.body.decision);
+    res.json({success:true});
+  }catch(error){res.status(error.status||500).json({success:false,error:error.status?error.message:'تعذرت مراجعة الفاتورة'});}
+});
 router.post('/:id/send-invoice', async (req, res) => {
   try {
     const { id } = req.params;
@@ -1643,17 +1576,19 @@ router.post('/:id/send-invoice', async (req, res) => {
       });
     }
 
-    const updatedOrder = await updateOrderNotesMeta(id, (meta) => ({
-      ...meta,
-      invoice_sent_at: new Date().toISOString()
-    }));
+    const fullOrder=await getOrderWithItems(id);
+    const invoiceResult=await require('../services/order-invoice').sendOrderInvoice(db,fullOrder,sendInvoiceEmail);
+    const updatedOrder=await getOrderWithItems(id);
 
     return res.json({
       success: true,
-      message: 'تم تسجيل إرسال الفاتورة',
+      message: 'تم قبول إرسال الفاتورة',
+      invoiceReplayed: invoiceResult.replayed,
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في إرسال الفاتورة:', error);
     return res.status(500).json({
       success: false,
@@ -1709,6 +1644,8 @@ router.put('/:id/tags', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في تحديث الوسوم:', error);
     return res.status(500).json({
       success: false,
@@ -1771,6 +1708,8 @@ router.post('/bulk/status', async (req, res) => {
       message: 'تم تحديث حالة الطلبات المحددة'
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في التحديث الجماعي للحالة:', error);
     return res.status(500).json({
       success: false,
@@ -1819,6 +1758,8 @@ router.post('/bulk/archive', async (req, res) => {
       message: 'تم أرشفة الطلبات المحددة'
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في الأرشفة الجماعية:', error);
     return res.status(500).json({
       success: false,
@@ -1870,6 +1811,8 @@ router.post('/bulk/unarchive', async (req, res) => {
       message: 'تم إلغاء أرشفة الطلبات المحددة'
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في إلغاء الأرشفة الجماعية:', error);
     return res.status(500).json({
       success: false,
@@ -1912,6 +1855,8 @@ router.post('/bulk/cancel', async (req, res) => {
       message: 'تم إلغاء الطلبات المحددة'
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في الإلغاء الجماعي:', error);
     return res.status(500).json({
       success: false,
@@ -1970,6 +1915,8 @@ router.post('/bulk/tags', async (req, res) => {
       message: 'تم تحديث وسوم الطلبات المحددة'
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في تحديث الوسوم جماعيًا:', error);
     return res.status(500).json({
       success: false,
@@ -2106,7 +2053,7 @@ router.put('/:id', async (req, res) => {
     let normalizedItems = [];
 
     if (items !== undefined) {
-      normalizedItems = normalizeOrderItems(items);
+      normalizedItems = order.inventory_managed ? (await priceOrder(db, items, '')).items : normalizeOrderItems(items);
 
       if (!normalizedItems.length) {
         return res.status(400).json({
@@ -2170,16 +2117,13 @@ router.put('/:id', async (req, res) => {
     updateFields.push('updated_at = CURRENT_TIMESTAMP');
     updateValues.push(id);
 
-    await db.run(
+    await updateOrderWithItems(db, id,
       `UPDATE ${ORDERS_TABLE}
        SET ${updateFields.join(', ')}
        WHERE id = ?`,
-      updateValues
+      updateValues,
+      shouldReplaceItems ? normalizedItems : null
     );
-
-    if (shouldReplaceItems) {
-      await replaceOrderItems(id, normalizedItems);
-    }
 
     const updatedOrder = await getOrderWithItems(id);
 
@@ -2189,6 +2133,8 @@ router.put('/:id', async (req, res) => {
       data: updatedOrder
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في تحديث الطلب:', error);
     return res.status(500).json({
       success: false,
@@ -2216,15 +2162,14 @@ router.delete('/:id', async (req, res) => {
       });
     }
 
-    await db.run(
-      `DELETE FROM ${ORDER_ITEMS_TABLE} WHERE order_id = ?`,
-      [id]
-    );
-
-    await db.run(
-      `DELETE FROM ${ORDERS_TABLE} WHERE id = ?`,
-      [id]
-    );
+    await atomicBatch(db, [
+      ...(order.inventory_managed ? [
+        { sql: "UPDATE order_inventory SET state='released' WHERE order_id=? AND state='reserved'", args: [id] },
+        { sql: 'DELETE FROM order_inventory WHERE order_id=?', args: [id] }
+      ] : []),
+      { sql: `DELETE FROM ${ORDER_ITEMS_TABLE} WHERE order_id=?`, args: [id] },
+      { sql: `DELETE FROM ${ORDERS_TABLE} WHERE id=?`, args: [id] }
+    ]);
 
     return res.json({
       success: true,
@@ -2235,6 +2180,8 @@ router.delete('/:id', async (req, res) => {
       }
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في حذف الطلب:', error);
     return res.status(500).json({
       success: false,
@@ -2264,6 +2211,8 @@ router.get('/:id', async (req, res) => {
       data: order
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في جلب الطلب:', error);
     return res.status(500).json({
       success: false,
@@ -2307,7 +2256,7 @@ router.get('/', async (req, res) => {
 
     const parsedLimit = Math.min(100, Math.max(1, toInt(limit, DEFAULT_LIMIT)));
     const parsedOffset = Math.max(0, toInt(offset, 0));
-    const targetCount = parsedLimit + parsedOffset;
+
     const sortOrder = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
     const where = [];
@@ -2356,42 +2305,8 @@ router.get('/', async (req, res) => {
       }
     }
 
-    const rows = [];
-    let lastId = sortOrder === 'DESC' ? Number.MAX_SAFE_INTEGER : 0;
-
-    while (rows.length < targetCount) {
-      const params = [...baseParams];
-      const clauses = [...where];
-
-      if (sortOrder === 'DESC') {
-        clauses.push(`id < ?`);
-        params.push(lastId);
-      } else {
-        clauses.push(`id > ?`);
-        params.push(lastId);
-      }
-
-      let sql = `SELECT * FROM ${ORDERS_TABLE}`;
-
-      if (clauses.length) {
-        sql += ` WHERE ${clauses.join(' AND ')}`;
-      }
-
-      sql += ` ORDER BY id ${sortOrder} LIMIT 1`;
-
-      const row = await withTimeout(
-        db.get(sql, params),
-        DB_OP_TIMEOUT_MS,
-        'listOrders(get-loop)'
-      );
-
-      if (!row) break;
-
-      rows.push(row);
-      lastId = Number(row.id);
-    }
-
-    const pageRows = rows.slice(parsedOffset, parsedOffset + parsedLimit);
+    const page = await require('../services/list-page').listPage(db, ORDERS_TABLE, where, baseParams, req.query, sortOrder, parsedLimit, parsedOffset);
+    const pageRows = page.rows;
     const data = pageRows.map(mergeOrderMeta);
 
     return res.json({
@@ -2400,6 +2315,7 @@ router.get('/', async (req, res) => {
       pagination: {
         limit: parsedLimit,
         offset: parsedOffset,
+        hasMore: page.hasMore,
         total: null,
         totalPages: null,
         cursor: data.length
@@ -2408,6 +2324,8 @@ router.get('/', async (req, res) => {
       }
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
+    if (inventoryConflict(res, error)) return;
     console.error('❌ خطأ في جلب الطلبات:', error);
 
     if (String(error?.message || '').includes('timed out')) {

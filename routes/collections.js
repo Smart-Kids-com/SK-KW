@@ -152,9 +152,9 @@ async function getCollectionBySlug(slug) {
   );
 }
 
-async function getCollectionProductCount(collectionId) {
+async function getCollectionProductCount(collectionId, publicOnly = false) {
   const row = await withTimeout(
-    db.get(`SELECT COUNT(*) as count FROM collection_products WHERE collection_id = ?`, [collectionId]),
+    db.get(`SELECT COUNT(*) as count FROM collection_products cp JOIN products p ON p.id=cp.product_id WHERE cp.collection_id = ?${publicOnly ? " AND p.status='active'" : ''}`, [collectionId]),
     DB_OP_TIMEOUT_MS,
     'getCollectionProductCount'
   );
@@ -190,180 +190,22 @@ function getOrderByForCollectionProducts(sortMode = 'manual') {
  * - For other sort modes:
  *   Ordering depends on product fields, so we keep a join, but keep selected columns minimal.
  */
-async function getCollectionProductsPaged(collectionId, sortMode = 'manual', limit = DEFAULT_LIMIT, offset = 0) {
-  const normalizedSort = normalizeSortMode(sortMode);
-
+async function getCollectionProductsPaged(collectionId, sortMode = 'manual', limit = DEFAULT_LIMIT, offset = 0, publicOnly = false) {
   const parsedLimit = Math.min(MAX_LIMIT, Math.max(1, toInteger(limit, DEFAULT_LIMIT)));
   const parsedOffset = Math.max(0, toInteger(offset, 0));
-
-  // Always compute total from the link table (cheap + stable)
-  const countRow = await withTimeout(
-    db.get(`SELECT COUNT(*) as total FROM collection_products WHERE collection_id = ?`, [collectionId]),
-    DB_OP_TIMEOUT_MS,
-    'countCollectionProducts'
-  );
-  const total = Number(countRow?.total || 0);
-
-  const pagination = {
-    total,
-    limit: parsedLimit,
-    offset: parsedOffset,
-    totalPages: parsedLimit ? Math.ceil(total / parsedLimit) : 1
-  };
-
-  if (total === 0) {
-    return { rows: [], pagination };
-  }
-
-  // If offset is beyond total, return empty page (prevents "stuck" pages)
-  if (parsedOffset >= total) {
-    return { rows: [], pagination };
-  }
-
-  // ✅ Manual mode: NO JOIN in paging query.
-  if (normalizedSort === 'manual') {
-    // 1) Page links
-    const linkRows = await withTimeout(
-      db.all(
-        `
-          SELECT product_id, sort_order
-          FROM collection_products
-          WHERE collection_id = ?
-          ORDER BY sort_order ASC, id ASC
-          LIMIT ? OFFSET ?
-        `,
-        [collectionId, parsedLimit, parsedOffset]
-      ),
-      DB_OP_TIMEOUT_MS,
-      'getCollectionProductsPaged(manual.linksPage)'
-    );
-
-    const pageLinks = Array.isArray(linkRows) ? linkRows : [];
-    const pageProductIds = pageLinks.map(r => Number(r.product_id)).filter(Boolean);
-
-    if (!pageProductIds.length) {
-      return { rows: [], pagination };
-    }
-
-    // 2) Fetch products by ids
-    const placeholders = pageProductIds.map(() => '?').join(', ');
-    const productRows = await withTimeout(
-      db.all(
-        `
-          SELECT
-            id,
-            product_name,
-            slug,
-            sku,
-            price,
-            sale_price,
-            image_url,
-            stock,
-            status,
-            product_type,
-            vendor,
-            category,
-            created_at,
-            updated_at
-          FROM products
-          WHERE id IN (${placeholders})
-        `,
-        pageProductIds
-      ),
-      DB_OP_TIMEOUT_MS,
-      'getCollectionProductsPaged(manual.productsByIds)'
-    );
-
-    const products = Array.isArray(productRows) ? productRows : [];
-    const byId = new Map(products.map(p => [Number(p.id), p]));
-
-    // 3) Reorder + placeholders for missing products
-    const ordered = [];
-    for (const link of pageLinks) {
-      const pid = Number(link.product_id);
-      const sortOrder = toInteger(link.sort_order, 0);
-      const product = byId.get(pid);
-
-      if (product) {
-        ordered.push({
-          collection_id: Number(collectionId),
-          product_id: pid,
-          sort_order: sortOrder,
-          ...product
-        });
-        continue;
-      }
-
-      // Placeholder row (keeps UI from showing empty list while total>0)
-      ordered.push({
-        collection_id: Number(collectionId),
-        product_id: pid,
-        sort_order: sortOrder,
-        id: pid,
-        product_name: '[Missing product]',
-        slug: '',
-        sku: '',
-        price: 0,
-        sale_price: null,
-        image_url: '',
-        stock: 0,
-        status: 'archived',
-        product_type: '',
-        vendor: '',
-        category: '',
-        created_at: null,
-        updated_at: null
-      });
-    }
-
-    return { rows: ordered, pagination };
-  }
-
-  // Other sort modes: ordering depends on product fields; keep join but minimal columns
-  const orderBy = getOrderByForCollectionProducts(normalizedSort);
-
-  const sql = `
-    SELECT
-      cp.collection_id,
-      cp.product_id,
-      cp.sort_order,
-      p.id,
-      p.product_name,
-      p.slug,
-      p.sku,
-      p.price,
-      p.sale_price,
-      p.image_url,
-      p.stock,
-      p.status,
-      p.product_type,
-      p.vendor,
-      p.category,
-      p.created_at,
-      p.updated_at
-    FROM collection_products cp
-    INNER JOIN products p ON p.id = cp.product_id
-    WHERE cp.collection_id = ?
-    ORDER BY ${orderBy}
-    LIMIT ? OFFSET ?
-  `;
-
-  const rows = await withTimeout(
-    db.all(sql, [collectionId, parsedLimit, parsedOffset]),
-    DB_OP_TIMEOUT_MS,
-    'getCollectionProductsPaged(join)'
-  );
-
-  return {
-    rows: Array.isArray(rows) ? rows : [],
-    pagination
-  };
+  if (parsedOffset > 10000) throw new Error('Collection offset is too large');
+  const visibility = publicOnly ? " AND p.status='active'" : '';
+  const from = `FROM collection_products cp INNER JOIN products p ON p.id=cp.product_id WHERE cp.collection_id=?${visibility}`;
+  const count = await db.get(`SELECT COUNT(*) AS total ${from}`, [collectionId]);
+  const rows = await db.all(`SELECT p.*, cp.collection_id, cp.product_id, cp.sort_order ${from}
+    ORDER BY ${getOrderByForCollectionProducts(normalizeSortMode(sortMode))} LIMIT ? OFFSET ?`, [collectionId, parsedLimit, parsedOffset]);
+  const total=Number(count.total);
+  return {rows,pagination:{total,limit:parsedLimit,offset:parsedOffset,totalPages:Math.ceil(total/parsedLimit)}};
 }
-
-async function enrichCollection(collection, includeProducts = false) {
+async function enrichCollection(collection, includeProducts = false, publicOnly = false) {
   if (!collection) return null;
 
-  const productCount = await getCollectionProductCount(collection.id);
+  const productCount = await getCollectionProductCount(collection.id, publicOnly);
 
   // لا نرجّع products افتراضيًا (مهم لـ Serverless)
   if (!includeProducts) {
@@ -375,7 +217,7 @@ async function enrichCollection(collection, includeProducts = false) {
   }
 
   // لو حد طلب includeProducts=1: نرجّع أول صفحة فقط لتجنب payload ضخم
-  const { rows } = await getCollectionProductsPaged(collection.id, collection.sort_mode || 'manual', 50, 0);
+  const { rows } = await getCollectionProductsPaged(collection.id, collection.sort_mode || 'manual', 50, 0, publicOnly);
 
   return {
     ...collection,
@@ -548,12 +390,12 @@ router.get('/slug/:slug', async (req, res) => {
   try {
     const collection = await getCollectionBySlug(req.params.slug);
 
-    if (!collection) {
+    if (!collection || (!req.adminSession && (collection.status !== 'active' || !Number(collection.online_store)))) {
       return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
     const includeProducts = parseIncludeProductsFlag(req, false);
-    const enriched = await enrichCollection(collection, includeProducts);
+    const enriched = await enrichCollection(collection, includeProducts, !req.adminSession);
 
     return res.json({ success: true, data: enriched });
   } catch (error) {
@@ -671,7 +513,7 @@ router.post('/:id/duplicate', async (req, res) => {
     const { id } = req.params;
 
     const collection = await getCollectionById(id);
-    if (!collection) {
+    if (!collection || (!req.adminSession && (collection.status !== 'active' || !Number(collection.online_store)))) {
       return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
@@ -760,7 +602,7 @@ router.get('/:id/products', async (req, res) => {
   try {
     const collection = await getCollectionById(req.params.id);
 
-    if (!collection) {
+    if (!collection || (!req.adminSession && (collection.status !== 'active' || !Number(collection.online_store)))) {
       return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
@@ -771,7 +613,7 @@ router.get('/:id/products', async (req, res) => {
     const limit = Math.min(MAX_LIMIT, Math.max(1, toInteger(req.query.limit, DEFAULT_LIMIT)));
     const offset = Math.max(0, toInteger(req.query.offset, 0));
 
-    const { rows, pagination } = await getCollectionProductsPaged(collection.id, sortMode, limit, offset);
+    const { rows, pagination } = await getCollectionProductsPaged(collection.id, sortMode, limit, offset, !req.adminSession);
 
     return res.json({
       success: true,
@@ -804,7 +646,7 @@ router.post('/:id/products/add', async (req, res) => {
     const { productIds = [], position = 'bottom' } = req.body || {};
 
     const collection = await getCollectionById(id);
-    if (!collection) {
+    if (!collection || (!req.adminSession && (collection.status !== 'active' || !Number(collection.online_store)))) {
       return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
@@ -834,7 +676,7 @@ router.post('/:id/products/remove', async (req, res) => {
     const { productIds = [] } = req.body || {};
 
     const collection = await getCollectionById(id);
-    if (!collection) {
+    if (!collection || (!req.adminSession && (collection.status !== 'active' || !Number(collection.online_store)))) {
       return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
@@ -875,7 +717,7 @@ router.post('/:id/products/reorder', async (req, res) => {
     const { items = [] } = req.body || {};
 
     const collection = await getCollectionById(id);
-    if (!collection) {
+    if (!collection || (!req.adminSession && (collection.status !== 'active' || !Number(collection.online_store)))) {
       return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
@@ -931,7 +773,7 @@ router.post('/:id/products/move', async (req, res) => {
     const { productIds = [], destination = 'top', position = 1 } = req.body || {};
 
     const collection = await getCollectionById(id);
-    if (!collection) {
+    if (!collection || (!req.adminSession && (collection.status !== 'active' || !Number(collection.online_store)))) {
       return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
@@ -1011,12 +853,12 @@ router.get('/:id', async (req, res) => {
   try {
     const collection = await getCollectionById(req.params.id);
 
-    if (!collection) {
+    if (!collection || (!req.adminSession && (collection.status !== 'active' || !Number(collection.online_store)))) {
       return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
     const includeProducts = parseIncludeProductsFlag(req, false);
-    const enriched = await enrichCollection(collection, includeProducts);
+    const enriched = await enrichCollection(collection, includeProducts, !req.adminSession);
 
     return res.json({ success: true, data: enriched });
   } catch (error) {
@@ -1051,7 +893,7 @@ router.put('/:id', async (req, res) => {
     } = normalizeIncomingCollectionBody(req.body);
 
     const collection = await getCollectionById(id);
-    if (!collection) {
+    if (!collection || (!req.adminSession && (collection.status !== 'active' || !Number(collection.online_store)))) {
       return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
@@ -1158,7 +1000,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const collection = await getCollectionById(req.params.id);
 
-    if (!collection) {
+    if (!collection || (!req.adminSession && (collection.status !== 'active' || !Number(collection.online_store)))) {
       return res.status(404).json({ success: false, error: 'المجموعة غير موجودة' });
     }
 
@@ -1204,7 +1046,8 @@ router.get('/', async (req, res) => {
     const where = [];
     let normalizedStatus = null;
 
-    if (status) {
+    if (!req.adminSession) { where.push("status='active' AND online_store=1"); }
+    if (status && req.adminSession) {
       normalizedStatus = parseStatusFilter(status);
       if (!normalizedStatus) {
         return res.status(400).json({ success: false, error: 'قيمة status غير صحيحة. القيم المسموحة: active, draft, archived' });
@@ -1247,28 +1090,15 @@ router.get('/', async (req, res) => {
     const collections = await withTimeout(db.all(sql, params), DB_OP_TIMEOUT_MS, 'listCollections');
 
     // enrich with product_count only (fast enough)
-    const enrichedCollections = [];
-    for (const collection of collections) {
-      enrichedCollections.push(await enrichCollection(collection, false));
-    }
-
+    const ids=collections.map(row=>row.id);
+    const counts=ids.length ? await db.all(`SELECT cp.collection_id,COUNT(*) AS n FROM collection_products cp
+      JOIN products p ON p.id=cp.product_id WHERE cp.collection_id IN (${ids.map(()=>'?').join(',')})
+      ${req.adminSession?'':"AND p.status='active'"} GROUP BY cp.collection_id`,ids) : [];
+    const countsMap=new Map(counts.map(row=>[Number(row.collection_id),Number(row.n)]));
+    const enrichedCollections=collections.map(row=>({...row,product_count:countsMap.get(Number(row.id))||0,products:[]}));
     let countSql = `SELECT COUNT(*) as total FROM collections`;
-    const countParams = [];
-
-    if (where.length > 0) {
-      countSql += ` WHERE ${where.join(' AND ')}`;
-
-      if (normalizedStatus) {
-        countParams.push(normalizedStatus);
-      }
-
-      if (search) {
-        const clipped = String(search).trim().slice(0, MAX_SEARCH_LEN);
-        const searchValue = `%${clipped}%`;
-        countParams.push(searchValue, searchValue, searchValue, searchValue, searchValue);
-      }
-    }
-
+    const countParams=params.slice(0,-2);
+    if(where.length)countSql+=` WHERE ${where.join(' AND ')}`;
     const countResult = await withTimeout(db.get(countSql, countParams), DB_OP_TIMEOUT_MS, 'countCollections');
     const total = Number(countResult?.total || 0);
 

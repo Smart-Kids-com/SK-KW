@@ -515,7 +515,7 @@
   <div id="site-header"></div>
   <script src="./header.js"></script>
   <div class="page">
-<div class="summary-toggle" id="summaryToggle">
+<div class="summary-toggle" id="summaryToggle" role="button" tabindex="0" aria-controls="summaryPanel" aria-expanded="true" aria-label="عرض أو إخفاء ملخص الطلب">
       <div class="summary-toggle-left">
         <span id="summaryChevron">⌃</span>
         <span>ملخص الطلب</span>
@@ -559,7 +559,7 @@
       </div>
 
       <div class="field">
-        <input type="text" id="contactField" placeholder="يرجى إدخال البريد الإلكتروني أو رقم الهاتف">
+        <input type="text" id="contactField" aria-label="البريد الإلكتروني أو رقم الهاتف" autocomplete="email" placeholder="يرجى إدخال البريد الإلكتروني أو رقم الهاتف">
       </div>
     </section>
 
@@ -567,37 +567,37 @@
       <h2>عنوان الشحن</h2>
 
       <div class="field select-wrap">
-        <select id="country" title="اختر الدولة">
+        <select id="country" aria-label="الدولة" autocomplete="shipping country-name" title="اختر الدولة">
           <option value="Kuwait" selected>Kuwait</option>
         </select>
       </div>
 
       <div class="field">
-        <input type="text" id="firstName" placeholder="الاسم الأول">
+        <input type="text" id="firstName" aria-label="الاسم الأول" autocomplete="shipping given-name" placeholder="الاسم الأول">
       </div>
 
       <div class="field">
-        <input type="text" id="lastName" placeholder="اسم العائلة">
+        <input type="text" id="lastName" aria-label="اسم العائلة" autocomplete="shipping family-name" placeholder="اسم العائلة">
       </div>
 
       <div class="field">
-        <input type="text" id="address1" placeholder="العنوان">
+        <input type="text" id="address1" aria-label="عنوان الشحن" autocomplete="shipping address-line1" placeholder="العنوان">
       </div>
 
       <div class="field">
-        <input type="text" id="address2" placeholder="قطعة - رقم المنزل - اسم الشارع - جادة رقم">
+        <input type="text" id="address2" aria-label="تفاصيل عنوان الشحن" autocomplete="shipping address-line2" placeholder="قطعة - رقم المنزل - اسم الشارع - جادة رقم">
       </div>
 
       <div class="field">
-        <input type="text" id="postalCode" placeholder="Postal code (optional)">
+        <input type="text" id="postalCode" aria-label="الرمز البريدي" autocomplete="shipping postal-code" placeholder="Postal code (optional)">
       </div>
 
       <div class="field">
-        <input type="text" id="city" placeholder="المدينة">
+        <input type="text" id="city" aria-label="المدينة" autocomplete="shipping address-level2" placeholder="المدينة">
       </div>
 
       <div class="field select-wrap">
-        <select id="governorate" aria-label="المحافظة">
+        <select id="governorate" aria-label="المحافظة" autocomplete="shipping address-level1">
           <option value="">المحافظة</option>
           <option>العاصمة</option>
           <option>حولي</option>
@@ -609,7 +609,7 @@
       </div>
 
       <div class="field">
-        <input type="tel" id="phone" placeholder="رقم الهاتف">
+        <input type="tel" id="phone" aria-label="رقم الهاتف" autocomplete="shipping tel" placeholder="رقم الهاتف">
       </div>
 
       <label class="check-row">
@@ -666,27 +666,27 @@
 
       <div id="billingAddressFields" class="hidden" style="margin-top:18px;">
         <div class="field">
-          <input type="text" id="billingFirstName" placeholder="الاسم الأول">
+          <input type="text" id="billingFirstName" aria-label="اسم الفاتورة الأول" autocomplete="billing given-name" placeholder="الاسم الأول">
         </div>
 
         <div class="field">
-          <input type="text" id="billingLastName" placeholder="اسم العائلة">
+          <input type="text" id="billingLastName" aria-label="اسم عائلة الفاتورة" autocomplete="billing family-name" placeholder="اسم العائلة">
         </div>
 
         <div class="field">
-          <input type="text" id="billingAddress1" placeholder="العنوان">
+          <input type="text" id="billingAddress1" aria-label="عنوان الفاتورة" autocomplete="billing address-line1" placeholder="العنوان">
         </div>
 
         <div class="field">
-          <input type="text" id="billingAddress2" placeholder="قطعة - رقم المنزل - اسم الشارع - جادة رقم">
+          <input type="text" id="billingAddress2" aria-label="تفاصيل عنوان الفاتورة" autocomplete="billing address-line2" placeholder="قطعة - رقم المنزل - اسم الشارع - جادة رقم">
         </div>
 
         <div class="field">
-          <input type="text" id="billingCity" placeholder="المدينة">
+          <input type="text" id="billingCity" aria-label="مدينة الفاتورة" autocomplete="billing address-level2" placeholder="المدينة">
         </div>
 
         <div class="field select-wrap">
-          <select id="billingGovernorate">
+          <select id="billingGovernorate" aria-label="محافظة الفاتورة" autocomplete="billing address-level1">
             <option value="">المحافظة</option>
             <option>العاصمة</option>
             <option>حولي</option>
@@ -698,7 +698,7 @@
         </div>
 
         <div class="field">
-          <input type="tel" id="billingPhone" placeholder="رقم الهاتف">
+          <input type="tel" id="billingPhone" aria-label="هاتف الفاتورة" autocomplete="billing tel" placeholder="رقم الهاتف">
         </div>
       </div>
     </section>
@@ -706,14 +706,14 @@
     <section class="section">
       <h2>ملاحظات الطلب</h2>
       <div class="field">
-        <textarea id="orderNotes" placeholder="أضف أي ملاحظات تخص الطلب أو التوصيل"></textarea>
+        <textarea id="orderNotes" aria-label="ملاحظات الطلب" autocomplete="off" placeholder="أضف أي ملاحظات تخص الطلب أو التوصيل"></textarea>
       </div>
     </section>
 
     <section class="section">
       <h2>خصم</h2>
       <div class="coupon-row">
-        <input type="text" id="discountField" placeholder="كود الخصم">
+        <input type="text" id="discountField" aria-label="كود الخصم" autocomplete="off" placeholder="كود الخصم">
         <button type="button" id="discountBtn">→</button>
       </div>
 
@@ -928,27 +928,6 @@
       }, delay);
     }
 
-    async function markAbandonedCheckoutRecovered(orderData = {}) {
-      const token = safeText(localStorage.getItem(ABANDONED_CHECKOUT_TOKEN_KEY));
-      if (!token) return;
-
-      try {
-        await fetch(`${ABANDONED_CHECKOUTS_API}/recover`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            checkoutToken: token,
-            orderId: orderData?.id || '',
-            orderNumber: orderData?.order_number || ''
-          })
-        });
-      } catch (error) {
-        console.error('Abandoned checkout recover error:', error);
-      }
-    }
 
     function renderShippingBox() {
       const shippingBox = document.getElementById('shippingBox');
@@ -1225,6 +1204,17 @@
         customerCity: safeText(document.getElementById('city').value),
         customerDistrict: safeText(document.getElementById('governorate').value),
         notes: buildOrderNotes(paymentMethod, billingMode),
+        billingMode,
+        billingAddress: billingMode === 'different' ? {
+          firstName: safeText(document.getElementById('billingFirstName').value),
+          lastName: safeText(document.getElementById('billingLastName').value),
+          address1: safeText(document.getElementById('billingAddress1').value),
+          address2: safeText(document.getElementById('billingAddress2').value),
+          city: safeText(document.getElementById('billingCity').value),
+          governorate: safeText(document.getElementById('billingGovernorate').value),
+          phone: safeText(document.getElementById('billingPhone').value)
+        } : null,
+        abandonedCheckoutToken: safeText(localStorage.getItem(ABANDONED_CHECKOUT_TOKEN_KEY)),
         shippingCost: getShipping() === null ? 0 : getShipping(),
         discountAmount: discountAmount,
         discountCode: discountCode || safeText(document.getElementById('discountField').value).toUpperCase(),
@@ -1241,6 +1231,17 @@
       };
 
       try {
+        clearTimeout(abandonedCheckoutSaveTimer);
+        await saveAbandonedCheckout(true);
+        // Keep the same attempt identifier across retries and page reloads.
+        const signature = JSON.stringify(orderPayload);
+        let attempt;
+        try { attempt = JSON.parse(localStorage.getItem('sk_checkout_attempt') || 'null'); } catch {}
+        if (!attempt || attempt.signature !== signature) {
+          attempt = { signature, key: crypto.randomUUID() };
+          localStorage.setItem('sk_checkout_attempt', JSON.stringify(attempt));
+        }
+        orderPayload.checkoutKey = attempt.key;
         const response = await fetch('/api/orders', {
           method: 'POST',
           headers: {
@@ -1256,11 +1257,11 @@
           localStorage.setItem('last_order', JSON.stringify(savedOrder));
           localStorage.removeItem('cart');
           localStorage.removeItem('cart_note');
+          localStorage.removeItem('sk_checkout_attempt');
 
           const orderNumber = savedOrder?.order_number || '';
           const orderId = savedOrder?.id || '';
 
-          await markAbandonedCheckoutRecovered(savedOrder);
           localStorage.removeItem(ABANDONED_CHECKOUT_TOKEN_KEY);
 
           showSuccess(`تم إرسال الطلب بنجاح ✅ رقم الطلب: ${orderNumber || orderId || ''}`);
@@ -1293,8 +1294,10 @@
       const panel = document.getElementById('summaryPanel');
       const chevron = document.getElementById('summaryChevron');
 
+      toggle.addEventListener('keydown', event => { if(event.key==='Enter'||event.key===' '){event.preventDefault();toggle.click();} });
       toggle.addEventListener('click', () => {
         panel.classList.toggle('open');
+        toggle.setAttribute('aria-expanded',String(panel.classList.contains('open')));
         chevron.textContent = panel.classList.contains('open') ? '⌃' : '⌄';
       });
     }

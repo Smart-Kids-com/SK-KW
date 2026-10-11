@@ -411,8 +411,13 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="/css/admin-navigation.css">
+  <script src="/js/admin-navigation.js" defer></script>
 </head>
-<body>
+<body data-admin-page="discounts">
+  <div class="admin-layout">
+    <aside data-admin-navigation aria-label="قائمة الإدارة الرئيسية"></aside>
+    <div class="admin-page-content" dir="rtl">
   <div class="page">
     <div class="topbar">
       <div class="title-wrap">
@@ -421,7 +426,7 @@
       </div>
 
       <div class="top-actions">
-        <a class="btn light" href="/admin-enhanced">العودة للوحة الإدارة</a>
+
         <button class="btn primary" type="button" id="refreshBtn">تحديث البيانات</button>
       </div>
     </div>
@@ -1045,5 +1050,7 @@
 
     document.addEventListener('DOMContentLoaded', init);
   </script>
+    </div>
+  </div>
 </body>
 </html>

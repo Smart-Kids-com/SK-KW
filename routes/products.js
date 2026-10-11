@@ -297,6 +297,7 @@ router.get('/stats/summary', async (req, res) => {
       }
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
     console.error('❌ خطأ في جلب إحصائيات المنتجات:', error);
     return res.status(500).json({ success: false, error: 'فشل في جلب إحصائيات المنتجات' });
   }
@@ -325,13 +326,14 @@ router.get('/slug/:slug', async (req, res) => {
       'getProductBySlug'
     );
 
-    if (!product) {
+    if (!product || (!req.adminSession && product.status !== 'active')) {
       return res.status(404).json({ success: false, error: 'المنتج غير موجود' });
     }
 
     const enrichedProduct = await enrichProduct(product);
     return res.json({ success: true, data: enrichedProduct });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
     console.error('❌ خطأ في جلب المنتج بالـ slug:', error);
     return res.status(500).json({ success: false, error: 'فشل في جلب المنتج' });
   }
@@ -470,6 +472,7 @@ router.post('/', async (req, res) => {
       data: enrichedProduct
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
     console.error('❌ خطأ في إنشاء المنتج:', error);
     return res.status(500).json({ success: false, error: 'فشل في إنشاء المنتج' });
   }
@@ -516,7 +519,7 @@ router.put('/:id', async (req, res) => {
       'getProductForUpdate'
     );
 
-    if (!product) {
+    if (!product || (!req.adminSession && product.status !== 'active')) {
       return res.status(404).json({ success: false, error: 'المنتج غير موجود' });
     }
 
@@ -687,6 +690,7 @@ router.put('/:id', async (req, res) => {
 
     return res.json({ success: true, message: 'تم تحديث المنتج بنجاح', data: enrichedProduct });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
     console.error('❌ خطأ في تحديث المنتج:', error);
     return res.status(500).json({ success: false, error: 'فشل في تحديث المنتج' });
   }
@@ -705,7 +709,7 @@ router.delete('/:id', async (req, res) => {
       'getProductForDelete'
     );
 
-    if (!product) {
+    if (!product || (!req.adminSession && product.status !== 'active')) {
       return res.status(404).json({ success: false, error: 'المنتج غير موجود' });
     }
 
@@ -721,6 +725,7 @@ router.delete('/:id', async (req, res) => {
       }
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
     console.error('❌ خطأ في حذف المنتج:', error);
     return res.status(500).json({ success: false, error: 'فشل في حذف المنتج' });
   }
@@ -750,7 +755,7 @@ router.get('/:id', async (req, res) => {
       'getProductById'
     );
 
-    if (!product) {
+    if (!product || (!req.adminSession && product.status !== 'active')) {
       return res.status(404).json({ success: false, error: 'المنتج غير موجود' });
     }
 
@@ -760,6 +765,7 @@ router.get('/:id', async (req, res) => {
 
     return res.json({ success: true, data: enrichedProduct });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
     console.error('❌ خطأ في جلب المنتج:', error);
     return res.status(500).json({ success: false, error: 'فشل في جلب المنتج' });
   }
@@ -787,12 +793,13 @@ router.get('/', async (req, res) => {
     // مؤقتًا نجبر الفرز على id فقط لأن ده اللي شغال ومستقر الآن
     const parsedLimit = Math.min(100, Math.max(1, toInteger(limit, DEFAULT_LIMIT)));
     const parsedOffset = Math.max(0, toInteger(offset, 0));
-    const targetCount = parsedLimit + parsedOffset;
+
 
     const where = [];
     const baseParams = [];
 
-    if (status) {
+    if (!req.adminSession) { where.push('status = ?'); baseParams.push('active'); }
+    if (status && req.adminSession) {
       const normalizedStatus = parseProductStatusFilter(status);
       if (!normalizedStatus) {
         return res.status(400).json({
@@ -836,61 +843,8 @@ router.get('/', async (req, res) => {
       }
     }
 
-    const rows = [];
-    let lastId = sortOrder === 'DESC' ? Number.MAX_SAFE_INTEGER : 0;
-
-    while (rows.length < targetCount) {
-      const params = [...baseParams];
-      const clauses = [...where];
-
-      if (sortOrder === 'DESC') {
-        clauses.push(`id < ?`);
-        params.push(lastId);
-      } else {
-        clauses.push(`id > ?`);
-        params.push(lastId);
-      }
-
-      let sql =
-        `SELECT
-          id,
-          product_name,
-          slug,
-          sku,
-          price,
-          sale_price,
-          image_url,
-          stock,
-          status,
-          product_type,
-          vendor,
-          category,
-          tags,
-          seo_title,
-          seo_description,
-          created_at,
-          updated_at
-         FROM products`;
-
-      if (clauses.length) {
-        sql += ` WHERE ${clauses.join(' AND ')}`;
-      }
-
-      sql += ` ORDER BY id ${sortOrder} LIMIT 1`;
-
-      const row = await withTimeout(
-        db.get(sql, params),
-        DB_OP_TIMEOUT_MS,
-        'listProducts(get-loop)'
-      );
-
-      if (!row) break;
-
-      rows.push(row);
-      lastId = Number(row.id);
-    }
-
-    const pageRows = rows.slice(parsedOffset, parsedOffset + parsedLimit);
+    const page = await require('../services/list-page').listPage(db, 'products', where, baseParams, req.query, sortOrder, parsedLimit, parsedOffset);
+    const pageRows = page.rows;
     const enriched = await enrichProductsMaybe(pageRows, includeImagesFlag);
 
     return res.json({
@@ -899,6 +853,7 @@ router.get('/', async (req, res) => {
       pagination: {
         limit: parsedLimit,
         offset: parsedOffset,
+        hasMore: page.hasMore,
         total: null,
         totalPages: null,
         cursor: enriched.length
@@ -907,6 +862,7 @@ router.get('/', async (req, res) => {
       }
     });
   } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
     console.error('❌ خطأ في جلب المنتجات:', error);
 
     if (String(error?.message || '').includes('timed out')) {

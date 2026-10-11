@@ -456,8 +456,13 @@
       table{min-width:1180px}
     }
   </style>
+  <link rel="stylesheet" href="/css/admin-navigation.css">
+  <script src="/js/admin-navigation.js" defer></script>
 </head>
-<body>
+<body data-admin-page="abandoned">
+  <div class="admin-layout">
+    <aside data-admin-navigation aria-label="قائمة الإدارة الرئيسية"></aside>
+    <div class="admin-page-content" dir="ltr">
   <div class="mobile-top">
     <div class="mobile-top-row">
       <div class="mobile-title">Abandoned Checkouts</div>
@@ -472,16 +477,6 @@
       <div class="search-wrap"><input class="top-search" id="desktopSearchTop" type="text" placeholder="Search abandoned checkouts"></div>
       <div class="top-right"><div class="avatar">🛍️</div><div class="avatar">🔔</div><div style="font-weight:800">الأطفال المبتكرون الكويت</div></div>
     </header>
-
-    <aside class="sidebar">
-      <div class="side-group">
-        <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
-        <a class="nav-item" href="/orders-admin.html"><span>📦 Orders</span></a>
-        <a class="nav-item" href="/products-admin"><span>🏷️ Products</span></a>
-        <a class="nav-item" href="/collections-admin"><span>🗂️ Collections</span></a>
-        <a class="nav-item active" href="/abandoned-checkouts-admin.html"><span>🛒 Abandoned</span></a>
-      </div>
-    </aside>
 
     <main class="main">
       <div class="page">
@@ -791,5 +786,7 @@
       await refreshData();
     });
   </script>
+    </div>
+  </div>
 </body>
 </html>

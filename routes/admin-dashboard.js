@@ -96,30 +96,7 @@ function existingColumns(columns, candidates) {
   return candidates.filter(column => columns.has(column));
 }
 
-async function ensureHeartbeatTable() {
-  await db.run(`
-    CREATE TABLE IF NOT EXISTS visitor_heartbeats (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      visitor_id TEXT NOT NULL UNIQUE,
-      page TEXT DEFAULT '',
-      user_agent TEXT DEFAULT '',
-      ip_address TEXT DEFAULT '',
-      source TEXT DEFAULT 'storefront',
-      first_seen_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      last_seen_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  await db.run(`
-    CREATE INDEX IF NOT EXISTS idx_visitor_heartbeats_last_seen
-    ON visitor_heartbeats(last_seen_at)
-  `);
-
-  await db.run(`
-    CREATE INDEX IF NOT EXISTS idx_visitor_heartbeats_source
-    ON visitor_heartbeats(source)
-  `);
-}
+async function ensureHeartbeatTable() { return require('../db/schema-readiness').assertTables(db,['visitor_heartbeats']); }
 
 async function tryGetOrdersInRange(fromIso, toIso) {
   try {

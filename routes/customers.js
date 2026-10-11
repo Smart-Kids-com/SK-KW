@@ -130,32 +130,7 @@ async function getCustomerById(id) {
   );
 }
 
-async function ensureCustomersTable() {
-  await withTimeout(
-    db.run(`
-      CREATE TABLE IF NOT EXISTS customers (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        full_name TEXT NOT NULL,
-        email TEXT,
-        phone TEXT,
-        city TEXT,
-        area TEXT,
-        status TEXT DEFAULT 'new',
-        total_orders INTEGER DEFAULT 0,
-        total_spent REAL DEFAULT 0,
-        accepts_marketing INTEGER DEFAULT 0,
-        marketing_opt_in INTEGER DEFAULT 0,
-        last_order_at TEXT,
-        is_blocked INTEGER DEFAULT 0,
-        notes TEXT,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-      )
-    `),
-    DB_OP_TIMEOUT_MS,
-    'ensureCustomersTable'
-  );
-}
+async function ensureCustomersTable() { return require('../db/schema-readiness').assertTables(db, ['customers']); }
 
 /**
  * GET /api/customers/stats/summary

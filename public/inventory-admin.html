@@ -110,8 +110,13 @@
     @media (max-width:800px){ .page{ padding:14px; } .stats{ grid-template-columns:1fr 1fr; } .row-2{ grid-template-columns:1fr; } .toolbar{ grid-template-columns:1fr; } .bulk-grid{ grid-template-columns:1fr; } .top-actions{ width:100%; } .top-actions .btn{ flex:1 1 160px; } }
     @media (max-width:520px){ .stats{ grid-template-columns:1fr; } }
   </style>
+  <link rel="stylesheet" href="/css/admin-navigation.css">
+  <script src="/js/admin-navigation.js" defer></script>
 </head>
-<body>
+<body data-admin-page="inventory">
+  <div class="admin-layout">
+    <aside data-admin-navigation aria-label="قائمة الإدارة الرئيسية"></aside>
+    <div class="admin-page-content" dir="rtl">
   <div class="page">
     <div class="topbar">
       <div class="title-wrap">
@@ -119,7 +124,7 @@
         <p>تعديل سريع للمخزون، فتح/إغلاق المنتج، وضبط الكمية المتاحة بدون تعقيد.</p>
       </div>
       <div class="top-actions">
-        <a class="btn light" href="/admin-enhanced">العودة للوحة الإدارة</a>
+
         <button class="btn primary" type="button" id="refreshBtn">تحديث البيانات</button>
       </div>
     </div>
@@ -890,5 +895,7 @@
 
     boot();
   </script>
+    </div>
+  </div>
 </body>
 </html>

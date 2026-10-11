@@ -1,0 +1,22 @@
+# Never package local credentials, operational SQLite files or backup artifacts.
+.env
+.env.*
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.sqlite3-*
+*.dpapi
+release-review.local.py
+release-package-review.local.json
+db/opening-inventory-approval.json
+db/*.db
+db/*.db-*
+db/*.sqlite*
+.git
+coverage
+.playwright
+docs
+tests
+scripts

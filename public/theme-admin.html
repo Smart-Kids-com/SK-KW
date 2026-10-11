@@ -370,8 +370,13 @@
       .form-grid { grid-template-columns: 1fr; }
     }
   </style>
+  <link rel="stylesheet" href="/css/admin-navigation.css">
+  <script src="/js/admin-navigation.js" defer></script>
 </head>
-<body>
+<body data-admin-page="theme">
+  <div class="admin-layout">
+    <aside data-admin-navigation aria-label="قائمة الإدارة الرئيسية"></aside>
+    <div class="admin-page-content" dir="rtl">
 
   <!-- ── Global Alert ──────────────────────────────────── -->
   <div class="global-alert" id="globalAlert"></div>
@@ -385,7 +390,7 @@
     <div class="top-actions">
       <button class="btn-top ghost" onclick="saveAllSettings()">💾 حفظ الكل</button>
       <a href="/" target="_blank" class="btn-top ghost">👁 عرض الموقع</a>
-      <a href="/admin-enhanced" class="btn-top primary">← لوحة التحكم</a>
+
     </div>
   </div>
 
@@ -1366,5 +1371,7 @@
     ['primaryColor', 'topbarColor', 'secondaryColor', 'accentColor'].forEach(bindColor);
     loadSettings();
   </script>
+    </div>
+  </div>
 </body>
 </html>

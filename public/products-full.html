@@ -1493,6 +1493,7 @@
 
   </style>
   <link rel="stylesheet" href="./site-theme.css">
+  <script src="/js/catalog-pages.js"></script>
 </head>
 
 <body>
@@ -1968,16 +1969,11 @@
 
     async function loadProducts() {
       try {
-        const response = await fetch(PRODUCTS_API, {
+        const result = await window.fetchCatalogPages(PRODUCTS_API, {
           cache: 'no-store',
           headers: { Accept: 'application/json' }
         });
 
-        const result = await response.json().catch(() => null);
-
-        if (!response.ok || !result || !result.success) {
-          throw new Error(result?.error || `HTTP ${response.status}`);
-        }
 
         allProducts = Array.isArray(result.data) ? result.data : [];
         filteredProducts = [...allProducts];

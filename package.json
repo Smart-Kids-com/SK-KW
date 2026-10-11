@@ -5,9 +5,14 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node simple-server.js",
+    "dev": "node scripts/security-demo.js",
     "build": "echo 'No build needed'",
-    "test": "echo 'No tests configured'"
+    "test": "node scripts/test-security.js --all",
+    "test:backend": "node scripts/test-security.js --backend",
+    "test:security": "node scripts/test-security.js",
+    "test:orders": "node scripts/test-security.js --orders",
+    "test:checkout": "node scripts/test-security.js --orders --browser",
+    "demo:security": "node scripts/security-demo.js"
   },
   "keywords": [
     "ecommerce",

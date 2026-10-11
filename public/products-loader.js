@@ -58,6 +58,18 @@ async function fetchJsonWithFallback(urls, timeoutMs = 25000) {
       }
 
       const json = await withTimeout(res.json());
+      if (new URL(url, location.href).pathname === '/api/products') {
+        let cursor=json.pagination?.cursor?.id;
+        while(json.pagination?.hasMore) {
+          const next=new URL(url,location.href);next.searchParams.set('limit','100');next.searchParams.set('offset','0');next.searchParams.set('cursor',cursor);
+          const page=await withTimeout(fetch(next.pathname+next.search,{cache:'no-store'}));
+          const result=await withTimeout(page.json());
+          if(!page.ok||!result.success)throw new Error('Failed to fetch next catalog page');
+          json.data.push(...result.data);
+          if(result.pagination?.hasMore && String(result.pagination.cursor?.id)===String(cursor))throw new Error('Catalog cursor did not advance');
+          cursor=result.pagination?.cursor?.id;json.pagination=result.pagination;
+        }
+      }
       return { json, url };
     } catch (error) {
       lastErr = error;

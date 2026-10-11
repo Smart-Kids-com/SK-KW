@@ -50,7 +50,7 @@ function buildItemsRows(items, currency) {
   return items.map((it) => {
     const name = safeText(it.product_name, 'منتج');
     const qty = Math.max(1, Number(it.quantity || 1));
-    const unitPrice = Number(it.price || 0);
+    const unitPrice = Number(it.price ?? it.product_price ?? 0);
     const lineTotal = formatMoney(unitPrice * qty, currency);
 
     return `
@@ -257,26 +257,45 @@ async function sendOrderEmails({ order }) {
   const customerEmail = safeText(order?.customer_email);
 
   if (adminTo) {
-    await resend.emails.send({
+    const response = await resend.emails.send({
       from,
       to: adminTo,
       subject: `[${storeName}] Order ${orderNumber} placed by ${customerName}`,
       html: buildAdminEmailHtml({ storeName, order, currency })
     });
+    if(response.error)throw new Error('Order email was rejected by provider');
   }
 
   if (customerEmail) {
-    await resend.emails.send({
+    const response = await resend.emails.send({
       from,
       to: customerEmail,
       subject: `[${storeName}] تم استلام طلبك ${orderNumber}`,
       html: buildCustomerEmailHtml({ storeName, order, currency })
     });
+    if(response.error)throw new Error('Order email was rejected by provider');
   }
 
   return true;
 }
 
-module.exports = {
-  sendOrderEmails
-};
+function buildInvoiceHtml(order){
+  let billing={};try{billing=JSON.parse(order.billing_address||'{}');}catch{}
+  const address=order.billing_mode==='different'
+    ? [billing.firstName,billing.lastName,billing.address1,billing.address2,billing.city,billing.governorate,billing.country,billing.phone].filter(Boolean).join(' - ')
+    : [order.customer_name,order.customer_address,order.customer_city,order.customer_district,order.customer_phone].filter(Boolean).join(' - ');
+  const html=buildCustomerEmailHtml({storeName:safeText(process.env.STORE_NAME,'Smart Kids Store'),order,currency:safeText(process.env.DEFAULT_CURRENCY,'KWD')})
+    .replace('تم استلام طلبك بنجاح','فاتورة الطلب').replace('شكرًا لطلبك 🌷','فاتورة الطلب');
+  const shipping=[order.customer_name,order.customer_address,order.customer_city,order.customer_district,order.customer_phone].filter(Boolean).join(' - ');
+  return html+`<div dir="rtl"><strong>عنوان الفاتورة</strong><p>${escapeHtml(address)}</p><strong>عنوان الشحن</strong><p>${escapeHtml(shipping)}</p></div>`;
+}
+async function sendInvoiceEmail({order,idempotencyKey}){
+  const apiKey=safeText(process.env.RESEND_API_KEY),from=safeText(process.env.MAIL_FROM),to=safeText(order.customer_email);
+  if(!apiKey||!from||!to||to.endsWith('@smartkids.local'))throw new Error('Invoice sender or deliverable customer email is unavailable');
+  let response;
+  try{response=await new Resend(apiKey).emails.send({from,to,subject:`فاتورة الطلب ${safeText(order.order_number)}`,html:buildInvoiceHtml(order)},{idempotencyKey});}
+  catch{const error=new Error('Invoice delivery status is unknown');error.deliveryUnknown=true;throw error;}
+  if(response.error||!response.data?.id)throw new Error('Invoice was not accepted by provider');
+  return {id:response.data.id};
+}
+module.exports={sendOrderEmails,sendInvoiceEmail,buildInvoiceHtml};

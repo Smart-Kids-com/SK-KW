@@ -56,23 +56,30 @@ function getInventoryState(row) {
   };
 }
 
-async function addColumnIfMissing(tableName, columnName, definitionSql) {
-  const columns = await db.all(`PRAGMA table_info(${tableName})`);
+async function addColumnIfMissing(tableName, columnName, definitionSql, targetDb = db) {
+  const columns = await targetDb.all(`PRAGMA table_info(${tableName})`);
   const exists = Array.isArray(columns) && columns.some(col => col.name === columnName);
 
   if (!exists) {
-    await db.run(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${definitionSql}`);
+    await targetDb.run(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${definitionSql}`);
   }
 }
 
+async function migrateInventoryColumns(targetDb = db) {
+  const add = (name, definition) => addColumnIfMissing(PRODUCTS_TABLE, name, definition, targetDb);
+  await add('sku', `TEXT DEFAULT ''`);
+  await add('stock', `INTEGER DEFAULT 0`);
+  await add('on_hand', `INTEGER DEFAULT 0`);
+  await add('committed', `INTEGER DEFAULT 0`);
+  await add('unavailable', `INTEGER DEFAULT 0`);
+  await add('inventory_enabled', `INTEGER DEFAULT 1`);
+  await add('inventory_blocked', `INTEGER DEFAULT 0`);
+}
 async function ensureInventoryColumns() {
-  await addColumnIfMissing(PRODUCTS_TABLE, 'sku', `TEXT DEFAULT ''`);
-  await addColumnIfMissing(PRODUCTS_TABLE, 'stock', `INTEGER DEFAULT 0`);
-  await addColumnIfMissing(PRODUCTS_TABLE, 'on_hand', `INTEGER DEFAULT 0`);
-  await addColumnIfMissing(PRODUCTS_TABLE, 'committed', `INTEGER DEFAULT 0`);
-  await addColumnIfMissing(PRODUCTS_TABLE, 'unavailable', `INTEGER DEFAULT 0`);
-  await addColumnIfMissing(PRODUCTS_TABLE, 'inventory_enabled', `INTEGER DEFAULT 1`);
-  await addColumnIfMissing(PRODUCTS_TABLE, 'inventory_blocked', `INTEGER DEFAULT 0`);
+  const columns=await db.all(`PRAGMA table_info(${PRODUCTS_TABLE})`);
+  if(['on_hand','committed','unavailable','inventory_enabled','inventory_blocked'].some(name=>!columns.some(row=>row.name===name))) {
+    const error=new Error('مخطط المخزون يحتاج إلى ترحيل صريح');error.status=503;throw error;
+  }
 }
 
 async function getProductInventoryById(id) {
@@ -437,6 +444,7 @@ module.exports = {
   calculateAvailable,
   getInventoryState,
   ensureInventoryColumns,
+  migrateInventoryColumns,
   getProductInventoryById,
   syncProductInventoryById,
   validateOrderItemsStock,

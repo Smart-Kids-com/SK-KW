@@ -53,3 +53,19 @@ db/*.db
 *.db
 *.sqlite
 *.sqlite3
+# SQLite sidecars can contain the same private data as the database.
+*.db-wal
+*.db-shm
+*.db-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.sqlite3-journal
+.vercel
+.env*
+# Encrypted credentials and local release-review artifacts are never source files.
+*.dpapi
+release-review.local.py
+release-package-review.local.json

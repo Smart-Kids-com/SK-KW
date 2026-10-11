@@ -260,8 +260,14 @@
       table{min-width:980px}
     }
   </style>
+  <link rel="stylesheet" href="/css/admin-navigation.css">
+  <script src="/js/admin-navigation.js" defer></script>
+  <script src="/js/catalog-pages.js"></script>
 </head>
-<body>
+<body data-admin-page="products">
+  <div class="admin-layout">
+    <aside data-admin-navigation aria-label="قائمة الإدارة الرئيسية"></aside>
+    <div class="admin-page-content" dir="ltr">
   <input id="importFileInput" class="hidden-file" type="file" accept=".json,.csv,application/json,text/csv" />
 
   <div class="mobile-top">
@@ -288,17 +294,6 @@
         <div style="font-weight:800">الأطفال المبتكرون الكويت</div>
       </div>
     </header>
-
-    <aside class="sidebar">
-      <div class="side-group">
-        <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
-        <a class="nav-item" href="/orders-admin.html"><span>📦 Orders</span><span class="badge-count" id="ordersCountBadge">—</span></a>
-        <a class="nav-item active" href="/products-admin.html"><span>🏷️ Products</span></a>
-        <a class="nav-item" href="/collections-admin.html"><span>🗂️ Collections</span></a>
-        <a class="nav-item" href="/customers-admin.html"><span>👥 Customers</span></a>
-        <a class="nav-item" href="/theme-admin.html"><span>🎨 Theme</span></a>
-      </div>
-    </aside>
 
     <main class="main">
       <div class="page">
@@ -1159,15 +1154,7 @@
     async function fetchImportLookup() {
       showAlert('جاري تجهيز بيانات المطابقة...', 'warning');
 
-      const { response, result } = await fetchJsonWithTimeout(
-        `${API_BASE}?limit=500&offset=0&includeImages=0`,
-        {},
-        20000
-      );
-
-      if (!response.ok) {
-        throw new Error(result?.error || result?.message || 'Failed to load products for import lookup');
-      }
+      const result = await window.fetchCatalogPages(`${API_BASE}?includeImages=0`);
 
       const products = normalizeProductsResponse(result);
       const byId = new Map();
@@ -1431,5 +1418,7 @@
       await Promise.allSettled([loadOrdersCount(), loadSummary()]);
     });
   </script>
+    </div>
+  </div>
 </body>
 </html>

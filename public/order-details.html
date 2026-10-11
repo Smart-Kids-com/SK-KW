@@ -1138,6 +1138,7 @@
     }
 
   </style>
+  <script src="/js/catalog-pages.js"></script>
 </head>
 <body>
   <div class="app">
@@ -1364,7 +1365,7 @@
 
                         <div>
                           <div class="sidebar-section-title">Billing address</div>
-                          <div class="muted">Same as shipping address</div>
+                          <div class="muted" id="billingAddressText">Same as shipping address</div>
                         </div>
                       </div>
                     </div>
@@ -1595,7 +1596,7 @@
               <select id="mainEditStatus">
                 <option value="pending">Pending</option>
                 <option value="processing">In progress</option>
-                <option value="on_hold">On hold</option>
+                <option value="on_hold" disabled>On hold (not supported)</option>
                 <option value="shipped">Fulfilled</option>
                 <option value="completed">Completed</option>
                 <option value="cancelled">Cancelled</option>
@@ -1942,7 +1943,7 @@
       const total = Number(order.total || 0);
       const shipping = Number(order.shipping_cost || 0);
       const subtotal = Number(order.subtotal || Math.max(total - shipping, 0));
-      const paid = order.status === 'completed' ? total : 0;
+      const paid = order.payment_status === 'paid' || (!Number(order.inventory_managed) && order.status === 'completed') ? total : 0;
       const balance = Math.max(total - paid, 0);
 
       return {
@@ -1959,6 +1960,8 @@
     }
 
     function renderOrder(order) {
+      refreshInvoiceStatus();
+      renderBillingAddress(order);
       const orderNumber = order.order_number || `#${order.id || ''}`;
       const paymentLabel = getPaymentLabel(order);
       const fulfillmentLabel = getFulfillmentLabel(order);
@@ -2066,7 +2069,8 @@
 
     async function loadProductsCatalog() {
       if (productsCatalogCache.length) return productsCatalogCache;
-      const { response, result } = await fetchJsonWithTimeout('/api/products?status=active&limit=100&includeImages=0');
+      const result = await window.fetchCatalogPages('/api/products?status=active&includeImages=0');
+      const response = { ok: true };
       if (!response.ok || !result?.success) {
         throw new Error(result?.error || 'Failed to load products');
       }
@@ -2108,7 +2112,7 @@
       const lineTotal = Number((discountedUnit * quantity).toFixed(3));
 
       return `
-        <div class="editor-item-card" data-item-index="${index}" data-discount-type="${escapeHtml(discountType)}" data-discount-value="${discountValue}" data-discount-reason="${escapeHtml(discountReason)}" data-custom-item="${custom}" data-taxable="${taxable}" data-physical-product="${physical}" data-sku="${sku}" data-image="${image}">
+        <div class="editor-item-card" data-item-index="${index}" data-product-id="${escapeHtml(String(item.product_id || item.productId || ''))}" data-discount-type="${escapeHtml(discountType)}" data-discount-value="${discountValue}" data-discount-reason="${escapeHtml(discountReason)}" data-custom-item="${custom}" data-taxable="${taxable}" data-physical-product="${physical}" data-sku="${sku}" data-image="${image}">
           <div class="editor-item-head">
             <div class="editor-item-title">Product ${index + 1}</div>
             <button class="editor-remove-btn" type="button" onclick="removeMainEditItem(this)">Remove</button>
@@ -2189,6 +2193,7 @@
 
         container.innerHTML = filtered.map((product, index) => {
           const payload = encodeURIComponent(JSON.stringify({
+            product_id: product.id,
             product_name: product.product_name || product.name || product.title || `Product ${index + 1}`,
             name: product.product_name || product.name || product.title || `Product ${index + 1}`,
             product_price: Number(product.price ?? product.sale_price ?? 0),
@@ -2365,6 +2370,7 @@
         const subtotal = Number((discountedUnit * quantity).toFixed(3));
 
         return {
+          product_id: card.dataset.productId || '',
           product_name: name,
           name,
           product_price: basePrice,
@@ -2393,7 +2399,7 @@
       const shipping = Number(document.getElementById('mainEditShippingCost').value || 0);
       const status = document.getElementById('mainEditStatus').value || 'pending';
       const total = Number((subtotal + shipping).toFixed(3));
-      const paid = status === 'completed' ? total : 0;
+      const paid = currentOrder.payment_status === 'paid' || (!Number(currentOrder.inventory_managed) && status === 'completed') ? total : 0;
       const balance = Math.max(Number((total - paid).toFixed(3)), 0);
 
       document.querySelectorAll('#mainEditItemsList .editor-item-card').forEach(card => {
@@ -2438,7 +2444,7 @@
         const subtotal = Number(items.reduce((sum, item) => sum + Number(item.subtotal || 0), 0).toFixed(3));
         const total = Number((subtotal + shipping).toFixed(3));
         const status = document.getElementById('mainEditStatus').value || currentOrder.status || 'pending';
-        const paid = status === 'completed' ? total : 0;
+        const paid = currentOrder.payment_status === 'paid' || (!Number(currentOrder.inventory_managed) && status === 'completed') ? total : 0;
         const balance = Math.max(Number((total - paid).toFixed(3)), 0);
 
         const updateData = {
@@ -2862,6 +2868,13 @@ async function cancelCurrentOrder() {
     function getPaymentLabel(order) {
       return Number(order.balance || 0) > 0 ? 'Payment pending' : 'Paid';
     }
+    function renderBillingAddress(order) {
+      const element=document.getElementById('billingAddressText');if(!element)return;
+      let address={};try{address=JSON.parse(order.billing_address||'{}');}catch{}
+      element.textContent=order.billing_mode==='different'
+        ? [address.firstName,address.lastName,address.address1,address.address2,address.city,address.governorate,address.country,address.phone].filter(Boolean).join(' - ')
+        : 'Same as shipping address';
+    }
 
     function getFulfillmentLabel(order) {
       if (order.status === 'completed' || order.status === 'shipped') return 'Fulfilled';
@@ -2954,10 +2967,40 @@ async function cancelCurrentOrder() {
         if (!response.ok || !data.success) throw new Error(data.error || 'Failed to send invoice');
         currentOrder = normalizeOrder(data.data);
         renderOrder(currentOrder);
-        showAlert('Invoice sent', 'success');
+        showAlert(data.invoiceReplayed ? 'هذه النسخة سبق إرسالها؛ لم يُرسل بريد إضافي' : 'تم قبول إرسال النسخة الحالية', 'success');
       } catch (error) {
         showAlert(error.message || 'Failed to send invoice', 'error');
       }
+      await refreshInvoiceStatus();
+    }
+
+    let invoiceState;
+    async function refreshInvoiceStatus(){
+      if(!currentOrder?.id)return;
+      let panel=document.getElementById('invoiceStatusPanel');
+      if(!panel){panel=document.createElement('div');panel.id='invoiceStatusPanel';panel.setAttribute('role','status');
+        const button=document.querySelector('button[onclick="sendInvoice()"]');button?.after(panel);}
+      try{
+        const response=await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}/invoice-status`);
+        const data=await response.json();if(!response.ok||!data.success)throw new Error();invoiceState=data.data;
+        const labels={not_sent:'النسخة الحالية لم تُرسل',sent:'النسخة الحالية سبق إرسالها',sending:'إرسال النسخة الحالية قيد التنفيذ',failed:'فشل إرسال النسخة الحالية',uncertain:'نتيجة إرسال النسخة الحالية غير مؤكدة؛ راجع مزوّد البريد',legacy_review:'سجل قديم بلا بصمة: راجع البريد القديم وقارنه ببيانات الطلب الحالية'};
+        panel.textContent=labels[invoiceState.state]||'تعذر تحديد حالة الفاتورة';
+        if(invoiceState.state==='legacy_review')for(const [decision,label] of [['already_sent','تأكيد أن الحالية سبق إرسالها'],['new_version','تأكيد أن الحالية نسخة محدّثة لم تُرسل']]){
+          const button=document.createElement('button');button.className='ghost-btn';button.textContent=label;
+          button.dataset.invoiceDecision=decision;button.onclick=()=>reviewLegacyInvoice(decision);panel.append(button);
+        }
+      }catch{panel.textContent='تعذر قراءة حالة الفاتورة';}
+      const mobileButton=document.querySelectorAll('button[onclick="sendInvoice()"]')[1];
+      if(mobileButton){document.getElementById('mobileInvoiceStatusPanel')?.remove();
+        const mobilePanel=panel.cloneNode(true);mobilePanel.id='mobileInvoiceStatusPanel';
+        for(const button of mobilePanel.querySelectorAll('[data-invoice-decision]'))button.onclick=()=>reviewLegacyInvoice(button.dataset.invoiceDecision);
+        mobileButton.after(mobilePanel);}
+    }
+    async function reviewLegacyInvoice(decision){
+      if(!confirm('هل راجعت الفاتورة القديمة لدى مزوّد البريد وتأكدت من هذا القرار؟ لا يُرسل هذا الإجراء بريدًا.'))return;
+      const response=await fetch(`${API_BASE}/${encodeURIComponent(currentOrder.id)}/invoice-review`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision,version:invoiceState.version})});
+      const data=await response.json();if(!response.ok){showAlert(data.error,'error');return;}
+      await refreshInvoiceStatus();
     }
 
     function setText(id, value) {

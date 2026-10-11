@@ -10,7 +10,7 @@ if (!USE_TURSO) {
   sqlite3 = require('sqlite3').verbose();
 }
 
-const DB_PATH = path.join(__dirname, '.', SYSTEM_CONFIG.DATABASE_CONFIG.NAME);
+const DB_PATH = require('./paths').LOCAL_DATABASE_PATH;
 
 // IMPORTANT: make timeouts more forgiving in production
 const TURSO_OP_TIMEOUT_MS = Number(process.env.TURSO_OP_TIMEOUT_MS || 25_000);
@@ -77,8 +77,9 @@ class DatabaseManager {
 
     clientInitPromise = withTimeout(
       (async () => {
-        console.log('🌐 اتصال بـ Turso (إنتاج)');
+        console.log(process.env.DATABASE_URL?.startsWith('file:') ? 'اتصال بقاعدة libSQL محلية' : 'اتصال بقاعدة libSQL مُعدّة');
         const c = createClient({ url, authToken });
+        await c.execute('PRAGMA foreign_keys=ON');
 
         // validate connection
         await c.execute({ sql: 'SELECT 1 as ok', args: [] });
@@ -110,7 +111,7 @@ class DatabaseManager {
           reject(err);
         } else {
           console.log('✅ تم الاتصال بقاعدة البيانات بنجاح');
-          resolve();
+          this.db.run('PRAGMA foreign_keys=ON', error => error ? reject(error) : resolve());
         }
       });
     });
@@ -140,10 +141,8 @@ class DatabaseManager {
     if (this.useTurso) {
       try {
         const c = await this.ensureTursoClient();
-        const result = await withRetry(
-          () => withTimeout(c.execute({ sql, args: params }), TURSO_OP_TIMEOUT_MS, 'Turso run'),
-          'Turso run'
-        );
+        // Mutations must never be replayed automatically after an ambiguous timeout.
+        const result = await withTimeout(c.execute({ sql, args: params }), TURSO_OP_TIMEOUT_MS, 'Turso run');
         return { id: result.lastInsertRowid, changes: result.rowsAffected };
       } catch (err) {
         console.error('❌ خطأ Turso (run):', err);
@@ -210,24 +209,15 @@ class DatabaseManager {
       try {
         const c = await this.ensureTursoClient();
 
-        await withRetry(
-          () => withTimeout(c.execute('BEGIN TRANSACTION'), TURSO_OP_TIMEOUT_MS, 'Turso BEGIN'),
-          'Turso BEGIN'
-        );
+        await withTimeout(c.execute('BEGIN TRANSACTION'), TURSO_OP_TIMEOUT_MS, 'Turso BEGIN');
 
         try {
           const result = await callback();
-          await withRetry(
-            () => withTimeout(c.execute('COMMIT'), TURSO_OP_TIMEOUT_MS, 'Turso COMMIT'),
-            'Turso COMMIT'
-          );
+          await withTimeout(c.execute('COMMIT'), TURSO_OP_TIMEOUT_MS, 'Turso COMMIT');
           return result;
         } catch (err) {
           try {
-            await withRetry(
-              () => withTimeout(c.execute('ROLLBACK'), TURSO_OP_TIMEOUT_MS, 'Turso ROLLBACK'),
-              'Turso ROLLBACK'
-            );
+            await withTimeout(c.execute('ROLLBACK'), TURSO_OP_TIMEOUT_MS, 'Turso ROLLBACK');
           } catch (rollbackErr) {
             console.error('❌ خطأ Turso (ROLLBACK):', rollbackErr);
           }
@@ -406,16 +396,7 @@ class DatabaseManager {
       `CREATE INDEX IF NOT EXISTS idx_collection_products_collection_sort ON collection_products(collection_id, sort_order, id)`
     ];
 
-    for (const sql of sqlCommands) {
-      try {
-        await this.run(sql);
-      } catch (err) {
-        const message = String(err.message || '').toLowerCase();
-        if (!message.includes('already exists')) {
-          console.warn('⚠️ تحذير:', err.message);
-        }
-      }
-    }
+    for (const sql of sqlCommands) await this.run(sql);
 
     const migrations = [
       ['products', 'product_type', `TEXT DEFAULT ''`],
@@ -434,21 +415,7 @@ class DatabaseManager {
       ['collections', 'pos_excluded', `INTEGER NOT NULL DEFAULT 1`]
     ];
 
-    for (const [tableName, columnName, columnSql] of migrations) {
-      try {
-        await this.addColumnIfMissing(tableName, columnName, columnSql);
-      } catch (err) {
-        const message = String(err.message || '').toLowerCase();
-        if (
-          !message.includes('duplicate column') &&
-          !message.includes('already exists') &&
-          !message.includes('duplicate') &&
-          !message.includes('no such table')
-        ) {
-          console.warn(`⚠️ تحذير migration ${tableName}.${columnName}:`, err.message);
-        }
-      }
-    }
+    for (const [tableName, columnName, columnSql] of migrations) await this.addColumnIfMissing(tableName, columnName, columnSql);
 
     console.log('✅ تم تهيئة الجداول بنجاح');
   }

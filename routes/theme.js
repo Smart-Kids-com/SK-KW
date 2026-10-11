@@ -63,63 +63,7 @@ function stringifySettings(settings) {
   }
 }
 
-async function ensureThemeTables() {
-  await withTimeout(
-    db.run(`
-      CREATE TABLE IF NOT EXISTS theme_pages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        page_key TEXT NOT NULL UNIQUE,
-        title TEXT NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-      )
-    `),
-    DB_OP_TIMEOUT_MS,
-    'createThemePagesTable'
-  );
-
-  await withTimeout(
-    db.run(`
-      CREATE TABLE IF NOT EXISTS theme_sections (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        page_id INTEGER NOT NULL,
-        type TEXT NOT NULL,
-        title TEXT NOT NULL,
-        settings_json TEXT NOT NULL DEFAULT '{}',
-        sort_order INTEGER NOT NULL DEFAULT 0,
-        is_visible INTEGER NOT NULL DEFAULT 1,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (page_id) REFERENCES theme_pages(id) ON DELETE CASCADE
-      )
-    `),
-    DB_OP_TIMEOUT_MS,
-    'createThemeSectionsTable'
-  );
-
-  await withTimeout(
-    db.run(`
-      CREATE TABLE IF NOT EXISTS theme_settings (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        setting_key TEXT NOT NULL UNIQUE,
-        setting_value TEXT NOT NULL DEFAULT '',
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-      )
-    `),
-    DB_OP_TIMEOUT_MS,
-    'createThemeSettingsTable'
-  );
-
-  await withTimeout(
-    db.run(`
-      INSERT OR IGNORE INTO theme_pages (page_key, title)
-      VALUES ('home', 'Homepage')
-    `),
-    DB_OP_TIMEOUT_MS,
-    'seedHomePage'
-  );
-}
+async function ensureThemeTables() { return require('../db/schema-readiness').assertTables(db, ['theme_pages','theme_sections','theme_settings']); }
 
 async function getPageByKey(pageKey) {
   return await withTimeout(

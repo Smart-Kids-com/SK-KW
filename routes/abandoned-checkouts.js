@@ -63,48 +63,7 @@ function buildCustomerName(firstName, lastName, fallback = '') {
   const full = `${safeText(firstName)} ${safeText(lastName)}`.trim();
   return full || safeText(fallback);
 }
-async function ensureTableExists() {
-  await db.run(`
-    CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      checkout_token TEXT NOT NULL UNIQUE,
-      status TEXT NOT NULL DEFAULT 'open',
-      contact_value TEXT DEFAULT '',
-      contact_type TEXT DEFAULT '',
-      customer_email TEXT DEFAULT '',
-      customer_phone TEXT DEFAULT '',
-      first_name TEXT DEFAULT '',
-      last_name TEXT DEFAULT '',
-      customer_name TEXT DEFAULT '',
-      address1 TEXT DEFAULT '',
-      address2 TEXT DEFAULT '',
-      city TEXT DEFAULT '',
-      governorate TEXT DEFAULT '',
-      country TEXT DEFAULT 'Kuwait',
-      postal_code TEXT DEFAULT '',
-      notes TEXT DEFAULT '',
-      discount_code TEXT DEFAULT '',
-      discount_amount REAL NOT NULL DEFAULT 0,
-      subtotal REAL NOT NULL DEFAULT 0,
-      shipping_cost REAL NOT NULL DEFAULT 0,
-      total REAL NOT NULL DEFAULT 0,
-      currency TEXT DEFAULT 'KWD',
-      cart_items TEXT DEFAULT '[]',
-      cart_quantity INTEGER NOT NULL DEFAULT 0,
-      item_count INTEGER NOT NULL DEFAULT 0,
-      recovered_order_id TEXT DEFAULT '',
-      recovered_order_number TEXT DEFAULT '',
-      last_activity_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_abandoned_checkouts_token ON ${TABLE_NAME}(checkout_token)`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_abandoned_checkouts_status ON ${TABLE_NAME}(status)`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_abandoned_checkouts_last_activity ON ${TABLE_NAME}(last_activity_at)`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_abandoned_checkouts_email ON ${TABLE_NAME}(customer_email)`);
-  await db.run(`CREATE INDEX IF NOT EXISTS idx_abandoned_checkouts_phone ON ${TABLE_NAME}(customer_phone)`);
-}
+async function ensureTableExists() { return require('../db/schema-readiness').assertTables(db, ['abandoned_checkouts']); }
 function mapRow(row) {
   if (!row) return null;
   return {
@@ -227,76 +186,13 @@ router.post('/save', async (req, res) => {
       finalCartQuantity,
       finalItemCount
     ];
-    if (existing?.id) {
-      await db.run(
-        `UPDATE ${TABLE_NAME}
-         SET
-           status = 'open',
-           contact_value = ?,
-           contact_type = ?,
-           customer_email = ?,
-           customer_phone = ?,
-           first_name = ?,
-           last_name = ?,
-           customer_name = ?,
-           address1 = ?,
-           address2 = ?,
-           city = ?,
-           governorate = ?,
-           country = ?,
-           postal_code = ?,
-           notes = ?,
-           discount_code = ?,
-           discount_amount = ?,
-           subtotal = ?,
-           shipping_cost = ?,
-           total = ?,
-           currency = ?,
-           cart_items = ?,
-           cart_quantity = ?,
-           item_count = ?,
-           updated_at = CURRENT_TIMESTAMP,
-           last_activity_at = CURRENT_TIMESTAMP
-         WHERE checkout_token = ?`,
-        [...values, token]
-      );
-    } else {
-      await db.run(
-        `INSERT INTO ${TABLE_NAME}
-         (
-           checkout_token,
-           status,
-           contact_value,
-           contact_type,
-           customer_email,
-           customer_phone,
-           first_name,
-           last_name,
-           customer_name,
-           address1,
-           address2,
-           city,
-           governorate,
-           country,
-           postal_code,
-           notes,
-           discount_code,
-           discount_amount,
-           subtotal,
-           shipping_cost,
-           total,
-           currency,
-           cart_items,
-           cart_quantity,
-           item_count,
-           created_at,
-           updated_at,
-           last_activity_at
-         )
-         VALUES (?, 'open', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
-        [token, ...values]
-      );
-    }
+    const fields=['contact_value','contact_type','customer_email','customer_phone','first_name','last_name','customer_name',
+      'address1','address2','city','governorate','country','postal_code','notes','discount_code','discount_amount',
+      'subtotal','shipping_cost','total','currency','cart_items','cart_quantity','item_count'];
+    await db.run(`INSERT INTO abandoned_checkouts(checkout_token,status,${fields.join(',')})
+      VALUES(?,'open',${fields.map(()=>'?').join(',')}) ON CONFLICT(checkout_token) DO UPDATE SET
+      ${fields.map(field=>`${field}=excluded.${field}`).join(',')},updated_at=CURRENT_TIMESTAMP,last_activity_at=CURRENT_TIMESTAMP
+      WHERE abandoned_checkouts.status='open'`,[token,...values]);
     const saved = await getByToken(token);
     return res.json({
       success: true,

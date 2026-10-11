@@ -1,0 +1,112 @@
+[
+    {
+        "value": [
+            {
+                "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/search-bar.webp?v=1776716710",
+                "local": "/admin-assets/search-bar.png",
+                "format": "PNG",
+                "bytes": 127808,
+                "sha256": "b2f53b95477ce096e9fad301bcfc7f68590eb0e2fba2bacbc5ed311b21e3af17"
+            },
+            {
+                "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/sk-Logo-with-name.webp?v=1776752430",
+                "local": "/admin-assets/sk-Logo-with-name.png",
+                "format": "PNG",
+                "bytes": 989071,
+                "sha256": "3315185fa90ba44a1ed032f3248b5c398c092e7b777422f32b7ac2362a8e12f8"
+            },
+            {
+                "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/smartify.webp?v=1776716711",
+                "local": "/admin-assets/smartify.png",
+                "format": "PNG",
+                "bytes": 783966,
+                "sha256": "713fd2e213956e7040f8fd1c0ff0be4468e4c2b4dbf91c3f27110e18019fe426"
+            },
+            {
+                "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/home.webp?v=1776716710",
+                "local": "/admin-assets/home.png",
+                "format": "PNG",
+                "bytes": 425233,
+                "sha256": "652a7a39c0bae74c130d1f6db108c148b909cd38532f36f486fdc5c677181170"
+            },
+            {
+                "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/orders.webp?v=1776716710",
+                "local": "/admin-assets/orders.png",
+                "format": "PNG",
+                "bytes": 439303,
+                "sha256": "0988c69d04d9828d59218485bdf73519f03fc7341a7ce972ab4eebb7384dc742"
+            },
+            {
+                "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/products.webp?v=1776716710",
+                "local": "/admin-assets/products.png",
+                "format": "PNG",
+                "bytes": 414204,
+                "sha256": "2ab21950b09024b62ed3ddc3e99c7f2dbc6dd6280b049ccc292b73f52972fb75"
+            },
+            {
+                "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/inventory-icon.webp?v=1777104600",
+                "local": "/admin-assets/inventory-icon.png",
+                "format": "PNG",
+                "bytes": 343741,
+                "sha256": "96e266cd3448c312d3e186ab83170c53aea501e6b76feb8008be66b04b92cb2f"
+            },
+            {
+                "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/collections.webp?v=1776716710",
+                "local": "/admin-assets/collections.png",
+                "format": "PNG",
+                "bytes": 438628,
+                "sha256": "3d252f4a2c34f79e6e77c46817b33295e6a954aa3c77a693c2d09f0466168f66"
+            },
+            {
+                "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/customers.webp?v=1776716710",
+                "local": "/admin-assets/customers.png",
+                "format": "PNG",
+                "bytes": 422700,
+                "sha256": "830c3af1a701861a2949cb33f2864318a2c3fdbbde5afbad96cdfbf127139f38"
+            },
+            {
+                "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/theme.webp?v=1776716710",
+                "local": "/admin-assets/theme.png",
+                "format": "PNG",
+                "bytes": 359912,
+                "sha256": "1718f4608a7f12ae78d788dd948131b13ac386f6efb852fecf08b05b0fcbb36a"
+            },
+            {
+                "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Discounts.webp?v=1776717424",
+                "local": "/admin-assets/Discounts.png",
+                "format": "PNG",
+                "bytes": 593274,
+                "sha256": "2f62f237025d1d15b5702ac48a93432d9beb0fadb8fe1593c8a1b730011fc1e6"
+            },
+            {
+                "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/abandoned-checkout.webp?v=1776754656",
+                "local": "/admin-assets/abandoned-checkout.png",
+                "format": "PNG",
+                "bytes": 398244,
+                "sha256": "8b0146daec48119afd02a2daf6484827875be30fd463ad4e7b16784c5c0b760e"
+            },
+            {
+                "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/orders-to-fullfill.webp?v=1776716710",
+                "local": "/admin-assets/orders-to-fullfill.png",
+                "format": "PNG",
+                "bytes": 238835,
+                "sha256": "f7e292072d6b3e883733477b88856ce98010a37f17c179b508c7d6f212762d89"
+            },
+            {
+                "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/payment-to-capure.webp?v=1776716710",
+                "local": "/admin-assets/payment-to-capure.png",
+                "format": "PNG",
+                "bytes": 550696,
+                "sha256": "e40694e556c4190c2f584adc08194d5695ffbc22815a38348fa68ee0856ad37e"
+            }
+        ],
+        "Count": 14
+    },
+    {
+        "source": "https://cdn.shopify.com/s/files/1/0697/3318/7805/files/redirects_bottom.png?v=1791525309",
+        "local": "/admin-assets/redirects_bottom.png",
+        "format": "PNG",
+        "bytes": 209500,
+        "sha256": "fffff4cc02fd3f47c05666fe39920f2a8c88ea580e0d1fcd34c9dd6c8a0cc6ec"
+    }
+]

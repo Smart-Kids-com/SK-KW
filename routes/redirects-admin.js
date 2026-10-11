@@ -46,47 +46,7 @@ function safeStatusCode(value) {
   return code === 302 ? 302 : 301;
 }
 
-async function ensureRedirectsTable() {
-  if (!redirectsTableReadyPromise) {
-    redirectsTableReadyPromise = (async () => {
-      await db.run(`
-        CREATE TABLE IF NOT EXISTS redirects (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          source_path TEXT NOT NULL UNIQUE,
-          destination_path TEXT NOT NULL,
-          status_code INTEGER DEFAULT 301,
-          is_active INTEGER DEFAULT 1,
-          notes TEXT DEFAULT '',
-          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-          updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-        )
-      `);
-
-      await db.run(`
-        CREATE INDEX IF NOT EXISTS idx_redirects_source_path
-        ON redirects(source_path)
-      `);
-
-      await db.run(`
-        CREATE INDEX IF NOT EXISTS idx_redirects_is_active
-        ON redirects(is_active)
-      `);
-
-      await db.run(`
-        INSERT OR IGNORE INTO redirects
-        (source_path, destination_path, status_code, is_active, notes)
-        VALUES
-        ('/product-page', '/products-full.html', 301, 1, 'Old product page redirect'),
-        ('/product-page/', '/products-full.html', 301, 1, 'Old product page redirect')
-      `);
-    })().catch(error => {
-      redirectsTableReadyPromise = null;
-      throw error;
-    });
-  }
-
-  return redirectsTableReadyPromise;
-}
+async function ensureRedirectsTable() { return require('../db/schema-readiness').assertTables(db, ['redirects']); }
 
 router.get('/', async (req, res) => {
   try {

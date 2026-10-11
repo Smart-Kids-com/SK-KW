@@ -141,8 +141,13 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="/css/admin-navigation.css">
+  <script src="/js/admin-navigation.js" defer></script>
 </head>
-<body>
+<body data-admin-page="redirects">
+  <div class="admin-layout">
+    <aside data-admin-navigation aria-label="قائمة الإدارة الرئيسية"></aside>
+    <div class="admin-page-content" dir="rtl">
   <div class="wrap">
     <div class="top">
       <div>
@@ -355,5 +360,7 @@
 
     loadRedirects();
   </script>
+    </div>
+  </div>
 </body>
 </html>
