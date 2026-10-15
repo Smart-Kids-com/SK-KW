@@ -1,10 +1,10 @@
-# Editors release — 2026-10-15-editors.1
+# Editors release — 2026-10-15-editors.2
 
 Theme drafts/library/media/visual editor, Products server list/import/export and collection membership, Orders list/selection/jobs/print and compact navigation/scrolling, and manual/automated Collections are included. Existing storefront content and defaults remain unchanged. Publishing a Theme draft is separate from deploying code. Sales remain paused.
 
 Best selling counts recorded item quantities in currently shipped/completed orders, excluding unfinished/cancelled orders and structured test flags/tags. Production currently has no item-level return quantities; general returned/refunded flags do not subtract invented quantities. Products without sales remain with zero, tied by product ID. The indexed aggregation runs on each request, across the whole collection before pagination; it has no stale cache.
 
-Most relevant with search ranks exact name/SKU, name prefix, all name words, then product type/tags/description; ties use sold pieces and product ID. Without search it uses saved manual priorities, followed by unprioritized products by sales and ID. Manual positions survive other sorts. Admin display preference does not publish ordering; published sort requires Save.
+Most relevant with search ranks exact name/SKU, name prefix, all name words, then product type/tags/description; ties use sold pieces and product ID. Without search it uses saved manual priorities, followed by unprioritized products by sales and ID. Manual positions survive other sorts. Admin display preference does not publish ordering; published sort requires Save. Storefront search for Most relevant queries the same server ranking across all pages, resets pagination, and ignores stale search responses.
 
 Only additive new migrations: theme-editor (documents/history/media/library/identity), orders-admin (durable selections/jobs and indexes), collections-editor (metadata/exclusions/automated memberships/jobs and triggers), and collection-ranking indexes. Product attributes already exist. No invoice, authentication, pricing, inventory settlement or earlier migration is repeated. The release migration tool snapshots production in a read transaction, restores it locally, rehearses rollback and success, and compares all original table fields before committing the remote schema transaction. It never initializes demo data.
 

@@ -47,6 +47,7 @@ async function runRankingBrowser({base,cdp,evaluate,wait,set,collectionId}){
   await set('sort_mode',sort,'input');await evaluate('document.getElementById("save").click()');await wait('!window.__SKCollectionEditor.dirty&&window.__SKCollectionEditor.collection.sort_mode==='+JSON.stringify(sort));
   await evaluate('window.__rankingReload=true');await cdp('Page.reload');await wait('!window.__rankingReload&&document.readyState==="complete"&&window.__SKCollectionEditor?.collection?.sort_mode==='+JSON.stringify(sort)+'&&document.getElementById("sort_mode").value==='+JSON.stringify(sort));assert.equal(await evaluate('document.getElementById("sort_mode").value'),sort);
   await cdp('Page.navigate',{url:base+'/collection.html?id='+collectionId});await wait('document.getElementById("collectionSortBadge")?.textContent==='+JSON.stringify(sort==='best_selling'?'Best selling':'Most relevant'));assert(await evaluate('document.getElementById("collectionSortBadge").title.length>20'));
+  if(sort==='most_relevant'){await set('searchInput','rocket','input');await wait('!productsLoading&&filteredProducts.length===4&&filteredProducts[0].id===3');assert.deepEqual(await evaluate('filteredProducts.map(p=>p.id)'),[3,6,9,12]);await set('searchInput','TEST-SKU-0069','input');await wait('!productsLoading&&filteredProducts.length===1&&filteredProducts[0].id===69');await set('searchInput','','input');await wait('!productsLoading&&filteredProducts[0]?.id===9');}
  }
  console.log('PASS ranking browser: admin order, explicit Save, reopen and published storefront for both sorts.');
 }

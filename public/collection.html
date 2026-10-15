@@ -567,6 +567,7 @@
     const productsLimit = 10;
     let productsTotal = null;
     let productsHasMore = false;
+    let relevantSearch = '', searchGeneration = 0, relevantSearchTimer;
 
     function escapeHtml(str) {
       return String(str || '')
@@ -697,6 +698,7 @@
       params.set('sort', sortMode || 'manual');
       params.set('limit', String(limit));
       params.set('offset', String(offset));
+      if(sortMode==='most_relevant' && relevantSearch) params.set('search',relevantSearch);
       if(new URLSearchParams(location.search).get('collectionPreview')==='1')params.set('preview','1');
 
       const { response, result } = await fetchJsonWithTimeout(
@@ -859,6 +861,7 @@
       if (productsLoading) return;
       if (!productsHasMore) return;
 
+      const generation=searchGeneration;
       try {
         productsLoading = true;
         updateLoadMoreButton();
@@ -871,6 +874,7 @@
           productsOffset
         );
 
+        if(generation!==searchGeneration)return;
         allCollectionProducts = [...allCollectionProducts, ...rows];
         filteredProducts = [...allCollectionProducts];
 
@@ -886,6 +890,7 @@
         renderProducts();
         updateLoadMoreButton();
       } catch (error) {
+        if(generation!==searchGeneration)return;
         console.error(error);
         productsLoading = false;
         productsHasMore = false;
@@ -899,6 +904,11 @@
     }
 
     function searchInCollection(query) {
+      if(currentCollection?.sort_mode==='most_relevant'){
+        relevantSearch=String(query||'').trim().slice(0,200);searchGeneration++;clearTimeout(relevantSearchTimer);
+        relevantSearchTimer=setTimeout(()=>{productsOffset=0;productsTotal=null;allCollectionProducts=[];filteredProducts=[];productsHasMore=true;productsLoading=false;loadMoreProducts();},200);
+        return;
+      }
       const q = String(query || '').trim().toLowerCase();
       if (!q) {
         filteredProducts = [...allCollectionProducts];
