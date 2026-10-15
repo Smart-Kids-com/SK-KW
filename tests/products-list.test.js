@@ -1,0 +1,64 @@
+'use strict';
+const isolation=require('./security-support');
+const {test,before,after}=require('node:test'),assert=require('node:assert/strict'),{once}=require('node:events');
+const db=require('../db/turso-manager'),S=require('../services/product-list');let app,server,base,cookie;
+async function req(path,{method='GET',body,admin=true}={}){const r=await fetch(base+'/api/products/admin/'+path,{method,headers:{Origin:base,...(admin?{Cookie:cookie}:{}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});return {status:r.status,data:r.headers.get('content-type')?.includes('json')?await r.json():await r.text()};}
+before(async()=>{await require('../scripts/security-demo-fixtures').seedSecurityDemo();await require('../scripts/products-demo-fixtures').seedProducts(db);await require('../db/collections-editor-migration').migrateCollectionsEditor(db);const wrapper=require('express')();wrapper.use((req,res,next)=>{res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; frame-src 'self'; object-src 'none'");next();});server=wrapper.listen(0,'127.0.0.1');await once(server,'listening');base='http://127.0.0.1:'+server.address().port;process.env.PUBLIC_ORIGIN=base;process.env.STORE_SALES_PAUSED='1';app=require('../server');wrapper.use(app);const jar=new Map();for(const [route,body]of [['/admin-login',{password:process.env.ADMIN_PASSWORD_1,next:'/products-admin'}],['/admin-otp',{otp:require('speakeasy').totp({secret:process.env.ADMIN_OTP_SECRET,encoding:'base32'}),next:'/products-admin'}]]){const r=await fetch(base+route,{method:'POST',redirect:'manual',headers:{Origin:base,'Content-Type':'application/x-www-form-urlencoded',Cookie:[...jar].map(([k,v])=>k+'='+v).join('; ')},body:new URLSearchParams(body)});for(const item of r.headers.getSetCookie()){const [k,v]=item.split(';')[0].split('=');v?jar.set(k,v):jar.delete(k);}}assert(jar.has('sk_admin_session'));cookie=[...jar].map(([k,v])=>k+'='+v).join('; ');});
+after(async()=>{server?.closeAllConnections();if(server)await new Promise(r=>server.close(r));app?.locals.adminAuth.close();(await db.ensureTursoClient()).close();});
+test('Collection dialog appearance and affected interaction only',async()=>{await require('../scripts/products-demo-fixtures').seedCollections(db);await require('../scripts/check-products-browser').checkProductsBrowser(base,{cookie,dialogOnly:true});assert.equal(isolation.blockedEffects.length,0);});
+test('Add to collection: complete admin choices, single/bulk/previous/retry membership and published visibility',async()=>{
+ const statements=[];for(let i=2;i<=132;i++)statements.push({sql:'INSERT INTO collections(id,title,slug,status,online_store) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET status=excluded.status,online_store=excluded.online_store',args:[i,'مجموعة تجريبية '+i,'collection-demo-'+i,i===131?'draft':'active',i===130?0:1]});await require('../services/order-inventory').atomicBatch(db,statements);
+ await db.run('DELETE FROM collection_products WHERE collection_id BETWEEN 2 AND 132');
+ const snapshot=JSON.stringify(await db.all('SELECT id,price,sale_price,status,on_hand,committed,unavailable,stock FROM products ORDER BY id'));
+ assert.equal((await req('collections',{admin:false})).status,401);assert.equal((await req('add-to-collection',{admin:false,method:'POST',body:{ids:[3],collectionId:132}})).status,401);
+ const first=(await req('collections')).data.data;assert.equal(first.rows.length,100);const next=(await req('collections?cursor='+first.nextCursor)).data.data;assert(next.rows.some(c=>c.id===132));assert.equal(next.nextCursor,null);assert(next.rows.some(c=>c.id===131&&c.status==='draft'));
+ await db.run('INSERT INTO collection_products(collection_id,product_id,sort_order) VALUES(1,3,1)');
+ const add=ids=>req('add-to-collection',{method:'POST',body:{ids,collectionId:132}});
+ assert.equal((await add([3])).data.data.added,1);let r=(await add([2,3,4])).data.data;assert.equal(r.added,2);assert.equal(r.alreadyPresent,1);r=(await add([2,3,4])).data.data;assert.equal(r.added,0);assert.equal(r.alreadyPresent,3);
+ const concurrent=await Promise.all([add([5]),add([5])]);assert(concurrent.every(r=>r.status===200));assert.equal(concurrent.reduce((n,r)=>n+r.data.data.added,0),1);
+ assert.equal((await db.get('SELECT COUNT(*) AS count FROM collection_products WHERE collection_id=132')).count,4);assert(await db.get('SELECT id FROM collection_products WHERE collection_id=1 AND product_id=3'));
+ assert.equal((await add([3,99999])).status,409);assert.equal((await req('add-to-collection',{method:'POST',body:{ids:[3],collectionId:99999}})).status,404);
+ await req('add-to-collection',{method:'POST',body:{ids:[3],collectionId:131}});await req('add-to-collection',{method:'POST',body:{ids:[3],collectionId:130}});
+ async function collection(path,admin){const target=admin?path.replace(/^(\d+)\/products/,'admin/$1/items'):path;const response=await fetch(base+'/api/collections/'+target,{headers:admin?{Cookie:cookie}:{}});const data=await response.json();if(admin&&data.data?.rows)data.data=data.data.rows;return {status:response.status,data};}
+ const admin=await collection('132/products?limit=100',true),publicResult=await collection('132/products?limit=100',false);assert.equal(admin.status,200);assert.equal(admin.data.data.length,4);assert.equal(publicResult.status,200);assert.deepEqual(publicResult.data.data.map(p=>p.id),[3]);assert.equal((await collection('131/products',false)).status,404);assert.equal((await collection('130/products',false)).status,404);assert.equal((await collection('132',true)).data.data.product_count,1);
+ assert.equal(JSON.stringify(await db.all('SELECT id,price,sale_price,status,on_hand,committed,unavailable,stock FROM products ORDER BY id')),snapshot);
+ await require('../scripts/check-products-browser').checkProductsBrowser(base,{cookie,collectionsOnly:true});assert.equal(isolation.blockedEffects.length,0);
+});
+test('protected server-wide search, filters, stable sort, count, pagination and authoritative available inventory',async()=>{
+ assert.equal((await req('list',{admin:false})).status,401);for(const p of ['facets','export','bulk-status','import/preview','import/apply'])assert.equal((await req(p,{admin:false,method:p==='facets'?'GET':'POST',body:p==='facets'?undefined:{}})).status,401);
+ let result=(await req('list?limit=25')).data.data;assert.equal(result.pagination.total,237);assert.equal(result.rows.length,25);assert.equal(result.pagination.hasMore,true);
+ const first=result.rows.map(r=>r.id),next=(await req('list?limit=25&offset=25')).data.data;assert(next.rows.every(r=>!first.includes(r.id)));assert.equal((await req('list?limit=25&offset=225')).data.data.rows.length,12);
+ result=(await req('list?search=TEST-SKU-0200')).data.data;assert.equal(result.rows[0].id,200);assert.equal(result.pagination.total,1);
+ result=(await req('list?search='+encodeURIComponent('منتج تجريبي 200'))).data.data;assert.equal(result.rows[0].id,200);
+ assert.equal((await req('list?search=%25')).data.data.pagination.total,0);
+ result=(await req('list?sort=price&direction=ASC&limit=100&hideArchived=1')).data.data;assert(result.rows.every(r=>r.status!=='archived'));assert(result.rows.every((r,i,a)=>!i||r.price>=a[i-1].price));
+ result=(await req('list?status=draft&category='+encodeURIComponent('كتب')+'&product_type=Book&vendor=Local%20demo')).data.data;assert(result.pagination.total>0);assert(result.rows.every(r=>r.status==='draft'&&r.category==='كتب'&&r.product_type==='Book'&&r.vendor==='Local demo'));
+ result=(await req('list?inventory=out_of_stock')).data.data;assert(result.rows.length>0&&result.rows.every(r=>r.available===0));
+ await db.run('UPDATE products SET stock=999,on_hand=11,committed=4,unavailable=2 WHERE id=200');assert.equal((await req('list?search=TEST-SKU-0200')).data.data.rows[0].available,5);await db.run('UPDATE products SET stock=5 WHERE id=200');
+ for(const query of ['sort=price;DROP','sort=constructor','direction=bad','inventory=bad','limit=101','offset=-1'])assert.equal((await req('list?'+query)).status,400);
+ assert((await req('facets')).data.data.product_type.includes('Book'));
+});
+test('selected bulk status returns exact partial results and does not alter inventory; export covers all pages and filters',async()=>{
+ const snapshot=JSON.stringify(await db.all('SELECT id,on_hand,committed,unavailable,stock FROM products ORDER BY id'));
+ const r=await req('bulk-status',{method:'POST',body:{ids:[200,201,99999],status:'archived'}});assert.equal(r.data.data.requested,3);assert.equal(r.data.data.updated,2);assert.equal(r.data.data.errors.length,1);assert.equal(JSON.stringify(await db.all('SELECT id,on_hand,committed,unavailable,stock FROM products ORDER BY id')),snapshot);
+ assert.equal((await req('bulk-status',{method:'POST',body:{ids:[200],status:'delete'}})).status,400);
+ const all=await req('export',{method:'POST',body:{scope:'all'}});assert.equal(all.status,200);const lines=all.data.trim().split('\r\n');assert.equal(lines.length,238);assert(all.data.includes('TEST-SKU-0200'));
+ const selected=await req('export',{method:'POST',body:{scope:'selected',ids:[200,201]}});assert.equal(selected.data.trim().split('\r\n').length,3);
+ const filtered=await req('export',{method:'POST',body:{scope:'filtered',filters:{status:'draft',inventory:'in_stock'}}});const count=(await req('list?status=draft&inventory=in_stock')).data.data.pagination.total;assert.equal(filtered.data.trim().split('\r\n').length,count+1);
+ assert(S.csvCell('=HYPERLINK("bad")').startsWith('"\''));
+});
+test('CSV validates before application, previews duplicates and conflicts, preserves reservations, safely retries and creates zero-stock drafts',async()=>{
+ const crossOrigin=await fetch(base+'/api/products/admin/bulk-status',{method:'POST',headers:{Origin:'https://external.invalid',Cookie:cookie,'Content-Type':'application/json'},body:JSON.stringify({ids:[200],status:'draft'})});assert.equal(crossOrigin.status,403);
+ const stockBefore=JSON.stringify(await db.all('SELECT id,on_hand,committed,unavailable,stock FROM products ORDER BY id'));
+ const csv='id,product_name,price,stock,image_url\r\n200,"منتج محدّث, مع فاصلة",21.250,0,/icon-whatsapp.webp\r\n';
+ const preview=(await req('import/preview',{method:'POST',body:{csv}})).data.data;assert.equal(preview.errors.length,0);assert.deepEqual(preview.readOnly,['stock']);assert.equal((await req('import/apply',{method:'POST',body:{csv,fingerprint:preview.fingerprint}})).status,200);
+ assert.equal((await db.get('SELECT product_name FROM products WHERE id=200')).product_name,'منتج محدّث, مع فاصلة');assert.equal(JSON.stringify(await db.all('SELECT id,on_hand,committed,unavailable,stock FROM products ORDER BY id')),stockBefore);
+ assert.equal((await req('import/apply',{method:'POST',body:{csv,fingerprint:preview.fingerprint}})).status,409);
+ const dup='product_name,sku,slug,price\nOne,DUP,dup-one,1\nTwo,DUP,dup-two,2';assert.equal((await req('import/preview',{method:'POST',body:{csv:dup}})).data.data.errors.length,1);
+ const invalid='product_name,slug,price,status\nBad,bad-slug,-1,wrong';const p=(await req('import/preview',{method:'POST',body:{csv:invalid}})).data.data;assert(p.errors.length);assert.equal((await req('import/apply',{method:'POST',body:{csv:invalid,fingerprint:p.fingerprint}})).status,400);
+ const conflict='id,product_name,sku,price\n200,Conflict,TEST-SKU-0201,2';assert.equal((await req('import/preview',{method:'POST',body:{csv:conflict}})).data.data.errors.length,1);
+ const fresh='product_name,slug,price,description\n"منتج جديد","csv-new",4.125,"Line one\nLine two"';const plan=(await req('import/preview',{method:'POST',body:{csv:fresh}})).data.data;assert.equal(plan.errors.length,0);assert.equal((await req('import/apply',{method:'POST',body:{csv:fresh,fingerprint:plan.fingerprint}})).status,200);const created=await db.get('SELECT * FROM products WHERE slug=?',['csv-new']);assert.equal(created.status,'draft');assert.equal(created.stock,0);assert.equal(created.committed,0);assert.equal(created.on_hand,0);
+ const stale='id,product_name,price\n201,Stale update,99';const stalePlan=(await req('import/preview',{method:'POST',body:{csv:stale}})).data.data;await db.run('UPDATE products SET vendor=? WHERE id=201',['Changed after preview']);assert.equal((await req('import/apply',{method:'POST',body:{csv:stale,fingerprint:stalePlan.fingerprint}})).status,409);assert.notEqual((await db.get('SELECT price FROM products WHERE id=201')).price,99);
+ assert.equal(isolation.blockedEffects.length,0);
+});
+test('Products browser: search, pages, filters, columns, mobile table, bulk status and CSV preview/apply',async()=>{await require('../scripts/check-products-browser').checkProductsBrowser(base,{cookie});assert.equal(isolation.blockedEffects.length,0);});

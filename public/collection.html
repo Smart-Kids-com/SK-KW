@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <script src="/js/theme-preview-bootstrap.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title id="pageTitle">مجموعة - Smart Kids Kuwait</title>
@@ -503,7 +504,7 @@
 
   <div class="collection-hero">
     <div class="collection-header">
-      <span class="collection-icon" id="collectionIcon"></span>
+      <span class="collection-icon" id="collectionIcon"></span><img id="collectionCover" alt="" hidden style="width:min(28vw,160px);height:auto;max-height:160px;object-fit:contain;border-radius:12px">
       <div class="collection-info">
         <h1 id="collectionTitle">تحميل المجموعة...</h1>
         <p id="collectionDescription"></p>
@@ -589,12 +590,11 @@
     function getCollectionIcon(collection) { return safeText(collection?.icon, ''); }
     function getProductTitle(product) { return safeText(product.product_name ?? product.name ?? product.title, 'منتج'); }
     function getProductVendor(product) { return safeText(product.vendor, ''); }
-    function extractPrice(product) { return safeNumber(product.price ?? product.sale_price ?? product.regular_price, 0); }
+    function extractPrice(product) { const base=safeNumber(product.price ?? product.regular_price,0),sale=safeNumber(product.sale_price,0);return safeNumber(product.effective_price ?? (sale>0&&sale<base?sale:base),0); }
 
     function getComparePrice(product) {
-      const sale = safeNumber(product.sale_price, 0);
-      const price = extractPrice(product);
-      return sale > price ? sale : null;
+      const base=safeNumber(product.price ?? product.regular_price,0);
+      return base>extractPrice(product)?base:null;
     }
 
     function hasDiscount(product) {
@@ -625,6 +625,7 @@
       const map = {
         manual: 'Manual',
         best_selling: 'Best selling',
+        most_relevant: 'Most relevant',
         title_asc: 'A → Z',
         title_desc: 'Z → A',
         price_desc: 'Highest price',
@@ -678,13 +679,13 @@
         ? `${COLLECTIONS_API}/slug/${encodeURIComponent(slug)}?includeProducts=0`
         : `${COLLECTIONS_API}/${encodeURIComponent(id)}?includeProducts=0`;
 
-      const { response, result } = await fetchJsonWithTimeout(endpoint);
+      const { response, result } = await fetchJsonWithTimeout(endpoint+(urlParams.get('collectionPreview')==='1'?'&preview=1':''));
 
       if (!response.ok || !result || !result.success) {
         throw new Error(result?.error || `HTTP ${response.status}`);
       }
 
-      if (String(result.data?.status || '').toLowerCase() === ARCHIVED_STATUS) {
+      if (String(result.data?.status || '').toLowerCase() === ARCHIVED_STATUS && urlParams.get('collectionPreview')!=='1') {
         throw new Error('هذه المجموعة مؤرشفة وغير متاحة للعرض');
       }
 
@@ -696,6 +697,7 @@
       params.set('sort', sortMode || 'manual');
       params.set('limit', String(limit));
       params.set('offset', String(offset));
+      if(new URLSearchParams(location.search).get('collectionPreview')==='1')params.set('preview','1');
 
       const { response, result } = await fetchJsonWithTimeout(
         `${COLLECTIONS_API}/${encodeURIComponent(collectionId)}/products?${params.toString()}`
@@ -729,6 +731,7 @@
       }
 
       document.getElementById('collectionTitle').textContent = title;
+      const cover=document.getElementById('collectionCover'),coverUrl=safeText(currentCollection?.image_url);cover.hidden=!/^(https?:\/\/|\/(?!\/))[^\s<>"']+$/i.test(coverUrl);if(!cover.hidden){cover.src=coverUrl;cover.alt=title;}
 
       if (description) {
         descEl.textContent = description;
@@ -742,6 +745,9 @@
         productsLoading ? 'جاري التحميل...' : `${filteredProducts.length} منتج (بالمجموعة)`;
 
       document.getElementById('collectionSortBadge').textContent = getSortLabel(sortMode);
+      document.getElementById('collectionSortBadge').title = currentCollection?.sort_notice || '';
+      document.getElementById('collectionSortBadge').tabIndex = 0;
+      document.getElementById('collectionSortBadge').setAttribute('aria-label',getSortLabel(sortMode)+(currentCollection?.sort_notice ? ': '+currentCollection.sort_notice : ''));
 
       document.getElementById('pageTitle').textContent = `${title} - Smart Kids Kuwait`;
       document.getElementById('pageDescription').setAttribute('content', description || title);
@@ -1015,5 +1021,6 @@
   <div id="site-footer"></div>
   <script src="./footer.js"></script>
   <script src="/js/live-visitors.js"></script>
+  <script src="/js/theme-runtime.js" defer></script>
 </body>
 </html>

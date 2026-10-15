@@ -336,27 +336,13 @@ test('missing authentication schema fails closed and runtime never creates its t
 });
 
 test('desktop/mobile/print order output escapes hostile customer text and never places IDs in executable handlers', () => {
-  const html = fs.readFileSync(path.join(__dirname, '../public/orders-admin.html'), 'utf8');
-  const script = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].find(match => match[1].includes('function renderDesktopOrders'))[1];
-  const elements = new Map();
-  const element = id => { if (!elements.has(id)) elements.set(id, { innerHTML: '' }); return elements.get(id); };
-  let printed = '';
-  const context = vm.createContext({
-    document: { getElementById: element, addEventListener() {} },
-    window: { open: () => ({ document: { open() {}, write(value) { printed = value; }, close() {} }, focus() {}, print() {} }) },
-    console, URLSearchParams, setTimeout, clearTimeout
-  });
-  vm.runInContext(script, context);
-  const hostile = '<img src=x onerror="globalThis.pwned=1"><svg onload=alert(1)> & \'"';
-  context.fixture = { id: "1');alert(1);//", order_number: hostile, customer_name: hostile, notes: hostile,
-    created_at: '2026-01-01', total: 10, shipping_cost: 1, status: 'pending' };
-  vm.runInContext('visibleOrders = [fixture]; renderDesktopOrders(); renderMobileOrders(); printOrdersList(visibleOrders);', context);
-  for (const output of [element('desktopOrdersTableBody').innerHTML, element('mobileOrdersList').innerHTML, printed]) {
-    assert.ok(!output.includes('<img') && !output.includes('<svg'), 'Customer markup is not parsed as HTML');
-    assert.ok(output.includes('&lt;img') && output.includes('&amp;'));
-    assert.ok(!output.includes("1');alert(1);//"), 'Customer ID is not embedded in JavaScript');
-  }
-  assert.equal(vm.runInContext('escapeHtml(fixture.customer_name)', context), hostile.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
+  const script=fs.readFileSync(path.join(__dirname,'../public/js/orders-admin.js'),'utf8'),route=fs.readFileSync(path.join(__dirname,'../routes/orders-list-admin.js'),'utf8');
+  const hostile='<img src=x onerror="globalThis.pwned=1"><svg onload=alert(1)> & \'"',elements=new Map(),created=[];
+  function node(tag){const n={tag,dataset:{},children:[],textContent:'',append(...children){this.children.push(...children)},replaceChildren(...children){this.children=children},setAttribute(k,v){assert.notEqual(k,'onclick');this[k]=v;}};Object.defineProperty(n,'innerHTML',{set(){throw Error('Customer text must use textContent')}});created.push(n);return n;}
+  const context=vm.createContext({document:{createElement:node,createTextNode:text=>({textContent:text})},$:id=>{if(!elements.has(id))elements.set(id,node(id));return elements.get(id)},rows:[{id:"1');alert(1);//",order_number:hostile,customer_name:hostile,notes:hostile}],scope:null,selected:new Set(),visible:()=>['order','customer','notes'],defs:{order:'Order',customer:'Customer',notes:'Notes'},total:1,offset:0,selectionUI(){}});
+  vm.runInContext(script.slice(script.indexOf('function td('),script.indexOf('const visible=')) + script.slice(script.indexOf('function render(){'),script.indexOf('async function load(){'))+';render();',context);
+  assert(created.filter(n=>n.textContent===hostile).length>=3);assert(created.some(n=>n.tag==='a'&&n.href.startsWith('/order-details.html?id=')));assert(created.every(n=>!Object.hasOwn(n,'onerror')));
+  const escaped=vm.runInNewContext(route.slice(route.indexOf('const escape=value'),route.indexOf("router.get('/print'"))+'escape(value)',{value:hostile});assert(!escaped.includes('<img'));assert(escaped.includes('&lt;img')&&escaped.includes('&amp;'));assert.match(route,/escape\(o.customer_name\)/);assert.match(route,/escape\(i.product_name\)/);
 });
 
 test('tests have not attempted any production database, email, Meta or external network effect', () => {

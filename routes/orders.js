@@ -12,6 +12,9 @@ const ORDERS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS;
 const ORDER_ITEMS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS;
 const META_START = '\n<!--OAI_ORDER_META:';
 const META_END = ':OAI_ORDER_META-->';
+router.use('/admin', require('./orders-list-admin'));
+// Keep legacy bulk URLs ahead of /:id/action, sharing the safe implementation.
+for(const action of ['archive','unarchive','cancel','status','tags'])router.post('/bulk/'+action,async(req,res)=>{try{const ids=req.body.ids;if(!Array.isArray(ids)||!ids.length||ids.length>100||ids.some(id=>!['string','number'].includes(typeof id)||!Number.isSafeInteger(Number(id))||Number(id)<1))return res.status(400).json({success:false,error:'Select 1–100 valid orders; use admin jobs for larger selections.'});const results=[];for(const id of [...new Set(ids.map(Number))]){let type=action,params={};if(action==='status')params.status=req.body.status;if(action==='tags'){type=req.body.mode==='remove'?'remove_tags':'add_tags';params.tags=Array.isArray(req.body.tags)?req.body.tags:String(req.body.tags||'').split(',').map(t=>t.trim()).filter(Boolean);}results.push({id,...await require('../services/orders-admin').applyOne(db,id,type,params)});}res.json({success:true,data:results});}catch(e){res.status(e.status||500).json({success:false,error:e.status?e.message:'Unable to complete bulk action.'});}});
 const { validateOrderItemsStock } = require('../services/inventory-service');
 const { priceOrder, OrderPricingError } = require('../services/order-pricing');
 const { savePricedOrder } = require('../services/order-storage');
@@ -1197,7 +1200,7 @@ router.post('/:id/fulfill', async (req, res) => {
 
     await db.run(
       `UPDATE ${ORDERS_TABLE}
-       SET status = ?, shipped_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+       SET status = ?, shipped_at = COALESCE(shipped_at,CURRENT_TIMESTAMP), updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
       [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.SHIPPED, id]
     );
@@ -1338,99 +1341,11 @@ router.put('/:id/fulfillment-location', async (req, res) => {
 /**
  * POST /api/orders/:id/archive
  */
-router.post('/:id/archive', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const order = await ensureOrderExists(id);
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        error: 'الطلب غير موجود'
-      });
-    }
-
-    const previousStatus = safeText(order.status) || SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING;
-
-    await db.run(
-      `UPDATE ${ORDERS_TABLE}
-       SET status = ?, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?`,
-      [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.CANCELLED, id]
-    );
-
-    const updatedOrder = await updateOrderNotesMeta(id, (meta) => ({
-      ...meta,
-      archived: true,
-      archived_prev_status: previousStatus
-    }));
-
-    return res.json({
-      success: true,
-      message: 'تم أرشفة الطلب',
-      data: updatedOrder
-    });
-  } catch (error) {
-    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
-    if (inventoryConflict(res, error)) return;
-    console.error('❌ خطأ في أرشفة الطلب:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في أرشفة الطلب'
-    });
-  }
-});
-
+router.post('/:id/archive',async(req,res)=>{try{await require('../services/orders-admin').applyOne(db,req.params.id,'archive');return res.json({success:true,data:await getOrderWithItems(req.params.id)});}catch(e){res.status(e.status||500).json({success:false,error:e.status?e.message:'Unable to update archive visibility.'});}});
 /**
  * POST /api/orders/:id/unarchive
  */
-router.post('/:id/unarchive', async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const order = await getOrderWithItems(id);
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        error: 'الطلب غير موجود'
-      });
-    }
-
-    const restoredStatus = normalizeStatus(
-      order.archived_prev_status || SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING
-    );
-
-    await db.run(
-      `UPDATE ${ORDERS_TABLE}
-       SET status = ?, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?`,
-      [restoredStatus, id]
-    );
-
-    const updatedOrder = await updateOrderNotesMeta(id, (meta) => ({
-      ...meta,
-      archived: false,
-      archived_prev_status: null
-    }));
-
-    return res.json({
-      success: true,
-      message: 'تم إلغاء أرشفة الطلب',
-      data: updatedOrder
-    });
-  } catch (error) {
-    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
-    if (inventoryConflict(res, error)) return;
-    console.error('❌ خطأ في إلغاء أرشفة الطلب:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في إلغاء أرشفة الطلب'
-    });
-  }
-});
-
+router.post('/:id/unarchive',async(req,res)=>{try{await require('../services/orders-admin').applyOne(db,req.params.id,'unarchive');return res.json({success:true,data:await getOrderWithItems(req.params.id)});}catch(e){res.status(e.status||500).json({success:false,error:e.status?e.message:'Unable to update archive visibility.'});}});
 /**
  * POST /api/orders/:id/cancel
  */
@@ -1657,273 +1572,22 @@ router.put('/:id/tags', async (req, res) => {
 /**
  * POST /api/orders/bulk/status
  */
-router.post('/bulk/status', async (req, res) => {
-  try {
-    const { ids = [], status } = req.body;
-
-    if (!Array.isArray(ids) || !ids.length) {
-      return res.status(400).json({
-        success: false,
-        error: 'يجب تحديد الطلبات'
-      });
-    }
-
-    if (!isValidOrderStatus(status)) {
-      return res.status(400).json({
-        success: false,
-        error: 'حالة الطلب غير صحيحة'
-      });
-    }
-
-    for (const rawId of ids) {
-      const id = String(rawId).trim();
-      if (!id) continue;
-
-      const order = await ensureOrderExists(id);
-      if (!order) continue;
-
-      const updateParts = ['status = ?', 'updated_at = CURRENT_TIMESTAMP'];
-      const values = [status];
-
-      if (status === SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.SHIPPED) {
-        updateParts.push('shipped_at = CURRENT_TIMESTAMP');
-      }
-
-      if (status === SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.COMPLETED) {
-        updateParts.push('completed_at = CURRENT_TIMESTAMP');
-      }
-
-      values.push(id);
-
-      await db.run(
-        `UPDATE ${ORDERS_TABLE}
-         SET ${updateParts.join(', ')}
-         WHERE id = ?`,
-        values
-      );
-    }
-
-    return res.json({
-      success: true,
-      message: 'تم تحديث حالة الطلبات المحددة'
-    });
-  } catch (error) {
-    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
-    if (inventoryConflict(res, error)) return;
-    console.error('❌ خطأ في التحديث الجماعي للحالة:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في التحديث الجماعي للحالة'
-    });
-  }
-});
 
 /**
  * POST /api/orders/bulk/archive
  */
-router.post('/bulk/archive', async (req, res) => {
-  try {
-    const { ids = [] } = req.body;
-
-    if (!Array.isArray(ids) || !ids.length) {
-      return res.status(400).json({
-        success: false,
-        error: 'يجب تحديد الطلبات'
-      });
-    }
-
-    for (const rawId of ids) {
-      const id = String(rawId).trim();
-      if (!id) continue;
-
-      const order = await ensureOrderExists(id);
-      if (!order) continue;
-
-      await db.run(
-        `UPDATE ${ORDERS_TABLE}
-         SET status = ?, updated_at = CURRENT_TIMESTAMP
-         WHERE id = ?`,
-        [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.CANCELLED, id]
-      );
-
-      await updateOrderNotesMeta(id, (meta) => ({
-        ...meta,
-        archived: true,
-        archived_prev_status: safeText(order.status) || SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING
-      }));
-    }
-
-    return res.json({
-      success: true,
-      message: 'تم أرشفة الطلبات المحددة'
-    });
-  } catch (error) {
-    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
-    if (inventoryConflict(res, error)) return;
-    console.error('❌ خطأ في الأرشفة الجماعية:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في الأرشفة الجماعية'
-    });
-  }
-});
 
 /**
  * POST /api/orders/bulk/unarchive
  */
-router.post('/bulk/unarchive', async (req, res) => {
-  try {
-    const { ids = [] } = req.body;
-
-    if (!Array.isArray(ids) || !ids.length) {
-      return res.status(400).json({
-        success: false,
-        error: 'يجب تحديد الطلبات'
-      });
-    }
-
-    for (const rawId of ids) {
-      const id = String(rawId).trim();
-      if (!id) continue;
-
-      const order = await getOrderWithItems(id);
-      if (!order) continue;
-
-      await db.run(
-        `UPDATE ${ORDERS_TABLE}
-         SET status = ?, updated_at = CURRENT_TIMESTAMP
-         WHERE id = ?`,
-        [
-          normalizeStatus(order.archived_prev_status || SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.PENDING),
-          id
-        ]
-      );
-
-      await updateOrderNotesMeta(id, (meta) => ({
-        ...meta,
-        archived: false,
-        archived_prev_status: null
-      }));
-    }
-
-    return res.json({
-      success: true,
-      message: 'تم إلغاء أرشفة الطلبات المحددة'
-    });
-  } catch (error) {
-    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
-    if (inventoryConflict(res, error)) return;
-    console.error('❌ خطأ في إلغاء الأرشفة الجماعية:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في إلغاء الأرشفة الجماعية'
-    });
-  }
-});
 
 /**
  * POST /api/orders/bulk/cancel
  */
-router.post('/bulk/cancel', async (req, res) => {
-  try {
-    const { ids = [] } = req.body;
-
-    if (!Array.isArray(ids) || !ids.length) {
-      return res.status(400).json({
-        success: false,
-        error: 'يجب تحديد الطلبات'
-      });
-    }
-
-    for (const rawId of ids) {
-      const id = String(rawId).trim();
-      if (!id) continue;
-
-      const order = await ensureOrderExists(id);
-      if (!order) continue;
-
-      await db.run(
-        `UPDATE ${ORDERS_TABLE}
-         SET status = ?, updated_at = CURRENT_TIMESTAMP
-         WHERE id = ?`,
-        [SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.CANCELLED, id]
-      );
-    }
-
-    return res.json({
-      success: true,
-      message: 'تم إلغاء الطلبات المحددة'
-    });
-  } catch (error) {
-    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
-    if (inventoryConflict(res, error)) return;
-    console.error('❌ خطأ في الإلغاء الجماعي:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في الإلغاء الجماعي'
-    });
-  }
-});
 
 /**
  * POST /api/orders/bulk/tags
  */
-router.post('/bulk/tags', async (req, res) => {
-  try {
-    const { ids = [], mode = 'add', tags = [] } = req.body;
-
-    if (!Array.isArray(ids) || !ids.length) {
-      return res.status(400).json({
-        success: false,
-        error: 'يجب تحديد الطلبات'
-      });
-    }
-
-    const incomingTags = Array.isArray(tags)
-      ? tags.map(tag => safeText(tag)).filter(Boolean)
-      : String(tags || '')
-          .split(',')
-          .map(tag => safeText(tag))
-          .filter(Boolean);
-
-    for (const rawId of ids) {
-      const id = String(rawId).trim();
-      if (!id) continue;
-
-      const order = await ensureOrderExists(id);
-      if (!order) continue;
-
-      await updateOrderNotesMeta(id, (meta) => {
-        let nextTags = [...meta.tags];
-
-        if (mode === 'remove') {
-          const removeSet = new Set(incomingTags.map(tag => tag.toLowerCase()));
-          nextTags = nextTags.filter(tag => !removeSet.has(tag.toLowerCase()));
-        } else {
-          nextTags = Array.from(new Set([...nextTags, ...incomingTags]));
-        }
-
-        return {
-          ...meta,
-          tags: nextTags
-        };
-      });
-    }
-
-    return res.json({
-      success: true,
-      message: 'تم تحديث وسوم الطلبات المحددة'
-    });
-  } catch (error) {
-    if (error.status) return res.status(error.status).json({ success: false, error: error.message });
-    if (inventoryConflict(res, error)) return;
-    console.error('❌ خطأ في تحديث الوسوم جماعيًا:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'فشل في تحديث الوسوم جماعيًا'
-    });
-  }
-});
 
 /**
  * PUT /api/orders/:id
@@ -1977,7 +1641,7 @@ router.put('/:id', async (req, res) => {
       updateValues.push(status);
 
       if (status === SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.SHIPPED) {
-        updateFields.push('shipped_at = CURRENT_TIMESTAMP');
+        updateFields.push('shipped_at = COALESCE(shipped_at,CURRENT_TIMESTAMP)');
       }
 
       if (status === SYSTEM_CONFIG.ORDER_CONFIG.STATUSES.COMPLETED) {
@@ -2342,4 +2006,5 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.adminCreateCustomerSync=upsertCustomerFromOrderSnapshot;
 module.exports = router;

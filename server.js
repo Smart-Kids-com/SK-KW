@@ -521,7 +521,9 @@ app.use((req, res, next) => {
 
   res.header('X-Content-Type-Options', 'nosniff');
 
-  res.header('X-Frame-Options', 'DENY');
+  const themeFrame = req.query.theme_preview === '1' && require('./public/js/theme-model').pages &&
+    Object.values(require('./public/js/theme-model').pages).some(([,url]) => url.split('?')[0] === req.path) || req.query.theme_preview === '1' && /^\/theme-page\/[a-z0-9-]{1,60}$/.test(req.path);
+  res.header('X-Frame-Options', themeFrame ? 'SAMEORIGIN' : 'DENY');
 
   next();
 
@@ -758,7 +760,7 @@ app.get('/customers-view.html', (req, res) => {
 
 app.get('/theme-admin', (req, res) => {
 
-  res.sendFile(path.join(__dirname, 'public', 'theme-admin.html'));
+  res.sendFile(path.join(__dirname, 'public', 'themes-admin.html'));
 
 });
 
@@ -766,11 +768,24 @@ app.get('/theme-admin', (req, res) => {
 
 app.get('/theme-admin.html', (req, res) => {
 
-  res.sendFile(path.join(__dirname, 'public', 'theme-admin.html'));
+  res.sendFile(path.join(__dirname, 'public', 'themes-admin.html'));
 
 });
 
 
+
+app.get('/theme-editor.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'theme-visual-admin.html')));
+app.get('/theme-page/:slug', async (req, res, next) => {
+  try {
+    if (!/^[a-z0-9-]{1,60}$/.test(req.params.slug)) return res.sendStatus(404);
+    const service = require('./services/theme-editor');
+    const isPreview = req.query.theme_preview === '1' && req.adminSession;
+    const state = await service.state(require('./db/turso-manager'), isPreview ? (req.query.theme || 'current') : 'current');
+    const document = isPreview && req.query.theme_view !== 'published' ? state.draft : state.published;
+    if (!isPreview && !document.customPages?.['page_' + req.params.slug]) return res.sendStatus(404);
+    res.set('Cache-Control', 'no-store').sendFile(path.join(__dirname, 'public', 'theme-custom-page.html'));
+  } catch (error) { next(error); }
+});
 
 app.get('/discounts-admin', (req, res) => {
 

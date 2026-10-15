@@ -1,0 +1,3 @@
+'use strict';
+async function seedCollectionsEditor(db){await require('../db/collections-editor-migration').migrateCollectionsEditor(db);await db.run('INSERT OR IGNORE INTO collection_products(collection_id,product_id,sort_order) SELECT 1,id,id FROM products WHERE id<=100');const S=require('../services/collections-editor');const c=await S.save(db,null,{title:'مجموعة تلقائية تجريبية',slug:'demo-automated',kind:'automated',rules:[{property:'price',operator:'gte',value:5}],match_mode:'all',status:'active',online_store:1,description:'شروط حقيقية على بيانات وهمية'});return c;}
+module.exports={seedCollectionsEditor};

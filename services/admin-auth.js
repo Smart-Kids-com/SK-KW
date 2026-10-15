@@ -41,7 +41,7 @@ function isPublicApi(req) {
     return route === '/health' ||
       /^\/products(?:\/(?:slug\/[^/]+|\d+))?$/.test(route) ||
       /^\/collections(?:\/(?:slug\/[^/]+|\d+(?:\/products)?))?$/.test(route) ||
-      route === '/theme/settings' || /^\/theme\/pages\/[a-z0-9_-]+(?:\/sections)?$/.test(route);
+      route === '/theme/settings' || route === '/theme/published' || /^\/theme\/media\/[a-f0-9]{64}$/.test(route) || /^\/theme\/pages\/[a-z0-9_-]+(?:\/sections)?$/.test(route);
   }
   return method === 'POST' && [
     '/orders', '/store/discounts/validate', '/abandoned-checkouts/save',

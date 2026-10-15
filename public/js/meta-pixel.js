@@ -1,5 +1,6 @@
 (function (window, document) {
   'use strict';
+  if (new URLSearchParams(window.location.search).get('theme_preview') === '1') return;
 
   const CONFIG = {
     pixelId: '899390561983033',

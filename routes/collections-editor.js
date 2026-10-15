@@ -1,0 +1,44 @@
+'use strict';
+const router=require('express').Router(),db=require('../db/turso-manager'),S=require('../services/collections-editor');
+const handle=fn=>async(req,res)=>{try{await fn(req,res);}catch(e){console.error('Collections:',e.message);if(!res.headersSent)res.status(e.status||500).json({success:false,error:e.status?e.message:'Unable to complete collection action. Check schema readiness and retry.'});}};
+const send=(res,data,status=200)=>res.status(status).json({success:true,data});
+let extendedSchema=false;
+router.use(async(req,res,next)=>{try{if(!extendedSchema)extendedSchema=(await db.all('PRAGMA table_info(collections)')).some(c=>c.name==='deleted_at');if(!extendedSchema){if(req.path.startsWith('/admin'))return res.status(503).json({success:false,error:'Collections editor migration is required before using this editor.'});return next('router');}next();}catch(e){next(e);}});
+router.get('/stats/summary',handle(async(req,res)=>{if(!req.adminSession)S.fail('Admin sign-in required.',401);const rows=await db.all('SELECT status,COUNT(*) AS n FROM collections WHERE deleted_at IS NULL GROUP BY status'),counts={active:0,draft:0,archived:0};for(const r of rows)counts[r.status]=Number(r.n);send(res,{totalCollections:counts.active+counts.draft+counts.archived,activeCollections:counts.active,draftCollections:counts.draft,archivedCollections:counts.archived});}));
+router.use('/admin',(req,res,next)=>{res.set('Cache-Control','no-store');if(!req.adminSession)return res.status(401).json({success:false,error:'Admin sign-in required.'});next();});
+router.get('/admin/list',handle(async(req,res)=>{if(req.query.selection)await S.selection(db,req.query.selection,S.owner(req));send(res,await S.list(db,req.query));}));
+router.get('/admin/catalog',handle(async(req,res)=>{const data=await S.list(db,req.query);res.json({success:true,data:data.rows,pagination:data.pagination});}));
+router.get('/admin/properties',handle(async(req,res)=>send(res,{properties:S.properties,operators:S.operators,unavailable:{compare_at_price:'No independent compare-at-price field.',weight:'No recorded weight.',variant_title:'No variants system.',unlisted:'No Unlisted product state.',suspended:'No Suspended product state.'}})));
+router.post('/admin/conditions/preview',handle(async(req,res)=>send(res,await S.rulesPreview(db,req.body))));
+router.post('/admin/create',handle(async(req,res)=>send(res,await S.operation(db,S.owner(req),req.body.request_key,req.body,tx=>S.saveTx(tx,null,req.body)),201)));
+router.get('/admin/:id/items',handle(async(req,res)=>send(res,await S.items(db,req.params.id,req.query))));
+router.get('/admin/:id/references',handle(async(req,res)=>send(res,await S.references(db,req.params.id))));
+router.get('/admin/:id/exclusions',handle(async(req,res)=>{await S.get(db,req.params.id);const {limit,offset}=S.paging(req.query);const rows=await db.all('SELECT p.id,p.product_name,p.status FROM collection_exclusions ex JOIN products p ON p.id=ex.product_id WHERE ex.collection_id=? ORDER BY p.id LIMIT ? OFFSET ?',[S.id(req.params.id),limit,offset]);const total=Number((await db.get('SELECT COUNT(*) AS n FROM collection_exclusions WHERE collection_id=?',[S.id(req.params.id)])).n);send(res,{rows,pagination:{total,limit,offset}});}));
+router.post('/admin/:id/exclusions/remove',handle(async(req,res)=>{const result=await S.transaction(db,async tx=>{const c=await S.get(tx,req.params.id);if(c.kind!=='automated')S.fail('Exclusions belong to automated collections.');if(!Array.isArray(req.body.ids)||!req.body.ids.length||req.body.ids.length>500)S.fail('Select exclusions.');const ids=req.body.ids.map(S.id);await tx.run(`DELETE FROM collection_exclusions WHERE collection_id=? AND product_id IN(${ids.map(()=>'?').join(',')})`,[c.id,...ids]);return S.get(tx,c.id);});send(res,result);}));
+router.post('/admin/:id/move',handle(async(req,res)=>send(res,await S.operation(db,S.owner(req),req.body.request_key,req.body,async tx=>S.move({...tx,useTurso:false,transaction:fn=>fn()},req.params.id,req.body)))));
+router.post('/admin/:id/add',handle(async(req,res)=>send(res,await S.memberships(db,req.params.id,req.body))));
+router.post('/admin/:id/remove',handle(async(req,res)=>send(res,await S.memberships(db,req.params.id,req.body,true))));
+router.post('/admin/:id/duplicate',handle(async(req,res)=>send(res,await S.operation(db,S.owner(req),req.body.request_key,{id:req.params.id,...req.body},tx=>S.duplicate(tx,req.params.id)),201)));
+router.post('/admin/:id/delete',handle(async(req,res)=>send(res,await S.operation(db,S.owner(req),req.body.request_key,{id:req.params.id,...req.body},tx=>S.removeTx(tx,req.params.id,req.body.revision)))));
+router.post('/admin/:id/restore',handle(async(req,res)=>send(res,await S.restore(db,req.params.id))));
+router.get('/admin/:id',handle(async(req,res)=>send(res,await S.get(db,req.params.id))));
+router.put('/admin/:id',handle(async(req,res)=>send(res,await S.save(db,req.params.id,req.body))));
+router.post('/admin/selection/create',handle(async(req,res)=>send(res,await S.select(db,req.body,S.owner(req)))));
+router.post('/admin/selection/:id/build',handle(async(req,res)=>send(res,await S.build(db,req.params.id,S.owner(req)))));
+router.get('/admin/selection/:id/review',handle(async(req,res)=>{const selection=await S.selection(db,req.params.id,S.owner(req));if(!selection.ready)S.fail('Selection is still building.');const offset=Number(req.query.offset||0);if(!Number.isSafeInteger(offset)||offset<0)S.fail('Invalid review page.');const data=await S.list(db,{selection:selection.id,limit:20,offset,sort:'title',direction:'ASC'}),sources=await S.referenceSources(db),rows=[];for(const c of data.rows)rows.push(await S.references(db,c.id,sources,c));send(res,{rows,total:data.pagination.total});}));
+router.post('/admin/selection/:id/job',handle(async(req,res)=>send(res,await S.job(db,req.params.id,S.owner(req),req.body))));
+router.post('/admin/job/:id/step',handle(async(req,res)=>send(res,await S.step(db,req.params.id,S.owner(req)))));
+router.post('/admin/job/:id/retry',handle(async(req,res)=>send(res,await S.step(db,req.params.id,S.owner(req),true))));
+// Compatible reads used by storefront, shared navigation and Theme sections.
+router.get('/',handle(async(req,res)=>{const data=await S.list(db,{...req.query,status:'active',online_store:'1',deleted:'0'});res.json({success:true,data:data.rows,pagination:data.pagination});}));
+async function publicCollection(req,res,bySlug=false){const found=bySlug?await db.get('SELECT id FROM collections WHERE slug=? AND deleted_at IS NULL',[req.params.slug]):{id:S.id(req.params.id)};if(!found)S.fail('Collection not found.',404);const c=await S.get(db,found.id),preview=req.adminSession&&req.query.preview==='1';if(!preview&&(c.status!=='active'||!c.online_store))S.fail('Collection not found.',404);const data=await S.items(db,c.id,{limit:1,status:'active'},!preview);send(res,{...c,sort_mode:c.sort_mode,sort_notice:data.sort_notice,product_count:data.pagination.total,products:[]});}
+router.get('/slug/:slug',handle((req,res)=>publicCollection(req,res,true)));
+router.get('/:id/products',handle(async(req,res)=>{const c=await S.get(db,req.params.id),preview=req.adminSession&&req.query.preview==='1';if(!preview&&(c.status!=='active'||!c.online_store))S.fail('Collection not found.',404);const data=await S.items(db,c.id,{...req.query,status:'active'},!preview);res.json({success:true,data:data.rows,pagination:data.pagination,sort:data.sort,sort_notice:data.sort_notice});}));
+router.get('/:id',handle((req,res)=>publicCollection(req,res)));
+// Legacy writes use the same safe relationship and metadata implementation.
+router.post('/',handle(async(req,res)=>{if(!req.adminSession)S.fail('Admin sign-in required.',401);const c=await S.save(db,null,req.body);if(req.body.productIds?.length)await S.memberships(db,c.id,req.body);send(res,await S.get(db,c.id),201);}));
+router.put('/:id',handle(async(req,res)=>{if(!req.adminSession)S.fail('Admin sign-in required.',401);send(res,await S.save(db,req.params.id,req.body,Number.isSafeInteger(req.body.revision)));}));
+router.post('/:id/duplicate',handle(async(req,res)=>{if(!req.adminSession)S.fail('Admin sign-in required.',401);send(res,await S.operation(db,S.owner(req),req.body.request_key,{id:req.params.id,...req.body},tx=>S.duplicate(tx,req.params.id)),201);}));
+for(const action of ['add','remove'])router.post('/:id/products/'+action,handle(async(req,res)=>{if(!req.adminSession)S.fail('Admin sign-in required.',401);send(res,await S.memberships(db,req.params.id,req.body,action==='remove'));}));
+router.delete('/:id',handle(async(req,res)=>{if(!req.adminSession)S.fail('Admin sign-in required.',401);send(res,await S.transaction(db,tx=>S.removeTx(tx,req.params.id,req.body.revision)));}));
+module.exports=router;

@@ -1,4 +1,5 @@
 (function () {
+  if (new URLSearchParams(location.search).get('theme_preview') === '1') return;
   const VISITOR_ID_KEY = 'store_visitor_id';
   const HEARTBEAT_INTERVAL = 30000;
   const HEARTBEAT_URL = '/api/admin-dashboard/heartbeat';

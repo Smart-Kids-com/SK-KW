@@ -1,0 +1,14 @@
+'use strict';
+const fs=require('node:fs');
+const crypto=require('node:crypto');
+const path=require('node:path');
+const file=path.join(__dirname,'../.env.activation-auth.local');
+const original=fs.readFileSync(file,'utf8');
+const pattern=/^AUTH_SESSION_SECRET=.*$/gm;
+if((original.match(pattern)||[]).length!==1)throw new Error('Expected one session secret entry');
+const secret=crypto.randomBytes(32).toString('hex');
+const updated=original.replace(pattern,'AUTH_SESSION_SECRET='+JSON.stringify(secret));
+fs.writeFileSync(file,updated,'utf8');
+const saved=fs.readFileSync(file,'utf8');
+if(saved!==updated||saved.replace(pattern,'')!==original.replace(pattern,''))throw new Error('Save verification failed');
+console.log('Session secret saved and verified; other settings preserved. Value not displayed.');

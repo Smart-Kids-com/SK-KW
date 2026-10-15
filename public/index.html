@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <script src="/js/theme-preview-bootstrap.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smart Kids Kuwait Store</title>
@@ -1306,12 +1307,13 @@
       const track = document.getElementById('heroTrack');
       const dots = document.querySelectorAll('.hero-dot');
       track.style.transform = `translateX(-${heroState.current * 100}%)`;
+      if (window.SKThemeNativeSlideshowOptions?.transition === 'fade') { track.animate([{opacity:0},{opacity:1}], {duration:window.SKThemeNativeSlideshowOptions.speed ?? 400}); }
       dots.forEach((dot, idx) => dot.classList.toggle('active', idx === heroState.current));
     }
 
     function goToHeroSlide(index) {
       if (!heroState.items.length) return;
-      heroState.current = (index + heroState.items.length) % heroState.items.length;
+      heroState.current = window.SKThemeNativeSlideshowOptions?.loop === false ? Math.max(0, Math.min(heroState.items.length - 1, index)) : (index + heroState.items.length) % heroState.items.length;
       updateHeroUi();
     }
 
@@ -1325,8 +1327,8 @@
 
     function startHeroAuto() {
       clearInterval(heroState.timer);
-      if (heroState.items.length <= 1) return;
-      heroState.timer = setInterval(nextHero, 4000);
+      if (heroState.items.length <= 1 || window.SKThemeNativeSlideshowOptions?.autoplay === false) return;
+      heroState.timer = setInterval(nextHero, window.SKThemeNativeSlideshowOptions?.interval || 4000);
     }
 
     function restartHeroAuto() {
@@ -1613,5 +1615,6 @@
   <div id="site-footer"></div>
   <script src="./footer.js"></script>
   <script src="/js/live-visitors.js"></script>
+  <script src="/js/theme-runtime.js" defer></script>
 </body>
 </html>

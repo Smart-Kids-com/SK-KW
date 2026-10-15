@@ -217,6 +217,7 @@ test('unsupported admin actions cannot break order edits and server rejects bypa
     assert.equal((await request(route,{method,admin:true,body})).status,400);
     assert.deepEqual({...await db.get('SELECT status,total,notes FROM orders WHERE id=?',[created.id])},before);
   }
+  await require('../db/orders-admin-migration').migrateOrdersAdmin(db);
   await require('../scripts/check-order-browser').checkOrderBrowser(origin,db,{unsupportedActions:true,orderId:created.id,cookie});
   assert.deepEqual({...await db.get('SELECT on_hand,committed,stock FROM products WHERE id=1')},{on_hand:100,committed:2,stock:98});
 });
@@ -258,7 +259,7 @@ test('checkout accessibility and selected-order actions are wired without replac
   const checkout=fs.readFileSync(path.join(__dirname,'../public/checkout.html'),'utf8');
   assert.match(checkout,/role="button" tabindex="0" aria-controls="summaryPanel" aria-expanded="true"/);assert.match(checkout,/shipping given-name/);assert.match(checkout,/toggle.addEventListener\('keydown'/);
   const orders=fs.readFileSync(path.join(__dirname,'../public/orders-admin.html'),'utf8');
-  assert.doesNotMatch(orders,/fakeAction|is not connected yet/);assert.match(orders,/runSelectedOrderAction/);assert.match(orders,/request-fulfillment/);
+  assert.doesNotMatch(orders,/fakeAction|is not connected yet/);assert.match(orders,/id="run-action"/);assert.match(orders,/data-action="request_note"/);assert.match(orders,/src="\/js\/orders-admin.js"/);
   assert.match(orders,/admin-navigation.js/);
 });
 test('expanded browser checkout covers full catalog, different billing address, keyboard summary and recovery',

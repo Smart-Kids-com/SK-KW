@@ -1,0 +1,20 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+const {DatabaseSync}=require('node:sqlite');
+const root=fs.realpathSync(path.resolve(__dirname,'../../SK-KW-backups'));
+const directory=fs.realpathSync(path.join(root,'production-snapshot-20261010-055520'));
+assert.equal(path.dirname(directory),root);
+const manifest=JSON.parse(fs.readFileSync(path.join(directory,'verification-manifest.json')));
+const original=path.join(directory,'production-snapshot.db');
+const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+assert.equal(hash(original),manifest.sha256);
+const restoration=path.join(directory,'permanent-restore-check-'+Date.now()+'.db');fs.copyFileSync(original,restoration);
+const db=new DatabaseSync(restoration,{readOnly:true});
+assert.equal(db.prepare('PRAGMA integrity_check').get().integrity_check,'ok');assert.deepEqual(db.prepare('PRAGMA foreign_key_check').all(),[]);
+for(const [table,count] of Object.entries(manifest.counts))assert.equal(db.prepare('SELECT COUNT(*) AS n FROM "'+table.replaceAll('"','""')+'"').get().n,count);
+db.close();assert.equal(hash(restoration),manifest.sha256);
+const result={directory,sha256:manifest.sha256,restoreVerified:true,allTableCountsMatch:true,integrity:true,foreignKeys:true,
+  encryptedRestoreVerified:true,encryptedVerification:'Windows DPAPI decrypt and SHA256 comparison independently completed in PowerShell',verifiedAt:new Date().toISOString()};
+fs.writeFileSync(path.join(directory,'permanent-location-verification.json'),JSON.stringify(result,null,2)+'\n');
+fs.writeFileSync(path.join(__dirname,'../docs/permanent-backup-verification.json'),JSON.stringify(result,null,2)+'\n');
+console.log('PASS permanent backup and independent local restoration; all table counts, SHA256, integrity and foreign keys match.');

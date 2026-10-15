@@ -8,6 +8,8 @@
 *.sqlite-*
 *.sqlite3-*
 *.dpapi
+*.local
+*.local.*
 release-review.local.py
 release-package-review.local.json
 db/opening-inventory-approval.json

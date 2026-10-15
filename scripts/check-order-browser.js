@@ -71,9 +71,9 @@ async function checkOrderBrowser(base, db, options={}) {
       await wait('currentOrder.status==="processing" && currentOrder.shipping_cost===3');
       assert.equal((await db.get('SELECT total FROM orders WHERE id=?',[options.orderId])).total,13);
       await cdp('Page.navigate',{url:base+'/orders-admin.html'});
-      await wait('document.getElementById("desktopCaptureBtn") && typeof bulkUpdateStatus==="function"');
-      assert.equal(await evaluate('document.getElementById("desktopCaptureBtn").disabled && document.getElementById("mobileCaptureBtn").disabled'),true);
-      assert.equal(await evaluate('Array.from(document.querySelectorAll("button")).filter(x=>x.textContent==="On hold (not supported)" && x.disabled).length'),2);
+      await wait('document.getElementById("bulk-menu") && document.querySelector("#rows tr")');
+      assert.equal(await evaluate('Array.from(document.querySelectorAll("button")).some(x=>x.textContent==="Capture payments" && x.disabled)'),true);
+      assert.equal(await evaluate('Array.from(document.querySelectorAll("button")).some(x=>x.textContent==="On hold" && x.disabled)'),true);
       return;
     }
     if(options.invoice){

@@ -33,6 +33,21 @@
   const active = links.find((link, index) => index > 0 && link.getAttribute('href') === paths[page]);
   if (active) active.setAttribute('aria-current', 'page');
   const details = host.querySelector('details');
+  const layout = host.closest('.admin-layout');
+  const toggle = document.createElement('button');
+  toggle.className = 'sk-nav-toggle';
+  toggle.type = 'button';
+  details.id = 'admin-navigation-panel';
+  toggle.setAttribute('aria-controls', details.id);
+  host.prepend(toggle);
+  let collapsed = false;
+  const updateCollapse = () => {
+    layout?.classList.toggle('nav-collapsed', desktop.matches && collapsed);
+    toggle.textContent = collapsed ? '☰' : '‹ Collapse menu';
+    toggle.setAttribute('aria-label', collapsed ? 'Open admin navigation' : 'Collapse admin navigation');
+    toggle.setAttribute('aria-expanded', String(!collapsed));
+  };
+  toggle.onclick = () => { collapsed = !collapsed; updateCollapse(); };
   const logout = host.querySelector('.sk-nav-stack > form');
   const placeLogout = () => {
     const target = desktop.matches || details.open
@@ -40,8 +55,10 @@
     target.append(logout);
   };
   const desktop = matchMedia('(min-width: 1001px)');
-  const applyViewport = () => { details.open = desktop.matches; placeLogout(); };
+  const applyViewport = () => { details.open = desktop.matches; placeLogout(); updateCollapse(); };
   details.addEventListener('toggle', placeLogout);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !desktop.matches) details.open = false; });
+  document.addEventListener('click', e => { if (!desktop.matches && details.open && !host.contains(e.target)) details.open = false; });
   applyViewport();
   desktop.addEventListener('change', applyViewport);
 })();

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <script src="/js/theme-preview-bootstrap.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>المجموعات - Smart Kids Kuwait</title>
@@ -587,19 +588,13 @@
     }
 
     async function fetchCollectionsFromApi() {
-      const response = await fetch(`${COLLECTIONS_API}?status=active&limit=120&offset=0&sort=created_at&order=DESC`, {
-        cache: 'no-store',
-        headers: { Accept: 'application/json' }
-      });
-
-      const result = await response.json().catch(() => null);
-
-      if (!response.ok || !result || !result.success) {
-        throw new Error(result?.error || `HTTP ${response.status}`);
+      const collections=[];
+      for(let offset=0;;){
+        const response=await fetch(`${COLLECTIONS_API}?status=active&limit=100&offset=${offset}&sort=created_at&order=DESC`,{cache:'no-store',headers:{Accept:'application/json'}});
+        const result=await response.json();if(!response.ok||!result.success)throw Error(result.error||'Unable to load collections');
+        const rows=Array.isArray(result.data)?result.data:[];collections.push(...rows);offset+=rows.length;
+        if(!rows.length||offset>=Number(result.pagination?.total||0))break;
       }
-
-      const collections = Array.isArray(result.data) ? result.data : [];
-
       return collections
         .filter(item => String(item.status || 'active').toLowerCase() !== 'archived')
         .map((item) => ({
@@ -639,6 +634,7 @@
 
         return `
           <div class="collection-card" data-url="${escapeHtml(url)}">
+            ${/^(https?:\/\/|\/(?!\/))[^\s<>"']+$/i.test(safeText(collection.image_url)) ? `<img src="${escapeHtml(collection.image_url)}" alt="${escapeHtml(title)}" loading="lazy" style="width:100%;height:auto;max-height:160px;object-fit:contain;border-radius:12px;margin-bottom:12px">` : ''}
             <h3 class="collection-title">${escapeHtml(title)}</h3>
             ${description ? `<p class="collection-description">${escapeHtml(description)}</p>` : ``}
             <div class="collection-count">${count} منتج</div>
@@ -677,5 +673,6 @@
   <div id="site-footer"></div>
   <script src="./footer.js"></script>
   <script src="/js/live-visitors.js"></script>
+  <script src="/js/theme-runtime.js" defer></script>
 </body>
 </html>

@@ -185,7 +185,7 @@
     if (!status || !results) return;
 
     const normalizedQuery = safeText(query);
-    if (!normalizedQuery) {
+    if (normalizedQuery.length < (window.SKThemeSearchMinLength || 1)) {
       cancelSearchRequest();
       searchProducts = [];
       results.replaceChildren();
@@ -326,24 +326,13 @@
     list.innerHTML = '<a href="./collections.html">جميع المجموعات</a>';
 
     try {
-      const response = await fetch('/api/collections?status=active&limit=80&offset=0&sort=created_at&order=DESC', {
-        cache: 'no-store',
-        headers: {
-          Accept: 'application/json'
-        }
-      });
-
-      const result = await response.json().catch(() => null);
-
-      if (
-        !response.ok ||
-        !result ||
-        !result.success ||
-        !Array.isArray(result.data)
-      ) {
-        return;
+      const result={data:[]};
+      for(let offset=0;;){
+        const response=await fetch('/api/collections?status=active&limit=100&offset='+offset+'&sort=created_at&order=DESC',{cache:'no-store',headers:{Accept:'application/json'}});
+        const page=await response.json().catch(()=>null);if(!response.ok||!page?.success||!Array.isArray(page.data))return;
+        result.data.push(...page.data);offset+=page.data.length;
+        if(!page.data.length||offset>=Number(page.pagination?.total||0))break;
       }
-
       const links = result.data
         .filter((item) => String(item.status || 'active').toLowerCase() !== 'archived')
         .map((item) => {

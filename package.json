@@ -12,6 +12,8 @@
     "test:security": "node scripts/test-security.js",
     "test:orders": "node scripts/test-security.js --orders",
     "test:checkout": "node scripts/test-security.js --orders --browser",
+    "test:theme": "node scripts/test-security.js --theme",
+    "demo:theme": "node scripts/security-demo.js --theme --port 4510",
     "demo:security": "node scripts/security-demo.js"
   },
   "keywords": [

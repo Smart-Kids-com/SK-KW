@@ -12,6 +12,7 @@ async function seedSecurityDemo() {
   const db = require('../db/turso-manager');
   await db.open();
   await require('../db/store-migration').migrateStore(db);
+  await require('../db/theme-editor-migration').migrateThemeEditor(db);
   const client = await db.ensureTursoClient();
   // Synthetic records use the explicit shared schema migration.
   await client.executeMultiple(`

@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db/turso-manager');
+// Administrative list/import/export are protected and separate from storefront queries.
+router.use('/admin', require('./products-list-admin'));
 
 /**
  * Helpers
