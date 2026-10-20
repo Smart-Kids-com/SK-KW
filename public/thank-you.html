@@ -255,8 +255,14 @@
       .actions .btn{width:100%}
       .item-name{max-width:100%}
     }
+    .item{display:flex;gap:12px;align-items:flex-start}.item-content{flex:1;min-width:0}
+    .item-image{width:64px;height:64px;object-fit:contain;border-radius:10px;flex-shrink:0}
+    .item-name{min-width:0;max-width:none;flex:1;unicode-bidi:plaintext;overflow-wrap:anywhere;word-break:normal}
+    .item-top{flex-wrap:nowrap;gap:12px}.item-total{flex-shrink:0}
+    @media(max-width:700px){.container{padding:12px}.hero{padding:18px 14px;margin:12px 0}.hero-icon{width:52px;height:52px;font-size:1.6rem;margin-bottom:8px}.hero p{font-size:.92rem;line-height:1.6}.card{padding:14px;margin-bottom:12px}.card h2{margin-bottom:10px}.order-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.info-box{padding:10px}.info-value{line-height:1.55;font-size:.92rem}.info-box:has(#customerAddress),.info-box:has(#customerEmail),.info-box:has(#orderDate){grid-column:1/-1}.item{padding:10px}.item-top{flex-wrap:wrap;gap:4px}.item-name{flex-basis:100%}.item-image{width:52px;height:52px}}
   </style>
   <script src="/js/meta-pixel.js"></script>
+  <script src="/js/order-presentation.js"></script>
 </head>
 <body>
   <div class="container">
@@ -265,7 +271,7 @@
       <div class="hero-icon">✓</div>
       <h1>شكراً لطلبك</h1>
       <p>
-        تم استلام طلبك بنجاح. ستجد تفاصيل الطلب كاملة هنا في نفس الصفحة، وسنتواصل معك قريبًا لتأكيده وتجهيزه.
+        تم استلام طلبك. احتفظ برقمه لمتابعته معنا.
       </p>
     </section>
     <div id="loading" class="loading active">
@@ -292,7 +298,7 @@
           </div>
           <div class="info-box">
             <div class="info-label">ملاحظة</div>
-            <div class="info-value">سيتم التواصل معك لتأكيد الطلب، لذلك احتفظ برقم الطلب عند الحاجة.</div>
+            <div class="info-value">سنتواصل معك لتأكيد الطلب وتجهيزه.</div>
           </div>
         </div>
       </div>
@@ -326,27 +332,27 @@
         <div class="summary">
           <div class="summary-row">
             <span>الإجمالي الجزئي</span>
-            <span id="subtotal">KWD 0.000</span>
+            <span id="subtotal">0.000 د.ك</span>
           </div>
           <div class="summary-row" id="discountRow">
             <span>الخصم</span>
-            <span id="discount">KWD 0.000</span>
+            <span id="discount">0.000 د.ك</span>
           </div>
           <div class="summary-row">
             <span>الشحن</span>
-            <span id="shipping">KWD 0.000</span>
+            <span id="shipping">0.000 د.ك</span>
           </div>
           <div class="summary-row total">
             <span>الإجمالي الكلي</span>
-            <span id="total">KWD 0.000</span>
+            <span id="total">0.000 د.ك</span>
           </div>
         </div>
         <div class="actions">
           <a class="btn primary" href="./index.html">العودة للمتجر</a>
-          <a id="whatsappBtn" class="btn whatsapp" href="#" target="_blank" rel="noopener">واتساب</a>
+          <a id="whatsappBtn" class="btn whatsapp" href="#" target="_blank" rel="noopener">تواصل معنا عبر واتساب</a>
         </div>
         <div class="note">
-          في حال احتجت أي مساعدة، يمكنك التواصل معنا عبر واتساب مع إرسال رقم الطلب.
+          احتفظ برقم الطلب للمتابعة.
         </div>
       </div>
     </section>
@@ -355,7 +361,7 @@
     const HELPERS_FALLBACK = {
       formatCurrency(value) {
         const num = Number(value || 0);
-        return `KWD ${num.toFixed(3)}`;
+        return OrderPresentation.money(num);
       },
       getStatusLabel(status) {
         const labels = {
@@ -404,29 +410,8 @@
       if (Array.isArray(order?.products) && order.products.length) return order.products;
       return [];
     }
-    function normalizeAddress(order) {
-      const parts = [
-        order?.customer_address,
-        order?.customer_district,
-        order?.customer_city
-      ].map(v => String(v || '').trim()).filter(Boolean);
-      return parts.join(' - ') || '-';
-    }
-    function formatOrderDateKuwait(value) {
-      if (!value) return '-';
-      const d = new Date(value);
-      if (isNaN(d.getTime())) return String(value);
-      return d.toLocaleString('ar-KW', {
-        timeZone: 'Asia/Kuwait',
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      });
-    }
+    function normalizeAddress(order) { return OrderPresentation.address(order); }
+    function formatOrderDateKuwait(value) { return OrderPresentation.formatDate(value); }
     function getCustomerFacingStatus(status) {
       const normalized = String(status || 'pending').trim().toLowerCase();
       const labels = {
@@ -454,36 +439,23 @@
         `;
         return;
       }
-      itemsList.innerHTML = items.map(item => {
-        const unitPrice = Number(item.product_price ?? item.price ?? item.unit_price ?? 0);
+      itemsList.replaceChildren(...items.map(item => {
+        const unitPrice = Number(item.price ?? item.product_price ?? item.unit_price ?? 0);
         const qty = Number(item.quantity ?? item.qty ?? 0);
-        const itemSubtotal = Number(item.subtotal ?? (unitPrice * qty));
-        const itemName = item.product_name || item.name || 'منتج';
-        return `
-          <div class="item">
-            <div class="item-top">
-              <div class="item-name">${itemName}</div>
-              <div class="item-total">${H.formatCurrency(itemSubtotal)}</div>
-            </div>
-            <div class="item-meta">
-              الكمية: ${qty} × ${H.formatCurrency(unitPrice)}
-            </div>
-          </div>
-        `;
-      }).join('');
+        const card=document.createElement('div');card.className='item';
+        const image=OrderPresentation.image(item.product_image || item.image);
+        if(image){const img=document.createElement('img');img.className='item-image';img.alt='';img.src=image;img.loading='lazy';img.addEventListener('error',()=>img.remove(),{once:true});card.append(img);}
+        const content=document.createElement('div');content.className='item-content';
+        const top=document.createElement('div');top.className='item-top';
+        const name=document.createElement('div');name.className='item-name';name.dir='auto';name.textContent=item.product_name || item.name || 'منتج';
+        const total=document.createElement('div');total.className='item-total';total.textContent=OrderPresentation.money(item.subtotal ?? unitPrice*qty);
+        top.append(name,total);const meta=document.createElement('div');meta.className='item-meta';meta.textContent=`الكمية: ${qty} × ${OrderPresentation.money(unitPrice)}`;
+        content.append(top,meta);card.append(content);return card;
+      }));
     }
     function setWhatsAppLink(order) {
-      const btn = document.getElementById('whatsappBtn');
-      if (!btn) return;
-      const orderNumber = String(order?.order_number || '').trim();
-      const customerName = String(order?.customer_name || '').trim();
-      const message = [
-        'مرحباً،',
-        'أحتاج مساعدة بخصوص طلبي.',
-        orderNumber ? `رقم الطلب: ${orderNumber}` : '',
-        customerName ? `الاسم: ${customerName}` : ''
-      ].filter(Boolean).join('\n');
-      btn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+      const btn=document.getElementById('whatsappBtn');
+      btn.href=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('رقم الطلب: '+String(order.order_number||''))}`;
     }
     function getPurchaseEventKey(order) {
       const orderNumber = String(order?.order_number || '').trim();
@@ -556,10 +528,10 @@
       const status = String(order.status || 'pending').trim().toLowerCase();
       statusEl.className = `status-badge ${getCustomerFacingStatusClass(status)}`;
       statusEl.textContent = getCustomerFacingStatus(status);
-      document.getElementById('subtotal').textContent = H.formatCurrency(order.subtotal || 0);
-      document.getElementById('shipping').textContent = H.formatCurrency(order.shipping_cost || 0);
-      document.getElementById('discount').textContent = H.formatCurrency(discountValue);
-      document.getElementById('total').textContent = H.formatCurrency(order.total || 0);
+      document.getElementById('subtotal').textContent = OrderPresentation.money(order.subtotal || 0);
+      document.getElementById('shipping').textContent = OrderPresentation.money(order.shipping_cost || 0);
+      document.getElementById('discount').textContent = OrderPresentation.money(discountValue);
+      document.getElementById('total').textContent = OrderPresentation.money(order.total || 0);
       document.getElementById('discountRow').style.display = discountValue > 0 ? 'flex' : 'none';
       renderItems(items);
       setWhatsAppLink(order);
