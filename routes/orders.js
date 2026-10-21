@@ -7,6 +7,7 @@ const db = require('../db/turso-manager');
 const { SYSTEM_CONFIG, HELPERS } = require('../config/system');
 const { sendOrderEmails, sendInvoiceEmail } = require('../utils/email');
 const { sendMetaPurchase } = require('../services/meta-capi');
+const { withReceiptProof } = require('../services/purchase-browser-receipts');
 
 const ORDERS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDERS;
 const ORDER_ITEMS_TABLE = SYSTEM_CONFIG.DATABASE_CONFIG.TABLES.ORDER_ITEMS;
@@ -628,7 +629,7 @@ router.post('/', async (req, res) => {
   try {
     const identity = checkoutIdentity(req);
     const replay = await replayCheckout(db, identity);
-    if (replay) return res.status(200).json({ success: true, data: await getOrderWithItems(replay.id), replayed: true });
+    if (replay) return res.status(200).json({ success: true, data: withReceiptProof(await getOrderWithItems(replay.id)), replayed: true });
     const {
       customerName,
       customerEmail,
@@ -751,7 +752,7 @@ router.post('/', async (req, res) => {
     return res.status(201).json({
       success: true,
       message: 'تم إنشاء الطلب بنجاح',
-      data: createdOrder
+      data: withReceiptProof(createdOrder)
     });
   } catch (error) {
     if (error.status) return res.status(error.status).json({ success: false, error: error.message });
@@ -759,7 +760,7 @@ router.post('/', async (req, res) => {
     if (String(error.message).includes('orders.checkout_key')) {
       try {
         const replay = await replayCheckout(db, checkoutIdentity(req));
-        if (replay) return res.status(200).json({ success: true, data: await getOrderWithItems(replay.id), replayed: true });
+        if (replay) return res.status(200).json({ success: true, data: withReceiptProof(await getOrderWithItems(replay.id)), replayed: true });
       } catch (replayError) { error = replayError; }
     }
     if (error.status) return res.status(error.status).json({ success: false, error: error.message });

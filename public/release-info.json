@@ -1,1 +1,1 @@
-{"version":"2026-10-21-purchase-logs.1","scope":"Safe Browser and CAPI purchase receipts; existing order presentation retained"}
+{"version":"2026-10-21-browser-receipts.1","scope":"Durable authenticated Browser dispatch receipts; Pixel and CAPI event payloads retained"}

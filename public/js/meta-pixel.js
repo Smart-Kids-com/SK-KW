@@ -85,13 +85,31 @@
     return true;
   }
 
+  function browserReceipt(eventID, payload, proof, status) {
+    try {
+      if (!/^purchase_SK\d+$/.test(eventID) || typeof proof !== 'string' || proof.length > 600) return;
+      const body = JSON.stringify({ order_number: eventID.slice('purchase_'.length), event_id: eventID,
+        value: payload.value, currency: payload.currency, called_at: new Date().toISOString(), status, proof });
+      let queued = false;
+      try {
+        if (typeof window.navigator?.sendBeacon === 'function') {
+          queued = window.navigator.sendBeacon('/api/purchase-browser-receipt', new Blob([body], { type: 'application/json' }));
+        }
+      } catch (_) { /* Try keepalive instead. */ }
+      if (!queued && typeof window.fetch === 'function') {
+        Promise.resolve(window.fetch('/api/purchase-browser-receipt', { method: 'POST',
+          credentials: 'same-origin', keepalive: true, headers: { 'Content-Type': 'application/json' }, body })).catch(() => {});
+      }
+    } catch (_) { /* Receipt transport must never affect tracking or the thank-you page. */ }
+  }
+
   function track(eventName, payload = {}, options = {}) {
-    if (!window.fbq) {
+    const eventID = normalizeName(options.eventID || options.eventId);
+    if (typeof window.fbq !== 'function') {
+      if (eventName === 'Purchase') browserReceipt(eventID, payload, options.receiptProof, 'fbq_unavailable');
       if (eventName !== 'Purchase') logDebug('fbq not ready, skipped event:', eventName, payload);
       return;
     }
-
-    const eventID = normalizeName(options.eventID || options.eventId);
 
     if (eventID) {
       window.fbq('track', eventName, payload, { eventID });
@@ -100,6 +118,7 @@
     }
 
     if (eventName === 'Purchase' && /^purchase_[A-Za-z0-9_-]{1,100}$/.test(eventID)) {
+      browserReceipt(eventID, payload, options.receiptProof, 'fbq_called');
       // This records dispatch to fbq, not delivery to Meta or deduplication.
       try {
         console.info('[purchase]', JSON.stringify({
@@ -166,7 +185,7 @@
         content_ids: normalizeIds(data.ids),
         content_type: data.contentType || 'product'
       },
-      eventID ? { eventID } : {}
+      { ...(eventID ? { eventID } : {}), receiptProof: data.receiptProof }
     );
   }
 

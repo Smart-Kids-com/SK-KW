@@ -117,6 +117,18 @@ function createAdminAuth({ passwords, otpSecret, renderLogin, renderOtp, env = p
 
   return {
     sessionName, challengeName,
+    purchaseReceiptLimiter: safe(async (req, res, next) => {
+      const origin = req.get('origin');
+      if (!origin || !require('./request-origin').isAllowedOrigin(req, origin,
+          new Set([env.PUBLIC_ORIGIN, 'https://smartkidskw.com', 'https://www.smartkidskw.com'].filter(Boolean)), env) ||
+          req.get('sec-fetch-site') === 'cross-site') return res.sendStatus(403);
+      // Shared atomic buckets use the existing auth rate-limit store, not instance memory.
+      for (const [bucket, maximum] of [['receipt:global', 1200], ['receipt:ip:' + hash(ip(req)), 60]]) {
+        const limit = await getStore().takeLimit(bucket, maximum, 60);
+        if (!limit.allowed) return res.set('Retry-After', String(limit.retryAfter)).sendStatus(429);
+      }
+      next();
+    }),
     close() { if (store) store.close(); },
     context: safe(async (req, res, next) => {
       const cookies = parseCookies(req);

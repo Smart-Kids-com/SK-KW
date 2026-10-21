@@ -511,6 +511,15 @@ app.use(cors((req, callback) => callback(null, {
 
 
 
+// Dedicated small, proof-authenticated ingestion; handled before the general parser/guard.
+app.post('/api/purchase-browser-receipt', adminAuth.purchaseReceiptLimiter,
+  express.json({ limit: '2kb', strict: true }),
+  require('./services/purchase-browser-receipts').receive(db, ensureDbReady),
+  (error, req, res, next) => {
+    // Parser errors may contain the input body/proof; never forward them to general logs.
+    res.status(error.type === 'entity.too.large' ? 413 : 400).json({ success: false });
+  });
+
 app.use(bodyParser.json({ limit: '50mb' }));
 
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
@@ -586,6 +595,8 @@ app.use('/api/redirects-admin', redirectsAdminRoutes);
 
 
 
+// The existing API guard above requires the normal admin login for this review endpoint.
+app.get('/api/orders/admin/browser-receipts', require('./services/purchase-browser-receipts').review(db));
 app.use('/api/orders', ordersRoutes);
 
 app.use('/api/products', productsRoutes);
