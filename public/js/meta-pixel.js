@@ -87,7 +87,7 @@
 
   function track(eventName, payload = {}, options = {}) {
     if (!window.fbq) {
-      logDebug('fbq not ready, skipped event:', eventName, payload);
+      if (eventName !== 'Purchase') logDebug('fbq not ready, skipped event:', eventName, payload);
       return;
     }
 
@@ -99,7 +99,19 @@
       window.fbq('track', eventName, payload);
     }
 
-    logDebug('Tracked:', eventName, payload, eventID ? { eventID } : {});
+    if (eventName === 'Purchase' && /^purchase_[A-Za-z0-9_-]{1,100}$/.test(eventID)) {
+      // This records dispatch to fbq, not delivery to Meta or deduplication.
+      try {
+        console.info('[purchase]', JSON.stringify({
+          order_number: eventID.slice('purchase_'.length),
+          event_id: eventID,
+          channel: 'Browser',
+          sent_at: new Date().toISOString()
+        }));
+      } catch (_) { /* Logging must not affect tracking. */ }
+    }
+
+    if (eventName !== 'Purchase') logDebug('Tracked:', eventName, payload, eventID ? { eventID } : {});
   }
 
   function trackCustom(eventName, payload = {}) {

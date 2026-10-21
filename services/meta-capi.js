@@ -180,6 +180,23 @@ async function sendMetaPurchase({ req, order }) {
   const payload = buildPurchasePayload(req, order);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 3500);
+  const sentAt = new Date().toISOString();
+  let receiptLogged = false;
+  function receipt(result, traceId) {
+    receiptLogged = true;
+    const trace = safeText(traceId);
+    // Allowlisted fields only: never log the request, URL, token, user_data or error body.
+    try {
+      console.info('[purchase]', JSON.stringify({
+        order_number: safeText(order.order_number).slice(0, 100),
+        event_id: payload.data[0].event_id,
+        channel: 'CAPI',
+        sent_at: sentAt,
+        result,
+        ...(/^[A-Za-z0-9_-]{1,200}$/.test(trace) ? { fbtrace_id: trace } : {})
+      }));
+    } catch (_) { /* Logging must not affect checkout. */ }
+  }
 
   try {
     const endpoint =
@@ -204,12 +221,18 @@ async function sendMetaPurchase({ req, order }) {
       responseBody = null;
     }
 
-    if (!response.ok) {
-      const metaMessage =
-        safeText(responseBody?.error?.message) ||
-        `HTTP ${response.status}`;
+    const received = Number(responseBody?.events_received);
+    const errorCode = Number(responseBody?.error?.code);
+    receipt({
+      status: response.ok ? 'accepted_http' : 'rejected_http',
+      http_status: Number(response.status),
+      events_received: Number.isFinite(received) ? received : null,
+      ...(!response.ok && Number.isFinite(errorCode) ? { error_code: errorCode } : {})
+    }, responseBody?.fbtrace_id || responseBody?.error?.fbtrace_id);
 
-      throw new Error(`Meta CAPI request failed: ${metaMessage}`);
+    if (!response.ok) {
+      // Provider error messages can echo submitted data; keep them out of route logs.
+      throw new Error(`Meta CAPI request failed: HTTP ${response.status}`);
     }
 
     return {
@@ -218,11 +241,13 @@ async function sendMetaPurchase({ req, order }) {
       eventsReceived: Number(responseBody?.events_received || 0)
     };
   } catch (error) {
+    if (!receiptLogged) receipt({ status: error?.name === 'AbortError' ? 'timeout' : 'network_error' });
     if (error?.name === 'AbortError') {
       throw new Error('Meta CAPI request timed out');
     }
 
-    throw error;
+    if (receiptLogged && /^Meta CAPI request failed: HTTP \d+$/.test(error?.message || '')) throw error;
+    throw new Error('Meta CAPI request failed before a response was received');
   } finally {
     clearTimeout(timeout);
   }
