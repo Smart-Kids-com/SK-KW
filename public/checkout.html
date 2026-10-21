@@ -8,6 +8,7 @@
   <meta name="description" content="إتمام الطلب - Smart Kids Kuwait" />
   <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457" />
   <script src="/js/meta-pixel.js"></script>
+  <script src="/js/order-presentation.js"></script>
   <link rel="stylesheet" href="./site-theme.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -510,6 +511,16 @@
         font-size:1.3rem;
       }
     }
+    .summary-name{min-width:0;overflow-wrap:anywhere;unicode-bidi:plaintext}
+    .summary-thumb{background:#f5f1f7}
+    .summary-thumb img{object-fit:contain}
+    .summary-thumb img[hidden]{display:none}
+    @media(max-width:420px){
+      .summary-item{grid-template-columns:56px minmax(0,1fr);gap:8px}
+      .summary-thumb{width:56px;height:56px;grid-row:span 2}
+      .summary-price,.summary-item>#finalSummaryTotal{grid-column:2;text-align:start;font-size:1rem!important}
+      .summary-item:has(#finalSummaryThumb)>div:nth-child(2)>div{font-size:1.1rem!important}
+    }
   </style>
 </head>
 <body>
@@ -521,7 +532,7 @@
         <span id="summaryChevron">⌃</span>
         <span>ملخص الطلب</span>
       </div>
-      <div class="summary-toggle-right" id="summaryToggleTotal">KWD 0.000</div>
+      <div class="summary-toggle-right" id="summaryToggleTotal">0.000 د.ك</div>
     </div>
 
     <div class="summary-panel open" id="summaryPanel">
@@ -530,7 +541,7 @@
       <div class="totals">
         <div class="totals-line">
           <span class="muted">المجموع الفرعي</span>
-          <strong id="subtotalValue">KWD 0.000</strong>
+          <strong id="subtotalValue">0.000 د.ك</strong>
         </div>
 
         <div class="totals-line">
@@ -538,14 +549,14 @@
           <span class="muted" id="shippingValue">أضف المحافظة</span>
         </div>
 
-        <div class="totals-line">
+        <div class="totals-line" id="checkoutDiscountRow" hidden>
           <span>الخصم</span>
-          <span class="muted" id="discountValue">KWD 0.000</span>
+          <span class="muted" id="discountValue">0.000 د.ك</span>
         </div>
 
         <div class="totals-line totals-grand">
           <span>إجمالي الطلب</span>
-          <span id="grandTotalValue">KWD 0.000</span>
+          <span id="grandTotalValue">0.000 د.ك</span>
         </div>
       </div>
     </div>
@@ -637,13 +648,13 @@
         <label class="radio-item" data-name="payment">
           <input type="radio" name="payment" value="cash">
           <span class="radio-ui"></span>
-          <span class="radio-label">Cash / نقداً</span>
+          <span class="radio-label">الدفع عند الاستلام</span>
         </label>
 
         <label class="radio-item checked" data-name="payment">
           <input type="radio" name="payment" value="link" checked>
           <span class="radio-ui"></span>
-          <span class="radio-label">link / رابط</span>
+          <span class="radio-label">رابط دفع</span>
         </label>
       </div>
     </section>
@@ -730,7 +741,7 @@
         </div>
 
         <div style="font-size:1.3rem; font-weight:900; direction:ltr;" id="finalSummaryTotal">
-          KWD 0.000
+          0.000 د.ك
         </div>
       </div>
     </section>
@@ -760,7 +771,7 @@
     let abandonedCheckoutSaveTimer = null;
 
     function formatKWD(value) {
-      return `KWD ${Number(value || 0).toFixed(3)}`;
+      return OrderPresentation.money(value);
     }
 
     function safeText(value, fallback = '') {
@@ -949,12 +960,12 @@
 
       if (shipping === 0) {
         shippingBox.classList.add('free');
-        shippingBoxMessage.textContent = 'The order qualifies for free shipping';
+        shippingBoxMessage.textContent = 'الطلب مؤهل للتوصيل المجاني';
         shippingBoxPrice.textContent = 'مجانا';
       } else {
         shippingBox.classList.add('paid');
-        shippingBoxMessage.textContent = 'Delivery fee : 2 KWD';
-        shippingBoxPrice.textContent = 'KWD 2.000';
+        shippingBoxMessage.textContent = 'رسوم التوصيل';
+        shippingBoxPrice.textContent = formatKWD(shipping);
       }
     }
 
@@ -972,23 +983,26 @@
       summaryItems.innerHTML = cart.map(item => {
         const quantity = safeNumber(item.quantity, 0);
         const linePrice = safeNumber(item.price, 0) * quantity;
-        const image = safeText(item.image, 'https://via.placeholder.com/120x120?text=Product');
+        const image = OrderPresentation.image(item.image);
         const name = safeText(item.name, 'منتج');
 
         return `
           <div class="summary-item">
             <div class="summary-thumb">
-              <img src="${escapeHtml(image)}" alt="${escapeHtml(name)}">
+              ${image ? `<img src="${escapeHtml(image)}" alt="" loading="lazy">` : ''}
               <span class="summary-qty">${quantity}</span>
             </div>
-            <div class="summary-name">${escapeHtml(name)}</div>
+            <div class="summary-name" dir="auto">${escapeHtml(name)}</div>
             <div class="summary-price">${formatKWD(linePrice)}</div>
           </div>
         `;
       }).join('');
+      summaryItems.querySelectorAll('img').forEach(img => img.addEventListener('error', () => img.remove(), { once: true }));
 
       document.getElementById('subtotalValue').textContent = formatKWD(subtotal);
       document.getElementById('discountValue').textContent = formatKWD(discountAmount);
+      document.getElementById('checkoutDiscountRow').style.display = discountAmount > 0 ? 'grid' : 'none';
+      document.getElementById('checkoutDiscountRow').hidden = !(discountAmount > 0);
       document.getElementById('summaryToggleTotal').textContent = formatKWD(getGrandTotal());
       document.getElementById('grandTotalValue').textContent = formatKWD(getGrandTotal());
 
@@ -1001,10 +1015,13 @@
       }
 
       const firstItem = cart[0];
-      document.getElementById('finalSummaryImage').src =
-        safeText(firstItem?.image, 'https://via.placeholder.com/120x120?text=Product');
+      const finalImage = document.getElementById('finalSummaryImage');
+      const finalSource = OrderPresentation.image(firstItem?.image);
+      finalImage.hidden = !finalSource;
+      finalImage.onerror = () => { finalImage.hidden = true; finalImage.removeAttribute('src'); };
+      if (finalSource) finalImage.src = finalSource; else finalImage.removeAttribute('src');
       document.getElementById('finalSummaryQty').textContent = totalQty;
-      document.getElementById('finalSummaryItemsText').textContent = `${totalQty} item`;
+      document.getElementById('finalSummaryItemsText').textContent = `عدد القطع: ${totalQty}`;
       document.getElementById('finalSummaryTotal').textContent = formatKWD(getGrandTotal());
 
       renderShippingBox();

@@ -259,7 +259,7 @@
     .item-image{width:64px;height:64px;object-fit:contain;border-radius:10px;flex-shrink:0}
     .item-name{min-width:0;max-width:none;flex:1;unicode-bidi:plaintext;overflow-wrap:anywhere;word-break:normal}
     .item-top{flex-wrap:nowrap;gap:12px}.item-total{flex-shrink:0}
-    @media(max-width:700px){.container{padding:12px}.hero{padding:18px 14px;margin:12px 0}.hero-icon{width:52px;height:52px;font-size:1.6rem;margin-bottom:8px}.hero p{font-size:.92rem;line-height:1.6}.card{padding:14px;margin-bottom:12px}.card h2{margin-bottom:10px}.order-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.info-box{padding:10px}.info-value{line-height:1.55;font-size:.92rem}.info-box:has(#customerAddress),.info-box:has(#customerEmail),.info-box:has(#orderDate){grid-column:1/-1}.item{padding:10px}.item-top{flex-wrap:wrap;gap:4px}.item-name{flex-basis:100%}.item-image{width:52px;height:52px}}
+    @media(max-width:700px){.container{padding:12px}.hero{padding:18px 14px;margin:12px 0}.hero-icon{width:52px;height:52px;font-size:1.6rem;margin-bottom:8px}.hero p{font-size:.92rem;line-height:1.6}.card{padding:14px;margin-bottom:12px}.card h2{margin-bottom:10px}.order-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.info-box{padding:10px}.info-value{line-height:1.55;font-size:.92rem}.info-box:has(#customerAddress),.info-box:has(#customerEmail),.info-box:has(#orderDate),.info-box:has(#paymentMethod){grid-column:1/-1}.item{padding:10px}.item-top{flex-wrap:wrap;gap:4px}.item-name{flex-basis:100%}.item-image{width:52px;height:52px}}
   </style>
   <script src="/js/meta-pixel.js"></script>
   <script src="/js/order-presentation.js"></script>
@@ -297,8 +297,8 @@
             <div class="info-value" id="orderDate">--</div>
           </div>
           <div class="info-box">
-            <div class="info-label">ملاحظة</div>
-            <div class="info-value">سنتواصل معك لتأكيد الطلب وتجهيزه.</div>
+            <div class="info-label">طريقة الدفع</div>
+            <div class="info-value" id="paymentMethod">--</div>
           </div>
         </div>
       </div>
@@ -310,12 +310,12 @@
             <div class="info-value" id="customerName">--</div>
           </div>
           <div class="info-box">
-            <div class="info-label">البريد الإلكتروني</div>
-            <div class="info-value" id="customerEmail">--</div>
-          </div>
-          <div class="info-box">
             <div class="info-label">رقم الهاتف</div>
             <div class="info-value" id="customerPhone">--</div>
+          </div>
+          <div class="info-box">
+            <div class="info-label">البريد الإلكتروني</div>
+            <div class="info-value" id="customerEmail">--</div>
           </div>
           <div class="info-box">
             <div class="info-label">العنوان</div>
@@ -525,6 +525,7 @@
       document.getElementById('customerEmail').textContent = order.customer_email || '-';
       document.getElementById('customerPhone').textContent = order.customer_phone || '-';
       document.getElementById('customerAddress').textContent = normalizeAddress(order);
+      document.getElementById('paymentMethod').textContent = OrderPresentation.payment(order);
       const statusEl = document.getElementById('orderStatus');
       const status = String(order.status || 'pending').trim().toLowerCase();
       statusEl.className = `status-badge ${getCustomerFacingStatusClass(status)}`;
