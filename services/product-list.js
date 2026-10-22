@@ -3,6 +3,8 @@ const crypto=require('node:crypto');
 const available='MAX(0,COALESCE(on_hand,0)-COALESCE(committed,0)-COALESCE(unavailable,0))';
 const fields=['product_name','slug','sku','description','price','sale_price','image_url','status','product_type','vendor','category','tags','seo_title','seo_description'];
 const columns=['id',...fields,'created_at','updated_at'];
+// Grid responses omit rich descriptions/SEO text; edit and CSV still use columns.
+const listColumns=['id','product_name','slug','sku','price','sale_price','image_url','status','category','product_type','vendor','created_at','updated_at'];
 const sorts={product_name:'product_name COLLATE NOCASE',sku:'sku COLLATE NOCASE',price:'price',status:'status',inventory:available,category:'category COLLATE NOCASE',product_type:'product_type COLLATE NOCASE',vendor:'vendor COLLATE NOCASE',created_at:'created_at',updated_at:'updated_at',id:'id'};
 function fail(message,status=400){const e=new Error(message);e.status=status;throw e;}
 function ids(input){if(!Array.isArray(input)||!input.length||input.length>500||input.some(x=>!Number.isSafeInteger(x)||x<1))fail('Select 1–500 valid product IDs.');return [...new Set(input)];}
@@ -13,9 +15,9 @@ function filter(q={}){const where=[],args=[];if(q.status){if(!['active','draft',
  const sort=q.sort||'created_at';if(!Object.hasOwn(sorts,sort))fail('Invalid sort column.');const direction=q.direction||'DESC';if(!['ASC','DESC'].includes(direction))fail('Invalid sort direction.');
  return {sql:where.length?' WHERE '+where.join(' AND '):'',args,order:` ORDER BY ${sorts[sort]} ${direction},id ${direction}`};}
 async function list(db,q){const f=filter(q),limit=Number(q.limit||25),offset=Number(q.offset||0);if(!Number.isSafeInteger(limit)||limit<1||limit>100||!Number.isSafeInteger(offset)||offset<0)fail('Invalid pagination.');
- const [rows,count]=await Promise.all([db.all(`SELECT ${columns.join(',')},${available} AS available FROM products${f.sql}${f.order} LIMIT ? OFFSET ?`,[...f.args,limit,offset]),db.get('SELECT COUNT(*) AS total FROM products'+f.sql,f.args)]);
+ const [rows,count]=await Promise.all([db.all(`SELECT ${listColumns.join(',')},${available} AS available FROM products${f.sql}${f.order} LIMIT ? OFFSET ?`,[...f.args,limit,offset]),db.get('SELECT COUNT(*) AS total FROM products'+f.sql,f.args)]);
  // One image lookup for the entire page, never one query per product.
- if(rows.length){const images=await db.all(`SELECT product_id,image_url FROM product_images WHERE product_id IN (${rows.map(()=>'?').join(',')}) ORDER BY product_id,sort_order,id`,rows.map(r=>r.id));const first=new Map();for(const image of images)if(!first.has(Number(image.product_id)))first.set(Number(image.product_id),image.image_url);for(const row of rows)row.primary_image=first.get(Number(row.id))||row.image_url;}
+ if(rows.length){const images=await db.all(`SELECT product_id,image_url FROM (SELECT product_id,image_url,ROW_NUMBER() OVER(PARTITION BY product_id ORDER BY sort_order,id) AS position FROM product_images WHERE product_id IN (${rows.map(()=>'?').join(',')})) WHERE position=1`,rows.map(r=>r.id));const first=new Map();for(const image of images)first.set(Number(image.product_id),image.image_url);for(const row of rows)row.primary_image=first.get(Number(row.id))||row.image_url;}
  return {rows,pagination:{total:Number(count.total),offset,limit,hasMore:offset+rows.length<Number(count.total)}};}
 async function facets(db){const result={};await Promise.all(['category','product_type','vendor'].map(async key=>{result[key]=(await db.all(`SELECT DISTINCT ${key} AS value FROM products WHERE ${key} IS NOT NULL AND ${key}!='' ORDER BY ${key} COLLATE NOCASE`)).map(r=>r.value);}));return result;}
 function parseCSV(text){if(typeof text!=='string'||Buffer.byteLength(text)>2*1024*1024)fail('CSV must be at most 2 MiB.');text=text.replace(/^\uFEFF/,'');const rows=[];let row=[],value='',quoted=false,closed=false;

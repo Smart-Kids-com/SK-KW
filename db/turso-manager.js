@@ -1,5 +1,6 @@
 const path = require('path');
 const { createClient } = require('@libsql/client');
+const { libsqlFetch } = require('./libsql-fetch');
 const { SYSTEM_CONFIG } = require('../config/system');
 
 const USE_TURSO = !!process.env.DATABASE_URL;
@@ -78,7 +79,7 @@ class DatabaseManager {
     clientInitPromise = withTimeout(
       (async () => {
         console.log(process.env.DATABASE_URL?.startsWith('file:') ? 'اتصال بقاعدة libSQL محلية' : 'اتصال بقاعدة libSQL مُعدّة');
-        const c = createClient({ url, authToken });
+        const c = createClient({ url, authToken, ...(!url.startsWith('file:') ? { fetch: libsqlFetch } : {}) });
         await c.execute('PRAGMA foreign_keys=ON');
 
         // validate connection
@@ -166,7 +167,9 @@ class DatabaseManager {
           () => withTimeout(c.execute({ sql, args: params }), TURSO_OP_TIMEOUT_MS, 'Turso get'),
           'Turso get'
         );
-        return result.rows.length > 0 ? result.rows[0] : null;
+        // Remote SDK Rows have read-only named properties; expose the same plain
+        // record contract as sqlite3 and the file client to application services.
+        return result.rows.length > 0 ? { ...result.rows[0] } : null;
       } catch (err) {
         console.error('❌ خطأ Turso (get):', err);
         throw err;
@@ -189,7 +192,7 @@ class DatabaseManager {
           () => withTimeout(c.execute({ sql, args: params }), TURSO_OP_TIMEOUT_MS, 'Turso all'),
           'Turso all'
         );
-        return result.rows;
+        return result.rows.map(row => ({ ...row }));
       } catch (err) {
         console.error('❌ خطأ Turso (all):', err);
         throw err;

@@ -97,8 +97,8 @@ async function checkDiscountsBrowser(base, options={}) {
       if(width===390){await evaluate('document.querySelector(".table-scroll").scrollIntoView();document.querySelector(".table-scroll").scrollLeft=0');await cdp('Input.dispatchMouseEvent',{type:'mouseWheel',x:180,y:320,deltaX:260,deltaY:0});await sleep(250);assert((await evaluate('document.querySelector(".table-scroll").scrollLeft'))>0,'Horizontal table scroll retained')}
       await evaluate('scrollTo(0,0)');
     }
-    for(const width of [1280,390])await scrollChecks(width);
-    console.log('PASS Discounts scroll: wheel, precise wheel/trackpad and touch gestures over table/filters/content; modal form scrolling, backdrop lock, Escape/button/programmatic unlock; horizontal table retained. No collapsible sidebar exists.');
+    for(const width of [1280,390]){await scrollChecks(width);if(width===1280){await evaluate('document.querySelector(".sk-nav-toggle").click()');await scrollChecks(width);await evaluate('document.querySelector(".sk-nav-toggle").click()')}}
+    console.log('PASS Discounts scroll: wheel, precise wheel/trackpad and touch gestures over table/filters/content; modal form scrolling, backdrop lock, Escape/button/programmatic unlock; horizontal table retained. Shared sidebar expanded and collapsed.');
     await evaluate('document.getElementById("create").click()');await wait('document.getElementById("editor").open');
     await evaluate(`document.getElementById('code').value='BROWSER';document.getElementById('title').value='<img src=x onerror="window.pwned=1"> خصم';document.getElementById('value').value=25;document.getElementById('form').requestSubmit()`);
     await wait('!document.getElementById("editor").open');await wait('document.getElementById("rows").textContent.includes("BROWSER")');
