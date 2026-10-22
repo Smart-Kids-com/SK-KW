@@ -1,0 +1,9 @@
+﻿/* Discounts owns vertical scrolling; table overflow is horizontal only. */
+html:has(body.discounts-admin){height:auto;overflow-y:auto;overscroll-behavior-y:auto}
+body.discounts-admin{height:auto;min-height:100vh;overflow:visible;overscroll-behavior-y:auto}
+.discounts-admin main,.discounts-admin .product-card{height:auto;max-height:none;overflow:visible;overscroll-behavior:auto}
+.discounts-admin .table-scroll{height:auto;max-height:none;overflow-x:auto;overflow-y:hidden;overscroll-behavior:auto;touch-action:pan-x pan-y}
+.discounts-admin .filters{overflow:visible;overscroll-behavior:auto}
+html:has(body.discounts-admin dialog[open]),body.discounts-admin:has(dialog[open]){overflow:hidden}
+.discounts-admin dialog{overscroll-behavior:auto;touch-action:pan-x pan-y}
+.discounts-admin dialog .targets{overscroll-behavior:auto}

@@ -1103,6 +1103,7 @@
       }).join('');
 
       totalEl.textContent = `${total.toFixed(3)} KWD`;
+      document.dispatchEvent(new Event('cart-rendered'));
     }
 
     function increaseQty(index) {
@@ -1295,5 +1296,6 @@
   <script src="./footer.js"></script>
   <script src="/js/live-visitors.js"></script>
   <script src="/js/theme-runtime.js" defer></script>
+  <script src="/js/cart-discounts.js"></script>
 </body>
 </html>

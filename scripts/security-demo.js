@@ -39,10 +39,21 @@ if (!process.argv.includes('--isolated-child')) {
   process.env.ADMIN_PASSWORD_1 = 'Local-SK-Demo!2026'; // Disposable demo credential only.
   const themeDemo = process.argv.includes('--theme');
   const productsDemo = process.argv.includes('--products');
+  const discountsDemo = process.argv.includes('--discounts');
+  if(discountsDemo){
+    // Synthetic review only: no actual mail, Pixel or CAPI dispatch.
+    const Module=require('node:module'),guardedLoad=Module._load;
+    Module._load=function(name,parent,isMain){
+      if(name.endsWith('/utils/email'))return {sendOrderEmails:async()=>({mock:true}),sendInvoiceEmail:async()=>({mock:true})};
+      if(name.endsWith('/services/meta-capi'))return {sendMetaPurchase:async()=>({skipped:true})};
+      return guardedLoad.call(this,name,parent,isMain);
+    };
+    process.env.STORE_SALES_PAUSED='0';
+  }
   const ordersDemo = process.argv.includes('--orders');
   const collectionsEditorDemo = process.argv.includes('--collections-editor');
   if (themeDemo || productsDemo || ordersDemo || collectionsEditorDemo) process.env.STORE_SALES_PAUSED = '1';
-  const destination = collectionsEditorDemo ? '/collections-admin' : ordersDemo ? '/orders-admin.html' : productsDemo ? '/products-admin' : themeDemo ? '/theme-admin' : '/orders-admin.html';
+  const destination = discountsDemo ? '/discounts-admin' : collectionsEditorDemo ? '/collections-admin' : ordersDemo ? '/orders-admin.html' : productsDemo ? '/products-admin' : themeDemo ? '/theme-admin' : '/orders-admin.html';
   const portIndex = process.argv.indexOf('--port');
   const port = portIndex < 0 ? 4310 : Number(process.argv[portIndex + 1]);
   if (!Number.isInteger(port) || port < 1024 || port > 65534) throw new Error('Invalid demo port');
@@ -58,6 +69,7 @@ if (!process.argv.includes('--isolated-child')) {
       await db.run("UPDATE orders SET customer_name='عميل تجريبي' WHERE id IN (1,2)");
     }
     if (productsDemo && !resumed) await require('./products-demo-fixtures').seedProducts(db);
+    if (discountsDemo && !resumed) await require('./discounts-demo-fixtures').seedDiscounts(db);
     if (productsDemo && !resumed && process.argv.includes('--collections')) await require('./products-demo-fixtures').seedCollections(db);
     if (collectionsEditorDemo && !resumed) await require('./collections-editor-demo-fixtures').seedCollectionsEditor(db);
     if (themeDemo && !resumed) {
@@ -74,6 +86,7 @@ if (!process.argv.includes('--isolated-child')) {
       next();
     });
     wrapper.get('/js/meta-pixel.js', (req, res) => res.type('js').send('window.fbq = function () {};'));
+    if(discountsDemo)wrapper.get('/discounts-demo-cart',(req,res)=>res.type('html').send(`<script>localStorage.setItem('cart',JSON.stringify([{id:1,name:'كتاب تجريبي',price:10,quantity:1,image:'/sk-main-logo.webp'}]));localStorage.removeItem('cart_discount_code');location.href='/cart.html';</script>`));
     wrapper.use(app);
     const server = wrapper.listen(port, '127.0.0.1');
     await new Promise((resolve, reject) => { server.once('listening', resolve); server.once('error', reject); });

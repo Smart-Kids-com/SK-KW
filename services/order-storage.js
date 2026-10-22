@@ -6,6 +6,7 @@ const { OrderPricingError } = require('./order-pricing');
 async function savePricedOrder(db, record, items, pricing) {
   record = { ...record, inventory_managed: 1 };
   const orderColumns = (await db.all('PRAGMA table_info(orders)')).map(row => row.name);
+  if(orderColumns.includes('discount_label'))record.discount_label=pricing.discount_label||'';
   const installed = await db.get("SELECT COUNT(*) AS n FROM sqlite_master WHERE type='trigger' AND name IN ('order_inventory_insert_guard','order_inventory_reserve','order_inventory_status','order_inventory_transition')");
   if (Number(installed?.n) !== 4) throw new Error('Order inventory migration is required before checkout');
   if (Object.keys(record).some(name => !orderColumns.includes(name))) {
@@ -14,13 +15,16 @@ async function savePricedOrder(db, record, items, pricing) {
   const itemColumns = (await db.all('PRAGMA table_info(order_items)')).map(row => row.name);
   const statements = [];
   if (pricing.discount_id != null) {
+    const snapshot=pricing.discount_snapshot;
+    const modern=snapshot&&Object.hasOwn(snapshot,'rules_json');
     statements.push({ sql: `UPDATE discount_codes SET used_count=COALESCE(used_count,0)+1,
       updated_at=CURRENT_TIMESTAMP WHERE id=? AND UPPER(TRIM(code))=? AND is_active=1 AND type=? AND value=?
       AND (usage_limit IS NULL OR COALESCE(used_count,0)<usage_limit)
       AND COALESCE(minimum_order_amount,0)<=?
       AND (starts_at IS NULL OR starts_at='' OR julianday(starts_at)<=julianday('now'))
-      AND (expires_at IS NULL OR expires_at='' OR julianday(expires_at)>=julianday('now'))`,
-    args: [pricing.discount_id, pricing.discount_code, pricing.discount_type, pricing.discount_value, pricing.subtotal] });
+      ${modern ? "AND archived=0 AND method=? AND rules_json=? AND minimum_order_amount=? AND COALESCE(starts_at,'')=? AND COALESCE(expires_at,'')=? AND title=?" : ''}
+      AND (expires_at IS NULL OR expires_at='' OR julianday(expires_at)>julianday('now'))`,
+    args: [pricing.discount_id, pricing.discount_code, pricing.discount_type, pricing.discount_value, pricing.subtotal, ...(modern?[snapshot.method,snapshot.rules_json,snapshot.minimum_order_amount,snapshot.starts_at||'',snapshot.expires_at||'',snapshot.title]:[])] });
   }
   const names = Object.keys(record);
   statements.push({ sql: `INSERT INTO orders (${names.join(',')}) SELECT ${names.map(() => '?').join(',')}

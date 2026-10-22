@@ -1,0 +1,11 @@
+﻿'use strict';
+(()=>{
+ const total=document.getElementById('summaryTotalPrice');if(!total)return;
+ const panel=document.createElement('section');panel.dir='rtl';panel.style.cssText='padding:12px 0;line-height:1.9;font-size:14px';
+ panel.innerHTML='<label for="cartDiscountCode">كود الخصم</label><div style="display:flex;gap:6px"><input id="cartDiscountCode" maxlength="80" style="min-width:0;flex:1;padding:8px" autocomplete="off"><button type="button" id="cartDiscountApply" style="padding:8px">تطبيق</button></div><p id="cartDiscountResult" role="status"></p><p id="cartQuoteAmounts"></p><small>خصم واحد لكل طلب؛ الكود يحل محل الخصم التلقائي. التحقق النهائي عند إنشاء الطلب.</small>';
+ total.parentElement.insertAdjacentElement('afterend',panel);
+ const input=document.getElementById('cartDiscountCode'),result=document.getElementById('cartDiscountResult'),amounts=document.getElementById('cartQuoteAmounts');input.value=localStorage.getItem('cart_discount_code')||'';
+ let seq=0;async function quote(){const id=++seq;let cart;try{cart=JSON.parse(localStorage.getItem('cart')||'[]')}catch{return}if(!cart.length)return;
+ result.textContent='جارٍ التحقق…';try{const r=await fetch('/api/store/discounts/validate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:input.value,items:cart.map(i=>({productId:i.id??i.product_id,quantity:i.quantity}))})});const j=await r.json();if(id!==seq)return;if(!r.ok||!j.success)throw Error(j.error||'تعذر حساب الخصم');const d=j.data;localStorage.setItem('cart_discount_code',input.value.trim().toUpperCase());result.textContent=d.discount_amount>0?'الخصم — '+(d.label||d.code)+': '+Number(d.discount_amount).toFixed(3)+' د.ك':'لا يوجد خصم مطبق';amounts.textContent='المجموع الفرعي '+Number(d.subtotal).toFixed(3)+' · التوصيل '+Number(d.shipping_cost).toFixed(3)+' د.ك';total.textContent=Number(d.total).toFixed(3)+' د.ك';}catch(e){if(id===seq){result.textContent=e.message;amounts.textContent='لم يتم تطبيق الخصم. راجع الكود قبل إتمام الطلب.'}}}
+ document.getElementById('cartDiscountApply').onclick=quote;input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();quote()}};document.addEventListener('cart-rendered',quote);quote();
+})();

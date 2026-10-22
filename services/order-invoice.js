@@ -6,6 +6,7 @@ function invoiceVersion(order){
     'customer_city','customer_district','billing_mode','billing_address','created_at',
     'subtotal','shipping_cost','discount_amount','total'];
   const content=fields.map(key=>order[key]??null);
+  if(order.discount_label)content.push(['discount_label',order.discount_label]);
   content.push((order.items||[]).map(item=>[item.product_name,item.quantity,item.price??item.product_price,item.subtotal])
     .sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b))));
   return createHash('sha256').update(JSON.stringify(content)).digest('hex');

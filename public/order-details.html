@@ -1266,12 +1266,14 @@
                             <div class="summary-row-title">Shipping</div>
                             <div class="summary-row-sub" id="desktopShippingText">—</div>
                           </div>
+                          <div id="desktopDiscountLabel" hidden style="overflow-wrap:anywhere;max-width:240px"></div>
                           <div class="summary-strong">Total</div>
                         </div>
 
                         <div class="value-col">
                           <div id="desktopSubtotal">KWD 0.000</div>
                           <div id="desktopShippingCost">KWD 0.000</div>
+                          <div id="desktopDiscountAmount" hidden></div>
                           <div class="summary-strong" id="desktopTotal">KWD 0.000</div>
                         </div>
                       </div>
@@ -1498,6 +1500,7 @@
                 <div class="mobile-summary-left">
                   <div>Subtotal</div>
                   <div>Shipping</div>
+                  <div id="mobileDiscountLabel" hidden style="overflow-wrap:anywhere;max-width:180px"></div>
                   <div style="font-weight:800;">Total</div>
                   <div>Paid</div>
                   <div>Balance</div>
@@ -1506,6 +1509,7 @@
                 <div class="mobile-summary-right">
                   <div id="mobileSubtotal">KWD 0.000</div>
                   <div id="mobileShippingCost">KWD 0.000</div>
+                  <div id="mobileDiscountAmount" hidden></div>
                   <div id="mobileTotal" style="font-weight:800;">KWD 0.000</div>
                   <div id="mobilePaid">KWD 0.000</div>
                   <div id="mobileBalance">KWD 0.000</div>
@@ -1960,6 +1964,12 @@
     }
 
     function renderOrder(order) {
+      for(const prefix of ['desktop','mobile']){
+        const label=document.getElementById(prefix+'DiscountLabel'),amount=document.getElementById(prefix+'DiscountAmount');
+        label.hidden=amount.hidden=!(Number(order.discount_amount)>0);
+        label.textContent='Discount'+(order.discount_label||order.discount_code?' — '+(order.discount_label||order.discount_code):'');
+        amount.textContent='−'+H.formatCurrency(order.discount_amount||0);
+      }
       refreshInvoiceStatus();
       renderBillingAddress(order);
       const orderNumber = order.order_number || `#${order.id || ''}`;

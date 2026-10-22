@@ -335,7 +335,7 @@
             <span id="subtotal">0.000 د.ك</span>
           </div>
           <div class="summary-row" id="discountRow">
-            <span>الخصم</span>
+            <span id="discountLabel">الخصم</span>
             <span id="discount">0.000 د.ك</span>
           </div>
           <div class="summary-row">
@@ -532,6 +532,7 @@
       statusEl.textContent = getCustomerFacingStatus(status);
       document.getElementById('subtotal').textContent = OrderPresentation.money(order.subtotal || 0);
       document.getElementById('shipping').textContent = OrderPresentation.money(order.shipping_cost || 0);
+      const discountLabel=document.getElementById('discountLabel');if(discountLabel)discountLabel.textContent='الخصم'+(order.discount_label||order.discount_code?' — '+(order.discount_label||order.discount_code):'');
       document.getElementById('discount').textContent = OrderPresentation.money(discountValue);
       document.getElementById('total').textContent = OrderPresentation.money(order.total || 0);
       document.getElementById('discountRow').style.display = discountValue > 0 ? 'flex' : 'none';

@@ -550,7 +550,7 @@
         </div>
 
         <div class="totals-line" id="checkoutDiscountRow" hidden>
-          <span>الخصم</span>
+          <span id="discountLabel">الخصم</span>
           <span class="muted" id="discountValue">0.000 د.ك</span>
         </div>
 
@@ -728,6 +728,7 @@
         <input type="text" id="discountField" aria-label="كود الخصم" autocomplete="off" placeholder="كود الخصم">
         <button type="button" id="discountBtn">→</button>
       </div>
+      <p style="font-size:.85rem;line-height:1.7;margin-top:8px">خصم واحد لكل طلب؛ الكود يحل محل الخصم التلقائي. التحقق والحساب النهائيان عند إنشاء الطلب.</p>
 
       <div class="summary-item" style="margin-top:22px; margin-bottom:0;">
         <div class="summary-thumb" id="finalSummaryThumb">
@@ -761,6 +762,9 @@
 
   <script>
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    let serverQuote = null;
+    let discountLabel = '';
+    let quoteSequence = 0;
     let discountAmount = 0;
     let discountCode = '';
     let discountType = '';
@@ -797,6 +801,7 @@
     }
 
     function getSubtotal() {
+      if (serverQuote) return serverQuote.subtotal;
       return cart.reduce((sum, item) => {
         return sum + (safeNumber(item.price, 0) * safeNumber(item.quantity, 0));
       }, 0);
@@ -808,6 +813,7 @@
 
     function getShipping() {
       const subtotal = getSubtotal();
+      if (serverQuote) return serverQuote.shipping_cost;
       if (!hasGovernorate()) return null;
       return subtotal >= 20 ? 0 : 2;
     }
@@ -1000,6 +1006,7 @@
       summaryItems.querySelectorAll('img').forEach(img => img.addEventListener('error', () => img.remove(), { once: true }));
 
       document.getElementById('subtotalValue').textContent = formatKWD(subtotal);
+      document.getElementById('discountLabel').textContent = discountLabel ? 'الخصم — '+discountLabel : 'الخصم';
       document.getElementById('discountValue').textContent = formatKWD(discountAmount);
       document.getElementById('checkoutDiscountRow').style.display = discountAmount > 0 ? 'grid' : 'none';
       document.getElementById('checkoutDiscountRow').hidden = !(discountAmount > 0);
@@ -1071,53 +1078,18 @@
       }
     }
 
-    async function applyDiscountCode() {
+    // A code replaces automatic discounts; no stacking. Final order pricing is server authoritative.
+    async function applyDiscountCode(automatic = false) {
+      const seq=++quoteSequence;
       const code = safeText(document.getElementById('discountField').value).toUpperCase();
-      const subtotal = getSubtotal();
-
-      if (!code) {
-        resetDiscountState();
-        renderSummary();
-        queueAbandonedCheckoutSave(200);
-        return;
-      }
-
       try {
-        const response = await fetch('/api/store/discounts/validate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            code,
-            subtotal
-          })
-        });
-
-        const result = await response.json().catch(() => null);
-
-        if (!response.ok || !result?.success) {
-          resetDiscountState();
-          renderSummary();
-          queueAbandonedCheckoutSave(200);
-          throw new Error(result?.error || 'فشل في التحقق من كود الخصم');
-        }
-
-        const discountData = result.data || {};
-
-        discountCode = safeText(discountData.code, code);
-        discountType = safeText(discountData.type);
-        discountValue = safeNumber(discountData.value, 0);
-        discountAmount = safeNumber(discountData.discount_amount, 0);
-
-        renderSummary();
-        queueAbandonedCheckoutSave(200);
-        showSuccess(`تم تطبيق كود الخصم: ${discountCode}`);
-      } catch (error) {
-        console.error('Discount validate error:', error);
-        showError(error.message || 'كود الخصم غير صحيح');
-      }
+        const response=await fetch('/api/store/discounts/validate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,items:cart.map(i=>({productId:i.id??i.product_id,quantity:i.quantity}))})});
+        const result=await response.json();if(seq!==quoteSequence)return;
+        if(!response.ok||!result.success)throw Error(result.error||'تعذر التحقق من الخصم');
+        serverQuote=result.data;discountCode=code;discountType=serverQuote.type;discountValue=serverQuote.value;discountAmount=serverQuote.discount_amount;discountLabel=serverQuote.label||serverQuote.code;
+        localStorage.setItem('cart_discount_code',code);renderSummary();queueAbandonedCheckoutSave(200);
+        if(automatic!==true&&discountAmount>0)showSuccess('تم تطبيق الخصم: '+discountLabel);
+      }catch(e){if(seq!==quoteSequence)return;serverQuote=null;discountLabel='';resetDiscountState();renderSummary();if(automatic!==true||code)showError(e.message);}
     }
 
     function validateCheckout() {
@@ -1235,7 +1207,7 @@
         abandonedCheckoutToken: safeText(localStorage.getItem(ABANDONED_CHECKOUT_TOKEN_KEY)),
         shippingCost: getShipping() === null ? 0 : getShipping(),
         discountAmount: discountAmount,
-        discountCode: discountCode || safeText(document.getElementById('discountField').value).toUpperCase(),
+        discountCode: safeText(document.getElementById('discountField').value).toUpperCase(),
         subtotal: getSubtotal(),
         total: getGrandTotal(),
         items: cart.map(item => ({
@@ -1368,7 +1340,9 @@
       document.getElementById('completeOrderBtn').addEventListener('click', completeOrder);
 
       bindDynamicRecalc();
+      document.getElementById('discountField').value=localStorage.getItem('cart_discount_code')||'';
       renderSummary();
+      applyDiscountCode(true);
       getCheckoutToken();
     });
   </script>

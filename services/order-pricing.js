@@ -40,33 +40,12 @@ async function priceOrder(db, requestedItems, requestedCode) {
     items.push({ product_id: String(product.id), product_name: product.product_name,
       product_image: product.image_url || '', price: unit / 1000, quantity });
   }
-  const code = String(requestedCode ?? '').trim().toUpperCase();
-  let discount = null;
-  let discountFils = 0;
-  if (code) {
-    discount = await db.get('SELECT * FROM discount_codes WHERE UPPER(TRIM(code)) = ?', [code]);
-    if (!discount || !Number(discount.is_active)) invalid('كود الخصم غير صالح أو غير مفعل');
-    const now = Date.now();
-    for (const [field, fails] of [['starts_at', date => now < date], ['expires_at', date => now > date]]) {
-      if (discount[field]) {
-        const date = Date.parse(discount[field]);
-        if (!Number.isFinite(date) || fails(date)) invalid('كود الخصم خارج فترة الصلاحية');
-      }
-    }
-    if (discount.usage_limit != null && Number(discount.used_count || 0) >= Number(discount.usage_limit)) {
-      invalid('تم الوصول إلى الحد الأقصى لاستخدام كود الخصم');
-    }
-    if (subtotalFils < money(discount.minimum_order_amount || 0)) invalid('الطلب أقل من الحد الأدنى لكود الخصم');
-    const value = Number(discount.value);
-    if (!Number.isFinite(value) || value < 0 || !['percentage', 'fixed'].includes(discount.type)) invalid('إعدادات كود الخصم غير صالحة');
-    discountFils = Math.min(subtotalFils, discount.type === 'percentage'
-      ? Math.round(subtotalFils * value / 100) : money(value));
-  }
-  const subtotal = subtotalFils / 1000;
-  const shippingFils = money(HELPERS.calculateShipping(subtotal));
-  return { items, subtotal, discount_id: discount?.id ?? null, discount_code: discount ? code : '', discount_type: discount?.type || '',
-    discount_value: discount ? Number(discount.value) : 0, discount_amount: discountFils / 1000,
-    shipping_cost: shippingFils / 1000, total: (subtotalFils - discountFils + shippingFils) / 1000 };
+  const shippingFils = money(HELPERS.calculateShipping(subtotalFils / 1000));
+  const {discount,discountFils}=await require('./discounts').calculate(db,items,subtotalFils,shippingFils,requestedCode);
+  return {items,subtotal:subtotalFils/1000,discount_id:discount?.id??null,
+    discount_code:discount?require('./discounts').normalizeCode(discount.code):'',discount_type:discount?.type||'',discount_value:discount?Number(discount.value):0,
+    discount_amount:discountFils/1000,shipping_cost:shippingFils/1000,total:Math.max(0,subtotalFils+shippingFils-discountFils)/1000,
+    discount_snapshot:discount,discount_label:discount?(discount.title||discount.code):''};
 }
 
 module.exports = { priceOrder, OrderPricingError };

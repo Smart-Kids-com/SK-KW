@@ -1,0 +1,56 @@
+'use strict';
+const isolation=require('./security-support'),Module=require('node:module'),guarded=Module._load;let mails=0;
+Module._load=function(name,parent,isMain){if(name.endsWith('/utils/email'))return {sendOrderEmails:async()=>{mails++},sendInvoiceEmail:async()=>{}};if(name.endsWith('/services/meta-capi'))return {sendMetaPurchase:async()=>({skipped:true})};return guarded.call(this,name,parent,isMain)};
+const {test,before,after}=require('node:test'),assert=require('node:assert/strict'),{once}=require('node:events'),db=require('../db/turso-manager'),D=require('../services/discounts');
+let server,app,base,cookie,savedOrderId;
+async function req(path,body,method=body?'POST':'GET',admin=true){const r=await fetch(base+path,{method,headers:{Origin:base,'Content-Type':'application/json',...(admin?{Cookie:cookie}: {})},...(body?{body:JSON.stringify(body)}:{})});return {status:r.status,...await r.json()}}
+const preview=(code,items=[{productId:1,quantity:1}])=>req('/api/store/discounts/validate',{code,items,subtotal:999999},'POST',false);
+const order=(code,key)=>({customerName:'عميل تجربة',customerEmail:'discount@example.invalid',customerPhone:'99999999',customerAddress:'عنوان تجريبي',notes:'Payment: cash',items:[{productId:1,quantity:1}],discountCode:code,discountAmount:999999,total:-1,checkoutKey:key});
+async function discount(code,extra={}){const r=await req('/api/discounts',{code,type:'percentage',value:10,...extra});assert.equal(r.status,201,JSON.stringify(r));return r.data}
+before(async()=>{
+ await require('../scripts/security-demo-fixtures').seedSecurityDemo();await require('../db/collections-editor-migration').migrateCollectionsEditor(db);
+ const old=await db.all('SELECT * FROM discount_codes');await require('../db/discounts-editor-migration').migrateDiscounts(db);assert.deepEqual((await db.all('SELECT * FROM discount_codes')).map(d=>Object.fromEntries(Object.keys(old[0]).map(k=>[k,d[k]]))),old);assert.equal((await require('../db/discounts-editor-migration').migrateDiscounts(db)).addedColumns,0);
+ await db.run('UPDATE products SET price=10,on_hand=200,stock=200,committed=0 WHERE id=1');await db.run("INSERT INTO products(id,product_name,slug,sku,price,status,stock,on_hand) VALUES(2,'منتج ثان','discount-two','DIS-2',5,'active',100,100)");
+ const express=require('express'),wrapper=express();wrapper.get('/js/meta-pixel.js',(req,res)=>res.type('js').send('window.fbq=function(){};window.SmartKidsPixel={trackPurchase:function(){},trackInitiateCheckout:function(){}};'));server=wrapper.listen(0,'127.0.0.1');await once(server,'listening');base='http://127.0.0.1:'+server.address().port;process.env.PUBLIC_ORIGIN=base;process.env.STORE_SALES_PAUSED='0';app=require('../server');wrapper.use(app);
+ const jar=new Map();for(const [path,body]of [['/admin-login',{password:process.env.ADMIN_PASSWORD_1}],['/admin-otp',{otp:require('speakeasy').totp({secret:process.env.ADMIN_OTP_SECRET,encoding:'base32'})}]]){const r=await fetch(base+path,{method:'POST',redirect:'manual',headers:{Origin:base,'Content-Type':'application/x-www-form-urlencoded',Cookie:[...jar].map(([k,v])=>k+'='+v).join('; ')},body:new URLSearchParams(body)});for(const c of r.headers.getSetCookie()){const [k,v]=c.split(';')[0].split('=');v?jar.set(k,v):jar.delete(k)}}assert(jar.has('sk_admin_session'));cookie=[...jar].map(([k,v])=>k+'='+v).join('; ');
+});
+after(async()=>{server?.closeAllConnections();if(server)await new Promise(r=>server.close(r));app?.locals.adminAuth.close();(await db.ensureTursoClient()).close();assert.equal(isolation.blockedEffects.length,0)});
+test('canonical code, authoritative prices, invalid/scheduled/expired/draft, minimums and Kuwait dates',async()=>{
+ const d=await discount('  mixed  ',{title:'خصم التجربة'});assert.equal(d.code,'MIXED');let p=await preview(' mixed ');assert.equal(p.data.subtotal,10);assert.equal(p.data.discount_amount,1);assert.equal(p.data.total,11);assert.equal((await preview('wrong')).status,400);
+ for(const [code,extra]of [['FUTURE',{starts_at:'2099-01-01T12:00'}],['PAST',{expires_at:'2000-01-01T12:00'}],['DRAFT',{is_active:0}],['MINIMUM',{minimum_order_amount:11}],['QTY',{rules:{minimum_quantity:2}}]]){const r=await discount(code,extra);if(code==='FUTURE')assert.equal(r.starts_at,'2099-01-01T09:00:00.000Z');assert.equal((await preview(code)).status,400,code)}
+ assert.equal((await preview('QTY',[{productId:1,quantity:2}])).data.discount_amount,2);
+ assert.equal((await req('/api/discounts',{code:' mixed ',type:'fixed',value:1})).status,409);
+ assert.equal((await req('/api/discounts',{code:'BADDATE',type:'fixed',value:1,starts_at:'nope'})).status,400);
+});
+test('product/collection scopes, fixed cap, shipping and non-stacking automatic policy',async()=>{
+ await discount('ONLYTWO',{type:'fixed',value:99,rules:{scope:'products',ids:[2]}});assert.equal((await preview('ONLYTWO')).status,400);const p=await preview('ONLYTWO',[{productId:1,quantity:1},{productId:2,quantity:1}]);assert.equal(p.data.discount_amount,5);assert.equal(p.data.total,12);
+ await discount('COLLECTION',{rules:{scope:'collections',ids:[1]}});assert.equal((await preview('COLLECTION')).data.discount_amount,1);assert.equal((await preview('COLLECTION',[{productId:2,quantity:1}])).status,400);
+ await discount('SHIP',{type:'free_shipping',title:'توصيل مجاني'});assert.equal((await preview('SHIP')).data.discount_amount,2);assert.equal((await preview('SHIP')).data.total,10);
+ await discount('AUTO1',{method:'automatic',type:'fixed',value:2});const a=await discount('AUTO2',{method:'automatic',type:'fixed',value:3});assert.equal((await preview('')).data.code,a.code);assert.equal((await preview('mixed')).data.discount_amount,1);await req('/api/discounts/'+a.id+'/archive',{});assert.equal((await preview('')).data.discount_amount,2);
+ await db.run("UPDATE discount_codes SET is_active=0 WHERE method='automatic'");
+});
+test('lifecycle, full result pagination, filters and no unverified-customer bypass',async()=>{
+ const d=await discount('LIFE',{notes:'retain this'});const copy=await req('/api/discounts/'+d.id+'/duplicate',{});assert.equal(copy.data.status,'draft');assert.equal(copy.data.used_count,0);assert.equal(copy.data.notes,'retain this');
+ await req('/api/discounts/'+d.id+'/archive',{});assert.equal((await preview('LIFE')).status,400);await req('/api/discounts/'+d.id+'/restore',{});assert.equal((await preview('LIFE')).status,200);await req('/api/discounts/'+d.id+'/toggle',{});assert.equal((await preview('LIFE')).status,400);
+ for(let i=0;i<106;i++)await db.run("INSERT INTO discount_codes(code,type,value) VALUES(?,'fixed',1)",['PAGE-'+String(i).padStart(3,'0')]);let list=await req('/api/discounts?search=PAGE-&limit=25&offset=100&sort=code&order=ASC');assert.equal(list.pagination.total,106);assert.equal(list.data.length,6);assert.equal(list.data[0].code,'PAGE-100');assert((await req('/api/discounts?status=draft')).data.every(d=>d.status==='draft'));
+ assert.equal((await req('/api/discounts',{code:'IDENTITY',type:'fixed',value:1,rules:{per_customer_limit:1}})).status,400);
+ assert.equal((await req('/api/discounts',undefined,'GET',false)).status,401);
+});
+test('two simultaneous orders: one limited use; retries consume once, invalid totals ignored and mail snapshot consistent',async()=>{
+ const d=await discount('LAST',{type:'fixed',value:3,usage_limit:1,title:'خصم محدود'}),before=Number((await db.get('SELECT committed FROM products WHERE id=1')).committed);
+ const bodies=[order('last','discount_parallel_a_12345'),order('LAST','discount_parallel_b_12345')];const rs=await Promise.all(bodies.map(b=>req('/api/orders',b,'POST',false)));assert.deepEqual(rs.map(r=>r.status).sort(),[201,400]);const i=rs.findIndex(r=>r.status===201),saved=rs[i].data;savedOrderId=saved.id;assert.equal(saved.total,9);assert.equal(saved.discount_amount,3);assert.equal(saved.discount_label,'خصم محدود');
+ const replay=await req('/api/orders',bodies[i],'POST',false);assert.equal(replay.status,200);assert.equal(replay.data.id,saved.id);assert.equal(Number((await db.get('SELECT used_count FROM discount_codes WHERE id=?',[d.id])).used_count),1);assert.equal(Number((await db.get('SELECT committed FROM products WHERE id=1')).committed),before+1);assert.equal(mails,1);
+ const native=Module._load;Module._load=function(name,parent,main){if(name==='resend')return {Resend:class{}};return guarded.call(this,name,parent,main)};let email;try{const filename=require.resolve('../utils/email'),m=new Module(filename,module);m.filename=filename;m.paths=module.paths;m._compile(require('fs').readFileSync(filename,'utf8'),filename);email=m.exports}finally{Module._load=native}for(const html of [email.buildCustomerEmailHtml({order:saved}),email.buildAdminEmailHtml({order:saved}),email.buildInvoiceHtml(saved)]){assert(html.includes('خصم محدود'));assert(html.includes('3.000'));assert(html.includes('9.000'))}
+ assert.equal((await req('/api/discounts/'+d.id,undefined,'DELETE')).status,409);
+});
+
+test('pre-priced race and changed rules roll back usage; automatic ties and normalized legacy codes',async()=>{
+ const price=require('../services/order-pricing').priceOrder,save=require('../services/order-storage').savePricedOrder;
+ const d=await discount('RACE',{type:'fixed',value:1,usage_limit:1});const a=await price(db,[{productId:1,quantity:1}],'RACE'),b=await price(db,[{productId:1,quantity:1}],'RACE');
+ function record(p,n){return {order_number:n,customer_name:'Synthetic',customer_email:'safe@example.invalid',customer_phone:'99999999',customer_address:'Local only',subtotal:p.subtotal,shipping_cost:p.shipping_cost,discount_amount:p.discount_amount,discount_code:p.discount_code,discount_type:p.discount_type,discount_value:p.discount_value,total:p.total,status:'pending'}}
+ const result=await Promise.allSettled([save(db,record(a,'LOCAL-RACE-A'),a.items,a),save(db,record(b,'LOCAL-RACE-B'),b.items,b)]);assert.equal(result.filter(r=>r.status==='fulfilled').length,1);assert.equal(Number((await db.get('SELECT used_count FROM discount_codes WHERE id=?',[d.id])).used_count),1);
+ const stale=await discount('STALE',{type:'fixed',value:1});const p=await price(db,[{productId:1,quantity:1}],'STALE');await req('/api/discounts/'+stale.id,{rules:{minimum_quantity:2}},'PUT');await assert.rejects(save(db,record(p,'LOCAL-STALE'),p.items,p));assert.equal(Number((await db.get('SELECT used_count FROM discount_codes WHERE id=?',[stale.id])).used_count),0);assert(!await db.get("SELECT id FROM orders WHERE order_number='LOCAL-STALE'"));
+ const first=await discount('TIEA',{method:'automatic',type:'fixed',value:1});await discount('TIEB',{method:'automatic',type:'fixed',value:1});assert.equal((await preview('')).data.code,first.code);await db.run("UPDATE discount_codes SET is_active=0 WHERE method='automatic'");
+ await db.run("INSERT INTO discount_codes(code,type,value) VALUES(' legacy spaced ','fixed',1)");const lp=await price(db,[{productId:1,quantity:1}],' LEGACY SPACED ');await save(db,record(lp,'LOCAL-LEGACY'),lp.items,lp);assert.equal(Number((await db.get("SELECT used_count FROM discount_codes WHERE code=' legacy spaced '")).used_count),1);
+});
+test('browser: admin workflow, mobile, column persistence, customer RTL and XSS',async()=>{await require('../scripts/check-discounts-browser').checkDiscountsBrowser(base,{cookie,orderId:savedOrderId})});
