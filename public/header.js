@@ -1,5 +1,8 @@
 (function () {
-  const HEADER_URL = './header.html';
+  const HEADER_URL = '/header.html';
+  if(!document.querySelector('link[href="/css/storefront-components.css"]')){const sheet=document.createElement('link');sheet.rel='stylesheet';sheet.href='/css/storefront-components.css';document.head.append(sheet);}
+  if(!window.SKStorefront&&!document.querySelector('script[src="/js/storefront-components.js"]')){const component=document.createElement('script');component.src='/js/storefront-components.js';document.head.append(component);}
+
 
   function safeText(value, fallback = '') {
     const text = String(value ?? '').trim();
@@ -110,7 +113,7 @@
     clearTimeout(searchTimer);
     cancelSearchRequest();
     input.value = '';
-    status.textContent = 'ابدأ بكتابة كلمة للبحث عن المنتجات.';
+    status.textContent = '';
     results.replaceChildren();
     overlay.classList.add('is-open');
     overlay.setAttribute('aria-hidden', 'false');
@@ -162,16 +165,14 @@
             ? `<img class="site-search__image" src="${escapeHtml(image)}" alt="" loading="lazy">`
             : '<span class="site-search__image-placeholder" aria-hidden="true">🧸</span>'}
           <div class="site-search__item-content">
-            <div class="site-search__item-title">${escapeHtml(title)}</div>
+            <a class="site-search__item-title" href="${getProductUrl(product)}" dir="auto">${escapeHtml(title)}</a>
             <div class="site-search__price">
               ${hasSale ? `<span class="site-search__price-old">KWD ${regularPrice.toFixed(3)}</span>` : ''}
               KWD ${getProductPrice(product).toFixed(3)}
             </div>
             <div class="site-search__item-actions">
-              <button type="button" data-search-add="${index}" ${purchasable ? '' : 'disabled'}>
-                ${purchasable ? 'إضافة للسلة' : 'نفدت الكمية'}
-              </button>
-              <a href="${getProductUrl(product)}">فتح المنتج</a>
+              ${purchasable ? `<button type="button" data-search-add="${index}" aria-label="إضافة للسلة" title="إضافة للسلة"><img src="/brand/cart.svg" alt=""></button>` : '<span class="site-search__sold-out">نفدت الكمية</span>'}
+              <a href="${getProductUrl(product)}" aria-label="فتح المنتج" title="فتح المنتج"><span aria-hidden="true">↗</span></a>
             </div>
           </div>
         </article>
@@ -189,7 +190,7 @@
       cancelSearchRequest();
       searchProducts = [];
       results.replaceChildren();
-      status.textContent = 'ابدأ بكتابة كلمة للبحث عن المنتجات.';
+      status.textContent = '';
       return;
     }
 
@@ -273,6 +274,7 @@
 
     try {
       localStorage.setItem('cart', JSON.stringify(cart));
+      window.SKStorefront?.cartFeedback(product);
     } catch (error) {
       console.error('Unable to save cart to local storage:', error);
       document.getElementById('siteSearchStatus').textContent = 'تعذر حفظ سلة التسوق في هذا المتصفح.';

@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart Kids Store - متجر الأطفال المبتكرون</title>
-  <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457">
+
   <script src="/js/meta-pixel.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1494,8 +1494,8 @@
 
   </style>
   <link rel="stylesheet" href="./site-theme.css">
-  <script src="/js/catalog-pages.js"></script>
-</head>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="96x96" href="/brand/icon-96.png"><link rel="icon" type="image/png" sizes="192x192" href="/brand/icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="/brand/icon-180.png"><link rel="manifest" href="/site.webmanifest">
+<link rel="stylesheet" href="/css/storefront-components.css"></head>
 
 <body>
   <div id="site-header"></div>
@@ -1504,28 +1504,11 @@
   <img src="/icon-whatsapp.webp" alt="WhatsApp" class="whatsapp-icon-img">
 </a>
 
-  <div class="toast" id="cartToast">
-    <div class="toast-inner">
-      <div class="toast-thumb">
-        <img id="toastImage" src="" alt="Product">
-      </div>
-      <div class="toast-content">
-        <div class="toast-title">تمت الإضافة إلى عربة التسوق بنجاح</div>
-        <div class="toast-name" id="toastName"></div>
-        <div class="toast-actions">
-          <a class="toast-cart-link" href="./cart.html">عرض عربة التسوق</a>
-          <a class="toast-continue" href="#" id="toastContinue">متابعة التسوق</a>
-        </div>
-      </div>
-      <button class="toast-close" id="toastClose" type="button">×</button>
-    </div>
-  </div>
-
   <div class="container">
     <div class="nav">
       <a href="./products-full.html">المنتجات</a>
       <a href="./collections.html">المجموعات</a>
-      <a href="./cart.html">🛍️ السلة</a>
+
     </div>
 
     <div class="search-container">
@@ -1537,9 +1520,7 @@
       >
     </div>
 
-    <div class="products-stats" id="productsStats">
-      <div class="stats-info">إجمالي المنتجات: <strong>0</strong></div>
-    </div>
+
 
     <div class="filter-toggle-wrap">
       <button class="filter-toggle-btn" id="filterToggleBtn" type="button">
@@ -1548,7 +1529,7 @@
       </button>
     </div>
 
-    <div class="layout-grid">
+    <div class="layout-grid sk-catalog-layout">
       <aside class="sidebar" id="sidebarFilters">
         <h3>📚 الأقسام</h3>
         <div id="categoryFilters">
@@ -1562,479 +1543,13 @@
         </div>
 
         <div class="products-actions">
-          <button id="loadMoreBtn" class="load-more-btn" style="display:none;">تحميل المزيد</button>
+          <button id="loadMoreBtn" class="load-more-btn">تحميل المزيد</button>
         </div>
       </main>
     </div>
   </div>
 
-  <script>
-    const PRODUCTS_API = '/api/products?status=active&limit=300&offset=0&sort=created_at&order=DESC';
-
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    let toastTimer = null;
-
-    let allProducts = [];
-    let filteredProducts = [];
-    let currentCategory = 'الكل';
-    let visibleCount = 12;
-
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
-    function safeText(value, fallback = '') {
-      const text = String(value ?? '').trim();
-      return text || fallback;
-    }
-
-    function normalizeText(value) {
-      return safeText(value).toLowerCase();
-    }
-
-    function extractTitle(product) {
-      return safeText(product.product_name ?? product.name ?? product.title, 'منتج');
-    }
-
-    function extractDescription(product) {
-      return safeText(product.description ?? product.body_html, '');
-    }
-
-    function extractCategory(product) {
-      return safeText(product.category ?? product.product_type ?? product.type, 'غير مصنف');
-    }
-
-    function toNumber(value) {
-      if (value === null || value === undefined || value === '') return 0;
-      const number = Number(String(value).replace(/[^0-9.-]/g, ''));
-      return Number.isFinite(number) ? number : 0;
-    }
-
-    function getCurrentRawPrice(product) {
-      return toNumber(
-        product.price ??
-        product.current_price ??
-        product.final_price ??
-        product.amount ??
-        0
-      );
-    }
-
-    function getRegularPrice(product) {
-      const regular = toNumber(
-        product.regular_price ??
-        product.compare_at_price ??
-        product.price_before ??
-        product.original_price ??
-        product.list_price ??
-        0
-      );
-
-      if (regular > 0) return regular;
-
-      const current = getCurrentRawPrice(product);
-      const explicitSale = toNumber(
-        product.sale_price ??
-        product.price_after ??
-        product.discounted_price ??
-        product.discount_price ??
-        product.special_price ??
-        0
-      );
-
-      return current > 0 ? current : explicitSale;
-    }
-
-    function getSalePrice(product) {
-      const explicitSale = toNumber(
-        product.sale_price ??
-        product.price_after ??
-        product.discounted_price ??
-        product.discount_price ??
-        product.special_price ??
-        0
-      );
-
-      const regular = getRegularPrice(product);
-      const current = getCurrentRawPrice(product);
-
-      if (explicitSale > 0 && regular > explicitSale) return explicitSale;
-      if (current > 0 && regular > current) return current;
-      return 0;
-    }
-
-    function hasSale(product) {
-      const regular = getRegularPrice(product);
-      const sale = getSalePrice(product);
-      return sale > 0 && regular > sale;
-    }
-
-    function extractPrice(product) {
-      const regular = getRegularPrice(product);
-      const sale = getSalePrice(product);
-      const current = getCurrentRawPrice(product);
-
-      if (hasSale(product)) return sale;
-      if (current > 0) return current;
-      return regular;
-    }
-
-    function getDisplayDescription(product) {
-      return safeText(product.description ?? product.body_html ?? product.short_description ?? '');
-    }
-
-    function getAvailableStock(product) {
-      const value = toNumber(
-        product.stock_quantity ??
-        product.quantity ??
-        product.inventory_quantity ??
-        product.inventory ??
-        product.stock ??
-        product.available_quantity ??
-        product.available ??
-        0
-      );
-      return Math.max(0, value);
-    }
-
-    function isPurchasable(product) {
-      const status = safeText(product.status, 'active').toLowerCase();
-      const inventoryBlocked = Number(product.inventory_blocked ?? 0) === 1;
-      const stock = getAvailableStock(product);
-
-      return status === 'active' && !inventoryBlocked && stock > 0;
-    }
-
-    function getStockLabel(product) {
-      return isPurchasable(product) ? 'متوفر' : 'نفدت الكمية';
-    }
-
-    function getPriceMarkup(product) {
-      const finalPrice = extractPrice(product);
-      const regularPrice = getRegularPrice(product);
-      const sale = hasSale(product);
-
-      return `
-        <div class="product-price-wrap">
-          ${sale ? `<div class="product-offer-badge">عرض خاص</div>` : ''}
-          ${sale ? `<div class="product-price-old">KWD ${regularPrice.toFixed(3)}</div>` : ''}
-          <div class="product-price">KWD ${finalPrice.toFixed(3)}</div>
-        </div>
-      `;
-    }
-
-    function extractImage(product) {
-      const image =
-        product.primary_image ||
-        product.image_url ||
-        product.image ||
-        (Array.isArray(product.images) && product.images[0] && (product.images[0].image_url || product.images[0].src || product.images[0].url)) ||
-        '';
-
-      return safeText(image, `https://via.placeholder.com/400x400?text=${encodeURIComponent(extractTitle(product))}`);
-    }
-
-    function getProductUrl(product) {
-      const slug = safeText(product.slug);
-      const id = safeText(product.id);
-
-      if (slug) return `./product-page.html?slug=${encodeURIComponent(slug)}`;
-      return `./product-page.html?id=${encodeURIComponent(id)}`;
-    }
-
-    function saveCart() {
-      localStorage.setItem('cart', JSON.stringify(cart));
-    }
-
-    function updateCartDisplay() {
-      const totalQty = cart.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
-      const badges = [
-        document.getElementById('cartBadge'),
-        document.getElementById('menuCartBadge')
-      ];
-
-      badges.forEach((badge) => {
-        if (!badge) return;
-
-        if (totalQty > 0) {
-          badge.style.display = 'flex';
-          badge.textContent = totalQty;
-        } else {
-          badge.style.display = 'none';
-          badge.textContent = '0';
-        }
-      });
-    }
-
-    function showCartToast(product) {
-      const toast = document.getElementById('cartToast');
-      const toastImage = document.getElementById('toastImage');
-      const toastName = document.getElementById('toastName');
-
-      if (toastImage) {
-        toastImage.src = extractImage(product);
-      }
-
-      if (toastName) {
-        toastName.textContent = extractTitle(product);
-      }
-
-      toast.classList.add('show');
-
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3200);
-    }
-
-    function hideCartToast() {
-      const toast = document.getElementById('cartToast');
-      if (toast) toast.classList.remove('show');
-      clearTimeout(toastTimer);
-    }
-
-    function addToCart(product) {
-      if (!isPurchasable(product)) {
-        alert('هذا المنتج نفدت كميته وغير متاح للشراء حالياً');
-        return;
-      }
-
-      const itemId = product.id || product.slug || extractTitle(product);
-      const existing = cart.find(item => String(item.id) === String(itemId));
-      const nextQuantity = existing ? Number(existing.quantity || 0) + 1 : 1;
-      const availableStock = getAvailableStock(product);
-
-      if (nextQuantity > availableStock) {
-        alert(`الكمية المتاحة فقط هي ${availableStock}`);
-        return;
-      }
-
-      if (existing) {
-        existing.quantity = nextQuantity;
-      } else {
-        cart.push({
-          id: itemId,
-          name: extractTitle(product),
-          price: extractPrice(product),
-          quantity: 1,
-          image: extractImage(product)
-        });
-      }
-
-      saveCart();
-      updateCartDisplay();
-      showCartToast(product);
-    }
-
-    function openMenu() {
-      document.body.classList.add('menu-open');
-    }
-
-    function closeMenu() {
-      document.body.classList.remove('menu-open');
-    }
-
-    function focusMainSearch() {
-      closeMenu();
-      const input = document.getElementById('mainSearchInput');
-      if (!input) return;
-      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => input.focus(), 250);
-    }
-
-    function toggleMobileFilters() {
-      const sidebar = document.getElementById('sidebarFilters');
-      const icon = document.getElementById('filterToggleIcon');
-      if (!sidebar || !icon) return;
-
-      sidebar.classList.toggle('mobile-open');
-      icon.textContent = sidebar.classList.contains('mobile-open') ? '⌃' : '⌄';
-    }
-
-    function updateStats() {
-      const stats = document.getElementById('productsStats');
-      const strong = stats.querySelector('strong');
-      if (strong) {
-        strong.textContent = filteredProducts.length;
-      }
-    }
-
-    function buildCategoryFilters() {
-      const container = document.getElementById('categoryFilters');
-      const categories = [...new Set(allProducts.map(extractCategory).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ar'));
-
-      container.innerHTML = `
-        <button class="filter-btn ${currentCategory === 'الكل' ? 'active' : ''}" data-category="الكل">الكل</button>
-        ${categories.map(cat => `
-          <button class="filter-btn ${currentCategory === cat ? 'active' : ''}" data-category="${escapeHtml(cat)}">${escapeHtml(cat)}</button>
-        `).join('')}
-      `;
-
-      container.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          currentCategory = btn.dataset.category || 'الكل';
-          visibleCount = 12;
-          applyFilters();
-        });
-      });
-    }
-
-    function applyFilters() {
-      const query = normalizeText(document.getElementById('mainSearchInput').value);
-
-      filteredProducts = allProducts.filter(product => {
-        const matchesCategory = currentCategory === 'الكل' || extractCategory(product) === currentCategory;
-
-        if (!matchesCategory) return false;
-
-        if (!query) return true;
-
-        const haystack = normalizeText([
-          extractTitle(product),
-          extractDescription(product),
-          extractCategory(product),
-          product.vendor || '',
-          product.sku || '',
-          product.tags || ''
-        ].join(' '));
-
-        return haystack.includes(query);
-      });
-
-      buildCategoryFilters();
-      updateStats();
-      renderProducts();
-    }
-
-    function productCard(product) {
-      const title = extractTitle(product);
-      const description = getDisplayDescription(product);
-      const image = extractImage(product);
-      const url = getProductUrl(product);
-      const id = product.id || product.slug || title;
-      const purchasable = isPurchasable(product);
-
-      return `
-        <article class="product">
-          <div class="product-image">
-            <a href="${url}">
-              <img src="${image}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x400?text=${encodeURIComponent(title)}'">
-            </a>
-          </div>
-
-          <div class="product-info">
-            <a href="${url}">
-              <div class="product-title">${escapeHtml(title)}</div>
-            </a>
-
-            ${description ? `<div class="product-description">${escapeHtml(description)}</div>` : ''}
-            ${getPriceMarkup(product)}
-
-            <div class="product-actions">
-              <button class="add-to-cart${purchasable ? '' : ' is-disabled'}" type="button" data-product-id="${escapeHtml(String(id))}" ${purchasable ? '' : 'disabled'}>${purchasable ? 'إضافة إلى السلة' : 'نفدت الكمية'}</button>
-              <a class="view-product-btn" href="${url}">عرض المنتج</a>
-            </div>
-          </div>
-        </article>
-      `;
-    }
-
-    function renderProducts() {
-      const container = document.getElementById('products');
-      const loadMoreBtn = document.getElementById('loadMoreBtn');
-
-      if (!filteredProducts.length) {
-        container.innerHTML = `<div class="loading">لا توجد منتجات مطابقة</div>`;
-        loadMoreBtn.style.display = 'none';
-        return;
-      }
-
-      const visibleItems = filteredProducts.slice(0, visibleCount);
-      container.innerHTML = visibleItems.map(productCard).join('');
-
-      container.querySelectorAll('[data-product-id]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const id = btn.dataset.productId;
-          const product = allProducts.find(p => String(p.id || p.slug || extractTitle(p)) === String(id));
-          if (product) addToCart(product);
-        });
-      });
-
-      loadMoreBtn.style.display = visibleCount < filteredProducts.length ? 'inline-flex' : 'none';
-    }
-
-    async function loadProducts() {
-      try {
-        const result = await window.fetchCatalogPages(PRODUCTS_API, {
-          cache: 'no-store',
-          headers: { Accept: 'application/json' }
-        });
-
-
-        allProducts = Array.isArray(result.data) ? result.data : [];
-        filteredProducts = [...allProducts];
-
-        buildCategoryFilters();
-        updateStats();
-        renderProducts();
-      } catch (error) {
-        console.error('loadProducts error:', error);
-        document.getElementById('products').innerHTML = `
-          <div class="loading">⚠️ حدث خطأ أثناء تحميل المنتجات</div>
-        `;
-      }
-    }
-
-
-    document.addEventListener('DOMContentLoaded', () => {
-      updateCartDisplay();
-      loadProducts();
-
-      const filterToggleBtn = document.getElementById('filterToggleBtn');
-      const toastClose = document.getElementById('toastClose');
-      const toastContinue = document.getElementById('toastContinue');
-      const loadMoreBtn = document.getElementById('loadMoreBtn');
-      const mainSearchInput = document.getElementById('mainSearchInput');
-
-      if (filterToggleBtn) filterToggleBtn.addEventListener('click', toggleMobileFilters);
-
-      if (toastClose) {
-        toastClose.addEventListener('click', hideCartToast);
-      }
-
-      if (toastContinue) {
-        toastContinue.addEventListener('click', (e) => {
-          e.preventDefault();
-          hideCartToast();
-        });
-      }
-
-      if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', () => {
-          visibleCount += 12;
-          renderProducts();
-        });
-      }
-
-      if (mainSearchInput) {
-        mainSearchInput.addEventListener('input', () => {
-          visibleCount = 12;
-          applyFilters();
-        });
-      }
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          hideCartToast();
-        }
-      });
-    });
-  </script>
+  <script src="/js/storefront-components.js"></script><script src="/js/storefront-catalog.js"></script>
 
   <div id="site-footer"></div>
   <script src="./footer.js"></script>

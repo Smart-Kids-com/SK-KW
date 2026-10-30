@@ -313,8 +313,9 @@
       .orders-table{min-width:860px}
     }
   </style>
+<link rel="stylesheet" href="/css/admin-navigation.css"><script src="/js/admin-navigation.js" defer></script><link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="96x96" href="/brand/icon-96.png"><link rel="icon" type="image/png" sizes="192x192" href="/brand/icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="/brand/icon-180.png"><link rel="manifest" href="/site.webmanifest">
 </head>
-<body>
+<body data-admin-page="customers" data-admin-detail="true"><div class="admin-layout"><aside data-admin-navigation aria-label="Admin navigation"></aside><div class="admin-page-content">
   <div class="app">
     <header class="topbar">
       <div class="top-left">
@@ -328,15 +329,7 @@
       </div>
     </header>
 
-    <aside class="sidebar">
-      <div class="side-group">
-        <a class="nav-item" href="/admin-enhanced.html"><span>🏠 Home</span></a>
-        <a class="nav-item" href="/products-admin"><span>🏷️ Products</span></a>
-        <a class="nav-item nav-sub" href="/collections-admin"><span>Collections</span></a>
-        <a class="nav-item" href="/customers-admin"><span>👥 Customers</span></a>
-        <a class="nav-item active" href="#"><span>👤 Customer View</span></a>
-      </div>
-    </aside>
+
 
     <main class="main">
       <div class="page">
@@ -898,5 +891,5 @@
 
     document.addEventListener('DOMContentLoaded', loadCustomer);
   </script>
-</body>
+</div></div></body>
 </html>

@@ -1139,8 +1139,9 @@
 
   </style>
   <script src="/js/catalog-pages.js"></script>
+<link rel="stylesheet" href="/css/admin-navigation.css"><script src="/js/admin-navigation.js" defer></script><link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="96x96" href="/brand/icon-96.png"><link rel="icon" type="image/png" sizes="192x192" href="/brand/icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="/brand/icon-180.png"><link rel="manifest" href="/site.webmanifest">
 </head>
-<body>
+<body data-admin-page="orders" data-admin-detail="true"><div class="admin-layout"><aside data-admin-navigation aria-label="Admin navigation"></aside><div class="admin-page-content">
   <div class="app">
     <div class="desktop-shell">
       <header class="desktop-topbar">
@@ -1168,29 +1169,7 @@
       </header>
 
       <div class="desktop-body">
-        <aside class="desktop-sidebar">
-          <div class="side-group">
-            <a class="side-link" href="/admin-enhanced.html">
-              <div class="side-link-left"><span>⌂</span><span>Home</span></div>
-            </a>
 
-            <a class="side-link active" href="/orders-admin.html">
-              <div class="side-link-left"><span>🧾</span><span>Orders</span></div>
-              <small id="desktopOrdersCountBadge">0</small>
-            </a>
-
-            <a class="side-link" href="/products-admin">
-              <div class="side-link-left"><span>🏷️</span><span>Products</span></div>
-            </a>
-
-            <div class="side-link"><div class="side-link-left"><span>👤</span><span>Customers</span></div></div>
-            <div class="side-link"><div class="side-link-left"><span>📣</span><span>Marketing</span></div></div>
-            <div class="side-link"><div class="side-link-left"><span>⚙️</span><span>Discounts</span></div></div>
-            <div class="side-link"><div class="side-link-left"><span>🖼️</span><span>Content</span></div></div>
-            <div class="side-link"><div class="side-link-left"><span>🌍</span><span>Markets</span></div></div>
-            <div class="side-link"><div class="side-link-left"><span>📊</span><span>Analytics</span></div></div>
-          </div>
-        </aside>
 
         <main class="desktop-main">
           <div class="desktop-content-wrap">
@@ -3046,5 +3025,5 @@ async function cancelCurrentOrder() {
         .replace(/'/g, '&#039;');
     }
   </script>
-</body>
+</div></div></body>
 </html>

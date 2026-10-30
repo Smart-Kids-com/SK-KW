@@ -65,6 +65,16 @@ function parseTags(tags) {
     .filter(Boolean);
 }
 
+function validateImageURL(value) {
+  if (!value) return value;
+  let valid=typeof value==='string'&&value.length<=2048&&!/[\x00-\x20<>\"'\\]/.test(value);
+  if(valid&&/^(?:\.\/)?[a-zA-Z0-9_/-]+\.(?:png|jpe?g|webp|gif|svg)(?:[?#][^<>]*)?$/i.test(value))return '/'+value.replace(/^\.\//,'');
+  if(valid&&!value.startsWith('/')){try{const url=new URL(value);valid=['https:','http:'].includes(url.protocol)&&!url.username&&!url.password;}catch{valid=false;}}
+  else if(valid)valid=!value.startsWith('//')&&!value.includes('..');
+  if(!valid){const error=new Error('Use a valid image URL or upload PNG, JPEG or WebP up to 2 MiB.');error.status=400;throw error;}
+  return value;
+}
+
 function normalizeImages(images, fallbackImageUrl = '') {
   let result = [];
 
@@ -100,6 +110,7 @@ function normalizeImages(images, fallbackImageUrl = '') {
     }];
   }
 
+  for(const image of result)image.image_url=validateImageURL(image.image_url);
   return result;
 }
 
@@ -225,21 +236,21 @@ async function enrichProductsMaybe(products = [], includeImages = false) {
 
 function normalizeIncomingProductBody(body = {}) {
   return {
-    productName: body.productName ?? body.product_name ?? body.name ?? body.title ?? '',
-    slug: body.slug ?? body.handle ?? '',
-    sku: body.sku ?? body.sku_code ?? '',
-    description: body.description ?? body.body_html ?? '',
-    price: body.price ?? body.regular_price ?? 0,
-    salePrice: body.salePrice ?? body.sale_price ?? body.compare_at_price ?? 0,
-    imageUrl: body.imageUrl ?? body.image_url ?? body.image ?? '',
-    stock: body.stock ?? body.inventory ?? body.inventory_quantity ?? 0,
-    status: body.status ?? body.published ?? 'active',
-    productType: body.productType ?? body.product_type ?? body.type ?? '',
-    vendor: body.vendor ?? '',
-    category: body.category ?? body.collection ?? '',
-    tags: body.tags ?? '',
-    seoTitle: body.seoTitle ?? body.seo_title ?? '',
-    seoDescription: body.seoDescription ?? body.seo_description ?? '',
+    productName: body.productName ?? body.product_name ?? body.name ?? body.title,
+    slug: body.slug ?? body.handle,
+    sku: body.sku ?? body.sku_code,
+    description: body.description ?? body.body_html,
+    price: body.price ?? body.regular_price,
+    salePrice: body.salePrice ?? body.sale_price ?? body.compare_at_price,
+    imageUrl: body.imageUrl ?? body.image_url ?? body.image,
+    stock: body.stock ?? body.inventory ?? body.inventory_quantity,
+    status: body.status ?? body.published,
+    productType: body.productType ?? body.product_type ?? body.type,
+    vendor: body.vendor,
+    category: body.category ?? body.collection,
+    tags: body.tags,
+    seoTitle: body.seoTitle ?? body.seo_title,
+    seoDescription: body.seoDescription ?? body.seo_description,
     images: body.images
   };
 }
@@ -812,6 +823,8 @@ router.get('/', async (req, res) => {
       where.push(`status = ?`);
       baseParams.push(normalizedStatus);
     }
+
+    if (req.query.category) { where.push('category = ?'); baseParams.push(String(req.query.category).trim().slice(0,1000)); }
 
     if (search) {
       const s = String(search).trim();

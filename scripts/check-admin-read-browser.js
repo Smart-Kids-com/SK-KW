@@ -15,7 +15,7 @@ async function checkAdminReadBrowser(base, options={}) {
   const browser = spawn(executable, ['--headless=new', '--disable-gpu', '--no-first-run',
     '--disable-background-networking', '--disable-component-update', '--disable-sync',
     '--disable-default-apps', '--no-default-browser-check', '--metrics-recording-only',
-    '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1',
+    `--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1, EXCLUDE ${new URL(base).hostname}`,
     '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], {
     windowsHide: true, stdio: ['ignore','ignore','pipe'],
     env: Object.fromEntries(Object.entries(process.env).filter(([key]) => /^(PATH|SYSTEMROOT|WINDIR|TEMP|TMP|COMSPEC|PATHEXT|USERPROFILE|APPDATA|LOCALAPPDATA)$/i.test(key)))
@@ -60,7 +60,8 @@ async function checkAdminReadBrowser(base, options={}) {
     };
 ﻿    async function wait(expression){for(let i=0;i<100;i++){try{if(await evaluate(expression))return;}catch{}await sleep(80);}throw Error('Browser condition timed out: '+expression);}
 
-    for(const entry of options.cookie.split('; ')){const [name,...value]=entry.split('=');await cdp('Network.setCookie',{name,value:value.join('='),url:base,path:'/'})}
+    for(const entry of (options.cookie||'').split('; ').filter(Boolean)){const [name,...value]=entry.split('=');await cdp('Network.setCookie',{name,value:value.join('='),url:base,path:'/'})}
+    if (options.run) return await options.run({base,cdp,evaluate,wait,sleep});
     const report=[];
     const cases=[['Dashboard','/admin-enhanced','home',`document.getElementById('ordersValue')?.textContent===String(${options.counts.periodOrders})&&!state.summaryLoadFailed&&!state.loading`],['Products','/products-admin','products',`document.querySelectorAll('#rows tr[data-id]').length===25`],['Orders','/orders-admin.html','orders',`window.__SKOrdersList?.total===${options.counts.orders}&&document.querySelectorAll('#metrics .metric').length===6`],['Collections','/collections-admin','collections',`document.querySelectorAll('#rows input[type=checkbox]').length>0&&!document.getElementById('feedback').classList.contains('error')`],['Inventory','/inventory-admin.html','inventory',`document.querySelectorAll('#inventoryTableBody .row-select').length===${Math.min(30,options.counts.products)}`],['Customers','/customers-admin','customers',`document.querySelectorAll('#customersTableBody tr').length===${options.counts.customers}&&!document.getElementById('customersTableBody').textContent.includes('Loading')`],['Theme','/theme-admin','theme',`document.querySelectorAll('#draft-themes .theme-card').length>0&&document.querySelector('#published-theme .theme-card')`],['Theme editor','/theme-editor.html?theme=current','theme',`document.querySelectorAll('#tree .tree-row').length>0&&document.getElementById('save-state').textContent!=='Loading…'`],['Discounts','/discounts-admin','discounts',`document.querySelectorAll('#rows button[data-action=edit]').length>0&&document.getElementById('range').textContent.includes('of')`]];
     for(const width of [1280,390]){

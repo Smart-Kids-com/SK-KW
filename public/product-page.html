@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title id="pageTitle">تفاصيل المنتج - Smart Kids Kuwait</title>
   <meta name="description" id="pageDescription" content="تفاصيل المنتج في Smart Kids Kuwait" />
-  <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457" />
+
   <script src="/js/meta-pixel.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1431,6 +1431,7 @@
 
   </style>
   <link rel="stylesheet" href="./site-theme.css">
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="96x96" href="/brand/icon-96.png"><link rel="icon" type="image/png" sizes="192x192" href="/brand/icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="/brand/icon-180.png"><link rel="manifest" href="/site.webmanifest">
 </head>
 
 <body>
@@ -1836,8 +1837,8 @@
         <div class="${prefix}-price-wrap">
           ${hasSale ? `<div class="${prefix}-offer-badge">عرض خاص</div>` : ""}
           <div class="${prefix}-price-row">
-            <span class="${prefix}-price-current">KWD ${finalPrice.toFixed(3)}</span>
-            ${hasSale ? `<span class="${prefix}-price-old">KWD ${regular.toFixed(3)}</span>` : ""}
+            <span class="${prefix}-price-current">${finalPrice.toFixed(3)} د.ك</span>
+            ${hasSale ? `<span class="${prefix}-price-old">${regular.toFixed(3)} د.ك</span>` : ""}
           </div>
         </div>
       `;
@@ -1916,7 +1917,7 @@
       const unique = [...new Set(out.filter(Boolean))];
 
       if (!unique.length) {
-        unique.push(`https://via.placeholder.com/1000x1000?text=${encodeURIComponent(getProductTitle(product))}`);
+        unique.push('/brand/no-product-image.svg');
       }
 
       return unique;
@@ -2076,7 +2077,7 @@
 
     function renderGallery(images, name) {
       galleryImages = Array.isArray(images) && images.length ? images : [
-        `https://via.placeholder.com/1000x1000?text=${encodeURIComponent(name || "Product")}`
+        '/brand/no-product-image.svg'
       ];
       activeImageIndex = 0;
 
@@ -2093,6 +2094,7 @@
     }
 
     function showCartToast(product) {
+      if(window.SKStorefront){SKStorefront.cartFeedback(product);return;}
       const toast = document.getElementById("cartToast");
       const toastImage = document.getElementById("toastImage");
       const toastName = document.getElementById("toastName");

@@ -4,7 +4,7 @@
 (() => {
   const menu = `
 <nav class="sk-nav-stack" aria-label="Sidebar navigation">
-          <a class="sk-nav-item" style="--nav-hit-top:22.381477%;--nav-hit-bottom:27.012128%" href="/admin-enhanced"><img src="/admin-assets/smartify.png" alt="Smartify"></a>
+          <a class="sk-nav-item" style="--nav-hit-top:22.381477%;--nav-hit-bottom:27.012128%" href="/admin-enhanced"><img class="sk-brand-horizontal" src="/sk-main-logo.webp" alt="Smart Kids Kuwait"></a>
           <a class="sk-nav-item" style="--nav-overlap:27.12572%;--nav-hit-top:30.319735%;--nav-hit-bottom:20.286659%" href="/admin-enhanced"><img src="/admin-assets/home.png" alt="Home"></a>
           <a class="sk-nav-item" style="--nav-overlap:25.14345%;--nav-hit-top:32.855568%;--nav-hit-bottom:17.971334%" href="/orders-admin.html"><img src="/admin-assets/orders.png" alt="Orders"><span class="sk-nav-badge" id="ordersCountBadge">—</span></a>
           <a class="sk-nav-item" style="--nav-overlap:23.05685%;--nav-hit-top:30.760750%;--nav-hit-bottom:25.468578%" href="/products-admin"><img src="/admin-assets/products.png" alt="Products"></a>
@@ -40,14 +40,20 @@
   details.id = 'admin-navigation-panel';
   toggle.setAttribute('aria-controls', details.id);
   host.prepend(toggle);
+  const mark=document.createElement('img');mark.src='/sk-main-logo.webp';mark.alt='Smart Kids Kuwait';mark.className='sk-nav-brand-mark';host.prepend(mark);
   let collapsed = false;
+  try { collapsed = localStorage.getItem('sk-admin-navigation-collapsed') === '1'; } catch {}
   const updateCollapse = () => {
     layout?.classList.toggle('nav-collapsed', desktop.matches && collapsed);
     toggle.textContent = collapsed ? '☰' : '‹ Collapse menu';
     toggle.setAttribute('aria-label', collapsed ? 'Open admin navigation' : 'Collapse admin navigation');
     toggle.setAttribute('aria-expanded', String(!collapsed));
   };
-  toggle.onclick = () => { collapsed = !collapsed; updateCollapse(); };
+  toggle.onclick = () => {
+    collapsed = !collapsed;
+    try { localStorage.setItem('sk-admin-navigation-collapsed', collapsed ? '1' : '0'); } catch {}
+    updateCollapse();
+  };
   const logout = host.querySelector('.sk-nav-stack > form');
   const placeLogout = () => {
     const target = desktop.matches || details.open
@@ -61,4 +67,7 @@
   document.addEventListener('click', e => { if (!desktop.matches && details.open && !host.contains(e.target)) details.open = false; });
   applyViewport();
   desktop.addEventListener('change', applyViewport);
+  const search = document.createElement('script');
+  search.src = '/js/admin-search.js';
+  document.head.append(search);
 })();

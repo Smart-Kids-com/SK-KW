@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smart Kids Kuwait Store</title>
   <meta name="description" content="متجر الأطفال المبتكرون الكويت - Smart Kids Kuwait Store" />
-  <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0697/3318/7805/files/Confirmed_google_small_icone_logo_of_sk_smart-kids.png?v=1756770457" />
+
   <script src="/js/meta-pixel.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -889,6 +889,7 @@
       }
     }
   </style>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" type="image/png" sizes="96x96" href="/brand/icon-96.png"><link rel="icon" type="image/png" sizes="192x192" href="/brand/icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="/brand/icon-180.png"><link rel="manifest" href="/site.webmanifest">
 </head>
 <body>
   <div id="site-header"></div>
@@ -1000,7 +1001,7 @@
         if (product.images[0] && product.images[0].src) return product.images[0].src;
         if (product.images[0] && product.images[0].image_url) return product.images[0].image_url;
       }
-      return `https://via.placeholder.com/800x800?text=${encodeURIComponent(getTitle(product))}`;
+      return '/brand/no-product-image.svg';
     }
 
     function getCollectionImage(collection) {
@@ -1010,7 +1011,7 @@
         collection.cover_image ||
         collection.banner_image ||
         collection.primary_image ||
-        `https://via.placeholder.com/800x800?text=${encodeURIComponent(safeText(collection.title, 'Collection'))}`
+        '/brand/no-product-image.svg'
       );
     }
 

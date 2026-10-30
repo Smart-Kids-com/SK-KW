@@ -4,7 +4,7 @@
 
   <header class="sk-header">
     <button class="sk-header-icon-btn sk-menu-toggle" id="menuBtn" type="button" aria-label="فتح القائمة">
-      <img src="/sk-toggle-icon.webp" alt="">
+      <img src="/brand/menu.svg" alt="">
     </button>
 
     <a href="./index.html" class="sk-header-logo" aria-label="الصفحة الرئيسية">
@@ -13,11 +13,11 @@
 
     <div class="sk-header-actions">
       <button class="sk-header-icon-btn" id="headerSearchBtn" type="button" aria-label="بحث">
-        <img src="/sk-search-icon.webp" alt="">
+        <img src="/brand/search.svg" alt="">
       </button>
 
       <a class="sk-header-icon-btn sk-cart-link" href="./cart.html" aria-label="السلة">
-        <img src="/sk-cart-icon.webp" alt="">
+        <img src="/brand/cart.svg" alt="">
         <span class="cart-badge" id="cartBadge">0</span>
       </a>
     </div>
@@ -35,11 +35,11 @@
 
       <div class="side-menu__icons">
         <button class="sk-header-icon-btn" id="menuSearchBtn" type="button" aria-label="بحث">
-          <img src="/sk-search-icon.webp" alt="">
+          <img src="/brand/search.svg" alt="">
         </button>
 
         <a class="sk-header-icon-btn sk-cart-link" href="./cart.html" aria-label="السلة">
-          <img src="/sk-cart-icon.webp" alt="">
+          <img src="/brand/cart.svg" alt="">
           <span class="cart-badge" id="menuCartBadge">0</span>
         </a>
       </div>
@@ -95,12 +95,11 @@
   <div class="site-search" id="siteSearch" aria-hidden="true">
     <section class="site-search__dialog" role="dialog" aria-modal="true" aria-labelledby="siteSearchTitle">
       <div class="site-search__head">
-        <h2 id="siteSearchTitle">ابحث في المنتجات</h2>
+        <h2 id="siteSearchTitle">ابحث عن منتج</h2>
         <button class="site-search__close" id="siteSearchClose" type="button" aria-label="إغلاق البحث">×</button>
       </div>
-      <label class="site-search__label" for="siteSearchInput">اسم المنتج أو وصفه أو رقمه</label>
-      <input id="siteSearchInput" class="site-search__input" type="search" autocomplete="off" placeholder="اكتب للبحث..." aria-controls="siteSearchResults">
-      <div class="site-search__status" id="siteSearchStatus" role="status" aria-live="polite">ابدأ بكتابة كلمة للبحث عن المنتجات.</div>
+      <input id="siteSearchInput" class="site-search__input" type="search" autocomplete="off" placeholder="ابحث عن منتج" aria-label="ابحث عن منتج" aria-controls="siteSearchResults">
+      <div class="site-search__status" id="siteSearchStatus" role="status" aria-live="polite"></div>
       <div class="site-search__results" id="siteSearchResults"></div>
     </section>
   </div>

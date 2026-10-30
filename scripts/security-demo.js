@@ -37,9 +37,10 @@ if (!process.argv.includes('--isolated-child')) {
   console.log = (...args) => log(...args.map(value => typeof value === 'string'
     ? value.replace('اتصال بـ Turso (إنتاج)', 'اتصال بقاعدة المتجر التجريبية المحلية') : value));
   process.env.ADMIN_PASSWORD_1 = 'Local-SK-Demo!2026'; // Disposable demo credential only.
+  const integratedDemo = process.argv.includes('--integrated');
   const themeDemo = process.argv.includes('--theme');
-  const productsDemo = process.argv.includes('--products');
-  const discountsDemo = process.argv.includes('--discounts');
+  const productsDemo = process.argv.includes('--products') || integratedDemo;
+  const discountsDemo = process.argv.includes('--discounts') || integratedDemo;
   if(discountsDemo){
     // Synthetic review only: no actual mail, Pixel or CAPI dispatch.
     const Module=require('node:module'),guardedLoad=Module._load;
@@ -53,11 +54,26 @@ if (!process.argv.includes('--isolated-child')) {
   const ordersDemo = process.argv.includes('--orders');
   const collectionsEditorDemo = process.argv.includes('--collections-editor');
   if (themeDemo || productsDemo || ordersDemo || collectionsEditorDemo) process.env.STORE_SALES_PAUSED = '1';
-  const destination = discountsDemo ? '/discounts-admin' : collectionsEditorDemo ? '/collections-admin' : ordersDemo ? '/orders-admin.html' : productsDemo ? '/products-admin' : themeDemo ? '/theme-admin' : '/orders-admin.html';
+  if(integratedDemo) process.env.STORE_SALES_PAUSED='0';
+  const destination = integratedDemo ? '/products-admin' : discountsDemo ? '/discounts-admin' : collectionsEditorDemo ? '/collections-admin' : ordersDemo ? '/orders-admin.html' : productsDemo ? '/products-admin' : themeDemo ? '/theme-admin' : '/orders-admin.html';
   const portIndex = process.argv.indexOf('--port');
   const port = portIndex < 0 ? 4310 : Number(process.argv[portIndex + 1]);
   if (!Number.isInteger(port) || port < 1024 || port > 65534) throw new Error('Invalid demo port');
-  process.env.PUBLIC_ORIGIN = `http://127.0.0.1:${port}`;
+  const lanIndex = process.argv.indexOf('--lan-address');
+  const lanAddress = lanIndex < 0 ? '' : process.argv[lanIndex + 1];
+  const privateIPv4 = value => /^(10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)$/.test(value) && value.split('.').every(n => Number(n) <= 255);
+  if (lanIndex >= 0 && !privateIPv4(lanAddress)) throw new Error('LAN demo requires a private IPv4 address');
+  const reviewHost = lanAddress || '127.0.0.1';
+  const listenHost = lanAddress ? '0.0.0.0' : '127.0.0.1';
+  process.env.PUBLIC_ORIGIN = `http://${reviewHost}:${port}`;
+  // Defense in depth: never expose this disposable login helper to public peers.
+  function privatePeerOnly(req, res, next) {
+    const peer = String(req.socket.remoteAddress || '').replace(/^::ffff:/, '');
+    const host = String(req.headers.host || '').split(':')[0];
+    if (!(peer === '127.0.0.1' || peer === '::1' || privateIPv4(peer)) ||
+        ![reviewHost, '127.0.0.1', 'localhost'].includes(host)) return res.sendStatus(403);
+    next();
+  }
 
   async function start() {
     const resumed = process.argv.includes('--resume-directory');
@@ -70,15 +86,25 @@ if (!process.argv.includes('--isolated-child')) {
     }
     if (productsDemo && !resumed) await require('./products-demo-fixtures').seedProducts(db);
     if (discountsDemo && !resumed) await require('./discounts-demo-fixtures').seedDiscounts(db);
-    if (productsDemo && !resumed && process.argv.includes('--collections')) await require('./products-demo-fixtures').seedCollections(db);
+    if (productsDemo && !resumed && (process.argv.includes('--collections')||integratedDemo)) await require('./products-demo-fixtures').seedCollections(db);
     if (collectionsEditorDemo && !resumed) await require('./collections-editor-demo-fixtures').seedCollectionsEditor(db);
     if (themeDemo && !resumed) {
       await db.run("INSERT INTO products(id,product_name,slug,sku,price,image_url,status,stock,on_hand,committed) VALUES(2,'منتج معاينة إضافي','demo-second','THEME-DEMO-2',8,'/sk-main-logo.webp','active',3,3,0)");
       await db.run('INSERT INTO collection_products(collection_id,product_id,sort_order) VALUES(1,2,1)');
     }
+    if(integratedDemo&&!resumed){
+      await require('../db/orders-admin-migration').migrateOrdersAdmin(db);
+      await db.run('UPDATE orders SET customer_name=? WHERE id=2',['Local review customer']);
+      await db.run('UPDATE collections SET status=?,online_store=1 WHERE id=1',['active']);
+      await db.run('INSERT OR IGNORE INTO collection_products(collection_id,product_id,sort_order) SELECT 1,id,id FROM products WHERE id>1');
+      await db.run('UPDATE products SET sale_price=price/2 WHERE id IN (3,6,9)');
+      const state=await require('../services/theme-editor').state(db);
+      await require('../services/theme-editor').save(db,{...state.draft,global:{...state.draft.global,collectionHeader:{showHeader:false,showTitle:false,showDescription:false,showImage:false},storefrontCategories:[]}},state.revision,'draft');
+    }
     const express = require('express');
     const app = require('../server');
     const wrapper = express();
+    wrapper.use(privatePeerOnly);
     // Stops browser-side Pixel and all automatic external assets/network too.
     wrapper.use((req, res, next) => {
       res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-src 'self'; object-src 'none'");
@@ -86,13 +112,26 @@ if (!process.argv.includes('--isolated-child')) {
       next();
     });
     wrapper.get('/js/meta-pixel.js', (req, res) => res.type('js').send('window.fbq = function () {};'));
+    if (integratedDemo) {
+      // Review screenshots only; never expose session files, databases or logs.
+      const reviewDirectory=path.join(__dirname,'../storefront-review-evidence.local');
+      wrapper.get('/review-screens', (req,res)=>{
+        const files=fs.readdirSync(reviewDirectory).filter(name=>/^final-[a-z0-9-]+\.png$/.test(name));
+        res.type('html').send('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Local review screenshots</title><style>body{font:16px Arial;background:#f4f1f6;padding:20px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}img{width:100%;height:420px;object-fit:contain;background:white}a{color:#4a064f}</style><h1>Local review screenshots</h1><main>'+files.map(name=>'<a href="/review-screens/'+name+'">'+name+'<img loading="lazy" src="/review-screens/'+name+'" alt="'+name+'"></a>').join('')+'</main>');
+      });
+      wrapper.get('/review-screens/:image', (req,res)=>{
+        if(!/^final-[a-z0-9-]+\.png$/.test(req.params.image))return res.sendStatus(404);
+        res.sendFile(path.join(reviewDirectory,req.params.image));
+      });
+    }
     if(discountsDemo)wrapper.get('/discounts-demo-cart',(req,res)=>res.type('html').send(`<script>localStorage.setItem('cart',JSON.stringify([{id:1,name:'كتاب تجريبي',price:10,quantity:1,image:'/sk-main-logo.webp'}]));localStorage.removeItem('cart_discount_code');location.href='/cart.html';</script>`));
     wrapper.use(app);
-    const server = wrapper.listen(port, '127.0.0.1');
+    const server = wrapper.listen(port, listenHost);
     await new Promise((resolve, reject) => { server.once('listening', resolve); server.once('error', reject); });
 
     // Separate localhost helper, absent from the actual application's routes.
     const helper = express();
+    helper.use(privatePeerOnly);
     helper.use((req, res, next) => {
       res.setHeader('Cache-Control', 'no-store');
       res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; form-action 'none'; frame-ancestors 'none'");
@@ -106,13 +145,13 @@ if (!process.argv.includes('--isolated-child')) {
       <style>body{font-family:Tahoma,Arial;max-width:600px;margin:50px auto;padding:20px;background:#f5f1fb;color:#2d2340}code{display:block;background:white;padding:16px;margin:12px 0;direction:ltr;text-align:center;font-size:24px;border-radius:12px}a{color:#6a4c93}</style>
       <h1>نسخة تجريبية معزولة</h1><p>هذه بيانات وهمية للنسخة المحلية فقط. كلمة المرور وOTP مطلوبان في التطبيق.</p>
       <p>كلمة المرور التجريبية:</p><code>Local-SK-Demo!2026</code><p>رمز OTP الحالي:</p><code id="otp">جارٍ تحميل الرمز</code><p id="remaining"></p>
-      <p><a href="http://127.0.0.1:${port}/admin?next=${destination}" target="_blank" rel="noopener">افتح دخول الإدارة</a></p>
+      <p><a href="http://${reviewHost}:${port}/admin?next=${destination}" target="_blank" rel="noopener">افتح دخول الإدارة</a></p>
       <p>إذا استُخدم الرمز قبل قليل، انتظر الرمز التالي. البيانات تُحذف عند إيقاف النسخة.</p>
       <script>async function refresh(){const r=await fetch('/otp');const d=await r.json();document.getElementById('otp').textContent=d.otp;document.getElementById('remaining').textContent='يتغير الرمز خلال '+d.remainingSeconds+' ثانية';}refresh();setInterval(refresh,1000);</script></html>`));
-    const helperServer = helper.listen(port + 1, '127.0.0.1');
+    const helperServer = helper.listen(port + 1, listenHost);
     await new Promise((resolve, reject) => { helperServer.once('listening', resolve); helperServer.once('error', reject); });
-    console.log(`Isolated local demo: http://127.0.0.1:${port}/admin?next=${destination}`);
-    console.log(`Synthetic login instructions and live OTP: http://127.0.0.1:${port + 1}/`);
+    console.log(`Isolated local demo: http://${reviewHost}:${port}/admin?next=${destination}`);
+    console.log(`Synthetic login instructions and live OTP: http://${reviewHost}:${port + 1}/`);
     console.log(`Node ${process.version}; temporary store/auth DBs; external traffic, mail and Meta blocked.`);
     let stopping = false;
     async function stop() {

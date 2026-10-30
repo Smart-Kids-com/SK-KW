@@ -54,3 +54,29 @@
  [data-admin-navigation] .sk-nav-details>summary::-webkit-details-marker{display:none}
  [data-admin-navigation] .sk-nav-details[open]>summary{margin-bottom:10px}
 }
+
+/* Detail pages use the same outer frame; legacy page content remains intact. */
+[data-admin-detail] .admin-page-content>.app{display:block;min-height:0;padding:0}
+[data-admin-detail] .admin-page-content .desktop-body{display:block}
+[data-admin-detail] .admin-page-content .main,[data-admin-detail] .desktop-main{margin:0;min-width:0}
+[data-admin-detail] .admin-page-content .topbar{position:static;width:auto}
+.sk-admin-search{position:relative;z-index:30;background:#202123;color:white;padding:10px 14px;border-radius:12px;margin-bottom:12px;direction:ltr}
+.sk-admin-search label{display:flex;gap:12px;align-items:center;font:600 13px/1.4 system-ui;flex-wrap:wrap}
+.sk-admin-search input{flex:1;min-width:150px;width:100%;min-height:40px;background:#333537;color:white;border:1px solid #606269;border-radius:8px;padding:8px 12px;font:inherit}
+.sk-admin-search input::placeholder{color:#ddd}
+.sk-admin-search-results{position:absolute;top:100%;left:0;right:0;background:white;color:#242126;max-height:65vh;overflow-y:auto;border:1px solid #ddd;border-radius:12px;padding:14px;box-shadow:0 10px 32px #0003}
+.sk-admin-search-results[hidden]{display:none}
+.sk-admin-search-results h3{margin:12px 0 4px;font:700 13px system-ui;color:#684074}
+.sk-admin-search-results a{display:block;padding:10px;border-radius:6px;color:#242126;text-decoration:none;overflow-wrap:anywhere}
+.sk-admin-search-results a:hover,.sk-admin-search-results a:focus-visible{background:#eee5f3;outline:2px solid #6c2981}
+/* The document owns vertical scrolling; only dialogs lock their background. */
+body[data-admin-page="products"]{height:auto;min-height:100vh;overflow-y:visible}
+[data-admin-page="products"] .table-scroll{overflow-x:auto;overflow-y:hidden;max-height:none;overscroll-behavior:auto;touch-action:pan-x pan-y}
+[data-admin-page="products"] main,[data-admin-page="products"] .product-card{height:auto;max-height:none;overflow:visible}
+html:has(body[data-admin-page] dialog[open]),body[data-admin-page]:has(dialog[open]){overflow:hidden}
+
+.sk-nav-brand-mark{display:none;width:40px;height:40px;object-fit:contain;margin-bottom:8px}.nav-collapsed .sk-nav-brand-mark{display:block}[data-admin-navigation] .sk-nav-item:first-child{pointer-events:auto;margin:0 0 12px;background:#fff;border-radius:12px;padding:8px}[data-admin-navigation] .sk-brand-horizontal{height:54px;object-fit:contain}[data-admin-navigation] .sk-nav-item:first-child::before{inset:0}
+
+[data-admin-navigation] .sk-nav-stack>.sk-nav-item:nth-child(2){margin-top:0}
+
+[data-admin-page="home"] .top-search-bar:has(#globalSearchInput){display:none}

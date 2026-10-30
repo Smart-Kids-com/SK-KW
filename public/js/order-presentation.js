@@ -19,6 +19,6 @@
     return [...out,'الكويت'].join('، ');
   }
   function payment(order,english=false){const m=text(order.payment_method)||text(order.notes).match(/(?:^|\|)\s*Payment:\s*(cash|link)(?=\s*(?:\||$))/i)?.[1]||'';return ({cash:english?'Cash on delivery':'الدفع عند الاستلام',link:english?'Payment link':'رابط دفع'})[m.toLowerCase()]|| (english?'Not recorded':'غير مسجلة');}
-  function image(value){const v=text(value);try{const u=new URL(v,'https://smartkidskw.com');return v&&['https:','http:'].includes(u.protocol)&&!u.username&&!u.password?u.href:'';}catch{return '';}}
+  function image(value){const v=text(value);try{const base=typeof window==='object'?window.location.origin:(typeof process==='object'&&process.env.PUBLIC_ORIGIN)||'https://smartkidskw.com';const u=new URL(v,base);return v&&['https:','http:'].includes(u.protocol)&&!u.username&&!u.password?u.href:'';}catch{return '';}}
   return {date,formatDate,address,payment,image,money:v=>`${(Number(v)||0).toFixed(3)} د.ك`};
 });

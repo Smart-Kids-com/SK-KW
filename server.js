@@ -615,6 +615,7 @@ app.use('/api/inventory', inventoryRoutes);
 
 app.use('/api/store/discounts', storeDiscountsRoutes);
 
+app.use('/api/admin-dashboard', require('./routes/admin-global-search'));
 app.use('/api/admin-dashboard', adminDashboardRoutes);
 
 
@@ -854,6 +855,7 @@ app.get('/redirects-admin.html', (req, res) => {
 
 
 
+app.use(require('./routes/collection-page'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 
