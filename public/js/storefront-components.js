@@ -30,7 +30,8 @@
   }
   function error(message){let status=document.querySelector('#sk-cart-error');if(!status){status=element('p',undefined,'sk-cart-error');status.id='sk-cart-error';status.setAttribute('role','alert');document.body.append(status);}status.textContent=message;setTimeout(()=>status.remove(),5000);}
   const pending=new Set();
-  async function add(product,button) {
+  async function add(product,button,requestedQuantity=1) {
+    requestedQuantity=Number(requestedQuantity);if(!Number.isSafeInteger(requestedQuantity)||requestedQuantity<1)return false;
     const id=Number(product.id);if(!Number.isSafeInteger(id)||id<1||pending.has(id))return;
     if(product.has_options||product.variants?.length){location.href=productURL(product);return;}
     pending.add(id);if(button){button.disabled=true;button.setAttribute('aria-busy','true');}
@@ -38,20 +39,66 @@
       const response=await fetch('/api/products/'+id,{cache:'no-store'}),json=await response.json();
       if(!response.ok||!json.success)throw Error('تعذر التحقق من المنتج. حاول مرة أخرى.');
       const current=json.data;if(current.status!=='active')throw Error('هذا المنتج غير متاح للشراء');
-      const available=Number(current.available??current.stock??0),cart=readCart(),existing=cart.find(p=>String(p.id)===String(id)),quantity=Number(existing?.quantity||0)+1;
+      const available=Number(current.available??current.stock??0),cart=readCart(),existing=cart.find(p=>String(p.id)===String(id)),quantity=Number(existing?.quantity||0)+requestedQuantity;
       if(!Number.isFinite(available)||quantity>available)throw Error('الكمية المطلوبة غير متاحة');
       const price=Number(current.sale_price)>0&&Number(current.sale_price)<Number(current.price)?Number(current.sale_price):Number(current.price);
-      if(existing)existing.quantity=quantity;else cart.push({id,slug:current.slug||'',name:title(current),price,quantity:1,image:image(current)});
+      if(existing)existing.quantity=quantity;else cart.push({id,slug:current.slug||'',name:title(current),price,quantity:requestedQuantity,image:image(current)});
       localStorage.setItem('cart',JSON.stringify(cart));window.dispatchEvent(new Event('cartUpdated'));cartFeedback(current);
+      return true;
     }catch(e){error(e.message||'تعذرت الإضافة إلى السلة');}
     finally{pending.delete(id);if(button){button.disabled=false;button.removeAttribute('aria-busy');}}
+  }
+  let quickDialog, quickAbort;
+  async function quickView(product,trigger){
+    if(quickDialog?.open)return;
+    const dialog=element('dialog',undefined,'sk-quick-view');quickDialog=dialog;
+    dialog.dir='rtl';dialog.setAttribute('aria-labelledby','sk-quick-title');
+    const close=element('button','×','sk-quick-close');close.type='button';close.setAttribute('aria-label','إغلاق');
+    const heading=element('h2',title(product));heading.id='sk-quick-title';
+    const content=element('div',undefined,'sk-quick-content'),status=element('p','جارٍ تحميل المنتج…','sk-quick-status');status.setAttribute('role','status');
+    content.append(status);dialog.append(close,heading,content);document.body.append(dialog);
+    const overflow=document.body.style.overflow;document.body.style.overflow='hidden';
+    quickAbort=new AbortController();const controller=quickAbort;
+    const dismiss=()=>dialog.close();close.onclick=dismiss;
+    let outside=false;
+    const outsideBounds=e=>{const r=dialog.getBoundingClientRect();return e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom;};
+    dialog.addEventListener('pointerdown',e=>{outside=outsideBounds(e);});
+    dialog.addEventListener('click',e=>{if(e.target===dialog&&outside&&outsideBounds(e))dismiss();outside=false;});
+    dialog.addEventListener('close',()=>{controller.abort();document.body.style.overflow=overflow;dialog.remove();if(quickDialog===dialog)quickDialog=null;trigger?.focus();},{once:true});
+    dialog.showModal();close.focus();
+    try{
+      const response=await fetch('/api/products/'+Number(product.id),{cache:'no-store',signal:controller.signal}),result=await response.json();
+      if(!response.ok||!result.success||result.data.status!=='active')throw Error('تعذر تحميل المنتج. حاول مرة أخرى.');
+      if(!dialog.open)return;
+      const p=result.data;heading.textContent=title(p);
+      const visual=element('div',undefined,'sk-quick-image');if(image(p)){const img=element('img');img.src=image(p);img.alt=title(p);visual.append(img);}else visual.textContent='لا توجد صورة';
+      const details=element('div',undefined,'sk-quick-details'),price=element('div',undefined,'sk-quick-price');
+      const sale=Number(p.sale_price)>0&&Number(p.sale_price)<Number(p.price);
+      if(sale)price.append(element('del',Number(p.price).toFixed(3)+' د.ك'));
+      price.append(element('strong',Number(sale?p.sale_price:p.price).toFixed(3)+' د.ك'));
+      if(sale)price.append(element('span','عرض خاص','sk-quick-offer'));
+      const description=element('p',String(p.description||p.short_description||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().slice(0,360),'sk-quick-description');
+      const quantity=element('input');quantity.type='number';quantity.min='1';quantity.step='1';quantity.value='1';quantity.id='sk-quick-quantity';quantity.inputMode='numeric';
+      const available=Number(p.available??p.stock??0);quantity.max=String(Math.max(0,available));quantity.disabled=available<1;
+      const label=element('label','الكمية');label.htmlFor=quantity.id;
+      const controls=element('div',undefined,'sk-quick-controls');controls.append(label,quantity);
+      const addButton=element('button',available>0?'إضافة إلى السلة':'نفدت الكمية','sk-quick-add');addButton.type='button';addButton.disabled=available<1;
+      const feedback=element('p','','sk-quick-status');feedback.setAttribute('role','status');
+      addButton.onclick=async()=>{
+        if(!quantity.reportValidity())return;
+        if(p.has_options||p.variants?.length){feedback.textContent='اختر خيارات المنتج من صفحة المنتج الكاملة.';return;}
+        feedback.textContent=(await add(p,addButton,quantity.value))?'تمت الإضافة إلى السلة.':'تعذرت الإضافة. تحقق من الكمية وحاول مرة أخرى.';
+      };
+      const full=element('a','عرض صفحة المنتج كاملة','sk-quick-full');full.href=productURL(p);
+      details.append(price,description,controls,addButton,feedback,full);content.replaceChildren(visual,details);
+    }catch(e){if(e.name!=='AbortError')status.textContent=e.message||'تعذر تحميل المنتج.';}
   }
   function card(p){
     const article=element('article',undefined,'product sk-product-card'),media=element('div',undefined,'product-image sk-product-media'),link=element('a');link.href=productURL(p);link.setAttribute('aria-label',title(p));
     if(image(p)){const img=element('img');img.src=image(p);img.alt=title(p);img.loading='lazy';link.append(img);}else link.append(element('span','لا توجد صورة','sk-no-image'));
     const sale=Number(p.sale_price)>0&&Number(p.sale_price)<Number(p.price),available=Number(p.available??p.stock??0)>0&&p.status==='active';
     media.append(link);if(sale)media.append(element('span','عرض خاص','sk-sale-label'));
-    const view=element('a',undefined,'sk-card-view');view.href=productURL(p);view.setAttribute('aria-label','عرض '+title(p));const eye=element('img');eye.src='/brand/eye.svg';eye.alt='';view.append(eye);media.append(view);
+    const view=element('button',undefined,'sk-card-view');view.type='button';view.setAttribute('aria-label','عرض سريع: '+title(p));view.onclick=()=>quickView(p,view);const eye=element('img');eye.src='/brand/eye.svg';eye.alt='';view.append(eye);media.append(view);
     const addButton=element('button',undefined,'sk-card-cart');addButton.type='button';addButton.disabled=!available;addButton.setAttribute('aria-label',available?'إضافة '+title(p)+' إلى السلة':'نفدت الكمية');
     const icon=element('img');icon.src='/brand/cart.svg';icon.alt='';addButton.append(icon);addButton.onclick=e=>{e.preventDefault();e.stopPropagation();add(p,addButton);};if(available)media.append(addButton);
     const info=element('div',undefined,'product-info'),name=element('a',title(p),'product-title');name.href=productURL(p);name.dir='auto';
