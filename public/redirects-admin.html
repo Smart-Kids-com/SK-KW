@@ -227,13 +227,6 @@
   <script>
     const API_URL = '/api/redirects-admin';
 
-    function normalizePath(value) {
-      const text = String(value || '').trim();
-      if (!text) return '';
-      if (text.startsWith('/')) return text;
-      return '/' + text;
-    }
-
     async function requestJson(url, options = {}) {
       const response = await fetch(url, {
         credentials: 'same-origin',
@@ -277,8 +270,8 @@
         const id = document.getElementById('redirectId').value.trim();
 
         const payload = {
-          source_path: normalizePath(document.getElementById('sourcePath').value),
-          destination_path: normalizePath(document.getElementById('destinationPath').value),
+          source_path: document.getElementById('sourcePath').value.trim(),
+          destination_path: document.getElementById('destinationPath').value.trim(),
           status_code: Number(document.getElementById('statusCode').value),
           is_active: Number(document.getElementById('isActive').value),
           notes: document.getElementById('notes').value.trim()
@@ -322,40 +315,61 @@
       }
     }
 
+    function tableMessage(message) {
+      const row = document.createElement('tr');
+      const cell = document.createElement('td');
+      cell.colSpan = 7;
+      cell.textContent = String(message);
+      row.append(cell);
+      document.getElementById('redirectsBody').replaceChildren(row);
+    }
+
     async function loadRedirects() {
       const body = document.getElementById('redirectsBody');
-
-      body.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
-
+      tableMessage('Loading...');
       try {
         const result = await requestJson(API_URL);
         const rows = Array.isArray(result.data) ? result.data : [];
-
         if (!rows.length) {
-          body.innerHTML = '<tr><td colspan="7">لا توجد تحويلات حتى الآن</td></tr>';
+          tableMessage('No redirects yet.');
           return;
         }
-
-        body.innerHTML = rows.map(item => `
-          <tr>
-            <td>${item.id}</td>
-            <td class="ltr">${item.source_path || ''}</td>
-            <td class="ltr">${item.destination_path || ''}</td>
-            <td>${item.status_code || 301}</td>
-            <td>
-              <span class="pill ${item.is_active ? '' : 'off'}">
-                ${item.is_active ? 'Active' : 'Disabled'}
-              </span>
-            </td>
-            <td>${item.notes || ''}</td>
-            <td>
-              <button class="secondary" onclick='editRedirect(${JSON.stringify(item).replace(/'/g, '&apos;')})'>Edit</button>
-              <button class="danger" onclick="deleteRedirect(${item.id})">Delete</button>
-            </td>
-          </tr>
-        `).join('');
+        const fragment = document.createDocumentFragment();
+        for (const item of rows) {
+          const row = document.createElement('tr');
+          function cell(value, className) {
+            const td = document.createElement('td');
+            td.textContent = String(value ?? '');
+            if (className) td.className = className;
+            row.append(td);
+            return td;
+          }
+          cell(item.id);
+          cell(item.source_path, 'ltr');
+          cell(item.destination_path, 'ltr');
+          cell(item.status_code || 301);
+          const badge = document.createElement('span');
+          badge.className = 'pill' + (item.is_active ? '' : ' off');
+          badge.textContent = item.is_active ? 'Active' : 'Disabled';
+          cell('').append(badge);
+          cell(item.notes);
+          const actions = cell('');
+          const edit = document.createElement('button');
+          edit.type = 'button';
+          edit.className = 'secondary';
+          edit.textContent = 'Edit';
+          edit.onclick = () => editRedirect(item);
+          const remove = document.createElement('button');
+          remove.type = 'button';
+          remove.className = 'danger';
+          remove.textContent = 'Delete';
+          remove.onclick = () => deleteRedirect(item.id);
+          actions.append(edit, remove);
+          fragment.append(row);
+        }
+        body.replaceChildren(fragment);
       } catch (error) {
-        body.innerHTML = `<tr><td colspan="7">${error.message || 'Failed to load redirects'}</td></tr>`;
+        tableMessage(error.message || 'Failed to load redirects');
       }
     }
 
